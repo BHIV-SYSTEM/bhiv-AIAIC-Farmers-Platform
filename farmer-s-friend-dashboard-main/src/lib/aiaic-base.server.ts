@@ -4,7 +4,7 @@
  * that can be updated without a code change. The bundled default is the last
  * URL we were given.
  */
-export const FALLBACK_BASE_URL = "https://disarm-scrubbed-pushiness.ngrok-free.dev";
+export const FALLBACK_BASE_URL = "http://163.128.209.18:8017";
 
 export function resolveBaseUrl(): { baseUrl: string; configured: boolean } {
   const fromEnv = process.env["AIAIC_BASE_URL"];

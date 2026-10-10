@@ -17,8 +17,10 @@ services:
       - VITE_SUPABASE_PROJECT_ID=${VITE_SUPABASE_PROJECT_ID}
       - VITE_SUPABASE_PUBLISHABLE_KEY=${VITE_SUPABASE_PUBLISHABLE_KEY}
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
-      - AIAIC_BASE_URL=${AIAIC_BASE_URL}
+      - AIAIC_BASE_URL=${AIAIC_BASE_URL:-http://163.128.209.18:8017}
       - PLANT_BASE_URL=${PLANT_BASE_URL}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - aiaic-network
     healthcheck:

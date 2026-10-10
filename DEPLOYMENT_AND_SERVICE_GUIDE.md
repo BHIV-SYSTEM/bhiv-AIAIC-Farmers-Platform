@@ -126,7 +126,7 @@ Configure these secrets in GitHub Repository Settings (`Settings` $\rightarrow$ 
 | `VM_USERNAME` | SSH username | `ubuntu` / `azureuser` |
 | `VM_PASSWORD` | SSH password (or secret authentication string) | `********` |
 | `AIAIC_ENV_FILE` *(Recommended)* | Complete production `.env` payload (from `.env.production.template`) | *See template below* |
-| `AIAIC_BASE_URL` *(Optional)* | Upstream decision engine backend URL | `https://disarm-scrubbed-pushiness.ngrok-free.dev` |
+| `AIAIC_BASE_URL` *(Optional)* | Upstream decision engine backend URL | `http://163.128.209.18:8017` |
 | `SUPABASE_URL` *(Optional)* | Supabase project URL | `https://fhwwpasgebufuznthynv.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` *(Optional)* | Supabase public API key | `sb_publishable_xTto...` |
 

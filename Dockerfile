@@ -26,7 +26,7 @@ ARG SUPABASE_URL="https://fhwwpasgebufuznthynv.supabase.co"
 ARG VITE_SUPABASE_PROJECT_ID="fhwwpasgebufuznthynv"
 ARG VITE_SUPABASE_PUBLISHABLE_KEY="sb_publishable_xTto2I1cQ0IXM3YK83u4vw_IZJeFsol"
 ARG VITE_SUPABASE_URL="https://fhwwpasgebufuznthynv.supabase.co"
-ARG AIAIC_BASE_URL="https://disarm-scrubbed-pushiness.ngrok-free.dev"
+ARG AIAIC_BASE_URL="http://163.128.209.18:8017"
 ARG PLANT_BASE_URL=""
 
 # Map build arguments to environment variables for Nitro/Vite bundling
