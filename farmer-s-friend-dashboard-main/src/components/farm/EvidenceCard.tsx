@@ -36,24 +36,24 @@ export function EvidenceCard({ source }: { source: Source }) {
         ) : null}
       </div>
 
-      <p className="mt-3 text-lg font-bold leading-snug text-foreground">
+      <p className="mt-2.5 break-words text-base font-bold leading-snug text-foreground sm:mt-3 sm:text-lg">
         {source.source_name ?? source.source_id ?? "—"}
       </p>
 
-      <dl className="mt-2 space-y-1 text-base text-foreground/80">
+      <dl className="mt-2 space-y-1 text-sm text-foreground/80 sm:text-base">
         {observed ? (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
             <dt className="font-semibold">{t("evidence.observed")}:</dt>
-            <dd>
+            <dd className="min-w-0 break-words">
               {observed}
               {source.freshness ? ` (${source.freshness})` : ""}
             </dd>
           </div>
         ) : null}
         {source.license ? (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
             <dt className="font-semibold">{t("evidence.license")}:</dt>
-            <dd>{source.license}</dd>
+            <dd className="min-w-0 break-words">{source.license}</dd>
           </div>
         ) : null}
       </dl>
@@ -63,9 +63,9 @@ export function EvidenceCard({ source }: { source: Source }) {
           href={source.source_url}
           target="_blank"
           rel="noreferrer noopener"
-          className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-secondary px-4 text-base font-bold text-secondary-foreground underline-offset-4 hover:underline"
+          className="mt-3 inline-flex min-h-11 max-w-full items-center rounded-xl bg-secondary px-3.5 text-sm font-bold text-secondary-foreground underline-offset-4 hover:underline sm:min-h-12 sm:px-4 sm:text-base"
         >
-          {t("evidence.open")}
+          <span className="truncate">{t("evidence.open")}</span>
         </a>
       ) : null}
     </li>

@@ -57,15 +57,15 @@ function ListingsPage() {
       : listings.filter((l: ProduceListing) => l.status === statusFilter);
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8">
+    <div className="mx-auto w-full max-w-4xl px-3.5 pb-20 pt-5 sm:px-4 sm:pb-24 sm:pt-8">
       {/* Top Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
-            <ClipboardList className="size-8 text-primary" />
-            {t("nav.listings")}
+          <h1 className="flex items-center gap-2.5 break-words text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            <ClipboardList className="size-7 text-primary shrink-0 sm:size-8" />
+            <span>{t("nav.listings")}</span>
           </h1>
-          <p className="mt-1 text-base text-muted-foreground">
+          <p className="mt-1 break-words text-sm text-muted-foreground sm:text-base">
             {t("listing.manage.subtitle") ||
               "Active produce lots submitted for buyer discovery and procurement."}
           </p>
@@ -73,31 +73,33 @@ function ListingsPage() {
 
         <Link
           to="/listing/new"
-          className="flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-lg font-bold text-primary-foreground shadow hover:bg-primary/90"
+          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground shadow hover:bg-primary/90 sm:w-auto sm:min-h-14 sm:rounded-2xl sm:px-5 sm:text-lg"
         >
-          <PlusCircle className="size-6" />
+          <PlusCircle className="size-5 shrink-0" />
           <span>{t("listing.action.listProduce")}</span>
         </Link>
       </div>
 
       {/* Persistence Architecture & Scope Notice */}
-      <div className="mt-6 flex items-start gap-3 rounded-2xl border-2 border-border bg-card p-4">
-        <Database className="mt-0.5 size-5 shrink-0 text-primary" />
-        <div className="text-xs text-foreground/80 leading-relaxed">
+      <div className="mt-5 flex items-start gap-2.5 rounded-2xl border-2 border-border bg-card p-3.5 sm:mt-6 sm:gap-3 sm:p-4">
+        <Database className="mt-0.5 size-4 shrink-0 text-primary sm:size-5" />
+        <div className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/80">
           <p className="font-bold text-foreground">Backend Persistence Architecture Notice</p>
-          <p className="mt-0.5">
+          <p className="mt-0.5 break-words">
             Listing records are saved in the server filesystem store (
-            <code className="rounded bg-muted px-1 py-0.5 font-mono">data/transactions.json</code>).
-            State is preserved across page refreshes and server reboots. Live external buyer
+            <code className="break-all rounded bg-muted px-1 py-0.5 font-mono">
+              data/transactions.json
+            </code>
+            ). State is preserved across page refreshes and server reboots. Live external buyer
             matching remains demonstrative pending Hemanth's central gateway contract.
           </p>
         </div>
       </div>
 
       {/* Filter and count bar */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/60 p-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-          <Filter className="size-4" />
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-border bg-card/60 p-2.5 sm:mt-6 sm:gap-3 sm:p-3">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:text-sm">
+          <Filter className="size-3.5 shrink-0 sm:size-4" />
           <span>Filter:</span>
           {["ALL", "ACTIVE", "MATCHED", "ORDERED", "DELISTED"].map((s) => (
             <button
@@ -105,7 +107,7 @@ function ListingsPage() {
               type="button"
               onClick={() => setStatusFilter(s)}
               className={cn(
-                "rounded-xl px-3 py-1 text-xs font-bold transition-colors",
+                "rounded-xl px-2.5 py-1 text-xs font-bold transition-colors sm:px-3",
                 statusFilter === s
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-muted text-foreground/80 hover:bg-muted/80",
@@ -120,7 +122,7 @@ function ListingsPage() {
           type="button"
           onClick={() => query.refetch()}
           disabled={query.isFetching}
-          className="flex items-center gap-1.5 rounded-xl px-3 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted disabled:opacity-50 sm:px-3"
         >
           <RefreshCw className={cn("size-3.5", query.isFetching && "animate-spin")} />
           <span>Refresh</span>
@@ -187,16 +189,16 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
   const totalValue = listing.quantityQuintals * listing.askingPricePerQuintal;
 
   return (
-    <div className="rounded-3xl border-2 border-border bg-card p-5 shadow-sm transition hover:border-primary/50">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
+    <div className="rounded-2xl border-2 border-border bg-card p-4 shadow-sm transition hover:border-primary/50 sm:rounded-3xl sm:p-5">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span className="break-all font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
               {listing.id}
             </span>
             <span
               className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-extrabold uppercase",
+                "rounded-full px-2 py-0.5 text-xs font-extrabold uppercase",
                 listing.status === "ACTIVE"
                   ? "bg-success-soft text-foreground border border-primary/30"
                   : listing.status === "MATCHED" || listing.status === "ORDERED"
@@ -206,15 +208,15 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
             >
               {listing.status}
             </span>
-            <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
               {t(`grade.${listing.grade}`)}
             </span>
           </div>
 
-          <h3 className="mt-2 text-2xl font-extrabold text-foreground">
+          <h3 className="mt-1.5 break-words text-xl font-extrabold text-foreground sm:mt-2 sm:text-2xl">
             {listing.crop}
             {listing.variety ? (
-              <span className="ml-2 text-lg font-semibold text-muted-foreground">
+              <span className="ml-1.5 break-words text-base font-semibold text-muted-foreground sm:ml-2 sm:text-lg">
                 ({listing.variety})
               </span>
             ) : null}
@@ -222,49 +224,49 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
         </div>
 
         <div className="flex flex-col sm:items-end">
-          <span className="text-xs font-semibold text-muted-foreground">
+          <span className="text-[11px] font-semibold text-muted-foreground sm:text-xs">
             {t("financial.grossValue")}
           </span>
-          <span className="text-2xl font-black text-foreground">
+          <span className="text-xl font-black text-foreground sm:text-2xl">
             ₹{totalValue.toLocaleString("en-IN")}
           </span>
-          <span className="text-xs text-muted-foreground font-semibold">
+          <span className="text-xs font-semibold text-muted-foreground">
             ₹{listing.askingPricePerQuintal}/Q • {listing.quantityQuintals} Quintals
           </span>
         </div>
       </div>
 
       {/* Metadata grid */}
-      <div className="mt-4 grid grid-cols-1 gap-2 border-t border-border pt-3 text-sm sm:grid-cols-3">
-        <div className="flex items-center gap-2 text-foreground/80">
+      <div className="mt-3.5 grid grid-cols-1 gap-1.5 border-t border-border pt-3 text-xs sm:mt-4 sm:grid-cols-3 sm:gap-2 sm:text-sm">
+        <div className="flex items-center gap-2 text-foreground/80 min-w-0">
           <MapPin className="size-4 shrink-0 text-muted-foreground" />
-          <span>
+          <span className="truncate">
             {listing.district}
             {listing.mandi ? ` (${listing.mandi})` : ""}
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-foreground/80">
+        <div className="flex items-center gap-2 text-foreground/80 min-w-0">
           <Calendar className="size-4 shrink-0 text-muted-foreground" />
-          <span>Window: {listing.harvestWindow}</span>
+          <span className="truncate">Window: {listing.harvestWindow}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-foreground/80">
+        <div className="flex items-center gap-2 text-foreground/80 min-w-0">
           <Building2 className="size-4 shrink-0 text-muted-foreground" />
-          <span>Pickup: {listing.pickupLocation}</span>
+          <span className="truncate">Pickup: {listing.pickupLocation}</span>
         </div>
       </div>
 
       {/* Provenance trace link if present */}
       {listing.decisionId ? (
-        <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
-          <Sparkles className="size-3.5 text-primary shrink-0" />
-          <span>Advisory Decision: {listing.decisionId}</span>
+        <div className="mt-2.5 flex items-start gap-1.5 text-xs text-muted-foreground font-mono sm:mt-3">
+          <Sparkles className="size-3.5 text-primary shrink-0 mt-0.5" />
+          <span className="break-all">Advisory Decision: {listing.decisionId}</span>
         </div>
       ) : null}
 
       {/* Actions */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+      <div className="mt-3.5 flex flex-col gap-2.5 border-t border-border pt-3.5 sm:mt-4 sm:flex-row sm:items-center sm:justify-between sm:pt-4">
         <span className="text-xs text-muted-foreground">
           Created: {new Date(listing.createdAt).toLocaleString()}
         </span>
@@ -272,7 +274,7 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
         <button
           type="button"
           onClick={() => navigate({ to: "/orders" })}
-          className="flex min-h-12 items-center gap-2 rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 sm:min-h-12 sm:w-auto sm:text-base"
         >
           <span>{t("listing.viewMatches")}</span>
           <ChevronRight className="size-4" />

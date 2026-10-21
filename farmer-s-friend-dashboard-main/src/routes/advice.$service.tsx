@@ -142,43 +142,49 @@ function AdviceServicePage() {
   const matchedCard = farmerAdviceQuery.data?.cards?.find((c) => c.service === service);
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-6">
+    <div className="mx-auto w-full max-w-xl px-3.5 pb-20 pt-5 sm:px-4 sm:pt-6">
       <Link
         to="/result"
         search={backSearch}
-        className="inline-flex min-h-12 items-center rounded-xl bg-secondary px-4 text-base font-bold text-secondary-foreground"
+        className="inline-flex min-h-11 items-center rounded-xl bg-secondary px-3.5 text-sm font-bold text-secondary-foreground sm:min-h-12 sm:px-4 sm:text-base"
       >
-        <ArrowLeft aria-hidden className="mr-2 size-5" />
+        <ArrowLeft aria-hidden className="mr-1.5 size-4 sm:mr-2 sm:size-5" />
         {t("result.title")}
       </Link>
 
-      <h1 className="mt-4 flex items-center gap-3 text-3xl font-extrabold text-foreground">
-        <ServiceIcon aria-hidden className="size-9 text-primary" strokeWidth={2.25} />
-        {t(`service.${service}`)}
+      <h1 className="mt-3 flex items-center gap-2.5 break-words text-2xl font-extrabold text-foreground sm:mt-4 sm:gap-3 sm:text-3xl">
+        <ServiceIcon
+          aria-hidden
+          className="size-7 shrink-0 text-primary sm:size-9"
+          strokeWidth={2.25}
+        />
+        <span className="break-words">{t(`service.${service}`)}</span>
       </h1>
 
       {/* Distress Alert if flagged by backend */}
       {farmerAdviceQuery.data?.distress ? (
-        <div className="mt-4 rounded-3xl border-2 border-destructive bg-danger-soft p-5 text-danger-foreground shadow-md">
+        <div className="mt-4 rounded-2xl border-2 border-destructive bg-danger-soft p-4 text-danger-foreground shadow-md sm:rounded-3xl sm:p-5">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="size-7 text-destructive" />
-            <h2 className="text-xl font-extrabold">Emergency Agricultural Support Alert</h2>
+            <ShieldAlert className="size-6 shrink-0 text-destructive sm:size-7" />
+            <h2 className="break-words text-lg font-extrabold sm:text-xl">
+              Emergency Agricultural Support Alert
+            </h2>
           </div>
-          <p className="mt-2 text-base font-bold">
+          <p className="mt-2 break-words text-sm font-bold sm:text-base">
             {farmerAdviceQuery.data.distress_message ||
               "Agricultural distress detected. Please reach out to official support helplines."}
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <a
               href="tel:18001801551"
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-destructive px-4 font-bold text-destructive-foreground shadow hover:opacity-90"
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground shadow hover:opacity-90"
             >
-              <PhoneCall className="size-4" />
-              Kisan Call Centre (1800-180-1551)
+              <PhoneCall className="size-4 shrink-0" />
+              <span>Kisan Call Centre (1800-180-1551)</span>
             </a>
             <a
               href="tel:14416"
-              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-destructive px-4 font-bold text-destructive hover:bg-destructive/10"
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-destructive px-3 text-center text-sm font-bold text-destructive hover:bg-destructive/10"
             >
               Tele-MANAS (14416)
             </a>
@@ -501,34 +507,34 @@ function ItemDetail({
               ...(decisionId ? { decisionId } : {}),
               ...(extractedPrice ? { price: String(extractedPrice) } : {}),
             }}
-            className="mt-4 flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl bg-primary px-4 text-xl font-extrabold text-primary-foreground shadow-md transition hover:bg-primary/90"
+            className="mt-4 flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-primary px-4 text-lg font-extrabold text-primary-foreground shadow-md transition hover:bg-primary/90 sm:min-h-16 sm:text-xl"
           >
-            <Tag aria-hidden className="size-6" />
-            <span>{t("listing.action.listProduce")}</span>
+            <Tag aria-hidden className="size-5 shrink-0 sm:size-6" />
+            <span className="text-center">{t("listing.action.listProduce")}</span>
           </Link>
 
           {/* Confirmed Ask a Human Helplines */}
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <a
               href={`tel:${askAHuman?.kisan_call_centre?.replace(/[^0-9]/g, "") || "18001801551"}`}
-              className="flex min-h-14 items-center justify-center rounded-2xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted"
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-border bg-card px-3 text-center text-sm font-bold text-foreground hover:bg-muted sm:min-h-14 sm:text-base"
             >
-              <Phone aria-hidden className="mr-2 size-5" />
-              Kisan Call Centre ({askAHuman?.kisan_call_centre || "1800-180-1551"})
+              <Phone aria-hidden className="size-4 shrink-0 sm:size-5" />
+              <span>Kisan Call Centre ({askAHuman?.kisan_call_centre || "1800-180-1551"})</span>
             </a>
             {askAHuman?.tele_manas ? (
               <a
                 href={`tel:${askAHuman.tele_manas.replace(/[^0-9]/g, "")}`}
-                className="flex min-h-14 items-center justify-center rounded-2xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted"
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-border bg-card px-3 text-center text-sm font-bold text-foreground hover:bg-muted sm:min-h-14 sm:text-base"
               >
-                <PhoneCall aria-hidden className="mr-2 size-5" />
-                Tele-MANAS ({askAHuman.tele_manas})
+                <PhoneCall aria-hidden className="size-4 shrink-0 sm:size-5" />
+                <span>Tele-MANAS ({askAHuman.tele_manas})</span>
               </a>
             ) : null}
           </div>
 
           {decisionId ? (
-            <p className="mt-3 break-all text-xs font-mono text-muted-foreground">
+            <p className="mt-3 break-all font-mono text-xs text-muted-foreground">
               Trace Reference: {decisionId}
             </p>
           ) : null}

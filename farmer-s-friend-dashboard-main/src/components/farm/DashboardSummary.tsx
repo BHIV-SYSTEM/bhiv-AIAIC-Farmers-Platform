@@ -82,82 +82,100 @@ export function DashboardSummary({
 
   return (
     <section
-      className="rounded-3xl border-2 border-border bg-card p-5 shadow-sm"
+      className="rounded-2xl border-2 border-border bg-card p-4 shadow-sm sm:rounded-3xl sm:p-5"
       aria-label={t("dashboard.title")}
     >
-      <div className="flex items-center gap-3">
-        <LayoutDashboard aria-hidden className="size-7 text-primary" strokeWidth={2.25} />
-        <h2 className="text-lg font-bold uppercase tracking-wide text-muted-foreground">
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <LayoutDashboard aria-hidden className="size-6 text-primary sm:size-7" strokeWidth={2.25} />
+        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground sm:text-lg">
           {t("dashboard.title")}
         </h2>
       </div>
 
-      <p className="mt-3 text-3xl font-extrabold leading-tight text-foreground">
+      <p className="mt-2 break-words text-2xl font-extrabold leading-tight text-foreground sm:text-3xl">
         {t("result.title")}
       </p>
       {subject ? (
-        <p className="mt-2 text-lg text-foreground/75">
+        <p className="mt-1.5 break-words text-base text-foreground/75 sm:text-lg">
           {t("result.for")}: <span className="font-bold">{subject}</span>
           {land ? ` • ${land}` : ""}
         </p>
       ) : null}
 
-      <p className="mt-3 text-lg leading-relaxed text-foreground/80">{summaryText}</p>
+      <p className="mt-2.5 break-words text-base leading-relaxed text-foreground/80 sm:mt-3 sm:text-lg">
+        {summaryText}
+      </p>
 
       {hasAdvice ? (
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
           {counts.high > 0 ? (
-            <div className="rounded-2xl bg-success-soft px-3 py-3 text-center">
-              <span className="block text-2xl font-extrabold text-success">{counts.high}</span>
-              <span className="text-sm font-semibold text-foreground/80">{t("conf.high")}</span>
+            <div className="rounded-xl bg-success-soft px-2.5 py-2.5 text-center sm:rounded-2xl sm:px-3 sm:py-3">
+              <span className="block text-xl font-extrabold text-success sm:text-2xl">
+                {counts.high}
+              </span>
+              <span className="block truncate text-xs font-semibold text-foreground/80 sm:text-sm">
+                {t("conf.high")}
+              </span>
             </div>
           ) : null}
           {counts.medium > 0 ? (
-            <div className="rounded-2xl bg-warning-soft px-3 py-3 text-center">
-              <span className="block text-2xl font-extrabold text-warning-foreground">
+            <div className="rounded-xl bg-warning-soft px-2.5 py-2.5 text-center sm:rounded-2xl sm:px-3 sm:py-3">
+              <span className="block text-xl font-extrabold text-warning-foreground sm:text-2xl">
                 {counts.medium}
               </span>
-              <span className="text-sm font-semibold text-foreground/80">{t("conf.medium")}</span>
+              <span className="block truncate text-xs font-semibold text-foreground/80 sm:text-sm">
+                {t("conf.medium")}
+              </span>
             </div>
           ) : null}
           {counts.low > 0 ? (
-            <div className="rounded-2xl bg-danger-soft px-3 py-3 text-center">
-              <span className="block text-2xl font-extrabold text-danger">{counts.low}</span>
-              <span className="text-sm font-semibold text-foreground/80">{t("conf.low")}</span>
+            <div className="rounded-xl bg-danger-soft px-2.5 py-2.5 text-center sm:rounded-2xl sm:px-3 sm:py-3">
+              <span className="block text-xl font-extrabold text-danger sm:text-2xl">
+                {counts.low}
+              </span>
+              <span className="block truncate text-xs font-semibold text-foreground/80 sm:text-sm">
+                {t("conf.low")}
+              </span>
             </div>
           ) : null}
           {counts.unknown > 0 ? (
-            <div className="rounded-2xl bg-muted px-3 py-3 text-center">
-              <span className="block text-2xl font-extrabold text-muted-foreground">
+            <div className="rounded-xl bg-muted px-2.5 py-2.5 text-center sm:rounded-2xl sm:px-3 sm:py-3">
+              <span className="block text-xl font-extrabold text-muted-foreground sm:text-2xl">
                 {counts.unknown}
               </span>
-              <span className="text-sm font-semibold text-foreground/80">{t("conf.unknown")}</span>
+              <span className="block truncate text-xs font-semibold text-foreground/80 sm:text-sm">
+                {t("conf.unknown")}
+              </span>
             </div>
           ) : null}
           {counts.abstained > 0 ? (
-            <div className="rounded-2xl bg-muted px-3 py-3 text-center">
-              <span className="block text-2xl font-extrabold text-muted-foreground">
+            <div className="rounded-xl bg-muted px-2.5 py-2.5 text-center sm:rounded-2xl sm:px-3 sm:py-3">
+              <span className="block text-xl font-extrabold text-muted-foreground sm:text-2xl">
                 {counts.abstained}
               </span>
-              <span className="text-sm font-semibold text-foreground/80">{t("abstain.title")}</span>
+              <span className="block truncate text-xs font-semibold text-foreground/80 sm:text-sm">
+                {t("abstain.title")}
+              </span>
             </div>
           ) : null}
         </div>
       ) : null}
 
-      <p className="mt-4 text-base text-muted-foreground">
+      <p className="mt-3 text-xs text-muted-foreground sm:mt-4 sm:text-sm">
         {t("dashboard.updated")}: {updatedTime}
       </p>
 
       {hasAdvice ? (
-        <div className="mt-4">
+        <div className="mt-3.5 sm:mt-4">
           <AdviceActions text={combinedText} title={t("app.name")} />
         </div>
       ) : null}
 
       {hasAdvice ? (
-        <div className="mt-5 space-y-2">
-          <p className="text-base font-semibold text-foreground/80">{t("dashboard.jump")}</p>
+        <div className="mt-4 space-y-2 sm:mt-5">
+          <p className="text-sm font-semibold text-foreground/80 sm:text-base">
+            {t("dashboard.jump")}
+          </p>
           <div className="flex flex-wrap gap-2">
             {items.map(({ service, index }) => {
               const Icon = SERVICE_ICON[service];
@@ -167,29 +185,29 @@ export function DashboardSummary({
                   to="/advice/$service"
                   params={{ service }}
                   search={{ ...search, i: index }}
-                  className="inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-border bg-background px-3 text-base font-bold text-foreground/80 transition-colors hover:bg-accent"
+                  className="inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-xl border-2 border-border bg-background px-3 text-sm font-bold text-foreground/80 transition-colors hover:bg-accent sm:min-h-12 sm:text-base"
                 >
-                  <Icon aria-hidden className="size-5 text-primary" />
-                  {t(`service.${service}`)}
+                  <Icon aria-hidden className="size-4 shrink-0 text-primary sm:size-5" />
+                  <span className="truncate">{t(`service.${service}`)}</span>
                 </Link>
               );
             })}
             <Link
               to="/review"
               search={search}
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-border bg-background px-3 text-base font-bold text-foreground/80 transition-colors hover:bg-accent"
+              className="inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-xl border-2 border-border bg-background px-3 text-sm font-bold text-foreground/80 transition-colors hover:bg-accent sm:min-h-12 sm:text-base"
             >
-              <ClipboardList aria-hidden className="size-5 text-primary" />
-              {t("home.review")}
+              <ClipboardList aria-hidden className="size-4 shrink-0 text-primary sm:size-5" />
+              <span className="truncate">{t("home.review")}</span>
             </Link>
           </div>
         </div>
       ) : null}
 
-      <div className="mt-5 rounded-2xl bg-warning-soft px-4 py-3">
-        <p className="flex items-start gap-2 text-base font-semibold text-warning-foreground">
-          <Phone aria-hidden className="mt-0.5 size-5 shrink-0" />
-          <span>{t("detail.next.call")}</span>
+      <div className="mt-4 rounded-xl bg-warning-soft px-3.5 py-2.5 sm:mt-5 sm:rounded-2xl sm:px-4 sm:py-3">
+        <p className="flex items-start gap-2 text-sm font-semibold text-warning-foreground sm:text-base">
+          <Phone aria-hidden className="mt-0.5 size-4 shrink-0 sm:size-5" />
+          <span className="break-words">{t("detail.next.call")}</span>
         </p>
       </div>
     </section>

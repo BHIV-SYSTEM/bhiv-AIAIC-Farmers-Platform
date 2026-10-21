@@ -71,24 +71,26 @@ export function PlantCheck({
   return (
     <section
       aria-labelledby="plant-heading"
-      className="rounded-3xl border-2 border-border bg-card p-5"
+      className="rounded-2xl border-2 border-border bg-card p-4 sm:rounded-3xl sm:p-5"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
+      <div className="flex items-start justify-between gap-2.5 sm:gap-3">
+        <div className="min-w-0 flex-1">
           <h2
             id="plant-heading"
-            className="flex items-center gap-2 text-xl font-bold text-foreground"
+            className="flex items-center gap-2 break-words text-lg font-bold text-foreground sm:text-xl"
           >
-            <Leaf aria-hidden className="size-6 text-primary" />
-            {t("plant.title") || "Plant Photo Check (Observation)"}
+            <Leaf aria-hidden className="size-5 shrink-0 text-primary sm:size-6" />
+            <span className="break-words">
+              {t("plant.title") || "Plant Photo Check (Observation)"}
+            </span>
           </h2>
-          <p className="mt-1 text-base text-foreground/80">
+          <p className="mt-1 break-words text-sm text-foreground/80 sm:text-base">
             {t("plant.lead") ||
               "Take a clear leaf photo for visual plant identification. Note: This identifies species/features; it is not a disease diagnosis."}
           </p>
         </div>
 
-        <span className="shrink-0 rounded-full bg-secondary px-3 py-1 text-xs font-bold text-secondary-foreground">
+        <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-bold text-secondary-foreground sm:px-3 sm:py-1">
           BioCLIP v1
         </span>
       </div>
@@ -181,24 +183,26 @@ export function PlantCheck({
             {result.distress ? (
               <div className="rounded-2xl border-2 border-destructive bg-danger-soft p-4 text-danger-foreground">
                 <div className="flex items-center gap-2">
-                  <ShieldAlert className="size-6 text-destructive" />
-                  <h3 className="text-lg font-extrabold">Emergency Agricultural Support</h3>
+                  <ShieldAlert className="size-5 shrink-0 text-destructive sm:size-6" />
+                  <h3 className="break-words text-base font-extrabold sm:text-lg">
+                    Emergency Agricultural Support
+                  </h3>
                 </div>
-                <p className="mt-1 text-base font-semibold">
+                <p className="mt-1 break-words text-sm font-semibold">
                   Severe crop stress or loss indication detected. Please reach out to agricultural
                   helplines immediately.
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <a
                     href="tel:18001801551"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-destructive px-4 py-2 font-bold text-destructive-foreground shadow hover:opacity-90"
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground shadow hover:opacity-90"
                   >
-                    <PhoneCall className="size-4" />
-                    Kisan Call Centre (1800-180-1551)
+                    <PhoneCall className="size-4 shrink-0" />
+                    <span>Kisan Call Centre (1800-180-1551)</span>
                   </a>
                   <a
                     href="tel:14416"
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-destructive px-4 py-2 font-bold text-destructive hover:bg-destructive/10"
+                    className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-destructive px-3 text-center text-sm font-bold text-destructive hover:bg-destructive/10"
                   >
                     Tele-MANAS (14416)
                   </a>
@@ -214,14 +218,16 @@ export function PlantCheck({
                 5. next_step.phone
             */}
             {fv ? (
-              <div className="rounded-2xl border-2 border-border bg-card p-5 space-y-4 shadow-sm">
+              <div className="rounded-2xl border-2 border-border bg-card p-4 space-y-3.5 shadow-sm sm:p-5 sm:space-y-4">
                 {/* 1. Headline */}
                 {fv.headline ? (
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground sm:text-xs">
                       Visual Observation
                     </span>
-                    <h3 className="mt-1 text-2xl font-extrabold text-foreground">{fv.headline}</h3>
+                    <h3 className="mt-1 break-words text-xl font-extrabold text-foreground sm:text-2xl">
+                      {fv.headline}
+                    </h3>
                   </div>
                 ) : null}
 
@@ -229,9 +235,12 @@ export function PlantCheck({
                 {fv.lines && fv.lines.length > 0 ? (
                   <ul className="space-y-2 border-t border-border pt-3">
                     {fv.lines.map((line, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-base text-foreground/90">
+                      <li
+                        key={idx}
+                        className="flex items-start gap-2 text-sm text-foreground/90 sm:text-base"
+                      >
                         <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
-                        <span>{line}</span>
+                        <span className="min-w-0 flex-1 break-words">{line}</span>
                       </li>
                     ))}
                   </ul>
@@ -239,7 +248,7 @@ export function PlantCheck({
 
                 {/* Additional species/stage tags if available */}
                 {result.species || result.stage ? (
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="flex flex-wrap gap-1.5 pt-1">
                     {result.species ? (
                       <span className="rounded-lg bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-foreground">
                         Species: {result.species}
@@ -254,12 +263,12 @@ export function PlantCheck({
                 ) : null}
 
                 {/* 3. Not a health check honest notice */}
-                <div className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-sm font-semibold text-warning-foreground">
+                <div className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-xs font-semibold text-warning-foreground sm:text-sm">
                   <p className="flex items-center gap-1.5 font-bold">
                     <Info className="size-4 shrink-0" />
                     Important Agricultural Limit:
                   </p>
-                  <p className="mt-1">
+                  <p className="mt-1 break-words">
                     {fv.not_a_health_check ||
                       "This only says which plant it looks like. It does not check for disease, pests or spots."}
                   </p>
@@ -267,14 +276,16 @@ export function PlantCheck({
 
                 {/* 4 & 5. Next step text and phone */}
                 {fv.next_step ? (
-                  <div className="rounded-xl border border-primary/30 bg-success-soft p-4">
-                    <p className="text-sm font-semibold text-foreground/90">{fv.next_step.text}</p>
+                  <div className="rounded-xl border border-primary/30 bg-success-soft p-3.5 sm:p-4">
+                    <p className="break-words text-sm font-semibold text-foreground/90">
+                      {fv.next_step.text}
+                    </p>
                     {fv.next_step.phone ? (
                       <a
                         href={`tel:${fv.next_step.phone.replace(/[^0-9]/g, "")}`}
-                        className="mt-3 inline-flex min-h-12 items-center gap-2 rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
+                        className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 sm:inline-flex sm:w-auto sm:px-4 sm:text-base"
                       >
-                        <PhoneCall className="size-4" />
+                        <PhoneCall className="size-4 shrink-0" />
                         <span>Call Helpline: {fv.next_step.phone}</span>
                       </a>
                     ) : null}
@@ -283,7 +294,7 @@ export function PlantCheck({
 
                 {/* Safe Request ID trace */}
                 {result.requestId ? (
-                  <p className="font-mono text-[11px] text-muted-foreground pt-1">
+                  <p className="break-all font-mono text-[11px] text-muted-foreground pt-1">
                     Reference Request ID: {result.requestId}
                   </p>
                 ) : null}

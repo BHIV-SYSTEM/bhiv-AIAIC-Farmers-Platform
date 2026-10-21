@@ -161,22 +161,28 @@ function AskPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 pb-32 pt-6">
-      <h1 className="text-3xl font-extrabold text-foreground">{t("ask.title")}</h1>
-      <p className="mt-2 text-lg text-foreground/75">{t("ask.subtitle")}</p>
+    <div className="mx-auto w-full max-w-xl px-3.5 pb-20 pt-5 sm:px-4 sm:pb-24 sm:pt-6">
+      <h1 className="break-words text-2xl font-extrabold text-foreground sm:text-3xl">
+        {t("ask.title")}
+      </h1>
+      <p className="mt-2 break-words text-base text-foreground/75 sm:text-lg">
+        {t("ask.subtitle")}
+      </p>
 
       {!catalogQuery.isPending && !options.live && !districtsQuery.data?.ok ? (
-        <p className="mt-4 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-3 text-base font-semibold text-warning-foreground">
+        <p className="mt-4 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-3.5 py-3 text-sm font-semibold text-warning-foreground sm:px-4 sm:text-base">
           <WifiOff aria-hidden className="mt-0.5 size-5 shrink-0" />
-          <span>{t("ask.options.stale")}</span>
+          <span className="min-w-0 flex-1 break-words">{t("ask.options.stale")}</span>
         </p>
       ) : null}
 
-      <div className="mt-8 space-y-8">
-        {/* State Selector: Maharashtra / Madhya Pradesh */}
+      <div className="mt-6 space-y-6 sm:mt-8 sm:space-y-8">
+        {/* State Selector: Single column mobile-first */}
         <div>
-          <label className="block text-xl font-bold text-foreground">State / राज्य</label>
-          <div className="mt-2 grid grid-cols-2 gap-3">
+          <label className="block text-lg font-bold text-foreground sm:text-xl">
+            State / राज्य
+          </label>
+          <div className="mt-2 grid grid-cols-1 gap-2.5">
             <button
               type="button"
               onClick={() => {
@@ -185,14 +191,14 @@ function AskPage() {
                 setMandi("");
               }}
               className={cn(
-                "flex min-h-14 items-center justify-center gap-2 rounded-2xl border-2 px-4 text-lg font-bold transition-colors",
+                "flex min-h-12 w-full items-center justify-start gap-3 rounded-2xl border-2 px-4 text-base font-bold transition-colors sm:min-h-14 sm:text-lg",
                 state === "mh"
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border bg-card text-foreground hover:bg-muted",
               )}
             >
               <MapPin className="size-5 shrink-0" />
-              <span>Maharashtra (महाराष्ट्र)</span>
+              <span className="min-w-0 flex-1 text-left truncate">Maharashtra (महाराष्ट्र)</span>
             </button>
 
             <button
@@ -203,14 +209,16 @@ function AskPage() {
                 setMandi("");
               }}
               className={cn(
-                "flex min-h-14 items-center justify-center gap-2 rounded-2xl border-2 px-4 text-lg font-bold transition-colors",
+                "flex min-h-12 w-full items-center justify-start gap-3 rounded-2xl border-2 px-4 text-base font-bold transition-colors sm:min-h-14 sm:text-lg",
                 state === "mp"
                   ? "border-primary bg-primary/10 text-primary"
                   : "border-border bg-card text-foreground hover:bg-muted",
               )}
             >
               <MapPin className="size-5 shrink-0" />
-              <span>Madhya Pradesh (मध्य प्रदेश)</span>
+              <span className="min-w-0 flex-1 text-left truncate">
+                Madhya Pradesh (मध्य प्रदेश)
+              </span>
             </button>
           </div>
         </div>
@@ -255,10 +263,10 @@ function AskPage() {
 
         {/* Land Size Input */}
         <div>
-          <label htmlFor="land" className="block text-xl font-bold text-foreground">
+          <label htmlFor="land" className="block text-lg font-bold text-foreground sm:text-xl">
             {t("ask.land")}
           </label>
-          <p className="mt-1 text-base text-muted-foreground">{t("ask.land.help")}</p>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">{t("ask.land.help")}</p>
           <input
             id="land"
             type="number"
@@ -267,17 +275,17 @@ function AskPage() {
             step="0.25"
             value={land}
             onChange={(e) => setLand(e.target.value)}
-            className="mt-2 min-h-16 w-full rounded-2xl border-2 border-input bg-card px-4 text-xl font-semibold text-foreground outline-none focus:border-ring"
+            className="mt-2 min-h-14 w-full rounded-2xl border-2 border-input bg-card px-4 text-lg font-semibold text-foreground outline-none focus:border-ring sm:min-h-16 sm:text-xl"
           />
         </div>
 
         {/* Official Groundwater / Soil Caveat */}
-        <div className="rounded-2xl border-2 border-border bg-muted/50 p-4 text-xs text-foreground/80 leading-relaxed">
+        <div className="rounded-2xl border-2 border-border bg-muted/50 p-3.5 text-xs leading-relaxed text-foreground/80 sm:p-4">
           <p className="flex items-center gap-1.5 font-bold text-foreground">
             <Info className="size-4 shrink-0 text-primary" />
             Official Water & Soil Data Caveat
           </p>
-          <p className="mt-1">
+          <p className="mt-1 break-words">
             Dynamic groundwater and soil moisture assessments reflect the latest official Central
             Ground Water Board records (March 2025 assessment). Taluka-level conditions may vary
             from the broader district average.
@@ -286,9 +294,13 @@ function AskPage() {
 
         {/* Services Selection */}
         <fieldset>
-          <legend className="text-xl font-bold text-foreground">{t("ask.services")}</legend>
-          <p className="mt-1 text-base text-muted-foreground">{t("ask.services.help")}</p>
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <legend className="text-lg font-bold text-foreground sm:text-xl">
+            {t("ask.services")}
+          </legend>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+            {t("ask.services.help")}
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
             {options.services.map((service) => {
               const active = selected.includes(service);
               const Icon = SERVICE_ICON[service];
@@ -299,28 +311,33 @@ function AskPage() {
                   aria-pressed={active}
                   onClick={() => toggle(service)}
                   className={cn(
-                    "flex min-h-16 items-center gap-3 rounded-2xl border-2 px-4 text-left text-lg font-bold transition-colors",
+                    "flex min-h-14 items-center gap-3 rounded-2xl border-2 px-3.5 text-left text-base font-bold transition-colors sm:min-h-16 sm:px-4 sm:text-lg",
                     active
                       ? "border-primary bg-success-soft text-foreground"
                       : "border-border bg-card text-foreground/80",
                   )}
                 >
-                  <Icon aria-hidden className="size-7 shrink-0 text-primary" strokeWidth={2.25} />
-                  <span className="flex-1">{t(`service.${service}`)}</span>
-                  {active ? <Check aria-hidden className="size-7 shrink-0 text-primary" /> : null}
+                  <Icon
+                    aria-hidden
+                    className="size-6 shrink-0 text-primary sm:size-7"
+                    strokeWidth={2.25}
+                  />
+                  <span className="min-w-0 flex-1 break-words">{t(`service.${service}`)}</span>
+                  {active ? (
+                    <Check aria-hidden className="size-6 shrink-0 text-primary sm:size-7" />
+                  ) : null}
                 </button>
               );
             })}
           </div>
         </fieldset>
-      </div>
 
-      <div className="fixed inset-x-0 bottom-0 border-t-2 border-border bg-background/95 p-4 backdrop-blur">
-        <div className="mx-auto w-full max-w-xl">
+        {/* Form Action Submit Button (In-flow for mobile keyboard safety) */}
+        <div className="pt-4">
           <button
             type="button"
             onClick={submit}
-            className="flex min-h-16 w-full items-center justify-center rounded-3xl bg-primary px-6 text-2xl font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
+            className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-primary px-6 text-xl font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 sm:min-h-16 sm:rounded-3xl sm:text-2xl"
           >
             {t("ask.submit")}
           </button>

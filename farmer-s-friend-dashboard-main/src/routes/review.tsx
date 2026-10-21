@@ -114,12 +114,12 @@ function ReviewPage() {
         type="button"
         onClick={() => void copyAll()}
         disabled={!query.data}
-        className="mt-4 inline-flex min-h-14 items-center rounded-2xl bg-primary px-5 text-lg font-bold text-primary-foreground disabled:opacity-50"
+        className="mt-4 flex min-h-12 sm:min-h-14 w-full sm:w-auto items-center justify-center rounded-2xl bg-primary px-5 text-base sm:text-lg font-bold text-primary-foreground disabled:opacity-50"
       >
         {copied ? (
-          <ClipboardCheck aria-hidden className="mr-2 size-6" />
+          <ClipboardCheck aria-hidden className="mr-2 size-5 sm:size-6" />
         ) : (
-          <ClipboardCopy aria-hidden className="mr-2 size-6" />
+          <ClipboardCopy aria-hidden className="mr-2 size-5 sm:size-6" />
         )}
         {copied ? t("review.copied") : t("review.copy")}
       </button>
@@ -136,17 +136,17 @@ function ReviewPage() {
             {query.data.results.map((result) => (
               <section
                 key={result.service}
-                className="rounded-3xl border-2 border-border bg-card p-4"
+                className="rounded-3xl border-2 border-border bg-card p-4 min-w-0"
               >
-                <h2 className="text-lg font-bold uppercase tracking-wide text-muted-foreground">
+                <h2 className="text-base sm:text-lg font-bold uppercase tracking-wide text-muted-foreground break-words">
                   {t("review.service")}: {t(`service.${result.service}`)} ({result.service})
                 </h2>
-                <p className="mt-1 text-base text-muted-foreground">
+                <p className="mt-1 text-sm sm:text-base text-muted-foreground break-words">
                   {result.ok
                     ? `ok • ${result.items.length} item(s) • ${result.fetchedAt}`
                     : `failed • ${result.reason}${result.status ? ` • HTTP ${result.status}` : ""} • ${result.fetchedAt}`}
                 </p>
-                <pre className="mt-3 max-h-96 overflow-auto rounded-2xl bg-muted p-3 text-xs leading-relaxed text-foreground">
+                <pre className="mt-3 max-h-96 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-2xl bg-muted p-3 text-xs leading-relaxed text-foreground">
                   {JSON.stringify(result, null, 2)}
                 </pre>
               </section>
@@ -156,15 +156,15 @@ function ReviewPage() {
       </div>
 
       <section className="mt-8">
-        <h2 className="text-lg font-bold uppercase tracking-wide text-muted-foreground">
+        <h2 className="text-base sm:text-lg font-bold uppercase tracking-wide text-muted-foreground">
           {t("review.plant")}
         </h2>
         {plant ? (
-          <pre className="mt-2 max-h-96 overflow-auto rounded-2xl bg-muted p-3 text-xs leading-relaxed text-foreground">
+          <pre className="mt-2 max-h-96 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-2xl bg-muted p-3 text-xs leading-relaxed text-foreground">
             {JSON.stringify(plant, null, 2)}
           </pre>
         ) : (
-          <p className="mt-2 text-lg text-foreground/75">{t("review.plant.none")}</p>
+          <p className="mt-2 text-base sm:text-lg text-foreground/75">{t("review.plant.none")}</p>
         )}
       </section>
 
@@ -177,7 +177,7 @@ function ReviewPage() {
             {feedback.map((entry) => (
               <li
                 key={entry.id}
-                className="rounded-2xl border-2 border-border bg-card p-3 text-base"
+                className="rounded-2xl border-2 border-border bg-card p-3 text-sm sm:text-base break-words min-w-0"
               >
                 <span className="font-bold">
                   {entry.useful ? t("feedback.yes") : t("feedback.no")}

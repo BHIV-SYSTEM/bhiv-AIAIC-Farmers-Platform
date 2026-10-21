@@ -128,35 +128,37 @@ function NewListingPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8">
+    <div className="mx-auto w-full max-w-2xl px-3.5 pb-20 pt-5 sm:px-4 sm:pb-24 sm:pt-8">
       {/* Top back button */}
       <button
         type="button"
         onClick={() => history.back()}
-        className="mb-4 inline-flex items-center gap-2 rounded-xl text-base font-semibold text-muted-foreground hover:text-foreground"
+        className="mb-3 inline-flex items-center gap-1.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground sm:mb-4 sm:text-base"
       >
-        <ArrowLeft className="size-5" />
+        <ArrowLeft className="size-4 sm:size-5" />
         <span>{t("ask.back")}</span>
       </button>
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+      <div className="mb-5 sm:mb-6">
+        <h1 className="break-words text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
           {t("listing.create.title")}
         </h1>
-        <p className="mt-2 text-lg text-foreground/80">{t("listing.create.subtitle")}</p>
+        <p className="mt-1.5 break-words text-sm text-foreground/80 sm:text-base">
+          {t("listing.create.subtitle")}
+        </p>
       </div>
 
       {/* Provenance Banner if from Advisory */}
       {decisionId ? (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border-2 border-primary/40 bg-success-soft p-4">
-          <Sparkles className="mt-0.5 size-5 shrink-0 text-primary" />
-          <div className="text-sm">
+        <div className="mb-5 flex items-start gap-2.5 rounded-2xl border-2 border-primary/40 bg-success-soft p-3.5 sm:mb-6 sm:gap-3 sm:p-4">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary sm:size-5" />
+          <div className="min-w-0 flex-1 text-xs sm:text-sm">
             <p className="font-bold text-foreground">
               {t("listing.decisionId")}:{" "}
-              <span className="font-mono text-primary">{decisionId}</span>
+              <span className="break-all font-mono text-primary">{decisionId}</span>
             </p>
-            <p className="mt-0.5 text-foreground/75">
+            <p className="mt-0.5 break-words text-foreground/75">
               Prefilled from live Agmarknet advisory. Your produce listing carries full traceability
               back to official mandi intelligence.
             </p>
@@ -165,14 +167,16 @@ function NewListingPage() {
       ) : null}
 
       {/* Persistence Architecture & Scope Notice */}
-      <div className="mb-6 flex items-start gap-3 rounded-2xl border-2 border-border bg-card p-4">
-        <Info className="mt-0.5 size-5 shrink-0 text-primary" />
-        <div className="text-xs text-foreground/80 leading-relaxed">
+      <div className="mb-5 flex items-start gap-2.5 rounded-2xl border-2 border-border bg-card p-3.5 sm:mb-6 sm:gap-3 sm:p-4">
+        <Info className="mt-0.5 size-4 shrink-0 text-primary sm:size-5" />
+        <div className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/80">
           <p className="font-bold text-foreground">Backend Persistence Architecture Notice</p>
-          <p className="mt-0.5">
+          <p className="mt-0.5 break-words">
             Listings and orders are persisted in the backend Nitro file store (
-            <code className="rounded bg-muted px-1 py-0.5 font-mono">data/transactions.json</code>).
-            State is preserved across page refreshes and server reboots. Live external buyer
+            <code className="break-all rounded bg-muted px-1 py-0.5 font-mono">
+              data/transactions.json
+            </code>
+            ). State is preserved across page refreshes and server reboots. Live external buyer
             matching remains demonstrative pending Hemanth's central gateway contract.
           </p>
         </div>
@@ -180,40 +184,44 @@ function NewListingPage() {
 
       {/* Success Modal / State */}
       {createdListingId ? (
-        <div className="rounded-3xl border-2 border-primary bg-card p-6 shadow-lg">
-          <div className="flex items-center gap-3 text-primary">
-            <CheckCircle2 className="size-9" />
-            <h2 className="text-2xl font-bold">{t("listing.create.success")}</h2>
+        <div className="rounded-2xl border-2 border-primary bg-card p-4 shadow-lg sm:rounded-3xl sm:p-6">
+          <div className="flex items-center gap-2.5 text-primary sm:gap-3">
+            <CheckCircle2 className="size-7 sm:size-9" />
+            <h2 className="break-words text-xl font-bold sm:text-2xl">
+              {t("listing.create.success")}
+            </h2>
           </div>
 
-          <p className="mt-3 text-lg text-foreground/90">
+          <p className="mt-2.5 break-words text-base text-foreground/90 sm:mt-3 sm:text-lg">
             Your produce lot is registered and verified on the platform.
           </p>
 
-          <div className="mt-4 rounded-2xl bg-muted p-4">
-            <div className="text-sm text-muted-foreground">{t("listing.id")}</div>
-            <div className="font-mono text-xl font-bold text-primary">{createdListingId}</div>
-            <div className="mt-2 text-sm text-foreground/80">
+          <div className="mt-3.5 rounded-2xl bg-muted p-3.5 sm:mt-4 sm:p-4">
+            <div className="text-xs text-muted-foreground sm:text-sm">{t("listing.id")}</div>
+            <div className="break-all font-mono text-lg font-bold text-primary sm:text-xl">
+              {createdListingId}
+            </div>
+            <div className="mt-1.5 break-words text-xs text-foreground/80 sm:mt-2 sm:text-sm">
               {crop} {variety ? `(${variety})` : ""} • {numQuantity} Quintals • ₹{numPrice}/Q
             </div>
-            <div className="text-xs text-muted-foreground mt-1">
+            <div className="mt-1 break-words text-xs text-muted-foreground">
               Location: {district} {mandi ? `• ${mandi}` : ""}
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-5 flex flex-col gap-2.5 sm:mt-6 sm:flex-row sm:gap-3">
             <button
               type="button"
               onClick={() => navigate({ to: "/orders" })}
-              className="flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-lg font-bold text-primary-foreground shadow hover:bg-primary/90"
+              className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-base font-bold text-primary-foreground shadow hover:bg-primary/90 sm:min-h-14 sm:rounded-2xl sm:px-5 sm:text-lg"
             >
               <span>{t("listing.viewMatches")}</span>
-              <ChevronRight className="size-5" />
+              <ChevronRight className="size-4 sm:size-5" />
             </button>
             <button
               type="button"
               onClick={() => navigate({ to: "/listings" })}
-              className="flex min-h-14 flex-1 items-center justify-center rounded-2xl border-2 border-border bg-card px-5 text-lg font-bold text-foreground hover:bg-muted"
+              className="flex min-h-12 flex-1 items-center justify-center rounded-xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted sm:min-h-14 sm:rounded-2xl sm:px-5 sm:text-lg"
             >
               {t("nav.listings")}
             </button>
@@ -221,7 +229,7 @@ function NewListingPage() {
         </div>
       ) : (
         /* The Form */
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {errorMsg ? (
             <div className="flex items-start gap-3 rounded-2xl border-2 border-destructive bg-danger-soft p-4 text-danger-foreground">
               <AlertCircle className="mt-0.5 size-5 shrink-0" />
@@ -481,15 +489,15 @@ function NewListingPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex min-h-16 w-full items-center justify-center gap-3 rounded-3xl bg-primary px-6 text-2xl font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 disabled:opacity-60"
+              className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-primary px-4 text-xl font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 disabled:opacity-60 sm:min-h-16 sm:rounded-3xl sm:px-6 sm:text-2xl"
             >
               {submitting ? (
                 <>
-                  <Loader2 className="size-7 animate-spin" />
-                  <span>Submitting to Backend...</span>
+                  <Loader2 className="size-6 animate-spin sm:size-7" />
+                  <span className="truncate">Submitting to Backend...</span>
                 </>
               ) : (
-                <span>{t("listing.create.submit")}</span>
+                <span className="truncate">{t("listing.create.submit")}</span>
               )}
             </button>
           </div>

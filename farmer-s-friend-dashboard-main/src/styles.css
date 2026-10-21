@@ -156,13 +156,16 @@
 }
 
 @layer base {
-  * {
+  *,
+  ::before,
+  ::after {
     border-color: var(--color-border);
+    box-sizing: border-box;
   }
 
   html {
-    /* Larger base size: the whole interface is read by 50+ users outdoors. */
-    font-size: 18px;
+    /* Responsive font scale: comfortable and legible on 320px mobile screens, scales gracefully up */
+    font-size: clamp(15px, 4.2vw, 18px);
     -webkit-text-size-adjust: 100%;
   }
 
@@ -170,6 +173,10 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   h1,

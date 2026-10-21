@@ -66,19 +66,19 @@ export function FeedbackBlock({
       <h2 id="feedback-heading" className="text-xl font-bold text-foreground">
         {t("feedback.title")}
       </h2>
-      <div className="mt-3 flex flex-wrap gap-3">
+      <div className="mt-3 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
         <button
           type="button"
           aria-pressed={answer === true}
           onClick={() => record(true)}
           className={cn(
-            "flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 text-lg font-bold",
+            "flex min-h-12 sm:min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 text-base sm:text-lg font-bold",
             answer === true
               ? "border-primary bg-success-soft text-foreground"
               : "border-border text-foreground/80",
           )}
         >
-          <ThumbsUp aria-hidden className="size-6" />
+          <ThumbsUp aria-hidden className="size-5 sm:size-6" />
           {t("feedback.yes")}
         </button>
         <button
@@ -86,13 +86,13 @@ export function FeedbackBlock({
           aria-pressed={answer === false}
           onClick={() => record(false)}
           className={cn(
-            "flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 text-lg font-bold",
+            "flex min-h-12 sm:min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 text-base sm:text-lg font-bold",
             answer === false
               ? "border-warning bg-warning-soft text-warning-foreground"
               : "border-border text-foreground/80",
           )}
         >
-          <ThumbsDown aria-hidden className="size-6" />
+          <ThumbsDown aria-hidden className="size-5 sm:size-6" />
           {t("feedback.no")}
         </button>
       </div>

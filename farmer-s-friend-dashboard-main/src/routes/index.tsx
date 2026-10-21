@@ -37,16 +37,20 @@ function Home() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-6">
+    <div className="mx-auto w-full max-w-xl px-3.5 pb-16 pt-5 sm:px-4 sm:pt-6">
       <header className="text-center">
-        <p className="text-lg font-bold uppercase tracking-widest text-primary">{t("app.name")}</p>
-        <h1 className="mt-2 text-4xl font-extrabold leading-tight text-foreground">
+        <p className="text-sm font-bold uppercase tracking-widest text-primary sm:text-base">
+          {t("app.name")}
+        </p>
+        <h1 className="mt-2 break-words text-2xl font-extrabold leading-tight text-foreground sm:text-3xl">
           {t("app.tagline")}
         </h1>
-        <p className="mt-4 text-xl leading-relaxed text-foreground/80">{t("home.lead")}</p>
+        <p className="mt-3 break-words text-base leading-relaxed text-foreground/80 sm:text-lg">
+          {t("home.lead")}
+        </p>
       </header>
 
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         <LanguageSwitcher />
       </div>
 
@@ -59,12 +63,12 @@ function Home() {
             ...(saved.land ? { land: saved.land } : {}),
             ...(saved.services ? { services: saved.services } : {}),
           }}
-          className="mt-8 flex min-h-16 w-full items-center justify-center gap-3 rounded-3xl bg-primary px-6 text-xl font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90"
+          className="mt-6 flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-primary px-4 py-3 text-center text-lg font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 sm:min-h-16 sm:rounded-3xl sm:px-6 sm:text-xl"
         >
-          <RotateCcw aria-hidden className="size-6 shrink-0" />
-          <span>
+          <RotateCcw aria-hidden className="size-5 shrink-0 sm:size-6" />
+          <span className="min-w-0 flex-1 truncate">
             {t("home.continue")}
-            <span className="block text-base font-semibold opacity-90">
+            <span className="block truncate text-sm font-semibold opacity-90 sm:text-base">
               {[saved.crop, saved.region].filter(Boolean).join(" • ")}
             </span>
           </span>
@@ -73,29 +77,31 @@ function Home() {
 
       <Link
         to="/ask"
-        className={`flex min-h-16 w-full items-center justify-center rounded-3xl px-6 text-2xl font-extrabold shadow-md transition-colors ${
+        className={`flex min-h-14 w-full items-center justify-center rounded-2xl px-4 py-3 text-center text-xl font-extrabold shadow-md transition-colors sm:min-h-16 sm:rounded-3xl sm:px-6 sm:text-2xl ${
           saved
             ? "mt-3 border-2 border-primary bg-card text-primary hover:bg-secondary"
-            : "mt-8 bg-primary text-primary-foreground hover:bg-primary/90"
+            : "mt-6 bg-primary text-primary-foreground hover:bg-primary/90 sm:mt-8"
         }`}
       >
         {t("home.cta")}
       </Link>
 
-      <section className="mt-10" aria-labelledby="how-heading">
-        <h2 id="how-heading" className="text-2xl font-bold text-foreground">
+      <section className="mt-8 sm:mt-10" aria-labelledby="how-heading">
+        <h2 id="how-heading" className="text-xl font-bold text-foreground sm:text-2xl">
           {t("home.how")}
         </h2>
-        <ol className="mt-4 space-y-3">
+        <ol className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
           {["home.step1", "home.step2", "home.step3"].map((key, i) => (
             <li
               key={key}
-              className="flex items-start gap-4 rounded-2xl bg-card p-4 border-2 border-border"
+              className="flex items-start gap-3 rounded-2xl border-2 border-border bg-card p-3.5 sm:gap-4 sm:p-4"
             >
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-xl font-extrabold text-secondary-foreground">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-base font-extrabold text-secondary-foreground sm:size-11 sm:text-xl">
                 {i + 1}
               </span>
-              <span className="text-lg leading-relaxed text-foreground">{t(key)}</span>
+              <span className="min-w-0 flex-1 break-words text-base leading-relaxed text-foreground sm:text-lg">
+                {t(key)}
+              </span>
             </li>
           ))}
         </ol>
@@ -103,16 +109,16 @@ function Home() {
 
       <section
         aria-labelledby="disclaimer-heading"
-        className="mt-10 rounded-3xl border-2 border-warning bg-warning-soft p-5"
+        className="mt-8 rounded-2xl border-2 border-warning bg-warning-soft p-4 sm:mt-10 sm:rounded-3xl sm:p-5"
       >
         <h2
           id="disclaimer-heading"
-          className="flex items-center gap-2 text-xl font-extrabold text-warning-foreground"
+          className="flex items-center gap-2 text-lg font-extrabold text-warning-foreground sm:text-xl"
         >
-          <AlertTriangle aria-hidden className="size-6 shrink-0" />
-          {t("home.demo.title")}
+          <AlertTriangle aria-hidden className="size-5 shrink-0 sm:size-6" />
+          <span>{t("home.demo.title")}</span>
         </h2>
-        <p className="mt-2 text-lg leading-relaxed text-warning-foreground">
+        <p className="mt-2 break-words text-sm leading-relaxed text-warning-foreground sm:text-base">
           {t("home.demo.body")}
         </p>
       </section>

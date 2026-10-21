@@ -166,11 +166,13 @@ function ResultPage() {
   const hasAnyResult = results.length > 0;
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-6">
+    <div className="mx-auto w-full max-w-xl px-3.5 pb-20 pt-5 sm:px-4 sm:pt-6">
       <header>
-        <h1 className="text-3xl font-extrabold text-foreground">{t("result.title")}</h1>
+        <h1 className="break-words text-2xl font-extrabold text-foreground sm:text-3xl">
+          {t("result.title")}
+        </h1>
         {subject ? (
-          <p className="mt-2 text-lg text-foreground/75">
+          <p className="mt-2 break-words text-base text-foreground/75 sm:text-lg">
             {t("result.for")}: <span className="font-bold">{subject}</span>
             {search.land ? ` • ${search.land} acres` : ""}
           </p>
@@ -179,17 +181,17 @@ function ResultPage() {
           <Link
             to="/ask"
             search={linkSearch}
-            className="inline-flex min-h-12 items-center rounded-xl bg-secondary px-4 text-base font-bold text-secondary-foreground"
+            className="inline-flex min-h-11 items-center rounded-xl bg-secondary px-3.5 text-sm font-bold text-secondary-foreground sm:min-h-12 sm:px-4 sm:text-base"
           >
-            <ArrowLeft aria-hidden className="mr-2 size-5" />
+            <ArrowLeft aria-hidden className="mr-1.5 size-4 sm:mr-2 sm:size-5" />
             {t("result.back")}
           </Link>
           <Link
             to="/review"
             search={linkSearch}
-            className="inline-flex min-h-12 items-center rounded-xl border-2 border-border px-4 text-base font-bold text-foreground/80"
+            className="inline-flex min-h-11 items-center rounded-xl border-2 border-border px-3.5 text-sm font-bold text-foreground/80 sm:min-h-12 sm:px-4 sm:text-base"
           >
-            <ClipboardList aria-hidden className="mr-2 size-5" />
+            <ClipboardList aria-hidden className="mr-1.5 size-4 sm:mr-2 sm:size-5" />
             {t("home.review")}
           </Link>
         </div>
@@ -197,26 +199,28 @@ function ResultPage() {
 
       {/* Distress Banner: Prominently at the top when distress=true */}
       {isDistress ? (
-        <div className="mt-6 rounded-3xl border-2 border-destructive bg-danger-soft p-5 text-danger-foreground shadow-md">
+        <div className="mt-6 rounded-2xl border-2 border-destructive bg-danger-soft p-4 text-danger-foreground shadow-md sm:rounded-3xl sm:p-5">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="size-7 text-destructive" />
-            <h2 className="text-xl font-extrabold">Emergency Agricultural Distress Alert</h2>
+            <ShieldAlert className="size-6 shrink-0 text-destructive sm:size-7" />
+            <h2 className="break-words text-lg font-extrabold sm:text-xl">
+              Emergency Agricultural Distress Alert
+            </h2>
           </div>
-          <p className="mt-2 text-base font-bold">
+          <p className="mt-2 break-words text-sm font-bold sm:text-base">
             {farmerAdviceQuery.data?.distress_message ||
               "Severe agricultural distress or loss detected. Please contact national agricultural helplines immediately."}
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
             <a
               href="tel:18001801551"
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-destructive px-5 font-bold text-destructive-foreground shadow hover:opacity-90"
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground shadow hover:opacity-90"
             >
-              <PhoneCall className="size-4" />
-              Kisan Call Centre (1800-180-1551)
+              <PhoneCall className="size-4 shrink-0" />
+              <span>Kisan Call Centre (1800-180-1551)</span>
             </a>
             <a
               href="tel:14416"
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-destructive px-5 font-bold text-destructive hover:bg-destructive/10"
+              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-destructive px-3 text-center text-sm font-bold text-destructive hover:bg-destructive/10"
             >
               Tele-MANAS (14416)
             </a>

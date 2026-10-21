@@ -47,15 +47,15 @@ export function BigSelect({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="mt-2 flex min-h-16 w-full items-center justify-between gap-3 rounded-2xl border-2 border-input bg-card px-4 text-left text-xl font-semibold text-foreground"
+        className="mt-2 flex min-h-14 w-full items-center justify-between gap-2.5 rounded-2xl border-2 border-input bg-card px-3.5 text-left text-lg font-semibold text-foreground sm:min-h-16 sm:px-4 sm:text-xl"
       >
-        <span className={value ? "" : "text-muted-foreground"}>
+        <span className={cn("min-w-0 flex-1 truncate", value ? "" : "text-muted-foreground")}>
           {value ? show(value) : anyLabel}
         </span>
         {open ? (
-          <ChevronUp aria-hidden className="size-7 shrink-0" />
+          <ChevronUp aria-hidden className="size-6 shrink-0 sm:size-7" />
         ) : (
-          <ChevronDown aria-hidden className="size-7 shrink-0" />
+          <ChevronDown aria-hidden className="size-6 shrink-0 sm:size-7" />
         )}
       </button>
 
@@ -114,11 +114,11 @@ function SelectRow({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex min-h-14 w-full items-center rounded-xl px-4 text-left text-lg font-semibold",
+        "flex min-h-12 w-full items-center rounded-xl px-3.5 text-left text-base font-semibold sm:min-h-14 sm:px-4 sm:text-lg",
         active ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground",
       )}
     >
-      {label}
+      <span className="min-w-0 flex-1 break-words">{label}</span>
     </button>
   );
 }

@@ -134,36 +134,36 @@ function OrderDetailPage() {
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8">
       {/* Top back & print bar */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-2.5">
         <Link
           to="/orders"
-          className="inline-flex items-center gap-2 rounded-xl text-base font-semibold text-muted-foreground hover:text-foreground"
+          className="inline-flex min-h-10 items-center gap-2 rounded-xl text-base font-semibold text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="size-5" />
+          <ArrowLeft className="size-5 shrink-0" />
           <span>{t("nav.orders")}</span>
         </Link>
 
         <button
           type="button"
           onClick={() => window.print()}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-sm font-semibold text-foreground hover:bg-muted"
+          className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground hover:bg-muted"
         >
-          <Printer className="size-4" />
-          <span>Print Contract Slip</span>
+          <Printer className="size-4 shrink-0" />
+          <span>Print Slip</span>
         </button>
       </div>
 
       {/* Header */}
-      <div className="rounded-3xl border-2 border-border bg-card p-6 shadow-sm">
+      <div className="rounded-3xl border-2 border-border bg-card p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg break-all">
                 {order.id}
               </span>
               <span
                 className={cn(
-                  "rounded-full px-3 py-1 text-xs font-black uppercase flex items-center gap-1.5",
+                  "rounded-full px-3 py-1 text-xs font-black uppercase flex items-center gap-1.5 shrink-0",
                   order.status === "PENDING_ACCEPTANCE"
                     ? "bg-warning-soft text-warning-foreground border border-warning/30"
                     : order.status === "ACCEPTED"
@@ -178,20 +178,22 @@ function OrderDetailPage() {
               </span>
             </div>
 
-            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-foreground">
+            <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground break-words">
               {order.crop} Procurement Contract
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground break-words">
               Listing Reference:{" "}
-              <span className="font-mono font-bold text-foreground">{order.listingId}</span>
+              <span className="font-mono font-bold text-foreground break-all">
+                {order.listingId}
+              </span>
             </p>
           </div>
 
-          <div className="flex flex-col sm:items-end">
+          <div className="flex flex-col rounded-2xl bg-muted/40 p-3 sm:p-0 sm:bg-transparent sm:items-end">
             <span className="text-xs font-semibold text-muted-foreground">
               {t("financial.netPayout")}
             </span>
-            <span className="text-3xl font-black text-foreground">
+            <span className="text-2xl sm:text-3xl font-black text-foreground">
               ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
             </span>
             <span className="text-xs text-muted-foreground font-semibold">
@@ -229,31 +231,36 @@ function OrderDetailPage() {
       ) : null}
 
       {/* Main Spec & Financial Cards */}
-      <div className="mt-6 space-y-6">
+      <div className="mt-6 space-y-5">
         {/* 1. Buyer & Terms */}
-        <section className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Building className="size-5 text-primary" />
-            1. Buyer Identity & Procurement Channel
+        <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <Building className="size-5 shrink-0 text-primary" />
+            <span>1. Buyer Identity & Procurement Channel</span>
           </h2>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl bg-secondary/50 p-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-secondary/50 p-3.5 sm:p-4 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
                 Procuring Organization
               </span>
-              <p className="text-lg font-bold text-foreground">{order.buyerName}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Type: {order.buyerType.replace("_", " ")} • ID: {order.buyerId}
+              <p className="text-base sm:text-lg font-bold text-foreground break-words">
+                {order.buyerName}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                Type: {order.buyerType.replace("_", " ")} • ID:{" "}
+                <span className="break-all">{order.buyerId}</span>
               </p>
             </div>
 
-            <div className="rounded-2xl bg-secondary/50 p-4">
+            <div className="rounded-2xl bg-secondary/50 p-3.5 sm:p-4 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
                 Dispatch Destination
               </span>
-              <p className="text-lg font-bold text-foreground">{order.deliveryDestination}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-base sm:text-lg font-bold text-foreground break-words">
+                {order.deliveryDestination}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5 break-words">
                 Pickup Gate: {order.pickupLocation}
               </p>
             </div>
@@ -261,58 +268,124 @@ function OrderDetailPage() {
         </section>
 
         {/* 2. Produce Specification */}
-        <section className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Tag className="size-5 text-primary" />
-            2. Produce Specification
+        <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <Tag className="size-5 shrink-0 text-primary" />
+            <span>2. Produce Specification</span>
           </h2>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <div className="rounded-2xl bg-muted p-3">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-4">
+            <div className="rounded-2xl bg-muted p-2.5 sm:p-3 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
                 {t("listing.crop")}
               </span>
-              <p className="text-base font-bold text-foreground">{order.crop}</p>
+              <p className="text-sm sm:text-base font-bold text-foreground break-words">
+                {order.crop}
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-muted p-3">
+            <div className="rounded-2xl bg-muted p-2.5 sm:p-3 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
                 {t("listing.quantity")}
               </span>
-              <p className="text-base font-bold text-foreground">
+              <p className="text-sm sm:text-base font-bold text-foreground break-words">
                 {order.quantityQuintals} Quintals
               </p>
             </div>
 
-            <div className="rounded-2xl bg-muted p-3">
+            <div className="rounded-2xl bg-muted p-2.5 sm:p-3 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
                 {t("listing.qualityGrade")}
               </span>
-              <p className="text-base font-bold text-foreground">{t(`grade.${order.grade}`)}</p>
+              <p className="text-sm sm:text-base font-bold text-foreground break-words">
+                {t(`grade.${order.grade}`)}
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-muted p-3">
+            <div className="rounded-2xl bg-muted p-2.5 sm:p-3 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
                 {t("order.agreedPrice")}
               </span>
-              <p className="text-base font-bold text-primary">₹{order.offeredPricePerQuintal}/Q</p>
+              <p className="text-sm sm:text-base font-bold text-primary break-words">
+                ₹{order.offeredPricePerQuintal}/Q
+              </p>
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground flex items-center gap-2">
-            <Info className="size-4 shrink-0 text-primary" />
-            <span>Contract Terms: {order.terms}</span>
+          <div className="text-xs text-muted-foreground flex items-start gap-2">
+            <Info className="size-4 shrink-0 text-primary mt-0.5" />
+            <span className="break-words">Contract Terms: {order.terms}</span>
           </div>
         </section>
 
         {/* 3. Itemized Financial Breakdown */}
-        <section className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Banknote className="size-5 text-primary" />
-            3. Itemized Financial Settlement
+        <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <Banknote className="size-5 shrink-0 text-primary" />
+            <span>3. Itemized Financial Settlement</span>
           </h2>
 
-          <div className="overflow-hidden rounded-2xl border border-border">
+          {/* Mobile Stacked Card Breakdown (<sm) */}
+          <div className="space-y-2.5 sm:hidden">
+            <div className="rounded-2xl border border-border bg-card p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-foreground">
+                  {t("financial.grossValue")}
+                </span>
+                <span className="text-base font-extrabold text-foreground whitespace-nowrap">
+                  ₹{order.grossAmount.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <span className="text-[11px] text-muted-foreground block mt-0.5">
+                Basis: {order.quantityQuintals} Q × ₹{order.offeredPricePerQuintal}/Q
+              </span>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-secondary/30 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-foreground">
+                  {t("financial.estimatedTransport")}
+                </span>
+                <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                  - ₹{order.estimatedTransportCost.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <span className="text-[11px] text-muted-foreground block mt-0.5">
+                Basis: Estimated freight (deducted post-dispatch)
+              </span>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-card p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-foreground">
+                  {t("financial.mandiCess")}
+                </span>
+                <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                  - ₹{order.estimatedPlatformFee.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <span className="text-[11px] text-muted-foreground block mt-0.5">
+                Basis: Statutory APMC levy
+              </span>
+            </div>
+
+            <div className="rounded-2xl border-2 border-primary/40 bg-primary/10 p-3.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-extrabold text-foreground">
+                  {t("financial.netPayout")}
+                </span>
+                <span className="text-xl font-black text-primary whitespace-nowrap">
+                  ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
+                </span>
+              </div>
+              <span className="text-[11px] font-semibold text-muted-foreground block mt-0.5">
+                Payable directly to Farmer account
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop/Tablet Table (>= sm) */}
+          <div className="hidden sm:block overflow-x-auto rounded-2xl border border-border">
             <table className="w-full text-left text-sm">
               <thead className="bg-muted text-xs font-bold text-muted-foreground uppercase">
                 <tr>
@@ -323,39 +396,43 @@ function OrderDetailPage() {
               </thead>
               <tbody className="divide-y divide-border">
                 <tr>
-                  <td className="px-4 py-3 font-bold text-foreground">
+                  <td className="px-4 py-3 font-bold text-foreground break-words">
                     {t("financial.grossValue")}
                   </td>
                   <td className="px-4 py-3 text-right text-muted-foreground">
                     {order.quantityQuintals} Q × ₹{order.offeredPricePerQuintal}/Q
                   </td>
-                  <td className="px-4 py-3 text-right font-extrabold text-foreground">
+                  <td className="px-4 py-3 text-right font-extrabold text-foreground whitespace-nowrap">
                     ₹{order.grossAmount.toLocaleString("en-IN")}
                   </td>
                 </tr>
 
                 <tr className="bg-secondary/20">
                   <td className="px-4 py-3 text-foreground">
-                    <span className="font-semibold">{t("financial.estimatedTransport")}</span>
-                    <span className="block text-xs text-muted-foreground">
+                    <span className="font-semibold block break-words">
+                      {t("financial.estimatedTransport")}
+                    </span>
+                    <span className="block text-xs text-muted-foreground break-words">
                       * Deducted only upon vehicle dispatch by transport partner
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right text-muted-foreground">Estimated freight</td>
-                  <td className="px-4 py-3 text-right font-semibold text-foreground">
+                  <td className="px-4 py-3 text-right font-semibold text-foreground whitespace-nowrap">
                     - ₹{order.estimatedTransportCost.toLocaleString("en-IN")}
                   </td>
                 </tr>
 
                 <tr>
                   <td className="px-4 py-3 text-foreground">
-                    <span className="font-semibold">{t("financial.mandiCess")}</span>
-                    <span className="block text-xs text-muted-foreground">
+                    <span className="font-semibold block break-words">
+                      {t("financial.mandiCess")}
+                    </span>
+                    <span className="block text-xs text-muted-foreground break-words">
                       Statutory market fee / platform charge
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right text-muted-foreground">Official APMC levy</td>
-                  <td className="px-4 py-3 text-right font-semibold text-foreground">
+                  <td className="px-4 py-3 text-right font-semibold text-foreground whitespace-nowrap">
                     - ₹{order.estimatedPlatformFee.toLocaleString("en-IN")}
                   </td>
                 </tr>
@@ -367,7 +444,7 @@ function OrderDetailPage() {
                   <td className="px-4 py-4 text-right text-xs font-bold text-muted-foreground">
                     Payable to Farmer Account
                   </td>
-                  <td className="px-4 py-4 text-right text-2xl font-black text-primary">
+                  <td className="px-4 py-4 text-right text-2xl font-black text-primary whitespace-nowrap">
                     ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
                   </td>
                 </tr>
@@ -375,7 +452,7 @@ function OrderDetailPage() {
             </table>
           </div>
 
-          <div className="rounded-2xl border border-warning/40 bg-warning-soft p-3 text-xs text-warning-foreground">
+          <div className="rounded-2xl border border-warning/40 bg-warning-soft p-3 text-xs text-warning-foreground leading-relaxed break-words">
             <span className="font-bold">Honest Cost Disclosure:</span> The transport cost of ₹
             {order.estimatedTransportCost} is an estimate based on average route distance. Actual
             deduction is locked only after transport manifest issuance.
@@ -383,15 +460,15 @@ function OrderDetailPage() {
         </section>
 
         {/* 4. Governance & Verification Separation */}
-        <section className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <ShieldCheck className="size-5 text-primary" />
-            4. Enterprise Governance & Lifecycle Tracking
+        <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <ShieldCheck className="size-5 shrink-0 text-primary" />
+            <span>4. Enterprise Governance & Lifecycle Tracking</span>
           </h2>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {/* Pillar A: Order State */}
-            <div className="rounded-2xl border border-border p-3.5 space-y-1">
+            <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-muted-foreground">Contract Acceptance</span>
                 <span
@@ -405,46 +482,46 @@ function OrderDetailPage() {
                   {order.status}
                 </span>
               </div>
-              <p className="text-xs text-foreground/80">
+              <p className="text-xs text-foreground/80 leading-relaxed">
                 Farmer legal commitment to deliver lot at agreed rate. Persisted on server.
               </p>
             </div>
 
             {/* Pillar B: VAJRA Verification */}
-            <div className="rounded-2xl border border-border p-3.5 space-y-1">
+            <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-muted-foreground">VAJRA Quality Assay</span>
                 <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                   {order.traceability.vajraAttestation}
                 </span>
               </div>
-              <p className="text-xs text-foreground/80">
+              <p className="text-xs text-foreground/80 leading-relaxed">
                 Physical assay performed upon vehicle arrival. No premature verification claimed.
               </p>
             </div>
 
             {/* Pillar C: TANTRA Logistics */}
-            <div className="rounded-2xl border border-border p-3.5 space-y-1">
+            <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-muted-foreground">TANTRA Logistics</span>
                 <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                   {order.traceability.tantraExecution}
                 </span>
               </div>
-              <p className="text-xs text-foreground/80">
+              <p className="text-xs text-foreground/80 leading-relaxed">
                 Pickup manifest registered for transport partner once order is accepted.
               </p>
             </div>
 
             {/* Pillar D: Bank Settlement */}
-            <div className="rounded-2xl border border-border p-3.5 space-y-1">
+            <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-muted-foreground">Payment Settlement</span>
                 <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                   {order.traceability.escrowStatus}
                 </span>
               </div>
-              <p className="text-xs text-foreground/80">
+              <p className="text-xs text-foreground/80 leading-relaxed">
                 Disbursement occurs via bank escrow post-inspection. No fake money movement.
               </p>
             </div>
@@ -453,11 +530,11 @@ function OrderDetailPage() {
 
         {/* 5. Acceptance Actions (Only if PENDING_ACCEPTANCE) */}
         {order.status === "PENDING_ACCEPTANCE" ? (
-          <div className="rounded-3xl border-2 border-primary bg-card p-6 shadow-md space-y-4">
-            <h2 className="text-2xl font-black text-foreground">
+          <div className="rounded-3xl border-2 border-primary bg-card p-4 sm:p-6 shadow-md space-y-4">
+            <h2 className="text-xl sm:text-2xl font-black text-foreground">
               Confirm or Decline Procurement Contract
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
               By clicking "Accept Order", you confirm that this produce lot is available for pickup
               at the agreed price of ₹{order.offeredPricePerQuintal}/Q. The acceptance will be
               transmitted directly to the server.
@@ -468,16 +545,16 @@ function OrderDetailPage() {
                 type="button"
                 disabled={acceptMutation.isPending || declineMutation.isPending}
                 onClick={() => acceptMutation.mutate()}
-                className="flex min-h-16 flex-1 items-center justify-center gap-3 rounded-2xl bg-primary px-6 text-xl font-extrabold text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-60"
+                className="flex min-h-14 sm:min-h-16 flex-1 items-center justify-center gap-2.5 rounded-2xl bg-primary px-5 text-lg sm:text-xl font-extrabold text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:opacity-60"
               >
                 {acceptMutation.isPending ? (
                   <>
-                    <Loader2 className="size-6 animate-spin" />
+                    <Loader2 className="size-5 sm:size-6 animate-spin" />
                     <span>Transmitting Acceptance...</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle2 className="size-6" />
+                    <CheckCircle2 className="size-5 sm:size-6" />
                     <span>{t("order.action.accept")}</span>
                   </>
                 )}
@@ -487,7 +564,7 @@ function OrderDetailPage() {
                 type="button"
                 disabled={acceptMutation.isPending || declineMutation.isPending}
                 onClick={() => setShowDeclineModal(true)}
-                className="flex min-h-16 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-6 text-lg font-bold text-foreground hover:bg-muted disabled:opacity-60"
+                className="flex min-h-12 sm:min-h-16 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 text-base sm:text-lg font-bold text-foreground hover:bg-muted disabled:opacity-60"
               >
                 <XCircle className="size-5 text-muted-foreground" />
                 <span>{t("order.action.decline")}</span>
@@ -497,10 +574,10 @@ function OrderDetailPage() {
         ) : null}
       </div>
 
-      {/* Decline Dialog Modal */}
+      {/* Decline Dialog Modal - Mobile Bottom Sheet */}
       {showDeclineModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-3xl border-2 border-border bg-card p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-2 sm:p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border-2 border-border bg-card p-5 sm:p-6 shadow-2xl">
             <h3 className="text-xl font-bold text-foreground">Decline Buyer Offer</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Please indicate why you are declining this offer (optional). The order status will be
@@ -515,7 +592,7 @@ function OrderDetailPage() {
               className="mt-3 w-full rounded-2xl border-2 border-input bg-background p-3 text-base text-foreground outline-none focus:border-ring"
             />
 
-            <div className="mt-4 flex gap-3">
+            <div className="mt-4 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               <button
                 type="button"
                 disabled={declineMutation.isPending}

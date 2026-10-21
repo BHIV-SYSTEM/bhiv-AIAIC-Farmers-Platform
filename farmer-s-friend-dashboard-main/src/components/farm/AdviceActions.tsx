@@ -37,30 +37,30 @@ export function AdviceActions({ text, title }: { text: string; title: string }) 
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
         {speech.supported ? (
           <button
             type="button"
             onClick={() => speech.toggle(text)}
             aria-pressed={speech.speaking}
-            className="flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-primary bg-card px-4 text-lg font-bold text-primary"
+            className="flex min-h-12 w-full flex-1 items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-3 text-base font-bold text-primary transition hover:bg-primary/5 sm:min-h-14 sm:rounded-2xl sm:px-4 sm:text-lg"
           >
             {speech.speaking ? (
-              <Square aria-hidden className="size-6" />
+              <Square aria-hidden className="size-5 shrink-0 sm:size-6" />
             ) : (
-              <Volume2 aria-hidden className="size-6" />
+              <Volume2 aria-hidden className="size-5 shrink-0 sm:size-6" />
             )}
-            {speech.speaking ? t("speak.stop") : t("speak.play")}
+            <span className="truncate">{speech.speaking ? t("speak.stop") : t("speak.play")}</span>
           </button>
         ) : null}
         <button
           type="button"
           onClick={() => void share()}
-          className="flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-4 text-lg font-bold text-foreground"
+          className="flex min-h-12 w-full flex-1 items-center justify-center gap-2 rounded-xl border-2 border-border bg-card px-3 text-base font-bold text-foreground transition hover:bg-muted sm:min-h-14 sm:rounded-2xl sm:px-4 sm:text-lg"
         >
-          <Share2 aria-hidden className="size-6" />
-          {t("share.button")}
-          <Printer aria-hidden className="size-5 text-muted-foreground" />
+          <Share2 aria-hidden className="size-5 shrink-0 sm:size-6" />
+          <span className="truncate">{t("share.button")}</span>
+          <Printer aria-hidden className="size-4 shrink-0 text-muted-foreground sm:size-5" />
         </button>
       </div>
       {copied ? (

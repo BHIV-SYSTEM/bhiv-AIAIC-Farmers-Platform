@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { I18nProvider } from "../lib/i18n";
 import { reportError } from "../lib/error-reporting";
 import { TopNav } from "../components/farm/TopNav";
+import { BottomNav } from "../components/farm/BottomNav";
 
 function NotFoundComponent() {
   return (
@@ -126,15 +127,16 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <div className="flex min-h-screen flex-col">
+        <div className="flex min-h-screen flex-col bg-background text-foreground">
           <TopNav />
-          <main className="flex-1">
+          <main className="flex-1 pb-20 sm:pb-24">
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
           </main>
-          <footer className="border-t-2 border-border px-4 py-5 text-center text-base text-muted-foreground">
+          <footer className="border-t-2 border-border px-4 py-5 pb-24 text-center text-xs text-muted-foreground sm:text-sm">
             AIAIC demonstration • real evidence, uncalibrated advice
           </footer>
+          <BottomNav />
         </div>
       </I18nProvider>
     </QueryClientProvider>

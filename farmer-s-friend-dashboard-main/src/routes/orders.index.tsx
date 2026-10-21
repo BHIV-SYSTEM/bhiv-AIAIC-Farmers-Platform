@@ -71,13 +71,13 @@ function OrdersPage() {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       {/* Top Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
-            <ShoppingBag className="size-8 text-primary" />
-            {t("nav.orders")}
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+            <ShoppingBag className="size-7 sm:size-8 text-primary shrink-0" />
+            <span>{t("nav.orders")}</span>
           </h1>
-          <p className="mt-1 text-base text-muted-foreground">
+          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
             {t("order.list.subtitle") ||
               "Matched buyer procurement offers and confirmed orders for your produce lots."}
           </p>
@@ -85,22 +85,24 @@ function OrdersPage() {
 
         <Link
           to="/listings"
-          className="flex min-h-12 items-center justify-center rounded-xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted"
+          className="flex min-h-12 w-full sm:w-auto items-center justify-center rounded-xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted"
         >
           {t("nav.listings")}
         </Link>
       </div>
 
       {/* Honest Sandbox / Demonstrative Buyer Matching Notice */}
-      <div className="mt-6 rounded-3xl border-2 border-primary/40 bg-card p-5 shadow-sm">
+      <div className="mt-6 rounded-3xl border-2 border-primary/40 bg-card p-4 sm:p-5 shadow-sm">
         <div className="flex items-start gap-3">
           <Info className="mt-0.5 size-5 shrink-0 text-primary" />
-          <div className="text-sm">
+          <div className="min-w-0 text-sm">
             <h2 className="text-base font-bold text-foreground">{t("sandbox.notice.title")}</h2>
             <p className="mt-1 text-foreground/80 leading-relaxed">{t("sandbox.notice.body")}</p>
-            <p className="mt-2 text-xs font-semibold text-muted-foreground">
+            <p className="mt-2 text-xs font-semibold text-muted-foreground break-words">
               Backend persistence active in{" "}
-              <code className="rounded bg-muted px-1 py-0.5 font-mono">data/transactions.json</code>
+              <code className="rounded bg-muted px-1 py-0.5 font-mono break-all">
+                data/transactions.json
+              </code>
               . Live external buyer gateway integration is owned by Hemanth.
             </p>
           </div>
@@ -108,17 +110,19 @@ function OrdersPage() {
       </div>
 
       {/* Filter and summary bar */}
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/60 p-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-muted-foreground">
-          <Filter className="size-4" />
-          <span>Filter:</span>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-border bg-card/60 p-2.5 sm:p-3">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm font-semibold text-muted-foreground">
+          <div className="flex items-center gap-1 mr-1">
+            <Filter className="size-3.5 sm:size-4" />
+            <span>Filter:</span>
+          </div>
           {["ALL", "PENDING_ACCEPTANCE", "ACCEPTED", "DECLINED"].map((st) => (
             <button
               key={st}
               type="button"
               onClick={() => setSelectedStatus(st)}
               className={cn(
-                "rounded-xl px-3 py-1 text-xs font-bold transition-colors",
+                "rounded-xl px-2.5 py-1 text-xs font-bold transition-colors min-h-8",
                 selectedStatus === st
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-muted text-foreground/80 hover:bg-muted/80",
@@ -139,7 +143,7 @@ function OrdersPage() {
           type="button"
           onClick={() => query.refetch()}
           disabled={query.isFetching}
-          className="flex items-center gap-1.5 rounded-xl px-3 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted disabled:opacity-50 min-h-8"
         >
           <RefreshCw className={cn("size-3.5", query.isFetching && "animate-spin")} />
           <span>Refresh</span>
@@ -196,17 +200,19 @@ function OrderCard({ order }: { order: ProduceOrder }) {
   const { t } = useI18n();
 
   return (
-    <div className="rounded-3xl border-2 border-border bg-card p-5 shadow-sm transition hover:border-primary/50">
+    <div className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 shadow-sm transition hover:border-primary/50">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg break-all">
               {order.id}
             </span>
-            <span className="font-mono text-xs text-muted-foreground">Ref: {order.listingId}</span>
+            <span className="font-mono text-xs text-muted-foreground break-all">
+              Ref: {order.listingId}
+            </span>
             <span
               className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-extrabold uppercase flex items-center gap-1",
+                "rounded-full px-2.5 py-0.5 text-xs font-extrabold uppercase flex items-center gap-1 shrink-0",
                 order.status === "PENDING_ACCEPTANCE"
                   ? "bg-warning-soft text-warning-foreground border border-warning/30"
                   : order.status === "ACCEPTED"
@@ -221,26 +227,30 @@ function OrderCard({ order }: { order: ProduceOrder }) {
             </span>
           </div>
 
-          <div className="mt-2 flex items-center gap-2">
-            <Building className="size-4 text-muted-foreground" />
-            <h3 className="text-xl font-extrabold text-foreground">{order.buyerName}</h3>
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-secondary-foreground">
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Building className="size-4 shrink-0 text-muted-foreground" />
+              <h3 className="text-lg sm:text-xl font-extrabold text-foreground break-words">
+                {order.buyerName}
+              </h3>
+            </div>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-secondary-foreground shrink-0">
               {order.buyerType.replace("_", " ")}
             </span>
           </div>
 
-          <p className="mt-1 text-sm font-semibold text-foreground/80">
+          <p className="mt-1 text-sm font-semibold text-foreground/80 break-words">
             {order.crop} • {order.quantityQuintals} Quintals offered @ ₹
             {order.offeredPricePerQuintal}/Q
           </p>
         </div>
 
         {/* Financial Overview */}
-        <div className="flex flex-col sm:items-end">
+        <div className="flex flex-col rounded-2xl bg-muted/40 p-3 sm:p-0 sm:bg-transparent sm:items-end">
           <span className="text-xs font-semibold text-muted-foreground">
             {t("financial.netPayout")}
           </span>
-          <span className="text-2xl font-black text-foreground">
+          <span className="text-2xl sm:text-3xl font-black text-foreground">
             ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
           </span>
           <span className="text-xs text-muted-foreground font-semibold">
@@ -251,29 +261,31 @@ function OrderCard({ order }: { order: ProduceOrder }) {
 
       {/* Itemized summary chips */}
       <div className="mt-4 grid grid-cols-1 gap-2 rounded-2xl bg-secondary/60 p-3 text-xs sm:grid-cols-3">
-        <div className="flex items-center gap-1.5 text-foreground/80">
-          <Truck className="size-3.5 text-muted-foreground" />
-          <span>
-            {t("financial.estimatedTransport")}: ₹{order.estimatedTransportCost}
+        <div className="flex items-start gap-1.5 text-foreground/80">
+          <Truck className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+          <div className="min-w-0">
+            <span>
+              {t("financial.estimatedTransport")}: ₹{order.estimatedTransportCost}
+            </span>
             <span className="text-[10px] text-muted-foreground block">(Estimated charge)</span>
-          </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 text-foreground/80">
-          <Tag className="size-3.5 text-muted-foreground" />
-          <span>
+          <Tag className="size-3.5 shrink-0 text-muted-foreground" />
+          <span className="break-words">
             {t("financial.mandiCess")}: ₹{order.estimatedPlatformFee}
           </span>
         </div>
 
         <div className="flex items-center gap-1.5 text-foreground/80">
-          <span className="font-semibold">Payment Terms:</span>
-          <span>{order.terms}</span>
+          <span className="font-semibold shrink-0">Payment Terms:</span>
+          <span className="break-words">{order.terms}</span>
         </div>
       </div>
 
       {/* Action Row */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-border pt-4">
         <span className="text-xs text-muted-foreground">
           Order Date: {new Date(order.createdAt).toLocaleString()}
         </span>
@@ -281,7 +293,7 @@ function OrderCard({ order }: { order: ProduceOrder }) {
         <Link
           to="/orders/$orderId"
           params={{ orderId: order.id }}
-          className="flex min-h-12 items-center gap-2 rounded-xl bg-primary px-5 text-base font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
+          className="flex min-h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-5 text-base font-bold text-primary-foreground shadow-sm hover:bg-primary/90"
         >
           {order.status === "PENDING_ACCEPTANCE" ? (
             <span>{t("order.action.accept")} / Review</span>
