@@ -44,8 +44,98 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+async function handleTtsApiRoute(request: Request): Promise<Response> {
+  const url = new URL(request.url);
+
+  if (request.method === "GET" && url.pathname === "/api/tts/health") {
+    const { getVaaniServerConfig, VAANI_VERIFIED_LANGUAGES } =
+      await import("./lib/vaani-tts.server");
+    const { baseUrl, hasApiKey } = getVaaniServerConfig();
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        service: "Vaani TTS Proxy",
+        configuredBaseUrl: baseUrl,
+        hasApiKeyConfigured: hasApiKey,
+        verifiedLanguages: VAANI_VERIFIED_LANGUAGES,
+      }),
+      { status: 200, headers: { "content-type": "application/json" } },
+    );
+  }
+
+  if (request.method !== "POST" && request.method !== "GET") {
+    return new Response(JSON.stringify({ ok: false, message: "Method not allowed" }), {
+      status: 405,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
+  try {
+    let payload: any = {};
+    if (request.method === "POST") {
+      payload = await request.json().catch(() => ({}));
+    } else {
+      payload = {
+        text: url.searchParams.get("text") || "",
+        language: url.searchParams.get("language") || url.searchParams.get("lang") || "hi",
+        voiceProfile:
+          url.searchParams.get("voiceProfile") ||
+          url.searchParams.get("voice_profile") ||
+          "vaani_teacher",
+      };
+    }
+
+    const { synthesizeAdviceSpeech } = await import("./lib/vaani-tts.server");
+    const result = await synthesizeAdviceSpeech(payload);
+
+    if (!result.ok) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          code: result.code,
+          message: result.message,
+          details: result.details,
+        }),
+        {
+          status: result.status,
+          headers: { "content-type": "application/json" },
+        },
+      );
+    }
+
+    const headers: Record<string, string> = {
+      "content-type": result.contentType || "audio/wav",
+      "cache-control": "no-store, no-cache, must-revalidate",
+    };
+    if (result.engine) headers["x-tts-engine"] = result.engine;
+    if (result.durationSeconds) headers["x-tts-duration-seconds"] = result.durationSeconds;
+
+    return new Response(result.audioBuffer, {
+      status: 200,
+      headers,
+    });
+  } catch (err: any) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        code: "SERVER_ERROR",
+        message: err?.message || "Internal server error during audio proxying",
+      }),
+      {
+        status: 500,
+        headers: { "content-type": "application/json" },
+      },
+    );
+  }
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/tts" || url.pathname === "/api/tts/health") {
+      return handleTtsApiRoute(request);
+    }
+
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

@@ -34,6 +34,7 @@ export function TopNav() {
         {/* Right side: Language Selector */}
         <div className="relative shrink-0">
           <button
+            id="top-nav-lang-trigger"
             type="button"
             onClick={() => setShowLangMenu((v) => !v)}
             aria-label={t("lang.title")}
@@ -53,6 +54,7 @@ export function TopNav() {
               <div className="absolute right-0 top-full z-50 mt-1 min-w-36 rounded-2xl border-2 border-border bg-card p-1 shadow-lg">
                 {LANGUAGES.map((l) => (
                   <button
+                    id={`lang-btn-${l.code}`}
                     key={l.code}
                     type="button"
                     onClick={() => {

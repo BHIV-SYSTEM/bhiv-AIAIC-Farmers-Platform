@@ -1,17 +1,17 @@
-import { Printer, Share2, Square, Volume2 } from "lucide-react";
+import { Printer, Share2 } from "lucide-react";
 import { useState } from "react";
 
-import { useI18n } from "@/lib/i18n";
-import { useSpeech } from "@/lib/use-speech";
+import { useI18n, type Lang } from "@/lib/i18n";
+import { VaaniAudioPlayer } from "@/components/farm/VaaniAudioPlayer";
 
 /**
- * Listen + share/print for one piece of advice. Both are pure browser actions;
- * nothing is sent anywhere.
+ * Vaani TTS audio playback + share/print for one piece of advice.
+ * Replaces browser speech synthesis with sovereign Vaani audio service.
  */
 export function AdviceActions({ text, title }: { text: string; title: string }) {
   const { t, lang } = useI18n();
-  const speech = useSpeech(lang);
   const [copied, setCopied] = useState(false);
+  const activeLang = (["en", "mr", "hi"].includes(lang) ? lang : "en") as Lang;
 
   const share = async () => {
     const payload = `${text}\n\n${window.location.href}`;
@@ -36,23 +36,11 @@ export function AdviceActions({ text, title }: { text: string; title: string }) 
   };
 
   return (
-    <div>
+    <div className="space-y-3">
+      {/* Sovereign Vaani Audio Playback Control */}
+      <VaaniAudioPlayer text={text} lang={activeLang} />
+
       <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
-        {speech.supported ? (
-          <button
-            type="button"
-            onClick={() => speech.toggle(text)}
-            aria-pressed={speech.speaking}
-            className="flex min-h-12 w-full flex-1 items-center justify-center gap-2 rounded-xl border-2 border-primary bg-card px-3 text-base font-bold text-primary transition hover:bg-primary/5 sm:min-h-14 sm:rounded-2xl sm:px-4 sm:text-lg"
-          >
-            {speech.speaking ? (
-              <Square aria-hidden className="size-5 shrink-0 sm:size-6" />
-            ) : (
-              <Volume2 aria-hidden className="size-5 shrink-0 sm:size-6" />
-            )}
-            <span className="truncate">{speech.speaking ? t("speak.stop") : t("speak.play")}</span>
-          </button>
-        ) : null}
         <button
           type="button"
           onClick={() => void share()}

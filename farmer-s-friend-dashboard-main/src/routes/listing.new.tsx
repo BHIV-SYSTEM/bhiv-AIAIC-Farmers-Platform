@@ -170,15 +170,8 @@ function NewListingPage() {
       <div className="mb-5 flex items-start gap-2.5 rounded-2xl border-2 border-border bg-card p-3.5 sm:mb-6 sm:gap-3 sm:p-4">
         <Info className="mt-0.5 size-4 shrink-0 text-primary sm:size-5" />
         <div className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/80">
-          <p className="font-bold text-foreground">Backend Persistence Architecture Notice</p>
-          <p className="mt-0.5 break-words">
-            Listings and orders are persisted in the backend Nitro file store (
-            <code className="break-all rounded bg-muted px-1 py-0.5 font-mono">
-              data/transactions.json
-            </code>
-            ). State is preserved across page refreshes and server reboots. Live external buyer
-            matching remains demonstrative pending Hemanth's central gateway contract.
-          </p>
+          <p className="font-bold text-foreground">{t("persistence.notice.title")}</p>
+          <p className="mt-0.5 break-words">{t("persistence.notice.body")}</p>
         </div>
       </div>
 
@@ -193,7 +186,7 @@ function NewListingPage() {
           </div>
 
           <p className="mt-2.5 break-words text-base text-foreground/90 sm:mt-3 sm:text-lg">
-            Your produce lot is registered and verified on the platform.
+            {t("listing.registeredNote")}
           </p>
 
           <div className="mt-3.5 rounded-2xl bg-muted p-3.5 sm:mt-4 sm:p-4">
@@ -202,10 +195,11 @@ function NewListingPage() {
               {createdListingId}
             </div>
             <div className="mt-1.5 break-words text-xs text-foreground/80 sm:mt-2 sm:text-sm">
-              {crop} {variety ? `(${variety})` : ""} • {numQuantity} Quintals • ₹{numPrice}/Q
+              {crop} {variety ? `(${variety})` : ""} • {numQuantity} {t("financial.quintals")} • ₹
+              {numPrice}/Q
             </div>
             <div className="mt-1 break-words text-xs text-muted-foreground">
-              Location: {district} {mandi ? `• ${mandi}` : ""}
+              {t("listing.location")}: {district} {mandi ? `• ${mandi}` : ""}
             </div>
           </div>
 
@@ -241,7 +235,7 @@ function NewListingPage() {
           <div className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Tag className="size-5 text-primary" />
-              1. Produce Specification
+              {t("listing.section.produce")}
             </h2>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -255,7 +249,7 @@ function NewListingPage() {
                   required
                   value={crop}
                   onChange={(e) => setCrop(e.target.value)}
-                  placeholder="e.g. Onion, Tomato, Soybean"
+                  placeholder={t("listing.placeholder.crop")}
                   className="mt-1.5 min-h-14 w-full rounded-2xl border-2 border-input bg-background px-4 text-lg font-semibold text-foreground outline-none focus:border-ring"
                 />
               </div>
@@ -269,7 +263,7 @@ function NewListingPage() {
                   type="text"
                   value={variety}
                   onChange={(e) => setVariety(e.target.value)}
-                  placeholder="e.g. Garva / Nashik Red / Desi"
+                  placeholder={t("listing.placeholder.variety")}
                   className="mt-1.5 min-h-14 w-full rounded-2xl border-2 border-input bg-background px-4 text-lg font-semibold text-foreground outline-none focus:border-ring"
                 />
               </div>
@@ -322,7 +316,7 @@ function NewListingPage() {
           <div className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Tag className="size-5 text-primary" />
-              2. Asking Price & Gross Lot Value
+              {t("listing.section.pricing")}
             </h2>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -361,7 +355,8 @@ function NewListingPage() {
                 </span>
                 {advisoryPrice ? (
                   <span className="text-xs text-muted-foreground mt-0.5">
-                    Advisory benchmark: ₹{advisoryPrice}/Q ({numPrice >= advisoryPrice ? "+" : ""}
+                    {t("listing.advisoryBenchmark")}: ₹{advisoryPrice}/Q (
+                    {numPrice >= advisoryPrice ? "+" : ""}
                     {(((numPrice - advisoryPrice) / advisoryPrice) * 100).toFixed(1)}%)
                   </span>
                 ) : null}
@@ -373,13 +368,13 @@ function NewListingPage() {
           <div className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Tag className="size-5 text-primary" />
-              3. Pickup Location & Logistics Window
+              {t("listing.section.location")}
             </h2>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="district" className="block text-base font-bold text-foreground">
-                  District *
+                  {t("listing.district")} *
                 </label>
                 <input
                   id="district"
@@ -393,14 +388,14 @@ function NewListingPage() {
 
               <div>
                 <label htmlFor="mandi" className="block text-base font-bold text-foreground">
-                  APMC Mandi (Nearest)
+                  {t("listing.mandiNearest")}
                 </label>
                 <input
                   id="mandi"
                   type="text"
                   value={mandi}
                   onChange={(e) => setMandi(e.target.value)}
-                  placeholder="e.g. Kolhapur, Lasalgaon"
+                  placeholder={t("listing.placeholder.mandi")}
                   className="mt-1.5 min-h-14 w-full rounded-2xl border-2 border-input bg-background px-4 text-lg font-semibold text-foreground outline-none focus:border-ring"
                 />
               </div>
@@ -412,7 +407,7 @@ function NewListingPage() {
                   htmlFor="pickupLocation"
                   className="block text-base font-bold text-foreground"
                 >
-                  Pickup Location / Gate *
+                  {t("listing.pickupLocation")} *
                 </label>
                 <input
                   id="pickupLocation"
@@ -420,7 +415,7 @@ function NewListingPage() {
                   required
                   value={pickupLocation}
                   onChange={(e) => setPickupLocation(e.target.value)}
-                  placeholder="e.g. Main Farm Gate, APMC Shed 4"
+                  placeholder={t("listing.placeholder.pickup")}
                   className="mt-1.5 min-h-14 w-full rounded-2xl border-2 border-input bg-background px-4 text-lg font-semibold text-foreground outline-none focus:border-ring"
                 />
               </div>
@@ -430,7 +425,7 @@ function NewListingPage() {
                   htmlFor="harvestWindow"
                   className="block text-base font-bold text-foreground"
                 >
-                  Availability / Harvest Window
+                  {t("listing.harvestWindow")}
                 </label>
                 <select
                   id="harvestWindow"
@@ -438,11 +433,9 @@ function NewListingPage() {
                   onChange={(e) => setHarvestWindow(e.target.value)}
                   className="mt-1.5 min-h-14 w-full rounded-2xl border-2 border-input bg-background px-4 text-base font-semibold text-foreground outline-none focus:border-ring"
                 >
-                  <option value="Immediate (within 48 hours)">Immediate (within 48 hours)</option>
-                  <option value="Within 3 to 5 days">Within 3 to 5 days</option>
-                  <option value="Next week (standing crop ready)">
-                    Next week (standing crop ready)
-                  </option>
+                  <option value="Immediate (within 48 hours)">{t("harvest.immediate")}</option>
+                  <option value="Within 3 to 5 days">{t("harvest.fewDays")}</option>
+                  <option value="Next week (standing crop ready)">{t("harvest.nextWeek")}</option>
                 </select>
               </div>
             </div>
@@ -452,13 +445,13 @@ function NewListingPage() {
           <div className="rounded-3xl border-2 border-border bg-card p-5 space-y-4">
             <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
               <Tag className="size-5 text-primary" />
-              4. Farmer Contact (For Pickup Manifest)
+              {t("listing.section.contact")}
             </h2>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="farmerName" className="block text-base font-bold text-foreground">
-                  Farmer / FPO Name
+                  {t("listing.farmerName")}
                 </label>
                 <input
                   id="farmerName"
@@ -471,7 +464,7 @@ function NewListingPage() {
 
               <div>
                 <label htmlFor="farmerPhone" className="block text-base font-bold text-foreground">
-                  Mobile Number
+                  {t("listing.farmerPhone")}
                 </label>
                 <input
                   id="farmerPhone"
@@ -494,7 +487,7 @@ function NewListingPage() {
               {submitting ? (
                 <>
                   <Loader2 className="size-6 animate-spin sm:size-7" />
-                  <span className="truncate">Submitting to Backend...</span>
+                  <span className="truncate">{t("listing.submitting")}</span>
                 </>
               ) : (
                 <span className="truncate">{t("listing.create.submit")}</span>

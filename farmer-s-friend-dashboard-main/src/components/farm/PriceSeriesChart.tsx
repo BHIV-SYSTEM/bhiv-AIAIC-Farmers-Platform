@@ -1,7 +1,10 @@
 import { TrendingUp, Calendar, Info, BarChart3 } from "lucide-react";
 import type { PriceSeriesResponse } from "@/lib/places.functions";
+import { useI18n } from "@/lib/i18n";
 
 export function PriceSeriesChart({ series }: { series: PriceSeriesResponse }) {
+  const { t } = useI18n();
+
   if (!series.available || !series.points.length) {
     return null;
   }
@@ -20,18 +23,21 @@ export function PriceSeriesChart({ series }: { series: PriceSeriesResponse }) {
         <div className="min-w-0 flex-1">
           <h3 className="break-words text-lg font-bold text-foreground flex items-center gap-2 sm:text-xl">
             <BarChart3 className="size-5 text-primary shrink-0" />
-            <span>Mandi Price History & 5-Year Benchmark Range</span>
+            <span>{t("chart.title")}</span>
           </h3>
           <p className="mt-0.5 break-words text-xs text-muted-foreground">
-            Official Agmarknet daily price series ({series.days} days) for {series.district} •{" "}
-            {series.crop_name}
+            {t("chart.subtitle", {
+              days: series.days,
+              district: series.district,
+              crop: series.crop_name,
+            })}
           </p>
         </div>
 
         {series.newest_day ? (
           <span className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground sm:text-xs">
             <Calendar className="size-3.5 shrink-0" />
-            <span>Latest: {series.newest_day}</span>
+            <span>{t("chart.latest", { day: series.newest_day })}</span>
           </span>
         ) : null}
       </div>
@@ -51,7 +57,7 @@ export function PriceSeriesChart({ series }: { series: PriceSeriesResponse }) {
         <div className="grid grid-cols-3 gap-1 rounded-xl bg-secondary/50 p-2 text-center text-xs sm:gap-2 sm:rounded-2xl sm:p-3">
           <div className="min-w-0 px-0.5">
             <span className="text-[10px] text-muted-foreground block truncate sm:text-xs">
-              Hist. 25th %ile
+              {t("chart.p25")}
             </span>
             <span className="text-sm font-extrabold text-foreground sm:text-base">
               ₹{band.p25.toLocaleString("en-IN")}/q
@@ -59,7 +65,7 @@ export function PriceSeriesChart({ series }: { series: PriceSeriesResponse }) {
           </div>
           <div className="border-x border-border min-w-0 px-0.5">
             <span className="text-[10px] text-muted-foreground block truncate sm:text-xs">
-              5-Yr Median
+              {t("chart.p50")}
             </span>
             <span className="text-sm font-black text-primary sm:text-base">
               ₹{band.p50.toLocaleString("en-IN")}/q
@@ -67,7 +73,7 @@ export function PriceSeriesChart({ series }: { series: PriceSeriesResponse }) {
           </div>
           <div className="min-w-0 px-0.5">
             <span className="text-[10px] text-muted-foreground block truncate sm:text-xs">
-              Hist. 75th %ile
+              {t("chart.p75")}
             </span>
             <span className="text-sm font-extrabold text-foreground sm:text-base">
               ₹{band.p75.toLocaleString("en-IN")}/q
@@ -79,7 +85,7 @@ export function PriceSeriesChart({ series }: { series: PriceSeriesResponse }) {
       {/* Mini Bar visualization for recent days */}
       <div className="space-y-2 pt-1">
         <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide sm:text-xs">
-          Recent Mandi Price Quotes (₹ / Quintal)
+          {t("chart.recentQuotes")}
         </span>
         <div className="space-y-1.5">
           {recentPoints.map((pt) => {
@@ -115,10 +121,7 @@ export function PriceSeriesChart({ series }: { series: PriceSeriesResponse }) {
       {/* Mandi & Grade footnote */}
       <div className="text-[11px] text-muted-foreground pt-1 flex items-start gap-1.5">
         <Info className="size-3.5 shrink-0 mt-0.5" />
-        <span className="break-words">
-          {series.band_note ||
-            "District median of Agmarknet reporting mandis. History, not a forecast and not guaranteed advice."}
-        </span>
+        <span className="break-words">{series.band_note || t("chart.footnote")}</span>
       </div>
     </div>
   );

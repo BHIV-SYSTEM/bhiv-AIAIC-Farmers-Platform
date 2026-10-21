@@ -7,6 +7,7 @@ import { DashboardSummary } from "@/components/farm/DashboardSummary";
 import { PlantCheck } from "@/components/farm/PlantCheck";
 import { RecommendationCard } from "@/components/farm/RecommendationCard";
 import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
+import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
 import { catalogOptions, catalogQueryOptions, subjectSupport } from "@/lib/catalog-query";
@@ -203,12 +204,11 @@ function ResultPage() {
           <div className="flex items-center gap-2">
             <ShieldAlert className="size-6 shrink-0 text-destructive sm:size-7" />
             <h2 className="break-words text-lg font-extrabold sm:text-xl">
-              Emergency Agricultural Distress Alert
+              {t("advice.distress.title")}
             </h2>
           </div>
           <p className="mt-2 break-words text-sm font-bold sm:text-base">
-            {farmerAdviceQuery.data?.distress_message ||
-              "Severe agricultural distress or loss detected. Please contact national agricultural helplines immediately."}
+            {farmerAdviceQuery.data?.distress_message || t("advice.distress.fallback")}
           </p>
           <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
             <a
@@ -228,144 +228,159 @@ function ResultPage() {
         </div>
       ) : null}
 
-      {/* Confirmed Important Guidance Note */}
-      {farmerAdviceQuery.data?.important ? (
-        <div className="mt-6 rounded-2xl border-2 border-warning/50 bg-warning-soft p-4 text-xs font-semibold text-warning-foreground leading-relaxed">
-          <span className="font-bold uppercase tracking-wider block mb-0.5">
-            {farmerAdviceQuery.data.important_label || "Important Guidance Note"}
-          </span>
-          {farmerAdviceQuery.data.important}
-        </div>
-      ) : null}
-
-      {!query.isPending && hasAnyResult ? (
+      {/* Primary Farmer Advice (Simple Advice First with Expandable Details) */}
+      {farmerAdviceQuery.isPending || query.isPending ? (
         <div className="mt-6">
-          <DashboardSummary
-            results={results}
-            subject={subject}
-            land={search.land}
-            updatedAt={updatedAt}
-            search={linkSearch}
-          />
-        </div>
-      ) : null}
-
-      {/* Plant Photo Check */}
-      <div className="mt-6">
-        <PlantCheck
-          crop={search.crop}
-          state={search.state}
-          onResult={(result) => savePlantResult(result)}
-        />
-      </div>
-
-      {/* Confirmed Historical Mandi Price Series (if market selected) */}
-      {priceSeriesQuery.data?.available ? (
-        <div className="mt-6">
-          <PriceSeriesChart series={priceSeriesQuery.data} />
-        </div>
-      ) : null}
-
-      {/* Services Advice Cards */}
-      <div className="mt-6">
-        {query.isPending ? (
           <LoadingBlock label={t("result.loading")} />
-        ) : (
-          <div className="space-y-5">
-            {showCached ? (
-              <StateBlock
-                tone="warning"
-                icon={Archive}
-                title={t("cache.title")}
-                body={t("cache.body", { when: savedWhen })}
-                action={retryButton}
+        </div>
+      ) : (
+        <div className="mt-6">
+          <SimpleAdviceHero
+            card={farmerAdviceQuery.data?.cards?.[0]}
+            response={farmerAdviceQuery.data}
+            subject={subject}
+            askAHuman={farmerAdviceQuery.data?.ask_a_human}
+          >
+            {/* Confirmed Important Guidance Note */}
+            {farmerAdviceQuery.data?.important ? (
+              <div className="rounded-2xl border-2 border-warning/50 bg-warning-soft p-4 text-xs font-semibold text-warning-foreground leading-relaxed">
+                <span className="font-bold uppercase tracking-wider block mb-0.5">
+                  {farmerAdviceQuery.data.important_label || "Important Guidance Note"}
+                </span>
+                {farmerAdviceQuery.data.important}
+              </div>
+            ) : null}
+
+            {/* Dashboard Summary Metrics */}
+            {hasAnyResult ? (
+              <div>
+                <DashboardSummary
+                  results={results}
+                  subject={subject}
+                  land={search.land}
+                  updatedAt={updatedAt}
+                  search={linkSearch}
+                />
+              </div>
+            ) : null}
+
+            {/* Plant Photo Check */}
+            <div>
+              <PlantCheck
+                crop={search.crop}
+                state={search.state}
+                onResult={(result) => savePlantResult(result)}
               />
+            </div>
+
+            {/* Confirmed Historical Mandi Price Series (if market selected) */}
+            {priceSeriesQuery.data?.available ? (
+              <div>
+                <PriceSeriesChart series={priceSeriesQuery.data} />
+              </div>
             ) : null}
 
-            {query.isError && !showCached ? (
-              <FailureBlock reason="request_failed" action={retryButton} />
-            ) : null}
-
-            {!showCached && !query.isError && results.length === 0 ? (
-              <StateBlock
-                icon={SearchX}
-                title={t("result.empty.title")}
-                body={support.anyUnknown ? t("state.unknown.subject") : t("result.empty.body")}
-                action={retryButton}
-              />
-            ) : null}
-
-            {results.map((result) => {
-              if (!result.ok) {
-                return (
-                  <section key={result.service} aria-label={t(`service.${result.service}`)}>
-                    <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-muted-foreground">
-                      {t(`service.${result.service}`)}
-                    </h2>
-                    <FailureBlock reason={result.reason} action={retryButton} />
-                  </section>
-                );
-              }
-              if (result.items.length === 0) {
-                const serviceSupport = subjectSupport(
-                  options,
-                  {
-                    region:
-                      result.service === "market" && search.mandi ? search.mandi : search.region,
-                    crop: search.crop,
-                  },
-                  result.service,
-                );
-                return (
-                  <section key={result.service} aria-label={t(`service.${result.service}`)}>
-                    <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-muted-foreground">
-                      {t(`service.${result.service}`)}
-                    </h2>
-                    <StateBlock
-                      icon={SearchX}
-                      title={t("result.empty.title")}
-                      body={
-                        serviceSupport.anyUnknown
-                          ? t("state.unknown.subject")
-                          : t("result.empty.body")
-                      }
-                    />
-                  </section>
-                );
-              }
-
-              // Match corresponding card from confirmed /farmer/advice if available
-              const matchedCard = farmerAdviceQuery.data?.cards?.find(
-                (c) => c.service === result.service,
-              );
-
-              return result.items.map((item, index) => {
-                // Overlay headline and action from confirmed /farmer/advice if present
-                const enhancedItem = {
-                  ...item,
-                  recommendation: matchedCard?.answer_headline || item.recommendation,
-                  recommendation_detail:
-                    matchedCard?.summary?.action?.text || item.recommendation_detail,
-                  explainability: matchedCard?.why || item.explainability,
-                  known_unknowns: matchedCard?.read_these_first?.length
-                    ? [...matchedCard.read_these_first, ...(item.known_unknowns ?? [])]
-                    : item.known_unknowns,
-                };
-
-                return (
-                  <RecommendationCard
-                    key={`${result.service}-${index}`}
-                    service={result.service}
-                    item={enhancedItem}
-                    index={index}
-                    search={linkSearch}
+            {/* Services Detailed Advice Cards */}
+            <div>
+              <div className="space-y-5">
+                {showCached ? (
+                  <StateBlock
+                    tone="warning"
+                    icon={Archive}
+                    title={t("cache.title")}
+                    body={t("cache.body", { when: savedWhen })}
+                    action={retryButton}
                   />
-                );
-              });
-            })}
-          </div>
-        )}
-      </div>
+                ) : null}
+
+                {query.isError && !showCached ? (
+                  <FailureBlock reason="request_failed" action={retryButton} />
+                ) : null}
+
+                {!showCached && !query.isError && results.length === 0 ? (
+                  <StateBlock
+                    icon={SearchX}
+                    title={t("result.empty.title")}
+                    body={support.anyUnknown ? t("state.unknown.subject") : t("result.empty.body")}
+                    action={retryButton}
+                  />
+                ) : null}
+
+                {results.map((result) => {
+                  if (!result.ok) {
+                    return (
+                      <section key={result.service} aria-label={t(`service.${result.service}`)}>
+                        <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-muted-foreground">
+                          {t(`service.${result.service}`)}
+                        </h2>
+                        <FailureBlock reason={result.reason} action={retryButton} />
+                      </section>
+                    );
+                  }
+                  if (result.items.length === 0) {
+                    const serviceSupport = subjectSupport(
+                      options,
+                      {
+                        region:
+                          result.service === "market" && search.mandi
+                            ? search.mandi
+                            : search.region,
+                        crop: search.crop,
+                      },
+                      result.service,
+                    );
+                    return (
+                      <section key={result.service} aria-label={t(`service.${result.service}`)}>
+                        <h2 className="mb-2 text-lg font-bold uppercase tracking-wide text-muted-foreground">
+                          {t(`service.${result.service}`)}
+                        </h2>
+                        <StateBlock
+                          icon={SearchX}
+                          title={t("result.empty.title")}
+                          body={
+                            serviceSupport.anyUnknown
+                              ? t("state.unknown.subject")
+                              : t("result.empty.body")
+                          }
+                        />
+                      </section>
+                    );
+                  }
+
+                  // Match corresponding card from confirmed /farmer/advice if available
+                  const matchedCard = farmerAdviceQuery.data?.cards?.find(
+                    (c) => c.service === result.service,
+                  );
+
+                  return result.items.map((item, index) => {
+                    // Overlay headline and action from confirmed /farmer/advice if present
+                    const enhancedItem = {
+                      ...item,
+                      recommendation: matchedCard?.answer_headline || item.recommendation,
+                      recommendation_detail:
+                        matchedCard?.summary?.action?.text || item.recommendation_detail,
+                      explainability: matchedCard?.why || item.explainability,
+                      known_unknowns: matchedCard?.read_these_first?.length
+                        ? [...matchedCard.read_these_first, ...(item.known_unknowns ?? [])]
+                        : item.known_unknowns,
+                    };
+
+                    return (
+                      <RecommendationCard
+                        key={`${result.service}-${index}`}
+                        service={result.service}
+                        item={enhancedItem}
+                        index={index}
+                        search={linkSearch}
+                      />
+                    );
+                  });
+                })}
+              </div>
+            </div>
+          </SimpleAdviceHero>
+        </div>
+      )}
     </div>
   );
 }

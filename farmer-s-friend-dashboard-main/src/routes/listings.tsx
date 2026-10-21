@@ -84,15 +84,8 @@ function ListingsPage() {
       <div className="mt-5 flex items-start gap-2.5 rounded-2xl border-2 border-border bg-card p-3.5 sm:mt-6 sm:gap-3 sm:p-4">
         <Database className="mt-0.5 size-4 shrink-0 text-primary sm:size-5" />
         <div className="min-w-0 flex-1 text-xs leading-relaxed text-foreground/80">
-          <p className="font-bold text-foreground">Backend Persistence Architecture Notice</p>
-          <p className="mt-0.5 break-words">
-            Listing records are saved in the server filesystem store (
-            <code className="break-all rounded bg-muted px-1 py-0.5 font-mono">
-              data/transactions.json
-            </code>
-            ). State is preserved across page refreshes and server reboots. Live external buyer
-            matching remains demonstrative pending Hemanth's central gateway contract.
-          </p>
+          <p className="font-bold text-foreground">{t("persistence.notice.title")}</p>
+          <p className="mt-0.5 break-words">{t("persistence.notice.body")}</p>
         </div>
       </div>
 
@@ -100,7 +93,7 @@ function ListingsPage() {
       <div className="mt-5 flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-border bg-card/60 p-2.5 sm:mt-6 sm:gap-3 sm:p-3">
         <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:text-sm">
           <Filter className="size-3.5 shrink-0 sm:size-4" />
-          <span>Filter:</span>
+          <span>{t("filter.label")}</span>
           {["ALL", "ACTIVE", "MATCHED", "ORDERED", "DELISTED"].map((s) => (
             <button
               key={s}
@@ -113,7 +106,7 @@ function ListingsPage() {
                   : "bg-muted text-foreground/80 hover:bg-muted/80",
               )}
             >
-              {s === "ALL" ? `All (${listings.length})` : s}
+              {s === "ALL" ? `${t("filter.all")} (${listings.length})` : t(`listing.status.${s}`)}
             </button>
           ))}
         </div>
@@ -125,7 +118,7 @@ function ListingsPage() {
           className="flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted disabled:opacity-50 sm:px-3"
         >
           <RefreshCw className={cn("size-3.5", query.isFetching && "animate-spin")} />
-          <span>Refresh</span>
+          <span>{t("result.retry")}</span>
         </button>
       </div>
 
@@ -134,33 +127,29 @@ function ListingsPage() {
         {query.isPending ? (
           <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border-2 border-border bg-card p-8 text-center">
             <Loader2 className="size-10 animate-spin text-primary" />
-            <p className="mt-3 text-lg font-bold text-foreground">
-              Loading your produce listings from server...
-            </p>
+            <p className="mt-3 text-lg font-bold text-foreground">{t("result.loading")}</p>
           </div>
         ) : query.isError ? (
           <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border-2 border-destructive bg-danger-soft p-8 text-center text-danger-foreground">
             <AlertCircle className="size-12" />
-            <p className="mt-3 text-xl font-bold">Failed to load listings</p>
+            <p className="mt-3 text-xl font-bold">{t("failure.request_failed.title")}</p>
             <p className="mt-1 text-sm">{query.error?.message}</p>
             <button
               type="button"
               onClick={() => query.refetch()}
               className="mt-4 rounded-xl bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:opacity-90"
             >
-              Try Again
+              {t("result.retry")}
             </button>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex min-h-72 flex-col items-center justify-center rounded-3xl border-2 border-dashed border-border bg-card p-8 text-center">
             <SearchX className="size-14 text-muted-foreground" />
             <h2 className="mt-4 text-2xl font-bold text-foreground">
-              {statusFilter === "ALL" ? t("listing.empty.title") : "No listings match this filter"}
+              {statusFilter === "ALL" ? t("listing.empty.title") : t("listing.list.empty")}
             </h2>
             <p className="mt-2 max-w-md text-base text-muted-foreground">
-              {statusFilter === "ALL"
-                ? t("listing.empty.body")
-                : "Try selecting a different filter or create a new produce listing."}
+              {t("listing.empty.body")}
             </p>
             <Link
               to="/listing/new"
@@ -206,7 +195,7 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
                     : "bg-muted text-muted-foreground",
               )}
             >
-              {listing.status}
+              {t(`listing.status.${listing.status}`)}
             </span>
             <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
               {t(`grade.${listing.grade}`)}
@@ -231,7 +220,8 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
             ₹{totalValue.toLocaleString("en-IN")}
           </span>
           <span className="text-xs font-semibold text-muted-foreground">
-            ₹{listing.askingPricePerQuintal}/Q • {listing.quantityQuintals} Quintals
+            ₹{listing.askingPricePerQuintal}/Q • {listing.quantityQuintals}{" "}
+            {t("financial.quintals")}
           </span>
         </div>
       </div>
@@ -248,12 +238,16 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
 
         <div className="flex items-center gap-2 text-foreground/80 min-w-0">
           <Calendar className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate">Window: {listing.harvestWindow}</span>
+          <span className="truncate">
+            {t("listing.harvestWindow")}: {listing.harvestWindow}
+          </span>
         </div>
 
         <div className="flex items-center gap-2 text-foreground/80 min-w-0">
           <Building2 className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate">Pickup: {listing.pickupLocation}</span>
+          <span className="truncate">
+            {t("listing.pickupLocation")}: {listing.pickupLocation}
+          </span>
         </div>
       </div>
 
@@ -261,7 +255,9 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
       {listing.decisionId ? (
         <div className="mt-2.5 flex items-start gap-1.5 text-xs text-muted-foreground font-mono sm:mt-3">
           <Sparkles className="size-3.5 text-primary shrink-0 mt-0.5" />
-          <span className="break-all">Advisory Decision: {listing.decisionId}</span>
+          <span className="break-all">
+            {t("listing.decisionId")}: {listing.decisionId}
+          </span>
         </div>
       ) : null}
 

@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { I18nProvider } from "../lib/i18n";
+import { I18nProvider, useI18n } from "../lib/i18n";
 import { reportError } from "../lib/error-reporting";
 import { TopNav } from "../components/farm/TopNav";
 import { BottomNav } from "../components/farm/BottomNav";
@@ -121,6 +121,15 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function FooterNote() {
+  const { t } = useI18n();
+  return (
+    <footer className="border-t-2 border-border px-4 py-5 pb-24 text-center text-xs text-muted-foreground sm:text-sm">
+      {t("footer.note")}
+    </footer>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -133,9 +142,7 @@ function RootComponent() {
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
           </main>
-          <footer className="border-t-2 border-border px-4 py-5 pb-24 text-center text-xs text-muted-foreground sm:text-sm">
-            AIAIC demonstration • real evidence, uncalibrated advice
-          </footer>
+          <FooterNote />
           <BottomNav />
         </div>
       </I18nProvider>

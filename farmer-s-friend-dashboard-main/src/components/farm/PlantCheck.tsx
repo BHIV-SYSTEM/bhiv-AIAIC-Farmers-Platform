@@ -166,13 +166,15 @@ export function PlantCheck({
           <div className="rounded-2xl border-2 border-warning bg-warning-soft p-4 text-warning-foreground">
             <div className="flex items-center gap-2">
               <AlertTriangle className="size-5 shrink-0" />
-              <h3 className="text-lg font-bold">Analysis Notice</h3>
+              <h3 className="text-lg font-bold">{t("plant.notice.title")}</h3>
             </div>
             <p className="mt-2 text-base font-semibold">
               {result.detail || "Could not analyze this image."}
             </p>
             {result.requestId ? (
-              <p className="mt-2 font-mono text-xs opacity-70">Request ID: {result.requestId}</p>
+              <p className="mt-2 font-mono text-xs opacity-70">
+                {t("plant.requestId")}: {result.requestId}
+              </p>
             ) : null}
           </div>
         ) : null}
@@ -185,13 +187,10 @@ export function PlantCheck({
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="size-5 shrink-0 text-destructive sm:size-6" />
                   <h3 className="break-words text-base font-extrabold sm:text-lg">
-                    Emergency Agricultural Support
+                    {t("plant.distress.title")}
                   </h3>
                 </div>
-                <p className="mt-1 break-words text-sm font-semibold">
-                  Severe crop stress or loss indication detected. Please reach out to agricultural
-                  helplines immediately.
-                </p>
+                <p className="mt-1 break-words text-sm font-semibold">{t("plant.distress.body")}</p>
                 <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <a
                     href="tel:18001801551"
@@ -223,7 +222,7 @@ export function PlantCheck({
                 {fv.headline ? (
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground sm:text-xs">
-                      Visual Observation
+                      {t("plant.visualObservation")}
                     </span>
                     <h3 className="mt-1 break-words text-xl font-extrabold text-foreground sm:text-2xl">
                       {fv.headline}
@@ -251,12 +250,12 @@ export function PlantCheck({
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {result.species ? (
                       <span className="rounded-lg bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-foreground">
-                        Species: {result.species}
+                        {t("plant.species")}: {result.species}
                       </span>
                     ) : null}
                     {result.stage ? (
                       <span className="rounded-lg bg-secondary px-2.5 py-1 text-xs font-bold text-secondary-foreground">
-                        Stage: {result.stage}
+                        {t("plant.stage")}: {result.stage}
                       </span>
                     ) : null}
                   </div>
@@ -266,7 +265,7 @@ export function PlantCheck({
                 <div className="rounded-xl border border-warning/40 bg-warning-soft p-3 text-xs font-semibold text-warning-foreground sm:text-sm">
                   <p className="flex items-center gap-1.5 font-bold">
                     <Info className="size-4 shrink-0" />
-                    Important Agricultural Limit:
+                    {t("plant.limit.title")}
                   </p>
                   <p className="mt-1 break-words">
                     {fv.not_a_health_check ||
@@ -286,7 +285,9 @@ export function PlantCheck({
                         className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 sm:inline-flex sm:w-auto sm:px-4 sm:text-base"
                       >
                         <PhoneCall className="size-4 shrink-0" />
-                        <span>Call Helpline: {fv.next_step.phone}</span>
+                        <span>
+                          {t("plant.callHelpline")}: {fv.next_step.phone}
+                        </span>
                       </a>
                     ) : null}
                   </div>
@@ -295,14 +296,16 @@ export function PlantCheck({
                 {/* Safe Request ID trace */}
                 {result.requestId ? (
                   <p className="break-all font-mono text-[11px] text-muted-foreground pt-1">
-                    Reference Request ID: {result.requestId}
+                    {t("plant.requestId")}: {result.requestId}
                   </p>
                 ) : null}
               </div>
             ) : (
               /* Fallback if farmer_view is missing but raw observations are present */
               <div className="rounded-2xl border-2 border-border bg-background p-4">
-                <p className="text-sm font-semibold text-muted-foreground">Observations</p>
+                <p className="text-sm font-semibold text-muted-foreground">
+                  {t("plant.observations")}
+                </p>
                 {result.observations.length ? (
                   <dl className="mt-2 space-y-1.5">
                     {result.observations.map((obs) => (
@@ -313,12 +316,10 @@ export function PlantCheck({
                     ))}
                   </dl>
                 ) : (
-                  <p className="text-base text-foreground/75">
-                    Photo processed without specific observations.
-                  </p>
+                  <p className="text-base text-foreground/75">{t("plant.noObservations")}</p>
                 )}
                 <p className="mt-3 rounded-xl bg-warning-soft p-3 text-xs font-semibold text-warning-foreground">
-                  Observations only. Not a definitive plant disease or health diagnosis.
+                  {t("plant.observationNote")}
                 </p>
               </div>
             )}

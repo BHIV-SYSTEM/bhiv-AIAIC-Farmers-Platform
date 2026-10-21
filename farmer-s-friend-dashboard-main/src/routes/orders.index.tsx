@@ -114,7 +114,7 @@ function OrdersPage() {
         <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm font-semibold text-muted-foreground">
           <div className="flex items-center gap-1 mr-1">
             <Filter className="size-3.5 sm:size-4" />
-            <span>Filter:</span>
+            <span>{t("filter.label")}</span>
           </div>
           {["ALL", "PENDING_ACCEPTANCE", "ACCEPTED", "DECLINED"].map((st) => (
             <button
@@ -129,12 +129,8 @@ function OrdersPage() {
               )}
             >
               {st === "ALL"
-                ? `All (${orders.length})`
-                : st === "PENDING_ACCEPTANCE"
-                  ? `Pending (${orders.filter((o: ProduceOrder) => o.status === "PENDING_ACCEPTANCE").length})`
-                  : st === "ACCEPTED"
-                    ? `Accepted (${orders.filter((o: ProduceOrder) => o.status === "ACCEPTED").length})`
-                    : `Declined (${orders.filter((o: ProduceOrder) => o.status === "DECLINED").length})`}
+                ? `${t("filter.all")} (${orders.length})`
+                : `${t(`order.status.${st}`)} (${orders.filter((o: ProduceOrder) => o.status === st).length})`}
             </button>
           ))}
         </div>
@@ -146,7 +142,7 @@ function OrdersPage() {
           className="flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:bg-muted disabled:opacity-50 min-h-8"
         >
           <RefreshCw className={cn("size-3.5", query.isFetching && "animate-spin")} />
-          <span>Refresh</span>
+          <span>{t("result.retry")}</span>
         </button>
       </div>
 
@@ -155,21 +151,19 @@ function OrdersPage() {
         {query.isPending ? (
           <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border-2 border-border bg-card p-8 text-center">
             <Loader2 className="size-10 animate-spin text-primary" />
-            <p className="mt-3 text-lg font-bold text-foreground">
-              Loading orders from backend server...
-            </p>
+            <p className="mt-3 text-lg font-bold text-foreground">{t("order.loading")}</p>
           </div>
         ) : query.isError ? (
           <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border-2 border-destructive bg-danger-soft p-8 text-center text-danger-foreground">
             <AlertCircle className="size-12" />
-            <p className="mt-3 text-xl font-bold">Failed to load orders</p>
+            <p className="mt-3 text-xl font-bold">{t("failure.request_failed.title")}</p>
             <p className="mt-1 text-sm">{query.error?.message}</p>
             <button
               type="button"
               onClick={() => query.refetch()}
               className="mt-4 rounded-xl bg-destructive px-4 py-2 text-sm font-bold text-destructive-foreground hover:opacity-90"
             >
-              Try Again
+              {t("result.retry")}
             </button>
           </div>
         ) : filtered.length === 0 ? (

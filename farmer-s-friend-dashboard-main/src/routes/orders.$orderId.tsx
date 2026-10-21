@@ -217,13 +217,10 @@ function OrderDetailPage() {
           <CheckCircle2 className="mt-0.5 size-7 shrink-0 text-primary" />
           <div>
             <h2 className="text-xl font-bold text-foreground">{t("order.accepted.message")}</h2>
-            <p className="mt-1 text-base text-foreground/85">
-              The order contract is permanently accepted and recorded on the server. Transport
-              allocation and depot inspection are now authorized.
-            </p>
+            <p className="mt-1 text-base text-foreground/85">{t("order.accepted.body")}</p>
             {order.acceptedAt ? (
               <p className="mt-2 font-mono text-xs text-muted-foreground">
-                Accepted Timestamp: {new Date(order.acceptedAt).toLocaleString()}
+                {t("order.acceptedTimestamp")}: {new Date(order.acceptedAt).toLocaleString()}
               </p>
             ) : null}
           </div>
@@ -236,32 +233,32 @@ function OrderDetailPage() {
         <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
           <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
             <Building className="size-5 shrink-0 text-primary" />
-            <span>1. Buyer Identity & Procurement Channel</span>
+            <span>{t("order.section.buyer")}</span>
           </h2>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="rounded-2xl bg-secondary/50 p-3.5 sm:p-4 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
-                Procuring Organization
+                {t("order.procuringOrg")}
               </span>
               <p className="text-base sm:text-lg font-bold text-foreground break-words">
                 {order.buyerName}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 break-words">
-                Type: {order.buyerType.replace("_", " ")} • ID:{" "}
+                {t("order.buyerType")}: {order.buyerType.replace("_", " ")} • ID:{" "}
                 <span className="break-all">{order.buyerId}</span>
               </p>
             </div>
 
             <div className="rounded-2xl bg-secondary/50 p-3.5 sm:p-4 min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">
-                Dispatch Destination
+                {t("order.dispatchDest")}
               </span>
               <p className="text-base sm:text-lg font-bold text-foreground break-words">
                 {order.deliveryDestination}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 break-words">
-                Pickup Gate: {order.pickupLocation}
+                {t("order.pickupGate")}: {order.pickupLocation}
               </p>
             </div>
           </div>
@@ -271,7 +268,7 @@ function OrderDetailPage() {
         <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
           <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
             <Tag className="size-5 shrink-0 text-primary" />
-            <span>2. Produce Specification</span>
+            <span>{t("order.section.produce")}</span>
           </h2>
 
           <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-4">
@@ -289,7 +286,7 @@ function OrderDetailPage() {
                 {t("listing.quantity")}
               </span>
               <p className="text-sm sm:text-base font-bold text-foreground break-words">
-                {order.quantityQuintals} Quintals
+                {order.quantityQuintals} {t("financial.quintals")}
               </p>
             </div>
 
@@ -314,15 +311,17 @@ function OrderDetailPage() {
 
           <div className="text-xs text-muted-foreground flex items-start gap-2">
             <Info className="size-4 shrink-0 text-primary mt-0.5" />
-            <span className="break-words">Contract Terms: {order.terms}</span>
+            <span className="break-words">
+              {t("order.contractTerms")}: {order.terms}
+            </span>
           </div>
         </section>
 
-        {/* 3. Itemized Financial Breakdown */}
+        {/* 3. Itemized Financial Settlement */}
         <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
           <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
             <Banknote className="size-5 shrink-0 text-primary" />
-            <span>3. Itemized Financial Settlement</span>
+            <span>{t("order.section.financial")}</span>
           </h2>
 
           {/* Mobile Stacked Card Breakdown (<sm) */}
@@ -337,7 +336,8 @@ function OrderDetailPage() {
                 </span>
               </div>
               <span className="text-[11px] text-muted-foreground block mt-0.5">
-                Basis: {order.quantityQuintals} Q × ₹{order.offeredPricePerQuintal}/Q
+                {t("financial.basis")}: {order.quantityQuintals} Q × ₹{order.offeredPricePerQuintal}
+                /Q
               </span>
             </div>
 
@@ -351,7 +351,7 @@ function OrderDetailPage() {
                 </span>
               </div>
               <span className="text-[11px] text-muted-foreground block mt-0.5">
-                Basis: Estimated freight (deducted post-dispatch)
+                {t("financial.basis")}: {t("financial.estimatedTransport")}
               </span>
             </div>
 
@@ -365,7 +365,7 @@ function OrderDetailPage() {
                 </span>
               </div>
               <span className="text-[11px] text-muted-foreground block mt-0.5">
-                Basis: Statutory APMC levy
+                {t("financial.basis")}: {t("financial.mandiCess")}
               </span>
             </div>
 
@@ -379,7 +379,7 @@ function OrderDetailPage() {
                 </span>
               </div>
               <span className="text-[11px] font-semibold text-muted-foreground block mt-0.5">
-                Payable directly to Farmer account
+                {t("financial.payableToFarmer")}
               </span>
             </div>
           </div>
@@ -389,9 +389,9 @@ function OrderDetailPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-muted text-xs font-bold text-muted-foreground uppercase">
                 <tr>
-                  <th className="px-4 py-3">Financial Item</th>
-                  <th className="px-4 py-3 text-right">Calculation Basis</th>
-                  <th className="px-4 py-3 text-right">Amount (₹)</th>
+                  <th className="px-4 py-3">{t("financial.item")}</th>
+                  <th className="px-4 py-3 text-right">{t("financial.basis")}</th>
+                  <th className="px-4 py-3 text-right">{t("financial.amount")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -413,10 +413,12 @@ function OrderDetailPage() {
                       {t("financial.estimatedTransport")}
                     </span>
                     <span className="block text-xs text-muted-foreground break-words">
-                      * Deducted only upon vehicle dispatch by transport partner
+                      {t("financial.transportDeductionNote")}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">Estimated freight</td>
+                  <td className="px-4 py-3 text-right text-muted-foreground">
+                    {t("financial.basis")}
+                  </td>
                   <td className="px-4 py-3 text-right font-semibold text-foreground whitespace-nowrap">
                     - ₹{order.estimatedTransportCost.toLocaleString("en-IN")}
                   </td>
@@ -428,10 +430,12 @@ function OrderDetailPage() {
                       {t("financial.mandiCess")}
                     </span>
                     <span className="block text-xs text-muted-foreground break-words">
-                      Statutory market fee / platform charge
+                      {t("financial.mandiCessNote")}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">Official APMC levy</td>
+                  <td className="px-4 py-3 text-right text-muted-foreground">
+                    {t("financial.basis")}
+                  </td>
                   <td className="px-4 py-3 text-right font-semibold text-foreground whitespace-nowrap">
                     - ₹{order.estimatedPlatformFee.toLocaleString("en-IN")}
                   </td>
@@ -442,7 +446,7 @@ function OrderDetailPage() {
                     {t("financial.netPayout")}
                   </td>
                   <td className="px-4 py-4 text-right text-xs font-bold text-muted-foreground">
-                    Payable to Farmer Account
+                    {t("financial.payableToFarmer")}
                   </td>
                   <td className="px-4 py-4 text-right text-2xl font-black text-primary whitespace-nowrap">
                     ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
@@ -453,9 +457,8 @@ function OrderDetailPage() {
           </div>
 
           <div className="rounded-2xl border border-warning/40 bg-warning-soft p-3 text-xs text-warning-foreground leading-relaxed break-words">
-            <span className="font-bold">Honest Cost Disclosure:</span> The transport cost of ₹
-            {order.estimatedTransportCost} is an estimate based on average route distance. Actual
-            deduction is locked only after transport manifest issuance.
+            <span className="font-bold">{t("financial.disclosure.title")}:</span>{" "}
+            {t("financial.disclosure.body")}
           </div>
         </section>
 
@@ -463,14 +466,16 @@ function OrderDetailPage() {
         <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">
           <h2 className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
             <ShieldCheck className="size-5 shrink-0 text-primary" />
-            <span>4. Enterprise Governance & Lifecycle Tracking</span>
+            <span>{t("order.section.governance")}</span>
           </h2>
 
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             {/* Pillar A: Order State */}
             <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-muted-foreground">Contract Acceptance</span>
+                <span className="text-xs font-bold text-muted-foreground">
+                  {t("order.gov.contract")}
+                </span>
                 <span
                   className={cn(
                     "text-xs font-extrabold px-2 py-0.5 rounded",
@@ -483,46 +488,52 @@ function OrderDetailPage() {
                 </span>
               </div>
               <p className="text-xs text-foreground/80 leading-relaxed">
-                Farmer legal commitment to deliver lot at agreed rate. Persisted on server.
+                {t("order.gov.contract.desc")}
               </p>
             </div>
 
             {/* Pillar B: VAJRA Verification */}
             <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-muted-foreground">VAJRA Quality Assay</span>
+                <span className="text-xs font-bold text-muted-foreground">
+                  {t("order.gov.vajra")}
+                </span>
                 <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                   {order.traceability.vajraAttestation}
                 </span>
               </div>
               <p className="text-xs text-foreground/80 leading-relaxed">
-                Physical assay performed upon vehicle arrival. No premature verification claimed.
+                {t("order.gov.vajra.desc")}
               </p>
             </div>
 
             {/* Pillar C: TANTRA Logistics */}
             <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-muted-foreground">TANTRA Logistics</span>
+                <span className="text-xs font-bold text-muted-foreground">
+                  {t("order.gov.tantra")}
+                </span>
                 <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                   {order.traceability.tantraExecution}
                 </span>
               </div>
               <p className="text-xs text-foreground/80 leading-relaxed">
-                Pickup manifest registered for transport partner once order is accepted.
+                {t("order.gov.tantra.desc")}
               </p>
             </div>
 
             {/* Pillar D: Bank Settlement */}
             <div className="rounded-2xl border border-border p-3 sm:p-3.5 space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-muted-foreground">Payment Settlement</span>
+                <span className="text-xs font-bold text-muted-foreground">
+                  {t("order.gov.escrow")}
+                </span>
                 <span className="text-xs font-extrabold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                   {order.traceability.escrowStatus}
                 </span>
               </div>
               <p className="text-xs text-foreground/80 leading-relaxed">
-                Disbursement occurs via bank escrow post-inspection. No fake money movement.
+                {t("order.gov.escrow.desc")}
               </p>
             </div>
           </div>
@@ -532,12 +543,10 @@ function OrderDetailPage() {
         {order.status === "PENDING_ACCEPTANCE" ? (
           <div className="rounded-3xl border-2 border-primary bg-card p-4 sm:p-6 shadow-md space-y-4">
             <h2 className="text-xl sm:text-2xl font-black text-foreground">
-              Confirm or Decline Procurement Contract
+              {t("order.confirmDecline")}
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              By clicking "Accept Order", you confirm that this produce lot is available for pickup
-              at the agreed price of ₹{order.offeredPricePerQuintal}/Q. The acceptance will be
-              transmitted directly to the server.
+              {t("order.confirmTerms")}
             </p>
 
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -550,7 +559,7 @@ function OrderDetailPage() {
                 {acceptMutation.isPending ? (
                   <>
                     <Loader2 className="size-5 sm:size-6 animate-spin" />
-                    <span>Transmitting Acceptance...</span>
+                    <span>{t("order.transmitting")}</span>
                   </>
                 ) : (
                   <>
@@ -578,16 +587,13 @@ function OrderDetailPage() {
       {showDeclineModal ? (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-2 sm:p-4 backdrop-blur-sm">
           <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border-2 border-border bg-card p-5 sm:p-6 shadow-2xl">
-            <h3 className="text-xl font-bold text-foreground">Decline Buyer Offer</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Please indicate why you are declining this offer (optional). The order status will be
-              updated to DECLINED.
-            </p>
+            <h3 className="text-xl font-bold text-foreground">{t("order.decline.title")}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">{t("order.decline.lead")}</p>
 
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
-              placeholder="e.g. Price too low, produce committed elsewhere"
+              placeholder={t("order.decline.placeholder")}
               rows={3}
               className="mt-3 w-full rounded-2xl border-2 border-input bg-background p-3 text-base text-foreground outline-none focus:border-ring"
             />
@@ -599,14 +605,16 @@ function OrderDetailPage() {
                 onClick={() => declineMutation.mutate()}
                 className="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-destructive px-4 font-bold text-destructive-foreground hover:opacity-90 disabled:opacity-60"
               >
-                {declineMutation.isPending ? "Declining..." : "Confirm Decline"}
+                {declineMutation.isPending
+                  ? t("order.decline.declining")
+                  : t("order.decline.confirm")}
               </button>
               <button
                 type="button"
                 onClick={() => setShowDeclineModal(false)}
                 className="flex min-h-12 items-center justify-center rounded-xl border border-border px-4 font-bold text-foreground hover:bg-muted"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </div>

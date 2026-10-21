@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
 import { EvidenceCard } from "@/components/farm/EvidenceCard";
 import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
+import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
 import {
   AlertTriangle,
@@ -167,12 +168,11 @@ function AdviceServicePage() {
           <div className="flex items-center gap-2">
             <ShieldAlert className="size-6 shrink-0 text-destructive sm:size-7" />
             <h2 className="break-words text-lg font-extrabold sm:text-xl">
-              Emergency Agricultural Support Alert
+              {t("advice.distress.title")}
             </h2>
           </div>
           <p className="mt-2 break-words text-sm font-bold sm:text-base">
-            {farmerAdviceQuery.data.distress_message ||
-              "Agricultural distress detected. Please reach out to official support helplines."}
+            {farmerAdviceQuery.data.distress_message || t("advice.distress.fallback")}
           </p>
           <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
             <a
@@ -280,275 +280,239 @@ function ItemDetail({
 
   return (
     <div className="space-y-8">
-      {/* Confirmed: All `read_these_first` warnings rendered prominently before recommendation */}
-      {matchedCard?.read_these_first && matchedCard.read_these_first.length > 0 ? (
-        <section aria-label="Urgent notices" className="space-y-3">
-          {matchedCard.read_these_first.map((warning, i) => (
-            <div
-              key={i}
-              className="rounded-3xl border-2 border-warning bg-warning-soft p-5 text-warning-foreground shadow-sm"
-            >
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="size-6 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-extrabold text-xs block uppercase tracking-wider">
-                    Read This First / आधी हे वाचा
-                  </span>
-                  <p className="mt-1 text-base font-bold leading-relaxed">{warning}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </section>
-      ) : null}
-
-      {/* 1. Recommendation */}
-      <section aria-labelledby="rec-heading">
-        <h2
-          id="rec-heading"
-          className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
-        >
-          {abstained ? t("abstain.title") : t("detail.recommendation")}
-        </h2>
-        <div className="mt-2 rounded-3xl border-2 border-primary bg-card p-5">
-          <p className="text-3xl font-extrabold leading-tight text-foreground">
-            {abstained ? matchedCard?.abstain_note || t("abstain.title") : headline}
-          </p>
-          <p className="mt-3 text-lg leading-relaxed text-foreground/80">
-            {matchedCard?.summary?.action?.text ??
-              item.recommendation_detail ??
-              (abstained ? t("abstain.body") : "")}
-          </p>
-          {subject ? <p className="mt-3 text-base text-muted-foreground">{subject}</p> : null}
-        </div>
-
-        {/* Confirmed checked_note */}
-        {matchedCard?.checked_note ? (
-          <p className="mt-3 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-3 text-base font-semibold text-warning-foreground">
-            <AlertTriangle aria-hidden className="mt-0.5 size-5 shrink-0" />
-            <span>{matchedCard.checked_note}</span>
-          </p>
-        ) : item.calibrated === false ? (
-          <p className="mt-3 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-3 text-lg font-semibold text-warning-foreground">
-            <AlertTriangle aria-hidden className="mt-1 size-6 shrink-0" />
-            <span>{t("conf.uncalibrated")}</span>
-          </p>
-        ) : null}
-      </section>
-
-      {/* Confirmed: Historical Price Series with 5-Year Benchmark Range (for market service) */}
-      {service === "market" && priceSeries?.available ? (
-        <section aria-label="Mandi Price History">
-          <PriceSeriesChart series={priceSeries} />
-        </section>
-      ) : null}
-
-      {/* Official Groundwater / Soil Caveat (for water & crop services) */}
-      {service === "water" || service === "crop" ? (
-        <section className="rounded-2xl border-2 border-border bg-muted/60 p-4 text-xs text-foreground/80 leading-relaxed">
-          <p className="flex items-center gap-1.5 font-bold text-foreground">
-            <Info className="size-4 shrink-0 text-primary" />
-            Official Groundwater & Soil Moisture Assessment Caveat
-          </p>
-          <p className="mt-1">
-            Dynamic ground water resource assessments are derived from the latest official CGWB
-            records (observed March 2025). Taluka-level extraction and water stress vary
-            significantly within the district. Please check local panchayat or KVK advisories.
-          </p>
-        </section>
-      ) : null}
-
-      {/* Plain-language one-liner + listen / share */}
-      <section aria-labelledby="summary-heading">
-        <h2
-          id="summary-heading"
-          className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
-        >
-          {t("detail.summary")}
-        </h2>
-        <p className="mt-2 rounded-2xl border-2 border-border bg-card p-4 text-lg leading-relaxed text-foreground">
-          {summaryLine(item, t)}
-        </p>
-        <div className="mt-3">
-          <AdviceActions text={spoken} title={serviceLabel} />
-        </div>
-      </section>
-
-      {/* 2. Why */}
-      <section aria-labelledby="why-heading">
-        <h2
-          id="why-heading"
-          className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
-        >
-          {t("detail.why")}
-        </h2>
-        {simple.length ? (
-          <ol className="mt-2 space-y-3">
-            {simple.map((line, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 rounded-2xl border-2 border-border bg-card p-4"
-              >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-lg font-extrabold text-secondary-foreground">
-                  {i + 1}
-                </span>
-                <p className="text-lg leading-relaxed text-foreground">{line}</p>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="mt-2 text-lg text-foreground/75">{t("limits.none")}</p>
-        )}
-
-        {technical.length ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setShowTechnical((v) => !v)}
-              aria-expanded={showTechnical}
-              className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-secondary px-4 text-base font-bold text-secondary-foreground"
-            >
-              {showTechnical ? t("detail.why.less") : t("detail.why.more")}
-            </button>
-            {showTechnical ? (
-              <ul className="mt-3 space-y-2 rounded-2xl bg-muted p-4">
-                {technical.map((line, i) => (
-                  <li key={i} className="break-words text-base leading-relaxed text-foreground/80">
-                    {line}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </>
-        ) : null}
-      </section>
-
-      {/* 3. Evidence */}
-      <section aria-labelledby="evidence-heading">
-        <h2
-          id="evidence-heading"
-          className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
-        >
-          {t("detail.evidence")}
-        </h2>
-        {sources.length ? (
-          <ul className="mt-2 space-y-3">
-            {sources.map((source, i) => (
-              <EvidenceCard key={source.source_id ?? i} source={source} />
-            ))}
-          </ul>
-        ) : (
-          <div className="mt-2">
-            <StateBlock tone="warning" icon={FileWarning} title={t("evidence.none")} />
-          </div>
-        )}
-        {age !== null && age > 2 ? (
-          <div className="mt-3">
-            <StateBlock
-              tone="warning"
-              icon={Clock}
-              title={t("stale.title")}
-              body={t("stale.body", { days: age })}
-            />
-          </div>
-        ) : null}
-      </section>
-
-      {/* 4. Confidence + limits */}
-      <section aria-labelledby="conf-heading">
-        <h2
-          id="conf-heading"
-          className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
-        >
-          {t("detail.confidence")}
-        </h2>
-        <div className="mt-2 rounded-3xl border-2 border-border bg-card p-5">
-          <ConfidenceMeter level={level} showBody />
-        </div>
-
-        <h3 className="mt-5 text-lg font-bold uppercase tracking-wide text-muted-foreground">
-          {t("detail.limits")}
-        </h3>
-        {limits.length ? (
-          <ul className="mt-2 space-y-2">
-            {limits.map((line, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft p-4 text-lg leading-relaxed text-warning-foreground"
-              >
-                <AlertTriangle aria-hidden className="mt-1 size-5 shrink-0" />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-2 text-lg text-foreground/75">{t("limits.none")}</p>
-        )}
-      </section>
-
-      {/* 5. Next action & Farm-to-Retail CTA */}
-      <section aria-labelledby="next-heading">
-        <h2
-          id="next-heading"
-          className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
-        >
-          {t("detail.next")}
-        </h2>
-        <div className="mt-2 rounded-3xl border-2 border-primary bg-success-soft p-5">
-          <p className="text-lg leading-relaxed text-foreground">{t("detail.next.body")}</p>
-
-          {/* Farm-to-Retail Produce Listing Action */}
-          <Link
-            to="/listing/new"
-            search={{
-              ...(farm.crop ? { crop: farm.crop } : {}),
-              ...(farm.region ? { region: farm.region } : {}),
-              ...(farm.mandi ? { mandi: farm.mandi } : {}),
-              ...(decisionId ? { decisionId } : {}),
-              ...(extractedPrice ? { price: String(extractedPrice) } : {}),
-            }}
-            className="mt-4 flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-primary px-4 text-lg font-extrabold text-primary-foreground shadow-md transition hover:bg-primary/90 sm:min-h-16 sm:text-xl"
+      <SimpleAdviceHero
+        card={matchedCard}
+        service={service}
+        subject={subject}
+        askAHuman={askAHuman}
+      >
+        {/* Full Recommendation Detail */}
+        <section aria-labelledby="rec-heading">
+          <h2
+            id="rec-heading"
+            className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
           >
-            <Tag aria-hidden className="size-5 shrink-0 sm:size-6" />
-            <span className="text-center">{t("listing.action.listProduce")}</span>
-          </Link>
-
-          {/* Confirmed Ask a Human Helplines */}
-          <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <a
-              href={`tel:${askAHuman?.kisan_call_centre?.replace(/[^0-9]/g, "") || "18001801551"}`}
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-border bg-card px-3 text-center text-sm font-bold text-foreground hover:bg-muted sm:min-h-14 sm:text-base"
-            >
-              <Phone aria-hidden className="size-4 shrink-0 sm:size-5" />
-              <span>Kisan Call Centre ({askAHuman?.kisan_call_centre || "1800-180-1551"})</span>
-            </a>
-            {askAHuman?.tele_manas ? (
-              <a
-                href={`tel:${askAHuman.tele_manas.replace(/[^0-9]/g, "")}`}
-                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-border bg-card px-3 text-center text-sm font-bold text-foreground hover:bg-muted sm:min-h-14 sm:text-base"
-              >
-                <PhoneCall aria-hidden className="size-4 shrink-0 sm:size-5" />
-                <span>Tele-MANAS ({askAHuman.tele_manas})</span>
-              </a>
-            ) : null}
+            {abstained ? t("abstain.title") : t("detail.recommendation")}
+          </h2>
+          <div className="mt-2 rounded-3xl border-2 border-primary bg-card p-5">
+            <p className="text-3xl font-extrabold leading-tight text-foreground">
+              {abstained ? matchedCard?.abstain_note || t("abstain.title") : headline}
+            </p>
+            <p className="mt-3 text-lg leading-relaxed text-foreground/80">
+              {matchedCard?.summary?.action?.text ??
+                item.recommendation_detail ??
+                (abstained ? t("abstain.body") : "")}
+            </p>
+            {subject ? <p className="mt-3 text-base text-muted-foreground">{subject}</p> : null}
           </div>
 
-          {decisionId ? (
-            <p className="mt-3 break-all font-mono text-xs text-muted-foreground">
-              Trace Reference: {decisionId}
+          {/* Confirmed checked_note */}
+          {matchedCard?.checked_note ? (
+            <p className="mt-3 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-3 text-base font-semibold text-warning-foreground">
+              <AlertTriangle aria-hidden className="mt-0.5 size-5 shrink-0" />
+              <span>{matchedCard.checked_note}</span>
+            </p>
+          ) : item.calibrated === false ? (
+            <p className="mt-3 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-3 text-lg font-semibold text-warning-foreground">
+              <AlertTriangle aria-hidden className="mt-1 size-6 shrink-0" />
+              <span>{t("conf.uncalibrated")}</span>
             </p>
           ) : null}
-        </div>
-      </section>
+        </section>
 
-      <FeedbackBlock
-        service={service}
-        decisionId={decisionId}
-        region={farm.region}
-        crop={farm.crop}
-        mandi={farm.mandi}
-        recommendation={headline}
-      />
+        {/* Confirmed: Historical Price Series with 5-Year Benchmark Range (for market service) */}
+        {service === "market" && priceSeries?.available ? (
+          <section aria-label={t("chart.title")}>
+            <PriceSeriesChart series={priceSeries} />
+          </section>
+        ) : null}
+
+        {/* Official Groundwater / Soil Caveat (for water & crop services) */}
+        {service === "water" || service === "crop" ? (
+          <section className="rounded-2xl border-2 border-border bg-muted/60 p-4 text-xs text-foreground/80 leading-relaxed">
+            <p className="flex items-center gap-1.5 font-bold text-foreground">
+              <Info className="size-4 shrink-0 text-primary" />
+              {t("advice.groundwaterCaveat.title")}
+            </p>
+            <p className="mt-1">{t("advice.groundwaterCaveat.body")}</p>
+          </section>
+        ) : null}
+
+        {/* Plain-language one-liner + listen / share */}
+        <section aria-labelledby="summary-heading">
+          <h2
+            id="summary-heading"
+            className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            {t("detail.summary")}
+          </h2>
+          <p className="mt-2 rounded-2xl border-2 border-border bg-card p-4 text-lg leading-relaxed text-foreground">
+            {summaryLine(item, t)}
+          </p>
+          <div className="mt-3">
+            <AdviceActions text={spoken} title={serviceLabel} />
+          </div>
+        </section>
+
+        {/* 2. Why */}
+        <section aria-labelledby="why-heading">
+          <h2
+            id="why-heading"
+            className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            {t("detail.why")}
+          </h2>
+          {simple.length ? (
+            <ol className="mt-2 space-y-3">
+              {simple.map((line, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 rounded-2xl border-2 border-border bg-card p-4"
+                >
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-lg font-extrabold text-secondary-foreground">
+                    {i + 1}
+                  </span>
+                  <p className="text-lg leading-relaxed text-foreground">{line}</p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="mt-2 text-lg text-foreground/75">{t("limits.none")}</p>
+          )}
+
+          {technical.length ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowTechnical((v) => !v)}
+                aria-expanded={showTechnical}
+                className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-secondary px-4 text-base font-bold text-secondary-foreground"
+              >
+                {showTechnical ? t("detail.why.less") : t("detail.why.more")}
+              </button>
+              {showTechnical ? (
+                <ul className="mt-3 space-y-2 rounded-2xl bg-muted p-4">
+                  {technical.map((line, i) => (
+                    <li
+                      key={i}
+                      className="break-words text-base leading-relaxed text-foreground/80"
+                    >
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </>
+          ) : null}
+        </section>
+
+        {/* 3. Evidence */}
+        <section aria-labelledby="evidence-heading">
+          <h2
+            id="evidence-heading"
+            className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            {t("detail.evidence")}
+          </h2>
+          {sources.length ? (
+            <ul className="mt-2 space-y-3">
+              {sources.map((source, i) => (
+                <EvidenceCard key={source.source_id ?? i} source={source} />
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-2">
+              <StateBlock tone="warning" icon={FileWarning} title={t("evidence.none")} />
+            </div>
+          )}
+          {age !== null && age > 2 ? (
+            <div className="mt-3">
+              <StateBlock
+                tone="warning"
+                icon={Clock}
+                title={t("stale.title")}
+                body={t("stale.body", { days: age })}
+              />
+            </div>
+          ) : null}
+        </section>
+
+        {/* 4. Confidence + limits */}
+        <section aria-labelledby="conf-heading">
+          <h2
+            id="conf-heading"
+            className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            {t("detail.confidence")}
+          </h2>
+          <div className="mt-2 rounded-3xl border-2 border-border bg-card p-5">
+            <ConfidenceMeter level={level} showBody />
+          </div>
+
+          <h3 className="mt-5 text-lg font-bold uppercase tracking-wide text-muted-foreground">
+            {t("detail.limits")}
+          </h3>
+          {limits.length ? (
+            <ul className="mt-2 space-y-2">
+              {limits.map((line, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft p-4 text-lg leading-relaxed text-warning-foreground"
+                >
+                  <AlertTriangle aria-hidden className="mt-1 size-5 shrink-0" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-lg text-foreground/75">{t("limits.none")}</p>
+          )}
+        </section>
+
+        {/* 5. Next action & Farm-to-Retail CTA */}
+        <section aria-labelledby="next-heading">
+          <h2
+            id="next-heading"
+            className="text-lg font-bold uppercase tracking-wide text-muted-foreground"
+          >
+            {t("detail.next")}
+          </h2>
+          <div className="mt-2 rounded-3xl border-2 border-primary bg-success-soft p-5">
+            <p className="text-lg leading-relaxed text-foreground">{t("detail.next.body")}</p>
+
+            {/* Farm-to-Retail Produce Listing Action */}
+            <Link
+              to="/listing/new"
+              search={{
+                ...(farm.crop ? { crop: farm.crop } : {}),
+                ...(farm.region ? { region: farm.region } : {}),
+                ...(farm.mandi ? { mandi: farm.mandi } : {}),
+                ...(decisionId ? { decisionId } : {}),
+                ...(extractedPrice ? { price: String(extractedPrice) } : {}),
+              }}
+              className="mt-4 flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-primary px-4 text-lg font-extrabold text-primary-foreground shadow-md transition hover:bg-primary/90 sm:min-h-16 sm:text-xl"
+            >
+              <Tag aria-hidden className="size-5 shrink-0 sm:size-6" />
+              <span className="text-center">{t("listing.action.listProduce")}</span>
+            </Link>
+
+            {decisionId ? (
+              <p className="mt-3 break-all font-mono text-xs text-muted-foreground">
+                {t("advice.traceReference")}: {decisionId}
+              </p>
+            ) : null}
+          </div>
+        </section>
+
+        <FeedbackBlock
+          service={service}
+          decisionId={decisionId}
+          region={farm.region}
+          crop={farm.crop}
+          mandi={farm.mandi}
+          recommendation={headline}
+        />
+      </SimpleAdviceHero>
     </div>
   );
 }

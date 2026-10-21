@@ -180,7 +180,7 @@ function AskPage() {
         {/* State Selector: Single column mobile-first */}
         <div>
           <label className="block text-lg font-bold text-foreground sm:text-xl">
-            State / राज्य
+            {t("ask.state")}
           </label>
           <div className="mt-2 grid grid-cols-1 gap-2.5">
             <button
@@ -198,7 +198,7 @@ function AskPage() {
               )}
             >
               <MapPin className="size-5 shrink-0" />
-              <span className="min-w-0 flex-1 text-left truncate">Maharashtra (महाराष्ट्र)</span>
+              <span className="min-w-0 flex-1 text-left truncate">{t("state.maharashtra")}</span>
             </button>
 
             <button
@@ -216,9 +216,7 @@ function AskPage() {
               )}
             >
               <MapPin className="size-5 shrink-0" />
-              <span className="min-w-0 flex-1 text-left truncate">
-                Madhya Pradesh (मध्य प्रदेश)
-              </span>
+              <span className="min-w-0 flex-1 text-left truncate">{t("state.madhyapradesh")}</span>
             </button>
           </div>
         </div>
@@ -226,11 +224,7 @@ function AskPage() {
         {/* District Selector */}
         <BigSelect
           label={t("ask.district")}
-          help={
-            state === "mh"
-              ? "36 Maharashtra districts (dynamic official catalog)"
-              : "55 Madhya Pradesh districts (dynamic official catalog)"
-          }
+          help={state === "mh" ? t("ask.district.help.mh") : t("ask.district.help.mp")}
           anyLabel={t("ask.district.any")}
           options={availableDistricts}
           display={formatDistrict}
@@ -283,13 +277,9 @@ function AskPage() {
         <div className="rounded-2xl border-2 border-border bg-muted/50 p-3.5 text-xs leading-relaxed text-foreground/80 sm:p-4">
           <p className="flex items-center gap-1.5 font-bold text-foreground">
             <Info className="size-4 shrink-0 text-primary" />
-            Official Water & Soil Data Caveat
+            {t("ask.waterSoilCaveat.title")}
           </p>
-          <p className="mt-1 break-words">
-            Dynamic groundwater and soil moisture assessments reflect the latest official Central
-            Ground Water Board records (March 2025 assessment). Taluka-level conditions may vary
-            from the broader district average.
-          </p>
+          <p className="mt-1 break-words">{t("ask.waterSoilCaveat.body")}</p>
         </div>
 
         {/* Services Selection */}
