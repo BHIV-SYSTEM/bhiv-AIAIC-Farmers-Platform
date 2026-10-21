@@ -11,9 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AskRouteImport } from './routes/ask'
+import { Route as ListingsRouteImport } from './routes/listings'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as AdviceServiceRouteImport } from './routes/advice.$service'
+import { Route as ListingNewRouteImport } from './routes/listing.new'
+import { Route as OrdersIndexRouteImport } from './routes/orders.index'
+import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AskRoute = AskRouteImport.update({
   id: '/ask',
   path: '/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListingsRoute = ListingsRouteImport.update({
+  id: '/listings',
+  path: '/listings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultRoute = ResultRouteImport.update({
@@ -40,43 +49,102 @@ const AdviceServiceRoute = AdviceServiceRouteImport.update({
   path: '/advice/$service',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListingNewRoute = ListingNewRouteImport.update({
+  id: '/listing/new',
+  path: '/listing/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersIndexRoute = OrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ask': typeof AskRoute
+  '/listings': typeof ListingsRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/listing/new': typeof ListingNewRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/orders/': typeof OrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ask': typeof AskRoute
+  '/listings': typeof ListingsRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/listing/new': typeof ListingNewRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/orders': typeof OrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ask': typeof AskRoute
+  '/listings': typeof ListingsRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/listing/new': typeof ListingNewRoute
+  '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/orders/': typeof OrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ask' | '/result' | '/review' | '/advice/$service'
+  fullPaths:
+    | '/'
+    | '/ask'
+    | '/listings'
+    | '/result'
+    | '/review'
+    | '/advice/$service'
+    | '/listing/new'
+    | '/orders/$orderId'
+    | '/orders/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ask' | '/result' | '/review' | '/advice/$service'
-  id: '__root__' | '/' | '/ask' | '/result' | '/review' | '/advice/$service'
+  to:
+    | '/'
+    | '/ask'
+    | '/listings'
+    | '/result'
+    | '/review'
+    | '/advice/$service'
+    | '/listing/new'
+    | '/orders/$orderId'
+    | '/orders'
+  id:
+    | '__root__'
+    | '/'
+    | '/ask'
+    | '/listings'
+    | '/result'
+    | '/review'
+    | '/advice/$service'
+    | '/listing/new'
+    | '/orders/$orderId'
+    | '/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AskRoute: typeof AskRoute
+  ListingsRoute: typeof ListingsRoute
   ResultRoute: typeof ResultRoute
   ReviewRoute: typeof ReviewRoute
   AdviceServiceRoute: typeof AdviceServiceRoute
+  ListingNewRoute: typeof ListingNewRoute
+  OrdersOrderIdRoute: typeof OrdersOrderIdRoute
+  OrdersIndexRoute: typeof OrdersIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -93,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/ask'
       fullPath: '/ask'
       preLoaderRoute: typeof AskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listings': {
+      id: '/listings'
+      path: '/listings'
+      fullPath: '/listings'
+      preLoaderRoute: typeof ListingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/result': {
@@ -116,15 +191,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdviceServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/listing/new': {
+      id: '/listing/new'
+      path: '/listing/new'
+      fullPath: '/listing/new'
+      preLoaderRoute: typeof ListingNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders/': {
+      id: '/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof OrdersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders/$orderId': {
+      id: '/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof OrdersOrderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AskRoute: AskRoute,
+  ListingsRoute: ListingsRoute,
   ResultRoute: ResultRoute,
   ReviewRoute: ReviewRoute,
   AdviceServiceRoute: AdviceServiceRoute,
+  ListingNewRoute: ListingNewRoute,
+  OrdersOrderIdRoute: OrdersOrderIdRoute,
+  OrdersIndexRoute: OrdersIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,8 +5,20 @@ import { z } from "zod";
 
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
 import { EvidenceCard } from "@/components/farm/EvidenceCard";
+import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
-import { AlertTriangle, ArrowLeft, Clock, FileWarning, Phone, SearchX } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Clock,
+  FileWarning,
+  Info,
+  Phone,
+  PhoneCall,
+  SearchX,
+  ShieldAlert,
+  Tag,
+} from "lucide-react";
 
 import { AdviceActions } from "@/components/farm/AdviceActions";
 import { FeedbackBlock } from "@/components/farm/FeedbackBlock";
@@ -16,6 +28,12 @@ import { SERVICE_ICON } from "@/lib/service-icons";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
 import { catalogOptions, catalogQueryOptions, subjectSupport } from "@/lib/catalog-query";
 import {
+  getFarmerAdvice,
+  type FarmerAdviceCard,
+  type AskAHuman,
+} from "@/lib/farmer-advice.functions";
+import { getPriceSeries } from "@/lib/places.functions";
+import {
   confidenceLevel,
   daysOld,
   isAbstention,
@@ -24,7 +42,7 @@ import {
   type IntelligenceItem,
   type Service,
 } from "@/lib/aiaic-types";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, type Lang } from "@/lib/i18n";
 
 const detailSearchSchema = farmSearchSchema.extend({ i: z.number().int().min(0).optional() });
 
@@ -43,24 +61,60 @@ export const Route = createFileRoute("/advice/$service")({
       {
         name: "description",
         content:
-          "Full details of one AIAIC suggestion: what to do, why, the exact data sources, how sure the system is, what it does not know, and your next step.",
+          "Reasoning, data sources, sureness and known limits for this agricultural guidance.",
       },
       { property: "og:title", content: "Advice Details — AIAIC Kisan" },
       {
         property: "og:description",
-        content: "Suggestion, reason, evidence, confidence and limitations — all in plain words.",
+        content: "Every recommendation shows its evidence, confidence and limits in plain words.",
       },
     ],
   }),
-  component: AdviceDetail,
+  component: AdviceServicePage,
 });
 
-function AdviceDetail() {
-  const { t } = useI18n();
+function AdviceServicePage() {
   const { service } = Route.useParams();
   const search = Route.useSearch();
-  const query = useQuery(intelligenceQueryOptions(search));
+  const { t, lang } = useI18n();
   const services = parseServices(search.services);
+  const activeLang = (["en", "mr", "hi"].includes(lang) ? lang : "en") as Lang;
+
+  // 1. Confirmed Farmer-Facing Advice Query (/farmer/advice)
+  const farmerAdviceQuery = useQuery({
+    queryKey: ["farmer-advice", search.crop, search.region, search.state, activeLang],
+    queryFn: () =>
+      getFarmerAdvice({
+        data: {
+          crop: search.crop || "onion",
+          region: search.region || "Nashik",
+          state: search.state || "mh",
+          lang: activeLang,
+        },
+      }),
+    enabled: Boolean(search.crop && search.region),
+    staleTime: 60_000,
+  });
+
+  // 2. Confirmed Price Series Query (/places/price-series) for market service
+  const priceSeriesQuery = useQuery({
+    queryKey: ["price-series", search.crop, search.region, search.state, activeLang],
+    queryFn: () =>
+      getPriceSeries({
+        data: {
+          crop: search.crop!,
+          district: search.region!,
+          state: search.state || "mh",
+          days: 30,
+          lang: activeLang,
+        },
+      }),
+    enabled: Boolean(service === "market" && search.crop && search.region),
+    staleTime: 5 * 60_000,
+  });
+
+  // 3. Technical Service Query (/intelligence/{service})
+  const query = useQuery(intelligenceQueryOptions(search));
 
   const catalogQuery = useQuery(catalogQueryOptions());
   const options = catalogOptions(catalogQuery.data);
@@ -79,11 +133,13 @@ function AdviceDetail() {
     ...(search.crop ? { crop: search.crop } : {}),
     ...(search.mandi ? { mandi: search.mandi } : {}),
     ...(search.land ? { land: search.land } : {}),
+    ...(search.state ? { state: search.state } : {}),
     services: services.join(","),
   };
 
   const result = query.data?.results.find((r) => r.service === service);
   const item = result?.ok ? result.items[search.i ?? 0] : undefined;
+  const matchedCard = farmerAdviceQuery.data?.cards?.find((c) => c.service === service);
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-6">
@@ -101,6 +157,35 @@ function AdviceDetail() {
         {t(`service.${service}`)}
       </h1>
 
+      {/* Distress Alert if flagged by backend */}
+      {farmerAdviceQuery.data?.distress ? (
+        <div className="mt-4 rounded-3xl border-2 border-destructive bg-danger-soft p-5 text-danger-foreground shadow-md">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="size-7 text-destructive" />
+            <h2 className="text-xl font-extrabold">Emergency Agricultural Support Alert</h2>
+          </div>
+          <p className="mt-2 text-base font-bold">
+            {farmerAdviceQuery.data.distress_message ||
+              "Agricultural distress detected. Please reach out to official support helplines."}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a
+              href="tel:18001801551"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-destructive px-4 font-bold text-destructive-foreground shadow hover:opacity-90"
+            >
+              <PhoneCall className="size-4" />
+              Kisan Call Centre (1800-180-1551)
+            </a>
+            <a
+              href="tel:14416"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-destructive px-4 font-bold text-destructive hover:bg-destructive/10"
+            >
+              Tele-MANAS (14416)
+            </a>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mt-6">
         {query.isPending ? (
           <LoadingBlock label={t("result.loading")} />
@@ -117,7 +202,14 @@ function AdviceDetail() {
             body={serviceSupport.anyUnknown ? t("state.unknown.subject") : t("result.empty.body")}
           />
         ) : (
-          <ItemDetail item={item} service={service} farm={search} />
+          <ItemDetail
+            item={item}
+            service={service}
+            farm={search}
+            matchedCard={matchedCard}
+            priceSeries={priceSeriesQuery.data}
+            askAHuman={farmerAdviceQuery.data?.ask_a_human}
+          />
         )}
       </div>
     </div>
@@ -128,30 +220,82 @@ function ItemDetail({
   item,
   service,
   farm,
+  matchedCard,
+  priceSeries,
+  askAHuman,
 }: {
   item: IntelligenceItem;
   service: Service;
-  farm: { region?: string | undefined; crop?: string | undefined; mandi?: string | undefined };
+  farm: {
+    region?: string | undefined;
+    crop?: string | undefined;
+    mandi?: string | undefined;
+    state?: string | undefined;
+  };
+  matchedCard?: FarmerAdviceCard | undefined;
+  priceSeries?: any;
+  askAHuman?: AskAHuman | undefined;
 }) {
   const { t, lang } = useI18n();
   const [showTechnical, setShowTechnical] = useState(false);
 
-  const abstained = isAbstention(item);
+  const abstained = isAbstention(item) || matchedCard?.abstained === true;
   const level = confidenceLevel(item);
-  const lines = item.explainability ?? [];
+
+  // Combine explainability lines from technical engine and confirmed /farmer/advice card
+  const cardWhy = matchedCard?.why || [];
+  const lines = cardWhy.length ? cardWhy : (item.explainability ?? []);
   const simple = lines.filter((line) => !isTechnicalLine(line));
-  const technical = lines.filter((line) => isTechnicalLine(line));
+  const technical = (item.explainability ?? []).filter((line) => isTechnicalLine(line));
   const sources = item.sources_used ?? [];
-  const limits = item.known_unknowns ?? [];
-  const observed = observedAt(item);
+  const limits = matchedCard?.read_these_first?.length
+    ? [...matchedCard.read_these_first, ...(item.known_unknowns ?? [])]
+    : (item.known_unknowns ?? []);
+  const observed = matchedCard?.as_of || observedAt(item);
   const age = observed ? daysOld(observed) : null;
-  const subject = [item.subject?.crop, item.subject?.region].filter(Boolean).join(" • ");
+  const subject = [item.subject?.crop || farm.crop, item.subject?.region || farm.region]
+    .filter(Boolean)
+    .join(" • ");
   const serviceLabel = t(`service.${service}`);
+  const headline = matchedCard?.answer_headline || recommendationLabel(item.recommendation, lang);
   const spoken = adviceText(item, serviceLabel, t, lang);
-  const decisionId = item.decision_id ?? item.supporting_evidence?.decision_id;
+  const decisionId =
+    matchedCard?.reference || item.decision_id || item.supporting_evidence?.decision_id;
+
+  const priceMatch =
+    (item.explainability?.join(" ") || "").match(
+      /(?:modal|mandi|price|rs\.?|₹)\s*:?\s*(?:rs\.?|₹)?\s*(\d{3,5})/i,
+    ) ||
+    (matchedCard?.why?.join(" ") || "").match(
+      /(?:modal|mandi|price|rs\.?|₹)\s*:?\s*(?:rs\.?|₹)?\s*(\d{3,5})/i,
+    ) ||
+    (item.recommendation || "").match(/(?:rs\.?|₹)\s*(\d{3,5})/i);
+  const extractedPrice = priceMatch ? priceMatch[1] : undefined;
 
   return (
     <div className="space-y-8">
+      {/* Confirmed: All `read_these_first` warnings rendered prominently before recommendation */}
+      {matchedCard?.read_these_first && matchedCard.read_these_first.length > 0 ? (
+        <section aria-label="Urgent notices" className="space-y-3">
+          {matchedCard.read_these_first.map((warning, i) => (
+            <div
+              key={i}
+              className="rounded-3xl border-2 border-warning bg-warning-soft p-5 text-warning-foreground shadow-sm"
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="size-6 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-extrabold text-xs block uppercase tracking-wider">
+                    Read This First / आधी हे वाचा
+                  </span>
+                  <p className="mt-1 text-base font-bold leading-relaxed">{warning}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : null}
+
       {/* 1. Recommendation */}
       <section aria-labelledby="rec-heading">
         <h2
@@ -162,20 +306,51 @@ function ItemDetail({
         </h2>
         <div className="mt-2 rounded-3xl border-2 border-primary bg-card p-5">
           <p className="text-3xl font-extrabold leading-tight text-foreground">
-            {abstained ? t("abstain.title") : recommendationLabel(item.recommendation, lang)}
+            {abstained ? matchedCard?.abstain_note || t("abstain.title") : headline}
           </p>
           <p className="mt-3 text-lg leading-relaxed text-foreground/80">
-            {item.recommendation_detail ?? (abstained ? t("abstain.body") : "")}
+            {matchedCard?.summary?.action?.text ??
+              item.recommendation_detail ??
+              (abstained ? t("abstain.body") : "")}
           </p>
           {subject ? <p className="mt-3 text-base text-muted-foreground">{subject}</p> : null}
         </div>
-        {item.calibrated === false ? (
+
+        {/* Confirmed checked_note */}
+        {matchedCard?.checked_note ? (
+          <p className="mt-3 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-3 text-base font-semibold text-warning-foreground">
+            <AlertTriangle aria-hidden className="mt-0.5 size-5 shrink-0" />
+            <span>{matchedCard.checked_note}</span>
+          </p>
+        ) : item.calibrated === false ? (
           <p className="mt-3 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-3 text-lg font-semibold text-warning-foreground">
             <AlertTriangle aria-hidden className="mt-1 size-6 shrink-0" />
             <span>{t("conf.uncalibrated")}</span>
           </p>
         ) : null}
       </section>
+
+      {/* Confirmed: Historical Price Series with 5-Year Benchmark Range (for market service) */}
+      {service === "market" && priceSeries?.available ? (
+        <section aria-label="Mandi Price History">
+          <PriceSeriesChart series={priceSeries} />
+        </section>
+      ) : null}
+
+      {/* Official Groundwater / Soil Caveat (for water & crop services) */}
+      {service === "water" || service === "crop" ? (
+        <section className="rounded-2xl border-2 border-border bg-muted/60 p-4 text-xs text-foreground/80 leading-relaxed">
+          <p className="flex items-center gap-1.5 font-bold text-foreground">
+            <Info className="size-4 shrink-0 text-primary" />
+            Official Groundwater & Soil Moisture Assessment Caveat
+          </p>
+          <p className="mt-1">
+            Dynamic ground water resource assessments are derived from the latest official CGWB
+            records (observed March 2025). Taluka-level extraction and water stress vary
+            significantly within the district. Please check local panchayat or KVK advisories.
+          </p>
+        </section>
+      ) : null}
 
       {/* Plain-language one-liner + listen / share */}
       <section aria-labelledby="summary-heading">
@@ -305,7 +480,7 @@ function ItemDetail({
         )}
       </section>
 
-      {/* 5. Next action */}
+      {/* 5. Next action & Farm-to-Retail CTA */}
       <section aria-labelledby="next-heading">
         <h2
           id="next-heading"
@@ -315,16 +490,46 @@ function ItemDetail({
         </h2>
         <div className="mt-2 rounded-3xl border-2 border-primary bg-success-soft p-5">
           <p className="text-lg leading-relaxed text-foreground">{t("detail.next.body")}</p>
-          <a
-            href="tel:18001801551"
-            className="mt-4 flex min-h-16 w-full items-center justify-center rounded-2xl bg-primary px-4 text-xl font-extrabold text-primary-foreground"
+
+          {/* Farm-to-Retail Produce Listing Action */}
+          <Link
+            to="/listing/new"
+            search={{
+              ...(farm.crop ? { crop: farm.crop } : {}),
+              ...(farm.region ? { region: farm.region } : {}),
+              ...(farm.mandi ? { mandi: farm.mandi } : {}),
+              ...(decisionId ? { decisionId } : {}),
+              ...(extractedPrice ? { price: String(extractedPrice) } : {}),
+            }}
+            className="mt-4 flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl bg-primary px-4 text-xl font-extrabold text-primary-foreground shadow-md transition hover:bg-primary/90"
           >
-            <Phone aria-hidden className="mr-2 size-6" />
-            {t("detail.next.call")}
-          </a>
-          {(item.decision_id ?? item.supporting_evidence?.decision_id) ? (
-            <p className="mt-3 break-all text-base text-muted-foreground">
-              {t("detail.decision")}: {item.decision_id ?? item.supporting_evidence?.decision_id}
+            <Tag aria-hidden className="size-6" />
+            <span>{t("listing.action.listProduce")}</span>
+          </Link>
+
+          {/* Confirmed Ask a Human Helplines */}
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <a
+              href={`tel:${askAHuman?.kisan_call_centre?.replace(/[^0-9]/g, "") || "18001801551"}`}
+              className="flex min-h-14 items-center justify-center rounded-2xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted"
+            >
+              <Phone aria-hidden className="mr-2 size-5" />
+              Kisan Call Centre ({askAHuman?.kisan_call_centre || "1800-180-1551"})
+            </a>
+            {askAHuman?.tele_manas ? (
+              <a
+                href={`tel:${askAHuman.tele_manas.replace(/[^0-9]/g, "")}`}
+                className="flex min-h-14 items-center justify-center rounded-2xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted"
+              >
+                <PhoneCall aria-hidden className="mr-2 size-5" />
+                Tele-MANAS ({askAHuman.tele_manas})
+              </a>
+            ) : null}
+          </div>
+
+          {decisionId ? (
+            <p className="mt-3 break-all text-xs font-mono text-muted-foreground">
+              Trace Reference: {decisionId}
             </p>
           ) : null}
         </div>
@@ -336,7 +541,7 @@ function ItemDetail({
         region={farm.region}
         crop={farm.crop}
         mandi={farm.mandi}
-        recommendation={item.recommendation}
+        recommendation={headline}
       />
     </div>
   );

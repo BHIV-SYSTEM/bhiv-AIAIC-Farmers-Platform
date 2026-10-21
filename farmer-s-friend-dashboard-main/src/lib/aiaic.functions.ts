@@ -28,7 +28,7 @@ const inputSchema = z.object({
  * a failure/empty state, never as advice.
  */
 export const getIntelligence = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => inputSchema.parse(data))
+  .validator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<{ baseUrlConfigured: boolean; results: ServiceResult[] }> => {
     const { resolveBaseUrl } = await import("./aiaic-base.server");
     const { baseUrl, configured } = resolveBaseUrl();

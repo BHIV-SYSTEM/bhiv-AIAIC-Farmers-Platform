@@ -14,6 +14,7 @@ export type SavedFarm = {
   mandi?: string;
   land?: string;
   services?: string;
+  state?: string;
 };
 
 function canUseStorage(): boolean {

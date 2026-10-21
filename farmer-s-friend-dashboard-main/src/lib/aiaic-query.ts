@@ -10,6 +10,7 @@ export const farmSearchSchema = z.object({
   mandi: z.string().optional(),
   land: z.string().optional(),
   services: z.string().optional(),
+  state: z.string().optional(),
 });
 
 export type FarmSearch = z.infer<typeof farmSearchSchema>;
