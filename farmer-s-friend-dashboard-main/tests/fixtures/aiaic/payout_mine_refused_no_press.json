@@ -1,0 +1,28 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "POST /farmer/trade/payout-account",
+    "at": "2026-10-23T20:00:50+00:00",
+    "status": 422,
+    "replay": null,
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": {
+        "notice_version": "pn-0b66a47d1399",
+        "shown_in": "hi",
+        "destination": "upi_id",
+        "pan_sent": true,
+        "name_on_pan_sent": true,
+        "upi_id_sent": true
+      }
+    },
+    "note": "A real answer of the real route on a *_test database: rehearsal records (a practice account's own sale in the app, tenant rec-farmer, or an operator's rehearsal farmer, tenant rec-nashik), her share in the buyer's link through Razorpay Route with Razorpay STOOD IN FOR on this machine (TEST keys; no request reached Razorpay; no money; the fee rule, the cooling time and the hold cap set for this recording only). A request that carried her payout details is kept WITHOUT them. Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "detail": {
+      "reason_code": "payout_consent_required",
+      "message": "Her consent to the payout notice is needed first: nothing was sent to Razorpay."
+    }
+  }
+}

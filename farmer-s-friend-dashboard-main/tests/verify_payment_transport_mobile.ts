@@ -53,7 +53,9 @@ class CdpClient {
               cb(data.result);
             }
           }
-        } catch {}
+        } catch {
+          /* a message that is not JSON is not ours: skip it */
+        }
       };
     });
   }
@@ -83,7 +85,7 @@ async function startChrome(): Promise<any> {
       "--user-data-dir=C:\\Users\\Rahil Mulani\\.gemini\\temp-chrome-profile-mobile",
       "about:blank",
     ],
-    { stdio: "ignore" }
+    { stdio: "ignore" },
   );
   await new Promise((r) => setTimeout(r, 2000));
   return chromeProc;
@@ -165,7 +167,7 @@ async function runMobileAudit() {
           if (passed) passedScenarios++;
 
           console.log(
-            `${passed ? "✓ PASS" : "✗ FAIL"} | [${lang}] ${route.path.padEnd(30)} @ ${vp.width}px | Client=${clientWidth}px, Scroll=${scrollWidth}px`
+            `${passed ? "✓ PASS" : "✗ FAIL"} | [${lang}] ${route.path.padEnd(30)} @ ${vp.width}px | Client=${clientWidth}px, Scroll=${scrollWidth}px`,
           );
         }
       }

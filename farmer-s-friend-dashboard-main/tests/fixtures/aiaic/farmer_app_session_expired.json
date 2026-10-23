@@ -1,0 +1,18 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "GET /farmer/trade",
+    "at": "2026-10-23T20:00:45+00:00",
+    "status": 401,
+    "replay": null,
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": null
+    },
+    "note": "A real answer of the real route on a *_test database: the recorded farmer's own token, past its expiry (made for this one request with the recording's throw-away signing secret; no header is kept), refused. Replayed by the phone test, never edited by hand."
+  },
+  "answer": {
+    "detail": "invalid or expired token (ExpiredSignatureError)"
+  }
+}

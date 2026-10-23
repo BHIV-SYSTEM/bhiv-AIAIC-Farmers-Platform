@@ -1,0 +1,24 @@
+{
+ "_recorded": {
+  "by": "reports/push2_2026-10-23/A_record_transport_fixtures.py (AIAIC repo)",
+  "route": "GET /transport/estimate",
+  "at": "2026-10-23T20:34:48+00:00",
+  "status": 404,
+  "request": {
+   "params": {
+    "mandi": "No Such Mandi Anywhere",
+    "quantity_q": 5,
+    "district": "nashik",
+    "state": "mh",
+    "from_place": "farm"
+   }
+  },
+  "note": "A real answer of AIAIC's own route, run in-process on this machine with no Geoapify key, so the distance is AIAIC's estimate (straight line x 1.3). Replayed by Annapoorna's tests, never edited."
+ },
+ "answer": {
+  "detail": {
+   "reason_code": "mandi_not_held",
+   "message": "No mandi of that name is held. Pick one from the list."
+  }
+ }
+}

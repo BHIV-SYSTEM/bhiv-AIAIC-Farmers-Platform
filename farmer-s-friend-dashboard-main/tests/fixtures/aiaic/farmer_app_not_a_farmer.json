@@ -1,0 +1,21 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "GET /farmer/trade",
+    "at": "2026-10-23T20:00:45+00:00",
+    "status": 403,
+    "replay": null,
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": null
+    },
+    "note": "A real answer of the real route on a *_test database: an operator's account (this recording's own throw-away admin) asking for the farmer's own sale page, refused. Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "detail": {
+      "reason_code": "farmers_only",
+      "message": "This is the farmer's own sale page. Operators use the Farm to retail page (/trade)."
+    }
+  }
+}

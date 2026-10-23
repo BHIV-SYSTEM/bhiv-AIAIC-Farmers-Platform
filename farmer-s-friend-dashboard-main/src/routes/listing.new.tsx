@@ -13,6 +13,8 @@ import {
 import { useState } from "react";
 import { z } from "zod";
 
+import { TradeSwitch } from "@/components/farm/aiaic/AiaicBits";
+import { AiaicSellForm } from "@/components/farm/aiaic/AiaicSellForm";
 import { useI18n } from "@/lib/i18n";
 import { createListing } from "@/lib/transactions.functions";
 import type { ProduceQualityGrade } from "@/lib/transaction-types";
@@ -40,7 +42,23 @@ export const Route = createFileRoute("/listing/new")({
   component: NewListingPage,
 });
 
+/** AIAIC's sale form when this server is set up for AIAIC; else the app's own demo-store form, as before. */
 function NewListingPage() {
+  const search = Route.useSearch();
+  return (
+    <TradeSwitch
+      width="max-w-2xl"
+      aiaic={() => (
+        <div className="mx-auto w-full max-w-2xl px-3.5 pb-20 pt-5 sm:px-4 sm:pb-24 sm:pt-8">
+          <AiaicSellForm initialCrop={search.crop} initialDistrict={search.region} />
+        </div>
+      )}
+      local={() => <LocalNewListingPage />}
+    />
+  );
+}
+
+function LocalNewListingPage() {
   const { t } = useI18n();
   const search = Route.useSearch();
   const navigate = useNavigate();

@@ -1,0 +1,431 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "GET /farmer/trade",
+    "at": "2026-10-23T20:00:46+00:00",
+    "status": 200,
+    "replay": null,
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": null
+    },
+    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer), her own act, so its records are real (synthetic: false) on this test database; the buyer is named as a recording. Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "tenant_id": "rec-farmer",
+    "profile_place": {
+      "state": null,
+      "district": null
+    },
+    "practice": false,
+    "practice_note": null,
+    "party": {
+      "party_id": "frm_29fc30009f6b324d74e6",
+      "kind": "farmer",
+      "buyer_type": null,
+      "tenant_id": "rec-farmer",
+      "display_name": null,
+      "district": "Nashik",
+      "state": "maharashtra",
+      "consent_given": true,
+      "consent_basis": "given by the farmer herself in the AIAIC app, signed in, when she listed her produce",
+      "consent_withdrawn_at": null,
+      "interests": {},
+      "synthetic": false,
+      "trace_id": "e3e5a140219b49a283d2b0bc9ad5d875",
+      "created_at": "2026-10-23T20:00:45.972223+00:00",
+      "from_the_app": true
+    },
+    "listings": [
+      {
+        "listing_id": "lst_b68d4f292b9edb706538",
+        "lot_id": "lot_5508ec7d55008564b50b",
+        "tenant_id": "rec-farmer",
+        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "crop": "onion",
+        "variety": null,
+        "grade": null,
+        "quantity_q": 10.0,
+        "quantity_left_q": 0.0,
+        "min_lot_q": null,
+        "ask_price_per_q": 3930.0,
+        "terms": null,
+        "available_from": null,
+        "available_to": null,
+        "district": "Nashik",
+        "state": "maharashtra",
+        "status": "sold",
+        "reference_price": {
+          "crop": "onion",
+          "held": true,
+          "note": "Compared on Unhali (other), the variety most mandis reported that day; 1 mandi that reported only another variety or grade is listed apart, not compared.",
+          "mandis": [
+            {
+              "mandi": "APMC Pimpalgaon Baswant",
+              "modal_price_per_q": 4300.0
+            },
+            {
+              "mandi": "APMC Lasalgaon",
+              "modal_price_per_q": 4200.0
+            },
+            {
+              "mandi": "APMC Nasik",
+              "modal_price_per_q": 4100.0
+            },
+            {
+              "mandi": "Lasalgaon(Niphad)",
+              "modal_price_per_q": 4050.0
+            },
+            {
+              "mandi": "APMC Manmad",
+              "modal_price_per_q": 4000.0
+            },
+            {
+              "mandi": "Lasalgaon(Vinchur)",
+              "modal_price_per_q": 4000.0
+            },
+            {
+              "mandi": "APMC Sinner",
+              "modal_price_per_q": 3950.0
+            },
+            {
+              "mandi": "APMC Chandwad",
+              "modal_price_per_q": 3930.0
+            },
+            {
+              "mandi": "APMC Devala",
+              "modal_price_per_q": 3925.0
+            },
+            {
+              "mandi": "APMC Kalvan",
+              "modal_price_per_q": 3851.0
+            },
+            {
+              "mandi": "APMC Satana",
+              "modal_price_per_q": 3800.0
+            },
+            {
+              "mandi": "APMC Yeola",
+              "modal_price_per_q": 3675.0
+            },
+            {
+              "mandi": "APMC Nampur",
+              "modal_price_per_q": 3600.0
+            },
+            {
+              "mandi": "APMC Umrane",
+              "modal_price_per_q": 3600.0
+            },
+            {
+              "mandi": "Pimpalgaon Baswant(Saykheda)",
+              "modal_price_per_q": 3550.0
+            }
+          ],
+          "source": "Agmarknet daily mandi prices (data.gov.in, Government Open Data Licence - India), as stored by AIAIC",
+          "age_days": 5,
+          "district": "Nashik",
+          "price_day": "2026-09-24",
+          "what_it_is": "Mandi modal prices reported on that day. Not an offer, not a valuation of this lot.",
+          "labels_read": {},
+          "source_name": "Agmarknet",
+          "lowest_per_q": 3550.0,
+          "highest_per_q": 4300.0,
+          "mandis_reporting": 15,
+          "middle_of_all_per_q": 3930.0
+        },
+        "synthetic": false,
+        "trace_id": "e3e5a140219b49a283d2b0bc9ad5d875",
+        "created_at": "2026-10-23T20:00:45.972223+00:00",
+        "updated_at": "2026-10-23T20:00:46.222239+00:00",
+        "offers": [
+          {
+            "offer_id": "ofr_c5925e399ee14b846e2b",
+            "tenant_id": "rec-farmer",
+            "listing_id": "lst_b68d4f292b9edb706538",
+            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "price_per_q": 3980.0,
+            "quantity_q": 10.0,
+            "delivery_terms": "The buyer collects from the farm within 3 days",
+            "terms_code": "buyer_collects",
+            "valid_until": null,
+            "status": "accepted",
+            "closed_reason": null,
+            "synthetic": false,
+            "trace_id": "ec4dc6d21d944b9d953719017c9a34d4",
+            "created_at": "2026-10-23T20:00:46.173002+00:00",
+            "updated_at": "2026-10-23T20:00:46.222239+00:00",
+            "expired": false,
+            "can_accept": false,
+            "why_not_accept": {
+              "code": "offer_not_open",
+              "why": "The offer is accepted."
+            },
+            "amount_inr": 39800.0,
+            "buyer_type": "wholesaler",
+            "buyer_district": "Pune",
+            "buyer_name": "Recorded buyer (a recording, no real business)",
+            "contact_options": {
+              "with_buyer": {
+                "offered": false,
+                "why_not": {
+                  "code": "path_off_here",
+                  "why": "The contact path is not switched on here for this sale."
+                }
+              },
+              "aiaic_arranges": {
+                "offered": false,
+                "why_not": {
+                  "code": "path_off_here",
+                  "why": "The contact path is not switched on here for this sale."
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "orders": [
+      {
+        "order_id": "ord_8f970da17287a216126d",
+        "transaction_id": "txn_059364b3557eb5b8e396",
+        "tenant_id": "rec-farmer",
+        "offer_id": "ofr_c5925e399ee14b846e2b",
+        "listing_id": "lst_b68d4f292b9edb706538",
+        "lot_id": "lot_5508ec7d55008564b50b",
+        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "crop": "onion",
+        "variety": null,
+        "grade": null,
+        "quantity_q": 10.0,
+        "price_per_q": 3980.0,
+        "amount_inr": 39800.0,
+        "delivery_terms": "The buyer collects from the farm within 3 days",
+        "terms_code": "buyer_collects",
+        "order_state": "in_fulfilment",
+        "cancel_reason_code": null,
+        "payment_state": "not_connected",
+        "vajra_state": "not_connected",
+        "vajra_ref": null,
+        "vajra_simulated": false,
+        "settlement_state": "not_connected",
+        "fee_state": "no_approved_fee_rule",
+        "payment_route": "none",
+        "payout_timing": null,
+        "synthetic": false,
+        "trace_id": "71766886e21945cbb9b2029cc963fece",
+        "created_at": "2026-10-23T20:00:46.222239+00:00",
+        "updated_at": "2026-10-23T20:00:46.250436+00:00",
+        "buyer_name": "Recorded buyer (a recording, no real business)",
+        "buyer_type": "wholesaler",
+        "buyer_district": "Pune",
+        "fulfilment": [
+          {
+            "event_id": "ful_4e649e9a7203f2e84196",
+            "order_id": "ord_8f970da17287a216126d",
+            "stage": "pickup",
+            "status": "done",
+            "reference": null,
+            "detail": {
+              "quantity_q": 10.0,
+              "transporter": "Recorded transporter"
+            },
+            "evidence_kind": "operator_observed",
+            "simulated": false,
+            "trace_id": "db28f1f6e19a40f08721ff49cdc72655",
+            "created_at": "2026-10-23T20:00:46.250436+00:00"
+          }
+        ],
+        "reconciliation": null,
+        "next_steps": [
+          "delivered",
+          "delivery_exception"
+        ],
+        "her_next_step": "delivered",
+        "payment": {
+          "state": "not_connected",
+          "link_made": false,
+          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay her onward from it, and settlement stays not connected for this order.",
+          "refund_owed_inr": null,
+          "refund_note": null
+        },
+        "money": {
+          "route": "none",
+          "settlement_state": "not_connected",
+          "timing": null,
+          "say": null,
+          "reports": [],
+          "can_report": false,
+          "why_not_report": {
+            "code": "direct_payment_not_approved",
+            "why": "People's word of a payment made outside AIAIC is not taken on real orders on this server (AIAIC_DIRECT_PAYMENT_REAL_ORDERS_APPROVED): it needs the owner's written approval."
+          }
+        },
+        "contact": {
+          "state": "off",
+          "choice": null,
+          "rehearsal": false,
+          "options": {
+            "with_buyer": {
+              "offered": false,
+              "why_not": {
+                "code": "path_off_here",
+                "why": "The contact path is not switched on here for this sale."
+              }
+            },
+            "aiaic_arranges": {
+              "offered": false,
+              "why_not": {
+                "code": "path_off_here",
+                "why": "The contact path is not switched on here for this sale."
+              }
+            }
+          },
+          "her_number_hint": null,
+          "call_code": null,
+          "buyer_business_phone": null,
+          "buyer_number_words": null,
+          "given_at": null,
+          "last_call_at": null,
+          "pickup_on": null,
+          "ended_at": null,
+          "ended_why": null,
+          "seen_by_staff": {
+            "count": 0,
+            "last_at": null
+          },
+          "can_choose": false,
+          "why_not_choose": {
+            "code": "contact_path_off",
+            "why": "The contact path is not switched on for real orders on this server (AIAIC_CONTACT_REAL_ORDERS_APPROVED): nobody can be reached through AIAIC about this sale. Nothing was kept."
+          },
+          "can_change_number": false,
+          "can_stop": false,
+          "can_report": false
+        }
+      }
+    ],
+    "payout_account": {
+      "offered": false,
+      "why_not_offered": {
+        "code": "payment_not_configured",
+        "why": "No payment provider is connected on this server: Razorpay's keys (AIAIC_RAZORPAY_KEY_ID, AIAIC_RAZORPAY_KEY_SECRET) are not set. Nothing is collected."
+      },
+      "test_mode": null,
+      "test_values_only": false,
+      "account": null,
+      "say": {
+        "key": "farmer.payout.none",
+        "values": {
+          "hint": null,
+          "time": null,
+          "reason": null
+        }
+      },
+      "can_create": false,
+      "can_withdraw": false
+    },
+    "contact_path": {
+      "offered": false,
+      "why_not": {
+        "code": "contact_path_off",
+        "why": "The contact path is not switched on for real orders on this server (AIAIC_CONTACT_REAL_ORDERS_APPROVED): nobody can be reached through AIAIC about this sale. Nothing was kept."
+      },
+      "aiaic_line": null,
+      "line_days": {
+        "en": "—",
+        "mr": "—",
+        "hi": "—"
+      },
+      "line_hours": {
+        "en": "—",
+        "mr": "—",
+        "hi": "—"
+      },
+      "grievance": {
+        "en": "not named yet",
+        "mr": "अजून ठरलेले नाही",
+        "hi": "अभी तय नहीं"
+      },
+      "emergency": null,
+      "keep_days": 30,
+      "max_days": 90,
+      "line_list_days": 7,
+      "notice": {
+        "version": "ctn-7f486ae0de4b",
+        "with_buyer": {
+          "en": "Calling the buyer yourself. AIAIC keeps no phone number of yours for this. It shows you, on this order, the business number the buyer agreed AIAIC may show to the farmers it buys from. When you call, the buyer sees your number and can keep it: AIAIC cannot take it back, or stop the buyer calling you later. AIAIC asks the buyer to use your number only for this sale; AIAIC cannot make sure of that. If the buyer troubles you, report it on this order. Questions or a complaint: not named yet.",
+          "mr": "खरेदीदाराला स्वतः फोन करणे. यासाठी AIAIC तुमचा कोणताही फोन नंबर ठेवत नाही. ज्या शेतकऱ्यांकडून खरेदीदार खरेदी करतो त्यांना AIAIC ने दाखवावा असे खरेदीदाराने मान्य केलेला त्याचा व्यवसायाचा फोन नंबर AIAIC या ऑर्डरवर तुम्हाला दाखवते. तुम्ही फोन केल्यावर खरेदीदाराला तुमचा नंबर दिसतो, आणि तो नंबर खरेदीदाराकडे राहू शकतो: AIAIC तो परत घेऊ शकत नाही, किंवा खरेदीदाराला नंतर तुम्हाला फोन करण्यापासून थांबवू शकत नाही. तुमचा नंबर फक्त या विक्रीसाठी वापरावा असे AIAIC खरेदीदाराला सांगते; पण AIAIC त्याची खात्री देऊ शकत नाही. खरेदीदाराने त्रास दिल्यास या ऑर्डरवर तक्रार करा. प्रश्न किंवा तक्रार: अजून ठरलेले नाही.",
+          "hi": "ख़ुद खरीदार को फ़ोन करना। इसके लिए AIAIC आपका कोई फ़ोन नंबर नहीं रखता। खरीदार ने माना है कि AIAIC उसका कारोबारी फ़ोन नंबर उन किसानों को दिखा सकता है जिनसे वह खरीदता है; AIAIC वही नंबर इस ऑर्डर पर आपको दिखाता है। आपके फ़ोन करने पर खरीदार को आपका नंबर दिखता है, और वह नंबर खरीदार के पास रह सकता है: AIAIC उसे वापस नहीं ले सकता, न ही खरीदार को आपको बाद में फ़ोन करने से रोक सकता है। AIAIC खरीदार से कहता है कि आपका नंबर सिर्फ़ इसी बिक्री के लिए इस्तेमाल करे; AIAIC इसे पक्का नहीं कर सकता। अगर खरीदार आपको परेशान करे, तो इस ऑर्डर पर शिकायत करें। सवाल या शिकायत: अभी तय नहीं।"
+        },
+        "aiaic_arranges": {
+          "en": "Your mobile number for this sale (order {ref}). What AIAIC keeps: the mobile number you type here, for this one order. Why: only so that AIAIC's staff can call you to arrange the pickup of your produce and the payment for this sale. Never for another sale and never for advertising. AIAIC does not sell it, and does not give it to the buyer or to anyone else. Who sees it: only the AIAIC staff named for these calls. Each time one of them looks at your number, AIAIC records who and when; your order shows how many times. They tell the buyer only the place and the day you agree on the call. How long: until this sale is over and 30 days more, and never more than 90 days after you said yes to the sale; or until you stop sharing it. Then AIAIC deletes it from its records. Outside AIAIC's records: the phone AIAIC calls from keeps a list of its calls, which AIAIC clears at least every 7 days. The telephone companies keep their own records of calls; AIAIC cannot delete those. Where: — To stop: press \"Stop sharing my number\" on this order, or call — (—, —). AIAIC deletes it at once. Questions or a complaint: not named yet.",
+          "mr": "या विक्रीसाठी तुमचा फोन नंबर (ऑर्डर {ref}). AIAIC काय ठेवते: तुम्ही इथे लिहिलेला फोन नंबर, फक्त या एका ऑर्डरसाठी. कशासाठी: फक्त तुमचा माल उचलणे आणि या विक्रीचे पैसे देणे ठरवण्यासाठी AIAIC चे कर्मचारी तुम्हाला फोन करू शकावेत म्हणून. दुसऱ्या कोणत्याही विक्रीसाठी नाही, जाहिरातीसाठी नाही. AIAIC तो विकत नाही, आणि खरेदीदाराला किंवा इतर कोणालाही देत नाही. कोण पाहते: या फोनसाठी नेमलेले AIAIC चे कर्मचारीच. त्यांच्यापैकी कोणीही तुमचा नंबर पाहिला की, कोणी आणि केव्हा पाहिला याची नोंद AIAIC ठेवते; किती वेळा पाहिला ते तुमच्या ऑर्डरवर दिसते. फोनवर तुम्ही ठरवलेली जागा आणि दिवस एवढेच ते खरेदीदाराला सांगतात. किती काळ: ही विक्री संपेपर्यंत आणि त्यानंतर 30 दिवस, आणि तुम्ही विक्रीला हो म्हटल्यापासून 90 दिवसांपेक्षा जास्त कधीही नाही; किंवा तुम्ही नंबर देणे थांबवेपर्यंत. मग AIAIC तो आपल्या नोंदींमधून काढून टाकते. AIAIC च्या नोंदींच्या बाहेर: AIAIC ज्या फोनवरून फोन करते, त्या फोनमध्ये फोनची यादी राहते; ती यादी AIAIC किमान दर 7 दिवसांनी पुसून टाकते. फोन कंपन्या फोनच्या स्वतःच्या नोंदी ठेवतात; त्या AIAIC काढून टाकू शकत नाही. कुठे: — थांबवण्यासाठी: या ऑर्डरवर \"माझा नंबर देणे थांबवा\" दाबा, किंवा — वर फोन करा (—, —). AIAIC तो लगेच काढून टाकते. प्रश्न किंवा तक्रार: अजून ठरलेले नाही.",
+          "hi": "इस बिक्री के लिए आपका फ़ोन नंबर (ऑर्डर {ref})। AIAIC क्या रखता है: यहाँ लिखा आपका फ़ोन नंबर, सिर्फ़ इसी एक ऑर्डर के लिए। किसलिए: सिर्फ़ इसलिए कि AIAIC के कर्मचारी आपको फ़ोन करके आपका माल उठाना और इस बिक्री का भुगतान तय करा सकें। किसी दूसरी बिक्री के लिए नहीं, विज्ञापन के लिए नहीं। AIAIC इसे बेचता नहीं, और खरीदार को या किसी और को नहीं देता। कौन देखता है: इन फ़ोन के लिए तय किए गए AIAIC के कर्मचारी ही। उनमें से कोई भी आपका नंबर देखे, तो AIAIC दर्ज करता है कि किसने और कब देखा; कितनी बार देखा, यह आपके ऑर्डर पर दिखता है। फ़ोन पर आपकी तय की हुई जगह और दिन, बस इतना ही वे खरीदार को बताते हैं। कब तक: यह बिक्री पूरी होने तक और उसके बाद 30 दिन, और बिक्री को आपके हाँ कहने से 90 दिन से ज़्यादा कभी नहीं; या जब तक आप नंबर देना बंद न करें। फिर AIAIC इसे अपने रिकॉर्ड से मिटा देता है। AIAIC के रिकॉर्ड के बाहर: AIAIC जिस फ़ोन से फ़ोन करता है, उसमें फ़ोन की सूची रहती है; उस सूची को AIAIC कम से कम हर 7 दिन में मिटा देता है। फ़ोन कंपनियाँ फ़ोन के अपने रिकॉर्ड रखती हैं; उन्हें AIAIC नहीं मिटा सकता। कहाँ: — बंद करने के लिए: इस ऑर्डर पर \"मेरा नंबर देना बंद करें\" दबाएँ, या — पर फ़ोन करें (—, —)। AIAIC इसे तुरंत मिटा देता है। सवाल या शिकायत: अभी तय नहीं।"
+        },
+        "parts_for_listening": {
+          "en": [
+            "Calling the buyer yourself. AIAIC keeps no phone number of yours for this. It shows you, on this order, the business number the buyer agreed AIAIC may show to the farmers it buys from. When you call, the buyer sees your number and can keep it: AIAIC cannot take it back, or stop the buyer calling you later. AIAIC asks the buyer to use your number only for this sale; AIAIC cannot make sure of that.",
+            "If the buyer troubles you, report it on this order. Questions or a complaint: not named yet.",
+            "Your mobile number for this sale (order {ref}). What AIAIC keeps: the mobile number you type here, for this one order. Why: only so that AIAIC's staff can call you to arrange the pickup of your produce and the payment for this sale. Never for another sale and never for advertising. AIAIC does not sell it, and does not give it to the buyer or to anyone else. Who sees it:",
+            "only the AIAIC staff named for these calls. Each time one of them looks at your number, AIAIC records who and when; your order shows how many times. They tell the buyer only the place and the day you agree on the call. How long: until this sale is over and 30 days more, and never more than 90 days after you said yes to the sale; or until you stop sharing it.",
+            "Then AIAIC deletes it from its records. Outside AIAIC's records: the phone AIAIC calls from keeps a list of its calls, which AIAIC clears at least every 7 days. The telephone companies keep their own records of calls; AIAIC cannot delete those. Where: — To stop: press \"Stop sharing my number\" on this order, or call — (—, —). AIAIC deletes it at once. Questions or a complaint: not named yet."
+          ],
+          "mr": [
+            "खरेदीदाराला स्वतः फोन करणे. यासाठी AIAIC तुमचा कोणताही फोन नंबर ठेवत नाही. ज्या शेतकऱ्यांकडून खरेदीदार खरेदी करतो त्यांना AIAIC ने दाखवावा असे खरेदीदाराने मान्य केलेला त्याचा व्यवसायाचा फोन नंबर AIAIC या ऑर्डरवर तुम्हाला दाखवते. तुम्ही फोन केल्यावर खरेदीदाराला तुमचा नंबर दिसतो, आणि तो नंबर खरेदीदाराकडे राहू शकतो:",
+            "AIAIC तो परत घेऊ शकत नाही, किंवा खरेदीदाराला नंतर तुम्हाला फोन करण्यापासून थांबवू शकत नाही. तुमचा नंबर फक्त या विक्रीसाठी वापरावा असे AIAIC खरेदीदाराला सांगते; पण AIAIC त्याची खात्री देऊ शकत नाही. खरेदीदाराने त्रास दिल्यास या ऑर्डरवर तक्रार करा. प्रश्न किंवा तक्रार: अजून ठरलेले नाही.",
+            "या विक्रीसाठी तुमचा फोन नंबर (ऑर्डर {ref}). AIAIC काय ठेवते: तुम्ही इथे लिहिलेला फोन नंबर, फक्त या एका ऑर्डरसाठी. कशासाठी: फक्त तुमचा माल उचलणे आणि या विक्रीचे पैसे देणे ठरवण्यासाठी AIAIC चे कर्मचारी तुम्हाला फोन करू शकावेत म्हणून. दुसऱ्या कोणत्याही विक्रीसाठी नाही, जाहिरातीसाठी नाही. AIAIC तो विकत नाही, आणि खरेदीदाराला किंवा इतर कोणालाही देत नाही. कोण पाहते:",
+            "या फोनसाठी नेमलेले AIAIC चे कर्मचारीच. त्यांच्यापैकी कोणीही तुमचा नंबर पाहिला की, कोणी आणि केव्हा पाहिला याची नोंद AIAIC ठेवते; किती वेळा पाहिला ते तुमच्या ऑर्डरवर दिसते. फोनवर तुम्ही ठरवलेली जागा आणि दिवस एवढेच ते खरेदीदाराला सांगतात. किती काळ: ही विक्री संपेपर्यंत आणि त्यानंतर 30 दिवस, आणि तुम्ही विक्रीला हो म्हटल्यापासून 90 दिवसांपेक्षा जास्त कधीही नाही; किंवा तुम्ही नंबर देणे थांबवेपर्यंत.",
+            "मग AIAIC तो आपल्या नोंदींमधून काढून टाकते. AIAIC च्या नोंदींच्या बाहेर: AIAIC ज्या फोनवरून फोन करते, त्या फोनमध्ये फोनची यादी राहते; ती यादी AIAIC किमान दर 7 दिवसांनी पुसून टाकते. फोन कंपन्या फोनच्या स्वतःच्या नोंदी ठेवतात; त्या AIAIC काढून टाकू शकत नाही. कुठे: — थांबवण्यासाठी: या ऑर्डरवर \"माझा नंबर देणे थांबवा\" दाबा, किंवा — वर फोन करा (—, —). AIAIC तो लगेच काढून टाकते. प्रश्न किंवा तक्रार:",
+            "अजून ठरलेले नाही."
+          ],
+          "hi": [
+            "ख़ुद खरीदार को फ़ोन करना। इसके लिए AIAIC आपका कोई फ़ोन नंबर नहीं रखता। खरीदार ने माना है कि AIAIC उसका कारोबारी फ़ोन नंबर उन किसानों को दिखा सकता है जिनसे वह खरीदता है; AIAIC वही नंबर इस ऑर्डर पर आपको दिखाता है। आपके फ़ोन करने पर खरीदार को आपका नंबर दिखता है, और वह नंबर खरीदार के पास रह सकता है: AIAIC उसे वापस नहीं ले सकता, न ही खरीदार को आपको बाद में फ़ोन करने से रोक सकता है।",
+            "AIAIC खरीदार से कहता है कि आपका नंबर सिर्फ़ इसी बिक्री के लिए इस्तेमाल करे; AIAIC इसे पक्का नहीं कर सकता। अगर खरीदार आपको परेशान करे, तो इस ऑर्डर पर शिकायत करें। सवाल या शिकायत: अभी तय नहीं।",
+            "इस बिक्री के लिए आपका फ़ोन नंबर (ऑर्डर {ref})। AIAIC क्या रखता है: यहाँ लिखा आपका फ़ोन नंबर, सिर्फ़ इसी एक ऑर्डर के लिए। किसलिए: सिर्फ़ इसलिए कि AIAIC के कर्मचारी आपको फ़ोन करके आपका माल उठाना और इस बिक्री का भुगतान तय करा सकें। किसी दूसरी बिक्री के लिए नहीं, विज्ञापन के लिए नहीं। AIAIC इसे बेचता नहीं, और खरीदार को या किसी और को नहीं देता। कौन देखता है:",
+            "इन फ़ोन के लिए तय किए गए AIAIC के कर्मचारी ही। उनमें से कोई भी आपका नंबर देखे, तो AIAIC दर्ज करता है कि किसने और कब देखा; कितनी बार देखा, यह आपके ऑर्डर पर दिखता है। फ़ोन पर आपकी तय की हुई जगह और दिन, बस इतना ही वे खरीदार को बताते हैं। कब तक: यह बिक्री पूरी होने तक और उसके बाद 30 दिन, और बिक्री को आपके हाँ कहने से 90 दिन से ज़्यादा कभी नहीं; या जब तक आप नंबर देना बंद न करें।",
+            "फिर AIAIC इसे अपने रिकॉर्ड से मिटा देता है। AIAIC के रिकॉर्ड के बाहर: AIAIC जिस फ़ोन से फ़ोन करता है, उसमें फ़ोन की सूची रहती है; उस सूची को AIAIC कम से कम हर 7 दिन में मिटा देता है। फ़ोन कंपनियाँ फ़ोन के अपने रिकॉर्ड रखती हैं; उन्हें AIAIC नहीं मिटा सकता। कहाँ: — बंद करने के लिए: इस ऑर्डर पर \"मेरा नंबर देना बंद करें\" दबाएँ, या — पर फ़ोन करें (—, —)। AIAIC इसे तुरंत मिटा देता है। सवाल या शिकायत:",
+            "अभी तय नहीं।"
+          ]
+        }
+      }
+    },
+    "payout_notice": {
+      "version": "pn-0b66a47d1399",
+      "en": [
+        "Your sale money through AIAIC: your consent",
+        "To send the money from your sales to you, AIAIC gives Razorpay, a payment company, your PAN, your name as on your PAN card, and your bank account number with its IFSC, or your UPI ID.",
+        "AIAIC keeps only Razorpay's reference for your account and the last 2 characters of a bank account number. AIAIC never keeps your PAN, your account number, your IFSC or your UPI ID.",
+        "Razorpay keeps your details under its own terms; agreeing here includes agreeing to them.",
+        "To withdraw: press Stop in your app, or tell a person from AIAIC, in person or in the app. AIAIC then sends no new money to this account; money already sent or held for a sale goes on under that sale's own rule.",
+        "Questions or a complaint: not named yet."
+      ],
+      "mr": [
+        "AIAIC मार्फत तुमच्या विक्रीचे पैसे: तुमची संमती",
+        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, Razorpay या पैसे पाठवणाऱ्या कंपनीला तुमचा PAN, तुमच्या PAN कार्डवरील नाव, आणि तुमचा बँक खाते क्रमांक व त्याचा IFSC, किंवा तुमचा UPI आयडी देते.",
+        "AIAIC फक्त तुमच्या खात्यासाठी Razorpay चा संदर्भ आणि बँक खाते क्रमांकाची शेवटची 2 अक्षरे ठेवते. तुमचा PAN, खाते क्रमांक, IFSC किंवा UPI आयडी AIAIC कधीही ठेवत नाही.",
+        "Razorpay तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
+        "संमती मागे घेण्यासाठी: तुमच्या अॅपमध्ये थांबवा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष किंवा अॅपमधून सांगा. त्यानंतर AIAIC या खात्यात नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवलेले किंवा राखून ठेवलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
+        "प्रश्न किंवा तक्रार: अजून ठरलेले नाही."
+      ],
+      "hi": [
+        "AIAIC के ज़रिए आपकी बिक्री का पैसा: आपकी सहमति",
+        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, Razorpay नाम की भुगतान कंपनी को आपका PAN, आपके PAN कार्ड पर लिखा नाम, और आपका बैंक खाता नंबर व उसका IFSC, या आपकी UPI आईडी देता है।",
+        "AIAIC केवल आपके खाते के लिए Razorpay का संदर्भ और बैंक खाता नंबर के आख़िरी 2 अक्षर रखता है। आपका PAN, खाता नंबर, IFSC या UPI आईडी AIAIC कभी नहीं रखता।",
+        "Razorpay आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों को भी सहमति देना है।",
+        "सहमति वापस लेने के लिए: अपने ऐप में रोकें दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC इस खाते में नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा गया या रोका गया पैसा उस बिक्री के नियम से आगे बढ़ता है।",
+        "प्रश्न या शिकायत: अभी तय नहीं।"
+      ]
+    },
+    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. Settlement and fee are not connected here: AIAIC does not pay the farmer onward. Her mobile number is kept only for an order where she asked an AIAIC person to call her, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
+    "trace": {
+      "request_id": "670132ce80c94ba0a3e809a12ac08df9",
+      "decision_ids": [],
+      "price_day": "not held",
+      "price_from": "not held",
+      "datasets": "not held",
+      "build": "unknown"
+    }
+  }
+}

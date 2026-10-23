@@ -1,0 +1,38 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "POST /farmer/trade/listings",
+    "at": "2026-10-23T20:00:46+00:00",
+    "status": 422,
+    "replay": null,
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": {
+        "crop": "onion",
+        "quantity_q": 10.0,
+        "ask_price_per_q": 394200
+      }
+    },
+    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer), her own act, so its records are real (synthetic: false) on this test database; the buyer is named as a recording. Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "detail": {
+      "reason_code": "price_far_from_market",
+      "message": "Rs 394,200.00 a quintal is far from the onion prices reported in Nashik's mandis on 2026-09-24 (Rs 3,550.00 to Rs 4,300.00, 15 mandis): more than twice the highest. If it is right, send it again with price_confirmed: true.",
+      "range": {
+        "crop": "onion",
+        "district": "Nashik",
+        "price_day": "2026-09-24",
+        "mandis_reporting": 15,
+        "lowest_per_q": 3550.0,
+        "highest_per_q": 4300.0,
+        "asked_below_per_q": 1775.0,
+        "asked_above_per_q": 8600.0,
+        "source": "Agmarknet daily mandi prices (data.gov.in, Government Open Data Licence - India), as stored by AIAIC",
+        "price_per_q": 394200.0,
+        "side": "above"
+      }
+    }
+  }
+}

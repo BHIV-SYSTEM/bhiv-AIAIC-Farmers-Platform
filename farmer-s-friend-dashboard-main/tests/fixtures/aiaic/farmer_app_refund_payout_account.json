@@ -1,0 +1,67 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "POST /farmer/trade/payout-account",
+    "at": "2026-10-23T20:00:47+00:00",
+    "status": 200,
+    "replay": "false",
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": {
+        "notice_version": "pn-0b66a47d1399",
+        "shown_in": "mr",
+        "agreed": true,
+        "destination": "bank_account",
+        "pan_sent": true,
+        "name_on_pan_sent": true,
+        "account_number_sent": true,
+        "ifsc_sent": true
+      }
+    },
+    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer, real records on this test database), her order paid through a payment link with Razorpay STOOD IN FOR on this machine and LIVE-MODE TEST-ONLY KEYS AND THE LIVE APPROVAL SET FOR THIS RECORDING ONLY (her app orders are real, so only live keys make a link for them; no request reached Razorpay; no money). On every real server live payments are not approved. Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "party_id": "frm_29fc30009f6b324d74e6",
+    "account": {
+      "payout_account_id": "pac_063fe004592e39239da7",
+      "provider": "razorpay_route",
+      "status": "created",
+      "refused_code": null,
+      "destination_kind": "bank_account",
+      "destination_hint": "89",
+      "hold_supported": true,
+      "account_status": "created",
+      "activation_status": "requested",
+      "verification_status": "verified",
+      "requirement_codes": [],
+      "name_check": "matched_by_rule",
+      "consent_notice_version": "pn-0b66a47d1399",
+      "consent_given_at": "2026-10-23T20:00:47.495411+00:00",
+      "consent_basis": "in_app_self",
+      "consent_how": null,
+      "consent_read_in": "mr",
+      "consent_withdrawn_at": null,
+      "provider_closure": null,
+      "test_mode": false,
+      "synthetic": false,
+      "created_at": "2026-10-23T20:00:47.495411+00:00",
+      "updated_at": "2026-10-23T20:00:47.505426+00:00",
+      "error_code": null,
+      "why": null,
+      "ready": false,
+      "why_not_ready": {
+        "code": "account_under_review",
+        "why": "Razorpay is still reviewing her payout account: no money is sent to it yet."
+      }
+    },
+    "trace": {
+      "request_id": "fd2412122fb54b168ccbe9b13dda025b",
+      "decision_ids": [],
+      "price_day": "not held",
+      "price_from": "not held",
+      "datasets": "not held",
+      "build": "unknown"
+    }
+  }
+}

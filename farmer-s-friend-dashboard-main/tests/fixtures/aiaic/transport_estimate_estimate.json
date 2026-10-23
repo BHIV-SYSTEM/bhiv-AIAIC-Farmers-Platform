@@ -1,0 +1,230 @@
+{
+ "_recorded": {
+  "by": "reports/push2_2026-10-23/A_record_transport_fixtures.py (AIAIC repo)",
+  "route": "GET /transport/estimate",
+  "at": "2026-10-23T20:34:48+00:00",
+  "status": 200,
+  "request": {
+   "params": {
+    "mandi": "APMC Ahilyanagar",
+    "quantity_q": 5,
+    "district": "nashik",
+    "state": "mh",
+    "mandi_state": "mh",
+    "mandi_district": "ahmednagar",
+    "from_place": "farm"
+   }
+  },
+  "note": "A real answer of AIAIC's own route, run in-process on this machine with no Geoapify key, so the distance is AIAIC's estimate (straight line x 1.3). Replayed by Annapoorna's tests, never edited."
+ },
+ "answer": {
+  "from": {
+   "state": "maharashtra",
+   "district_key": "nashik",
+   "district": "Nashik",
+   "lat": 19.997,
+   "lon": 73.789,
+   "approximate": null,
+   "place_class": "unknown",
+   "area": "unknown",
+   "settlement": "Nashik",
+   "trip_starts_at": "farm",
+   "end_area": "rural"
+  },
+  "to": {
+   "mandi": "APMC Ahilyanagar",
+   "also_named": [
+    "Ahilyanagar APMC",
+    "Ahmednagar",
+    "Ahmednagar APMC"
+   ],
+   "state": "maharashtra",
+   "district_key": "ahmednagar",
+   "place": "Ahilyanagar",
+   "lat": 19.09295,
+   "lon": 74.74935,
+   "located_by": "mandi_town",
+   "point_kind": "town",
+   "place_class": "city",
+   "area": "urban",
+   "geocoder": "nominatim",
+   "geocoded_on": "2026-10-23",
+   "district": "Ahilyanagar"
+  },
+  "quantity_q": 5.0,
+  "route_type": {
+   "key": "rural_urban",
+   "from_area": "rural",
+   "to_area": "urban",
+   "possible": [
+    "rural_urban"
+   ],
+   "factor_low": 1.1,
+   "factor_high": 1.1,
+   "assumption": true,
+   "applied": true,
+   "factors": {
+    "urban_urban": 1.0,
+    "rural_urban": 1.1,
+    "rural_rural": 1.2
+   },
+   "why": "No source read separates rural and urban freight rates. Less-connected roads and the empty return cost more: 'Routes to hill areas or less-connected districts cost more, because the truck may wait days for a load back' (TruckGuru, 2026-10-10)."
+  },
+  "distance": {
+   "km": 184.9,
+   "method": "estimate",
+   "straight_km": 142.2,
+   "factor": 1.3,
+   "why_not_road": "no_routing_key",
+   "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+  },
+  "route": null,
+  "vehicle": {
+   "key": "ace_dost_pickup",
+   "name": "ACE / DOST / PICKUP (1.5 TON)",
+   "names": {
+    "en": "ACE / DOST / PICKUP (1.5 TON)",
+    "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+    "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+   },
+   "capacity_kg": 1500,
+   "capacity_q": 15,
+   "routing_mode": "light_truck",
+   "rate": "market"
+  },
+  "trips": 1,
+  "loads_q": [
+   5.0
+  ],
+  "rate": {
+   "kind": "market",
+   "official": false,
+   "confirmed_current": false,
+   "n_sources": 2,
+   "rs_per_km_low": 27.0,
+   "rs_per_km_high": 32.0,
+   "basis": "the average of the published sources below (long trips); not a quote",
+   "sources": [
+    {
+     "key": "truckguru_2026_10",
+     "name": "TruckGuru blog: Truck Transportation Cost in India",
+     "url": "https://truckguru.co.in/blog/truck-transportation-cost-in-india/",
+     "page_date": "2026-10-10",
+     "read_on": "2026-10-23",
+     "says": "Indicative fares, checked October 2026; per km from an about 500 km trip fare; toll included; for comparison only (TruckGuru does not quote a fixed per-km tariff)",
+     "rows": [
+      {
+       "row": "Tata Ace",
+       "capacity": "up to 1,100 kg",
+       "rs_per_km_low": 26,
+       "rs_per_km_high": 29
+      },
+      {
+       "row": "Bada Dost / Mahindra Pickup",
+       "capacity": "up to 1.5 tonnes",
+       "rs_per_km_low": 26,
+       "rs_per_km_high": 29
+      }
+     ],
+     "rs_per_km_low": 26.0,
+     "rs_per_km_high": 29.0
+    },
+    {
+     "key": "mukund_2026_09",
+     "name": "Mukund Logistics: daily freight rates (Verified Tariff Matrix, Pan-India Hubs)",
+     "url": "https://mukundlogistic.com/daily-freight-rates/",
+     "page_date": "2026-09-09",
+     "read_on": "2026-10-23",
+     "says": "Outstation rate per km; a local trip fare (its distance not stated); toll not in the table; estimates",
+     "rows": [
+      {
+       "row": "Tata Ace / Chota Hathi",
+       "capacity": "1.0 Ton",
+       "rs_per_km_low": 28,
+       "rs_per_km_high": 35
+      }
+     ],
+     "rs_per_km_low": 28.0,
+     "rs_per_km_high": 35.0
+    }
+   ],
+   "distance_band": {
+    "up_to_km": 200,
+    "factor": 1.15,
+    "from": "the mean of Porter's 148-166 km routes (Rs 28.23 a km, x1.21) and the owner's TruckGuru quote at 175 km against TruckGuru's long-trip rate for that class (x1.10)"
+   },
+   "applied_per_km_low": 34.16,
+   "applied_per_km_high": 40.48,
+   "minimum_per_trip": {
+    "low_rs": 850,
+    "high_rs": 1200,
+    "from": [
+     "mukund_2026_09"
+    ]
+   },
+   "minimum_applied": false,
+   "return_in_high": false
+  },
+  "fare_per_trip": {
+   "low_rs": 6315,
+   "high_rs": 7485
+  },
+  "cost": {
+   "low_rs": 6315,
+   "high_rs": 7485
+  },
+  "per_quintal": {
+   "low_rs": 1263,
+   "high_rs": 1497
+  },
+  "notes": [
+   {
+    "code": "from_district_centre",
+    "text": "Measured from your district's centre, not from your farm."
+   },
+   {
+    "code": "to_mandi_town",
+    "text": "Measured to the mandi's town."
+   },
+   {
+    "code": "distance_estimate",
+    "text": "Straight line x 1.3: an estimate."
+   },
+   {
+    "code": "rates_averaged",
+    "text": "Per km: the average of 2 published rate cards (long trips), not a quote.",
+    "values": {
+     "n": 2
+    }
+   },
+   {
+    "code": "short_trip_band",
+    "text": "Trips up to 200 km cost more per km: x1.15.",
+    "values": {
+     "up_to_km": 200,
+     "factor": 1.15
+    }
+   },
+   {
+    "code": "route_type_assumption",
+    "text": "Route type rural_urban: x1.1, an assumption.",
+    "values": {
+     "route": "rural_urban",
+     "factor": 1.1
+    }
+   },
+   {
+    "code": "tolls_mixed",
+    "text": "Tolls are inside some sources' rates, not others'."
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "information_only": true
+ }
+}

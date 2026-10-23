@@ -17,6 +17,8 @@ import {
   Wallet,
 } from "lucide-react";
 
+import { TradeSwitch } from "@/components/farm/aiaic/AiaicBits";
+import { AiaicPayments } from "@/components/farm/aiaic/AiaicPayments";
 import { BankDetailsCard } from "@/components/farm/BankDetailsCard";
 import { useI18n } from "@/lib/i18n";
 import { getOrders } from "@/lib/transactions.functions";
@@ -37,7 +39,12 @@ export const Route = createFileRoute("/payments")({
   component: PaymentsPage,
 });
 
+/** Her money through AIAIC when this server is set up for AIAIC; else the demo store's payments, as before. */
 function PaymentsPage() {
+  return <TradeSwitch aiaic={() => <AiaicPayments />} local={() => <LocalPaymentsPage />} />;
+}
+
+function LocalPaymentsPage() {
   const { t } = useI18n();
   const getOrdersFn = useServerFn(getOrders);
 

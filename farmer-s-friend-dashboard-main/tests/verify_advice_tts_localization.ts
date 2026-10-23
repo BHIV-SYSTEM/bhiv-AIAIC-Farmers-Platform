@@ -42,7 +42,9 @@ class CdpClient {
           } else if (data.method && this.eventListeners.has(data.method)) {
             this.eventListeners.get(data.method)!(data.params);
           }
-        } catch (_e) {}
+        } catch (_e) {
+          /* a message that is not JSON is not ours: skip it */
+        }
       };
     });
   }
@@ -62,7 +64,9 @@ class CdpClient {
   close(): void {
     try {
       this.ws.close();
-    } catch (_e) {}
+    } catch (_e) {
+      /* already closed */
+    }
   }
 }
 
@@ -88,7 +92,9 @@ async function startChrome(): Promise<{ proc: any; tmpDir: string }> {
     try {
       const res = await fetch(`http://127.0.0.1:${PORT}/json/version`);
       if (res.ok) return { proc: chrome, tmpDir };
-    } catch (_e) {}
+    } catch (_e) {
+      /* Chrome is not up yet: try again */
+    }
     attempts++;
   }
   throw new Error("Failed to start headless Chrome.");
@@ -97,9 +103,7 @@ async function startChrome(): Promise<{ proc: any; tmpDir: string }> {
 async function getWsUrl(): Promise<string> {
   const res = await fetch(`http://127.0.0.1:${PORT}/json/list`);
   const pages = (await res.json()) as any[];
-  const page = pages.find(
-    (p) => p.type === "page" && !p.url.startsWith("chrome-extension://"),
-  );
+  const page = pages.find((p) => p.type === "page" && !p.url.startsWith("chrome-extension://"));
   if (page && page.webSocketDebuggerUrl) {
     return page.webSocketDebuggerUrl;
   }
@@ -156,7 +160,9 @@ async function runTargetedVerification() {
   const mrCard = {
     service: "market",
     answer_headline: "पुणे आणि नारायणगाव बाजारात आवक स्थिरावत आहे.",
-    summary: { action: { text: "माल ३ ते ५ दिवस थांबून विकल्यास चांगला दर मिळण्याची शक्यता आहे." } },
+    summary: {
+      action: { text: "माल ३ ते ५ दिवस थांबून विकल्यास चांगला दर मिळण्याची शक्यता आहे." },
+    },
     why: ["सध्याचे बाजारभाव ५ वर्षांच्या सरासरीपेक्षा कमी आहेत."],
     read_these_first: ["मुंबईकडे जाणारी वाहतूक काही ठिकाणी संथ आहे."],
     important: "पिकलेला शेतमाल उन्हात उघडा ठेवू नका.",
@@ -478,7 +484,10 @@ async function runTargetedVerification() {
       `,
       returnByValue: true,
     });
-    console.log("  Marathi player text captured:", JSON.stringify(mrUiEval.result.value.playerText));
+    console.log(
+      "  Marathi player text captured:",
+      JSON.stringify(mrUiEval.result.value.playerText),
+    );
     assert(
       mrUiEval.result.value.hasMarathiText,
       "Marathi written advice is visible and localized",
@@ -492,18 +501,19 @@ async function runTargetedVerification() {
       "Marathi audio control shows localized unavailable notice without falling back to browser TTS",
       mrUiEval.result.value.playerText,
     );
-    assert(
-      !mrUiEval.result.value.speechInvoked,
-      "Browser window.speechSynthesis was NOT invoked",
-    );
+    assert(!mrUiEval.result.value.speechInvoked, "Browser window.speechSynthesis was NOT invoked");
   } finally {
     client.close();
     try {
       chromeProc.kill();
-    } catch (_e) {}
+    } catch (_e) {
+      /* already gone */
+    }
     try {
       fs.rmSync(tmpDir, { recursive: true, force: true });
-    } catch (_e) {}
+    } catch (_e) {
+      /* nothing left to remove, or still in use: leave it */
+    }
   }
 
   console.log("\n=========================================================");

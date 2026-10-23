@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { TradeSwitch } from "@/components/farm/aiaic/AiaicBits";
+import { AiaicListings } from "@/components/farm/aiaic/AiaicListings";
 import { useI18n } from "@/lib/i18n";
 import { getListings } from "@/lib/transactions.functions";
 import type { ProduceListing, ListingStatus } from "@/lib/transaction-types";
@@ -36,7 +38,12 @@ export const Route = createFileRoute("/listings")({
   component: ListingsPage,
 });
 
+/** Her lots in AIAIC when this server is set up for AIAIC; else the app's own demo-store lots, as before. */
 function ListingsPage() {
+  return <TradeSwitch aiaic={() => <AiaicListings />} local={() => <LocalListingsPage />} />;
+}
+
+function LocalListingsPage() {
   const { t } = useI18n();
   const getListingsFn = useServerFn(getListings);
 
