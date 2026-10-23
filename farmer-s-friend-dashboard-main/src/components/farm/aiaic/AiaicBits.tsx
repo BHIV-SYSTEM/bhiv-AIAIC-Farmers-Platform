@@ -1,9 +1,13 @@
-import { AlertCircle, Database, FlaskConical, Loader2, PhoneCall, RefreshCw } from "lucide-react";
+import { AlertCircle, Database, FlaskConical, Loader2, RefreshCw } from "lucide-react";
+import { useEffect } from "react";
 
+import { useRaiseCrisis } from "@/lib/aiaic-crisis";
 import { useMine, useProblemText, useTradeMode } from "@/lib/aiaic-hooks";
 import { type AiaicProblem, type MineForScreen } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+
+import { CrisisCard, CrisisFirst } from "./CrisisFirst";
 
 /** ONE small chip for what kind of records these are: practice (AIAIC's practice account), TEST (Razorpay test
  * keys) or the app's own demo store. Never a paragraph. */
@@ -42,42 +46,8 @@ export function LocalStoreLine({ className = "" }: { className?: string }) {
   );
 }
 
-/** The helplines, when AIAIC answered with its crisis card: they lead, nothing else is shown. */
-export function CrisisCard({ problem }: { problem: AiaicProblem }) {
-  const { t } = useI18n();
-  const lines = problem.crisis?.helplines ?? [];
-  return (
-    <div
-      role="alert"
-      className="rounded-3xl border-2 border-destructive bg-danger-soft p-4 text-foreground shadow-md sm:p-5"
-    >
-      <h2 className="text-lg font-extrabold sm:text-xl">{t("aiaic.crisis.title")}</h2>
-      <p className="mt-1 text-sm font-semibold">{t("aiaic.crisis.lead")}</p>
-      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {(lines.length
-          ? lines
-          : [
-              { name: "Tele-MANAS", phone: "14416" },
-              { name: "Kisan Call Centre", phone: "1800-180-1551" },
-            ]
-        ).map((h) => (
-          <a
-            key={h.phone}
-            href={`tel:${h.phone.replace(/[^0-9+]/g, "")}`}
-            className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground"
-          >
-            <PhoneCall className="size-4 shrink-0" aria-hidden />
-            <span className="break-words">
-              {h.name} · {h.phone}
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/** A problem, said in one line, with "try again" when trying again can help. */
+/** A problem, said in one line, with "try again" when trying again can help. AIAIC's crisis card is raised to the page
+ * instead (`CrisisFirst`): the page then shows it alone. */
 export function ProblemCard({
   problem,
   onRetry,
@@ -87,6 +57,10 @@ export function ProblemCard({
 }) {
   const { t } = useI18n();
   const say = useProblemText();
+  const raise = useRaiseCrisis();
+  useEffect(() => {
+    if (problem.crisis && raise) raise(problem);
+  }, [problem, raise]);
   if (problem.crisis) return <CrisisCard problem={problem} />;
   return (
     <div
@@ -147,8 +121,9 @@ export function WithMine({ children }: { children: (data: MineForScreen) => Reac
 }
 
 /**
- * A trade page's switch: AIAIC's screens when this server is set up for AIAIC, else the app's own demo-store page with
- * one line that says so. While the server is asked, a loader (never the demo store, which would then vanish).
+ * A trade page's switch: AIAIC's screens when this server is set up for AIAIC (inside the page's crisis gate,
+ * `CrisisFirst`), else the app's own demo-store page with one line that says so. While the server is asked, a loader
+ * (never the demo store, which would then vanish).
  */
 export function TradeSwitch({
   aiaic,
@@ -181,7 +156,7 @@ export function TradeSwitch({
       </div>
     );
   }
-  if (mode.data.mode === "aiaic") return <>{aiaic()}</>;
+  if (mode.data.mode === "aiaic") return <CrisisFirst>{aiaic()}</CrisisFirst>;
   return (
     <>
       <div className={cn("mx-auto w-full px-3.5 pt-5 sm:px-4", width)}>

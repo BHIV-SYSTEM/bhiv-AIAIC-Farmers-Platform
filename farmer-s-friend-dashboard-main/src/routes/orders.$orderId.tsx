@@ -511,7 +511,7 @@ function LocalOrderDetailPage() {
           crop={order.crop}
           cropLabel={order.crop}
           quantityQ={order.quantityQuintals}
-          fromText={`${order.pickupLocation} ${order.deliveryDestination}`}
+          fromText={order.pickupLocation}
         />
 
         {/* Decoupled Payment Status Stepper */}

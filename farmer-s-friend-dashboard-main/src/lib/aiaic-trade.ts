@@ -261,6 +261,29 @@ export function newPressKey(): string {
   return `ann-${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
 }
 
+/**
+ * One press's call to this app's server, never left hanging: a call that throws (this server not reached, the page
+ * offline, an input this server refuses) is said as "AIAIC is not answering", so the screen says it and gives the
+ * buttons back. Every press of the AIAIC screens goes through it (`usePress`).
+ */
+export async function pressed<T>(run: () => Promise<AiaicResult<T>>): Promise<AiaicResult<T>> {
+  try {
+    return await run();
+  } catch {
+    return { ok: false, problem: problem("aiaic_unavailable") };
+  }
+}
+
+/** A press (`pressed`), then AIAIC's crisis card raised to the page: it outranks everything the page shows. */
+export async function pressAndRaise<T>(
+  run: () => Promise<AiaicResult<T>>,
+  raise: ((crisis: AiaicProblem) => void) | null,
+): Promise<AiaicResult<T>> {
+  const r = await pressed(run);
+  if (!r.ok && r.problem.crisis && raise) raise(r.problem);
+  return r;
+}
+
 // ------------------------------------------------------------------------------------------------ numbers
 
 /** Rupees, Indian grouping, whole rupees unless paise are there: "₹79,600", "₹20,261.36". */
@@ -319,6 +342,11 @@ function stepDone(order: AiaicOrder, stages: string[]): boolean {
   return order.fulfilment.some((s) => stages.includes(s.stage) && s.status === "done");
 }
 
+/** Whether her produce was handed over: a pickup, the road or the delivery recorded done by AIAIC. */
+export function handedOver(order: AiaicOrder): boolean {
+  return stepDone(order, ["pickup", "in_transit", "delivered"]);
+}
+
 /**
  * The five steps of one sale, the transaction in order: agreed -> paid by the buyer -> handed over -> delivered ->
  * her money. Each is read from AIAIC's own states, never assumed: "paid" only on Razorpay's verified word
@@ -338,14 +366,14 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
         : pay === "link_expired" || pay === "link_cancelled"
           ? "stopped"
           : "todo";
-  const handedOver = stepDone(order, ["pickup", "in_transit", "delivered"]);
+  const given = handedOver(order);
   const delivered = order.order_state === "delivered" || stepDone(order, ["delivered"]);
-  const handover: StepState = handedOver ? "done" : cancelled ? "stopped" : "now";
+  const handover: StepState = given ? "done" : cancelled ? "stopped" : "now";
   const deliveredState: StepState = delivered
     ? "done"
     : cancelled
       ? "stopped"
-      : handedOver
+      : given
         ? "now"
         : "todo";
   const settlement = order.money?.settlement_state ?? order.settlement_state ?? "not_connected";
@@ -389,23 +417,92 @@ export function paymentLine(order: AiaicOrder): { key: string; state: string; no
 
 // --------------------------------------------------------------------------------------- her money, in words
 
+/**
+ * A SENTENCE IS NEVER SHOWN WITH A HOLE IN IT (as AIAIC's own web and phone say it, their `WITHOUT`): a fact AIAIC did
+ * not send (an amount she did not say, the last characters of a bank account Razorpay gave none of) is said by the
+ * same sentence without it. Each key lists the facts ITS sentence here prints (this app's buyer sentence names no
+ * reference, so only his amount).
+ */
+export const WITHOUT: Readonly<Record<string, readonly [readonly string[], string]>> = {
+  "farmer.money.will_send_bank": [["hint"], "farmer.money.will_send_bank_any"],
+  "farmer.money.sent_bank": [["hint"], "farmer.money.sent_bank_any"],
+  "farmer.payout.ready_bank": [["hint"], "farmer.payout.ready_bank_any"],
+  "farmer.money.direct.said_got": [["amount", "day"], "farmer.money.direct.said_got_any"],
+  "farmer.money.direct.buyer_says": [["amount"], "farmer.money.direct.buyer_says_any"],
+};
+
+/** The key a sentence is said with, given the facts AIAIC sent (`WITHOUT`): one missing or empty picks the sentence
+ * without it. */
+export function keyFor(key: string, values: Readonly<Record<string, unknown>>): string {
+  const w = WITHOUT[key];
+  if (!w) return key;
+  return w[0].some((k) => values[k] === null || values[k] === undefined || values[k] === "")
+    ? w[1]
+    : key;
+}
+
 /** The key her money's sentence is worded from (AIAIC's own key, `farmer.money.*` or `farmer.payout.*`, under this
- * app's `aiaic.` prefix), and the values it fills in; null when AIAIC says nothing of her money on this order. */
+ * app's `aiaic.` prefix; the same sentence without a fact AIAIC did not send, `keyFor`), and the values it fills in;
+ * null when AIAIC says nothing of her money on this order. */
 export function sayKey(say: AiaicSay): { key: string; values: Record<string, string> } | null {
   if (!say || typeof say.key !== "string" || !say.key) return null;
   const values: Record<string, string> = {};
   for (const [k, v] of Object.entries(say.values ?? {})) {
     if (v === null || v === undefined) continue;
-    if (k === "amount" || k === "back" || k === "left") values[k] = rupees(Number(v));
-    else if (k === "day" || k === "time") values[k] = dayOf(String(v));
-    else values[k] = String(v);
+    let said: string;
+    if (k === "amount" || k === "back" || k === "left") {
+      const n = typeof v === "number" ? v : typeof v === "string" && v.trim() ? Number(v) : NaN;
+      said = Number.isFinite(n) ? rupees(n) : "";
+    } else if (k === "day" || k === "time") said = dayOf(String(v));
+    else said = String(v);
+    if (said) values[k] = said;
   }
-  return { key: `aiaic.${say.key}`, values };
+  return { key: `aiaic.${keyFor(say.key, values)}`, values };
 }
 
-/** The reason inside a money or payout sentence, as a key of its own (a code, never English text). */
-export function reasonKey(prefix: "money" | "payout", code: string | undefined): string {
-  return `aiaic.farmer.${prefix}.reason.${code && /^[a-z_]+$/.test(code) ? code : "other"}`;
+type Words = (key: string, vars?: Record<string, string | number>) => string;
+
+/** The reason inside a money or payout sentence, as a key of its own (a code, never English text): AIAIC's code when
+ * this app has words for it, else `.other` ("Razorpay's reason is with the AIAIC team"), never a raw key. */
+export function reasonKey(
+  t: Words,
+  prefix: "money" | "payout",
+  code: string | null | undefined,
+): string {
+  const other = `aiaic.farmer.${prefix}.reason.other`;
+  if (!code || !/^[a-z_]+$/.test(code)) return other;
+  const key = `aiaic.farmer.${prefix}.reason.${code}`;
+  return t(key) === key ? other : key;
+}
+
+/** Her money's (or her payout account's) sentence in her words, from AIAIC's key and facts: rupees, India's day, a
+ * reason from its code, never a hole. Null when AIAIC says nothing. */
+export function moneySaid(t: Words, prefix: "money" | "payout", say: AiaicSay): string | null {
+  const said = sayKey(say);
+  if (!said) return null;
+  return t(said.key, { ...said.values, reason: t(reasonKey(t, prefix, said.values["reason"])) });
+}
+
+/**
+ * Whether her screen asks "Did the buyer pay you?" with her two buttons: only where AIAIC takes her word
+ * (`money.can_report`) AND the money is outside AIAIC (`money.route == "direct"`) or her produce was handed over.
+ * Before the handover AIAIC can still make the buyer's payment link: a "Not yet" pressed there would switch the sale to a
+ * direct payment, and AIAIC would refuse every link after it (push 2 audit, ENG-01).
+ */
+export function asksHerWord(order: AiaicOrder): boolean {
+  const m = order.money;
+  if (!m || !m.can_report) return false;
+  return m.route === "direct" || handedOver(order);
+}
+
+/** Her sale's money card: AIAIC's sentence for her money, else, where her word is asked (`asksHerWord`), the question;
+ * null when there is nothing to say (no card). */
+export function moneyCard(t: Words, order: AiaicOrder): { line: string; asks: boolean } | null {
+  const asks = asksHerWord(order);
+  const line =
+    moneySaid(t, "money", order.money?.say ?? null) ??
+    (asks ? t("aiaic.farmer.money.direct.ask") : null);
+  return line ? { line, asks } : null;
 }
 
 // ------------------------------------------------------------------------------------------------ names
@@ -421,7 +518,51 @@ export function districtName(names: Record<string, string>, district: string | n
   return names[district] ?? names[district.toLowerCase()] ?? district;
 }
 
-type Words = (key: string, vars?: Record<string, string | number>) => string;
+/** One row of AIAIC's district list (GET /places/districts): its key and its English name. */
+export type DistrictRow = { key: string; name_en: string };
+
+/** Where a district's name (or key) stands in a text as whole words, case and spacing aside; -1 when it is not there. */
+function namedAt(text: string, name: string): number {
+  const words = name
+    .toLowerCase()
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (!words.length) return -1;
+  const m = new RegExp(`(^|[^a-z])${words.join("[\\s_-]+")}(?![a-z])`).exec(text);
+  return m ? m.index + (m[1] ?? "").length : -1;
+}
+
+/**
+ * The district a sale or a transport card starts from: the first of `wanted` AIAIC's list holds (by its key or English
+ * name), else the district the pickup text names first (whole words; the longer name where two start at the same
+ * place), else none: "" (she chooses it; never silently the list's first district).
+ */
+export function startDistrict(
+  list: readonly DistrictRow[],
+  wanted: readonly (string | null | undefined)[],
+  text?: string | null,
+): string {
+  for (const w of wanted) {
+    const want = (w ?? "").trim().toLowerCase();
+    if (!want) continue;
+    const hit = list.find((d) => d.key === want || d.name_en.toLowerCase() === want);
+    if (hit) return hit.key;
+  }
+  const said = (text ?? "").toLowerCase();
+  let best: { key: string; at: number; length: number } | null = null;
+  if (said) {
+    for (const d of list) {
+      for (const name of [d.name_en, d.key]) {
+        const at = namedAt(said, name);
+        if (at < 0) continue;
+        if (!best || at < best.at || (at === best.at && name.length > best.length))
+          best = { key: d.key, at, length: name.length };
+      }
+    }
+  }
+  return best?.key ?? "";
+}
 
 /** "1 quintal" or "{n} quintals", in her language. */
 export function quintalWords(t: Words, n: number): string {
@@ -658,24 +799,58 @@ export function vehicleName(est: TransportEstimate, lang: string): string {
   return names[lang] ?? names["en"] ?? est.vehicle.name;
 }
 
-/** The line of sources under the fare: each rate source's name and its page date ("undated" when it has none). */
-export function rateSources(
-  est: TransportEstimate,
-): { name: string; url: string; day: string | null }[] {
+/** A rate source's short name: the part before its colon, without " blog" ("TruckGuru", "Mukund Logistics"). */
+function shortSourceName(name: string): string {
+  return (name.split(":")[0] ?? name).replace(/\s+blog$/i, "").trim();
+}
+
+/** The line of sources under the fare: each rate source's name and its page date ("undated" when it has none);
+ * `official` for MSRTC's own chart (an official rate, said in her words: `sourcesSaid`). */
+export function rateSources(est: TransportEstimate): {
+  name: string;
+  short: string;
+  url: string;
+  day: string | null;
+  official: boolean;
+}[] {
   if (est.rate.kind === "official" && est.rate.source) {
     return [
       {
         name: est.rate.source.name,
+        short: shortSourceName(est.rate.source.name),
         url: est.rate.source.url,
         day: est.rate.source.page_date ?? null,
+        official: true,
       },
     ];
   }
   return (est.rate.sources ?? []).map((s) => ({
     name: s.name,
+    short: shortSourceName(s.name),
     url: s.url,
     day: s.page_date ?? null,
+    official: false,
   }));
+}
+
+/**
+ * The sources line's links in her words: MSRTC's official chart as a line of her language with its date (the source's
+ * full name, English, only in the link's title), each market source by its short name (a name) with its page date.
+ */
+export function sourcesSaid(
+  t: Words,
+  est: TransportEstimate,
+): { text: string; title: string; url: string }[] {
+  return rateSources(est).map((s) => {
+    const day = s.day ? dayOf(s.day) || s.day : t("aiaic.transport.undated");
+    return {
+      text: s.official
+        ? t("aiaic.transport.source.official", { day })
+        : `${s.short || s.name} (${day})`,
+      title: s.name,
+      url: s.url,
+    };
+  });
 }
 
 /** Every attribution the answer carries, OpenStreetMap's first, none dropped (OSM's and Geoapify's terms). */

@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ClipboardList, MapPin, PlusCircle, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
+import { usePress } from "@/lib/aiaic-crisis";
 import { useMine } from "@/lib/aiaic-hooks";
 import {
   cropName,
@@ -86,6 +87,7 @@ function Lot({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const stopFn = useServerFn(stopSelling);
+  const press = usePress();
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<AiaicProblem | null>(null);
@@ -96,7 +98,9 @@ function Lot({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
   const stop = async () => {
     setBusy(true);
     setProblem(null);
-    const r = await stopFn({ data: { key: newPressKey(), listing_id: lot.listing_id } });
+    const r = await press(() =>
+      stopFn({ data: { key: newPressKey(), listing_id: lot.listing_id } }),
+    );
     setBusy(false);
     setAsking(false);
     if (!r.ok) setProblem(r.problem);

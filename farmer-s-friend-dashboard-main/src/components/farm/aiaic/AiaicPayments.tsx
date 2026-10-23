@@ -12,18 +12,18 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { usePress } from "@/lib/aiaic-crisis";
 import { useMine } from "@/lib/aiaic-hooks";
 import {
   cropName,
+  moneySaid,
   moneyTotals,
   newPressKey,
   paymentLine,
   payoutDetailsProblem,
   quintalWords,
   quintals,
-  reasonKey,
   rupees,
-  sayKey,
   type AiaicProblem,
   type MineForScreen,
   type PayoutAccountBlock,
@@ -117,8 +117,7 @@ function EachSale({ data }: { data: MineForScreen }) {
         </p>
       ) : (
         orders.map((o) => {
-          const said = sayKey(o.money?.say ?? null);
-          const reason = said?.values["reason"];
+          const said = moneySaid(t, "money", o.money?.say ?? null);
           return (
             <article
               key={o.order_id}
@@ -133,14 +132,7 @@ function EachSale({ data }: { data: MineForScreen }) {
                 </p>
               </div>
               <p className="text-sm font-semibold text-foreground">{t(paymentLine(o).key)}</p>
-              {said ? (
-                <p className="text-sm text-foreground/85">
-                  {t(said.key, {
-                    ...said.values,
-                    reason: reason ? t(reasonKey("money", reason)) : "",
-                  })}
-                </p>
-              ) : null}
+              {said ? <p className="text-sm text-foreground/85">{said}</p> : null}
               <Link
                 to="/orders/$orderId"
                 params={{ orderId: o.order_id }}
@@ -182,6 +174,7 @@ function PayoutAccountCard({
   const queryClient = useQueryClient();
   const giveFn = useServerFn(givePayoutAccount);
   const withdrawFn = useServerFn(withdrawPayoutAccount);
+  const press = usePress();
   const [open, setOpen] = useState(false);
   const [readNotice, setReadNotice] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -219,12 +212,7 @@ function PayoutAccountCard({
     );
   }
 
-  const said = sayKey(block.say);
-  const reason = said?.values["reason"];
-  const sayValues = {
-    ...(said?.values ?? {}),
-    reason: reason ? t(reasonKey("payout", reason)) : "",
-  };
+  const said = moneySaid(t, "payout", block.say);
   const lines = notice ? (notice[lang as Lang] ?? notice.en) : [];
 
   const send = async () => {
@@ -240,8 +228,8 @@ function PayoutAccountCard({
     if (bad) return;
     setBusy(true);
     setProblem(null);
-    try {
-      const r = await giveFn({
+    const r = await press(() =>
+      giveFn({
         data: {
           key: newPressKey(),
           notice_version: notice.version,
@@ -254,34 +242,24 @@ function PayoutAccountCard({
             ? { account_number: account.replace(/[\s-]+/g, ""), ifsc: ifsc.trim().toUpperCase() }
             : { upi_id: upi.trim() }),
         },
-      });
-      if (r.ok) {
-        clear();
-        setOpen(false);
-      } else {
-        setProblem(r.problem);
-        const field = r.problem.facts?.["field"];
-        if (typeof field === "string") setBadField(field);
-      }
-    } catch {
-      setProblem({
-        code: "aiaic_unavailable",
-        message: null,
-        status: null,
-        setting: null,
-        facts: null,
-        crisis: null,
-      });
-    } finally {
-      setBusy(false);
-      await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
+      }),
+    );
+    if (r.ok) {
+      clear();
+      setOpen(false);
+    } else {
+      setProblem(r.problem);
+      const field = r.problem.facts?.["field"];
+      if (typeof field === "string") setBadField(field);
     }
+    setBusy(false);
+    await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
   };
 
   const stop = async () => {
     setBusy(true);
     setProblem(null);
-    const r = await withdrawFn({ data: { key: newPressKey() } });
+    const r = await press(() => withdrawFn({ data: { key: newPressKey() } }));
     setBusy(false);
     setStopping(false);
     if (!r.ok) setProblem(r.problem);
@@ -303,9 +281,7 @@ function PayoutAccountCard({
         </h2>
         {block.test_values_only ? <ModeChip kind="test" /> : null}
       </div>
-      {said ? (
-        <p className="text-base font-bold text-foreground">{t(said.key, sayValues)}</p>
-      ) : null}
+      {said ? <p className="text-base font-bold text-foreground">{said}</p> : null}
       {problem ? <ProblemCard problem={problem} /> : null}
 
       {block.can_create ? (

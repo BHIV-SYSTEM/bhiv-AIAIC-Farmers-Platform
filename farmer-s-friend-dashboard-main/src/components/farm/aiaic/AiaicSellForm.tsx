@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, ChevronDown, ChevronUp, Loader2, Tag } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { usePress } from "@/lib/aiaic-crisis";
 import {
   QUANTITY_CHOICES,
   dayOf,
@@ -11,6 +12,7 @@ import {
   quintalWords,
   quintals,
   rupees,
+  startDistrict,
   type AiaicProblem,
   type MineForScreen,
   type ReferencePrice,
@@ -66,6 +68,7 @@ function SellForm({
   const cropsFn = useServerFn(getPlacesCrops);
   const priceFn = useServerFn(getSalePrice);
   const sellFn = useServerFn(sellProduce);
+  const press = usePress();
 
   const place = data.mine.profile_place;
   const [estate, setEstate] = useState<Estate>(estateOf(place.state));
@@ -92,13 +95,11 @@ function SellForm({
     () => (districts.data?.ok ? districts.data.districts : []),
     [districts.data],
   );
+  // Her district from the link or her profile when AIAIC's list holds it; else none: she chooses (never silently the
+  // list's first district).
   useEffect(() => {
     if (!districtList.length || districtList.some((d) => d.key === district)) return;
-    const wants = [initialDistrict, place.district].map((x) => (x ?? "").toLowerCase());
-    const hit =
-      districtList.find((d) => wants.includes(d.key) || wants.includes(d.name_en.toLowerCase())) ??
-      districtList[0];
-    if (hit) setDistrict(hit.key);
+    setDistrict(startDistrict(districtList, [initialDistrict, place.district]));
   }, [districtList, district, initialDistrict, place.district]);
 
   const crops = useQuery({
@@ -146,8 +147,8 @@ function SellForm({
     if (!district || !crop || !qtyOk || !priceOk) return;
     setSending(true);
     setProblem(null);
-    try {
-      const r = await sellFn({
+    const r = await press(() =>
+      sellFn({
         data: {
           key: pressKey,
           state: estate,
@@ -158,32 +159,22 @@ function SellForm({
           grade: grade || null,
           ...(confirmed ? { price_confirmed: true } : {}),
         },
-      });
-      if (r.ok) {
-        setListed(r.data.listing_id);
-        setAskBack(null);
-        setPressKey(newPressKey());
-        await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
-      } else if (r.problem.code === "price_far_from_market" && !confirmed) {
-        // AIAIC kept nothing and no key: the SAME press goes again once she says her price is right.
-        const range = r.problem.facts?.["range"];
-        setAskBack(range && typeof range === "object" && !Array.isArray(range) ? range : {});
-      } else {
-        setProblem(r.problem);
-        if (r.problem.status !== null && r.problem.status < 500) setPressKey(newPressKey());
-      }
-    } catch {
-      setProblem({
-        code: "aiaic_unavailable",
-        message: null,
-        status: null,
-        setting: null,
-        facts: null,
-        crisis: null,
-      });
-    } finally {
-      setSending(false);
+      }),
+    );
+    if (r.ok) {
+      setListed(r.data.listing_id);
+      setAskBack(null);
+      setPressKey(newPressKey());
+    } else if (r.problem.code === "price_far_from_market" && !confirmed) {
+      // AIAIC kept nothing and no key: the SAME press goes again once she says her price is right.
+      const range = r.problem.facts?.["range"];
+      setAskBack(range && typeof range === "object" && !Array.isArray(range) ? range : {});
+    } else {
+      setProblem(r.problem);
+      if (r.problem.status !== null && r.problem.status < 500) setPressKey(newPressKey());
     }
+    setSending(false);
+    if (r.ok) await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
   };
 
   if (listed) {
@@ -265,6 +256,7 @@ function SellForm({
               }}
               className={SELECT}
             >
+              {district ? null : <option value="">{t("aiaic.choose")}</option>}
               {districtList.map((d) => (
                 <option key={d.key} value={d.key}>
                   {d.name}

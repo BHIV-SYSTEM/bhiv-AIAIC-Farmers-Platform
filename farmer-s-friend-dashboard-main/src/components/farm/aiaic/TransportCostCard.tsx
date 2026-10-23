@@ -6,13 +6,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   QUANTITY_CHOICES,
   attributionsOf,
-  dayOf,
   quintalWords,
   quintals,
-  rateSources,
   routeSketch,
   rupeeRange,
   rupees,
+  sourcesSaid,
+  startDistrict,
   vehicleName,
   type TransportEstimate,
 } from "@/lib/aiaic-trade";
@@ -53,7 +53,8 @@ export function TransportCostCard({
   quantityQ: number;
   fromState?: string | null | undefined;
   fromDistrict?: string | null | undefined;
-  /** Free text that may name her district (the demo store's pickup place): its first district name is the default. */
+  /** Her PICKUP place as free text (the demo store's order): the district it names first is the default; none named,
+   * she chooses (never the buyer's end, never the list's first district). */
   fromText?: string | null | undefined;
   className?: string;
 }) {
@@ -78,17 +79,11 @@ export function TransportCostCard({
     [districts.data],
   );
 
-  // Her district, as AIAIC's list names it (the sale's district, matched by its English name or its key).
+  // Her district, as AIAIC's list names it (the sale's district by its key or English name, else the district her
+  // pickup text names); none: "Choose your district" and no estimate until she chooses.
   useEffect(() => {
-    if (!districtList.length) return;
-    const want = (fromDistrict ?? "").toLowerCase();
-    const text = (fromText ?? "").toLowerCase();
-    const hit =
-      districtList.find(
-        (d) => d.key === district || d.key === want || d.name_en.toLowerCase() === want,
-      ) ?? (text ? districtList.find((d) => text.includes(d.name_en.toLowerCase())) : undefined);
-    if (hit && hit.key !== district) setDistrict(hit.key);
-    if (!hit && !district) setDistrict(districtList[0]?.key ?? "");
+    if (!districtList.length || districtList.some((d) => d.key === district)) return;
+    setDistrict(startDistrict(districtList, [fromDistrict], fromText));
   }, [districtList, fromDistrict, fromText, district]);
 
   const nearby = useQuery({
@@ -186,6 +181,9 @@ export function TransportCostCard({
                   }}
                   className={SELECT}
                 >
+                  {district ? null : (
+                    <option value="">{t("aiaic.transport.choose_district")}</option>
+                  )}
                   {districtList.map((d) => (
                     <option key={d.key} value={d.key}>
                       {d.name}
@@ -195,7 +193,7 @@ export function TransportCostCard({
               </div>
             </label>
             <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold text-foreground">
-              {est ? (
+              {!district ? null : est ? (
                 <>
                   <span className="text-base font-black">
                     {t("aiaic.transport.km", { km: Math.round(est.distance.km) })}
@@ -421,10 +419,11 @@ function RouteSketch({ est, fromName }: { est: TransportEstimate; fromName?: str
   );
 }
 
-/** One short line: each rate source's name and its page date, and the route type's factor as an assumption. */
+/** One short line: each rate source in her words with its page date (MSRTC's official chart as a line of her language,
+ * its full name in the link's title), and the route type's factor as an assumption. */
 function SourcesLine({ est }: { est: TransportEstimate }) {
   const { t } = useI18n();
-  const sources = rateSources(est);
+  const sources = sourcesSaid(t, est);
   const rt = est.route_type;
   return (
     <div className="space-y-1 text-[11px] leading-snug text-muted-foreground">
@@ -433,10 +432,9 @@ function SourcesLine({ est }: { est: TransportEstimate }) {
         {sources.map((s, i) => (
           <span key={s.url}>
             {i ? " · " : null}
-            <a href={s.url} target="_blank" rel="noreferrer" className="underline">
-              {(s.name.split(":")[0] ?? s.name).replace(/\s+blog$/i, "")}
-            </a>{" "}
-            ({s.day ? dayOf(s.day) : t("aiaic.transport.undated")})
+            <a href={s.url} title={s.title} target="_blank" rel="noreferrer" className="underline">
+              {s.text}
+            </a>
           </span>
         ))}
       </p>

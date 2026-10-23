@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Banknote, CheckCircle2, Loader2, Wallet, XCircle } from "lucide-react";
 import { useState } from "react";
 
+import { usePress } from "@/lib/aiaic-crisis";
 import {
   buyerLine,
   cropName,
@@ -11,14 +12,13 @@ import {
   findOffer,
   findOrder,
   listingOfOrder,
+  moneyCard,
   newPressKey,
   orderOfOffer,
   paymentLine,
   quintalWords,
   quintals,
   rupees,
-  sayKey,
-  reasonKey,
   type AiaicOrder,
   type AiaicProblem,
   type MineForScreen,
@@ -88,6 +88,7 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const answerFn = useServerFn(answerOffer);
+  const press = usePress();
   const [asking, setAsking] = useState<"accept" | "reject" | null>(null);
   const [pressKey, setPressKey] = useState(newPressKey);
   const [busy, setBusy] = useState(false);
@@ -100,28 +101,18 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
   const answer = async (which: "accept" | "reject") => {
     setBusy(true);
     setProblem(null);
-    try {
-      const r = await answerFn({ data: { key: pressKey, offer_id: o.offer_id, answer: which } });
-      await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
-      if (!r.ok) {
-        setProblem(r.problem);
-        if (r.problem.status !== null && r.problem.status < 500) setPressKey(newPressKey());
-      } else if (which === "accept" && r.data.order_id) {
-        void navigate({ to: "/orders/$orderId", params: { orderId: r.data.order_id } });
-      }
-    } catch {
-      setProblem({
-        code: "aiaic_unavailable",
-        message: null,
-        status: null,
-        setting: null,
-        facts: null,
-        crisis: null,
-      });
-    } finally {
-      setBusy(false);
-      setAsking(null);
+    const r = await press(() =>
+      answerFn({ data: { key: pressKey, offer_id: o.offer_id, answer: which } }),
+    );
+    await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
+    if (!r.ok) {
+      setProblem(r.problem);
+      if (r.problem.status !== null && r.problem.status < 500) setPressKey(newPressKey());
+    } else if (which === "accept" && r.data.order_id) {
+      void navigate({ to: "/orders/$orderId", params: { orderId: r.data.order_id } });
     }
+    setBusy(false);
+    setAsking(null);
   };
 
   return (
@@ -351,25 +342,26 @@ function PaymentCard({ order }: { order: AiaicOrder }) {
   );
 }
 
-/** What reached her, in AIAIC's own words for its state (`money.say`), and her word of a direct payment where AIAIC
- * takes it (`money.can_report`). */
+/** What reached her, in AIAIC's own words for its state (`money.say`), and her word of a payment made outside AIAIC
+ * where AIAIC takes it AND the money is outside AIAIC or her produce was handed over (`moneyCard`, `asksHerWord`). */
 function MoneyCard({ order }: { order: AiaicOrder }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
   const reportFn = useServerFn(reportPayment);
+  const press = usePress();
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<AiaicProblem | null>(null);
   const money = order.money;
-  if (!money) return null;
-  const said = sayKey(money.say);
-  if (!said && !money.can_report) return null;
-  const reason = said?.values["reason"];
-  const values = { ...(said?.values ?? {}), reason: reason ? t(reasonKey("money", reason)) : "" };
+  const card = moneyCard(t, order);
+  // a refusal of her last press stays in sight even when the card has nothing else to say
+  if (!money || (!card && !problem)) return null;
 
   const report = async (what: "received" | "not_received") => {
     setBusy(true);
     setProblem(null);
-    const r = await reportFn({ data: { key: newPressKey(), order_id: order.order_id, what } });
+    const r = await press(() =>
+      reportFn({ data: { key: newPressKey(), order_id: order.order_id, what } }),
+    );
     setBusy(false);
     if (!r.ok) setProblem(r.problem);
     await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
@@ -384,18 +376,14 @@ function MoneyCard({ order }: { order: AiaicOrder }) {
         </h2>
         {money.test_mode ? <ModeChip kind="test" /> : null}
       </div>
-      {said ? (
-        <p className="text-base font-bold text-foreground">{t(said.key, values)}</p>
-      ) : money.can_report ? (
-        <p className="text-base font-bold text-foreground">{t("aiaic.farmer.money.direct.ask")}</p>
-      ) : null}
+      {card ? <p className="text-base font-bold text-foreground">{card.line}</p> : null}
       {money.fee_on_top && typeof money.share_inr === "number" ? (
         <p className="text-xs font-semibold text-muted-foreground">
           {t("aiaic.farmer.money.fee_on_top", { amount: rupees(money.share_inr) })}
         </p>
       ) : null}
       {problem ? <ProblemCard problem={problem} /> : null}
-      {money.can_report ? (
+      {card?.asks ? (
         <div className="flex flex-col gap-2 pt-1 sm:flex-row">
           <button
             type="button"

@@ -5,8 +5,11 @@ farmer routes, from this app's **server** side: listing → buyers' offers → a
 state → what reached the farmer → pickup and delivery. The order and offer pages also show AIAIC's transport cost
 (a truck-booking style card: From → To with the km, the weight, one vehicle, the fare range and the fare per quintal).
 
-Without the settings nothing changes: the app keeps its own demo store (`data/transactions.json`), and each of those
-pages says so in one line. Every other screen (advice, plant check, voice) is untouched.
+Without the settings the sales stay in the app's own demo store (`data/transactions.json`), and each of those pages
+says so in one line. One exception: the demo store's order page also shows AIAIC's transport cost card, which reads
+AIAIC's public routes (`GET /places/districts`, `GET /transport/nearby-mandis`, `GET /transport/estimate`; no sign-in;
+only the district, the mandi and the weight are sent) at `AIAIC_BASE_URL`, or at the app's built-in default
+`http://163.128.209.18:8017` when that setting is not set. Every other screen (advice, plant check, voice) is untouched.
 
 With the settings, a new listing gets no automatic demo bid: buyers' offers are made by AIAIC's operators on AIAIC's
 dashboard (its Farm to retail page, `/trade`), and appear under Orders & Offers.

@@ -16,7 +16,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.chip.practice": "Practice",
   "aiaic.chip.test": "TEST",
   "aiaic.chip.local": "Demo store",
-  "aiaic.local.line": "Sales here are kept in this app's own demo store: AIAIC is not connected.",
+  "aiaic.local.line": "Sales here are kept in this app's own demo store, not in AIAIC.",
   "aiaic.practice.tip": "A practice account: no real money, no real produce.",
   "aiaic.loading": "Reading from AIAIC…",
   "aiaic.retry": "Try again",
@@ -91,6 +91,10 @@ export const AIAIC_EN: Dict = {
     "What you say of a payment is not taken on this server.",
   "aiaic.refused.payment_route_is_razorpay":
     "This sale's money moves through Razorpay: AIAIC says what reached you.",
+  "aiaic.refused.link_still_possible":
+    "AIAIC can still make the buyer's payment link for this sale: nothing was recorded.",
+  "aiaic.refused.not_handed_over_yet":
+    "You are asked about the payment once your produce is handed over.",
   "aiaic.refused.order_closed": "This sale was called off.",
   "aiaic.refused.mandi_not_held": "AIAIC holds no such mandi: choose one from the list.",
   "aiaic.refused.mandi_not_placed": "This mandi's place is not known: choose another.",
@@ -237,6 +241,8 @@ export const AIAIC_EN: Dict = {
   "aiaic.money.not_yet": "Not yet",
   "aiaic.farmer.money.will_send_bank":
     "When the buyer pays through the link, Razorpay sends your {amount} to your bank account ending {hint}.",
+  "aiaic.farmer.money.will_send_bank_any":
+    "When the buyer pays through the link, Razorpay sends your {amount} to your bank account.",
   "aiaic.farmer.money.will_send_upi":
     "When the buyer pays through the link, Razorpay sends your {amount} to your UPI ID.",
   "aiaic.farmer.money.fee_on_top":
@@ -246,6 +252,8 @@ export const AIAIC_EN: Dict = {
     "The buyer paid. Razorpay keeps your {amount} until your produce is delivered.",
   "aiaic.farmer.money.sent_bank":
     "Your {amount} was sent to your bank account ending {hint}. It usually arrives in about 2 working days.",
+  "aiaic.farmer.money.sent_bank_any":
+    "Your {amount} was sent to your bank account. It usually arrives in about 2 working days.",
   "aiaic.farmer.money.sent_upi":
     "Your {amount} was sent to your UPI ID. It usually arrives within a few minutes.",
   "aiaic.farmer.money.settled":
@@ -265,10 +273,14 @@ export const AIAIC_EN: Dict = {
     "Did the buyer pay you? First check your own bank's message or UPI app.",
   "aiaic.farmer.money.direct.said_got":
     "You told us you got {amount} on {day}. AIAIC did not see this payment itself.",
+  "aiaic.farmer.money.direct.said_got_any":
+    "You told us you got the money. AIAIC did not see this payment itself.",
   "aiaic.farmer.money.direct.said_not_yet":
     "You told us the money has not come. This is on the AIAIC team's list.",
   "aiaic.farmer.money.direct.buyer_says":
     "The buyer says he paid {amount}. Check your own bank's message or UPI app.",
+  "aiaic.farmer.money.direct.buyer_says_any":
+    "The buyer says he paid. Check your own bank's message or UPI app.",
 
   "aiaic.payout.title": "Where your money goes",
   "aiaic.payout.not_offered": "Paying you through AIAIC is not switched on here.",
@@ -301,6 +313,7 @@ export const AIAIC_EN: Dict = {
     "Your details are checked. Money can be sent through AIAIC after {time}.",
   "aiaic.farmer.payout.ready_bank":
     "Ready: your money will be sent to your bank account ending {hint}.",
+  "aiaic.farmer.payout.ready_bank_any": "Ready: your money will be sent to your bank account.",
   "aiaic.farmer.payout.ready_upi": "Ready: your money will be sent to your UPI ID.",
   "aiaic.farmer.payout.refused":
     "Razorpay did not accept these details. AIAIC kept none of them. A person from AIAIC can help you try again.",
@@ -342,6 +355,8 @@ export const AIAIC_EN: Dict = {
   "aiaic.transport.info_only": "Information only: not a quote, not a booking.",
   "aiaic.transport.loading": "Working out the cost…",
   "aiaic.transport.choose_mandi": "Choose a mandi",
+  "aiaic.transport.choose_district": "Choose your district",
+  "aiaic.transport.source.official": "MSRTC's chart ({day})",
   "aiaic.transport.map": "The route",
   "aiaic.transport.note.from_district_centre":
     "Measured from your district's centre, not from your farm.",
@@ -376,7 +391,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.chip.test": "चाचणी",
   "aiaic.chip.local": "नमुना साठा",
   "aiaic.local.line":
-    "येथील विक्रीच्या नोंदी या अॅपच्या स्वतःच्या नमुना साठ्यात ठेवल्या जातात: AIAIC जोडलेले नाही.",
+    "येथील विक्रीच्या नोंदी या अॅपच्या स्वतःच्या नमुना साठ्यात ठेवल्या जातात, AIAIC मध्ये नाही.",
   "aiaic.practice.tip": "सरावाचे खाते: खरे पैसे नाहीत, खरा माल नाही.",
   "aiaic.loading": "AIAIC कडून वाचत आहे…",
   "aiaic.retry": "पुन्हा प्रयत्न करा",
@@ -450,6 +465,9 @@ export const AIAIC_MR: Dict = {
     "पेमेंटबद्दल तुम्ही सांगितलेले या सर्व्हरवर घेतले जात नाही.",
   "aiaic.refused.payment_route_is_razorpay":
     "या विक्रीचे पैसे Razorpay मार्फत जातात: तुमच्यापर्यंत काय पोहोचले ते AIAIC सांगते.",
+  "aiaic.refused.link_still_possible":
+    "AIAIC अजून या विक्रीसाठी खरेदीदाराची पेमेंट लिंक बनवू शकते: काहीही नोंदवले गेले नाही.",
+  "aiaic.refused.not_handed_over_yet": "तुमचा माल दिल्यानंतर पेमेंटबद्दल विचारले जाईल.",
   "aiaic.refused.order_closed": "ही विक्री रद्द झाली.",
   "aiaic.refused.mandi_not_held": "अशी मंडी AIAIC कडे नाही: यादीतून एक निवडा.",
   "aiaic.refused.mandi_not_placed": "या मंडीची जागा माहीत नाही: दुसरी निवडा.",
@@ -596,6 +614,8 @@ export const AIAIC_MR: Dict = {
   "aiaic.money.not_yet": "अजून नाही",
   "aiaic.farmer.money.will_send_bank":
     "खरेदीदाराने लिंकवरून पैसे भरले की Razorpay तुमचे {amount} {hint} ने संपणाऱ्या बँक खात्यात पाठवेल.",
+  "aiaic.farmer.money.will_send_bank_any":
+    "खरेदीदाराने लिंकवरून पैसे भरले की Razorpay तुमचे {amount} तुमच्या बँक खात्यात पाठवेल.",
   "aiaic.farmer.money.will_send_upi":
     "खरेदीदाराने लिंकवरून पैसे भरले की Razorpay तुमचे {amount} तुमच्या UPI आयडीवर पाठवेल.",
   "aiaic.farmer.money.fee_on_top":
@@ -605,6 +625,8 @@ export const AIAIC_MR: Dict = {
     "खरेदीदाराने पैसे भरले. तुमचा माल पोहोचेपर्यंत Razorpay तुमचे {amount} राखून ठेवते.",
   "aiaic.farmer.money.sent_bank":
     "तुमचे {amount} {hint} ने संपणाऱ्या बँक खात्यात पाठवले. ते साधारणपणे सुमारे 2 कामकाजाच्या दिवसांत पोहोचतात.",
+  "aiaic.farmer.money.sent_bank_any":
+    "तुमचे {amount} तुमच्या बँक खात्यात पाठवले. ते साधारणपणे सुमारे 2 कामकाजाच्या दिवसांत पोहोचतात.",
   "aiaic.farmer.money.sent_upi":
     "तुमचे {amount} तुमच्या UPI आयडीवर पाठवले. ते साधारणपणे काही मिनिटांत पोहोचतात.",
   "aiaic.farmer.money.settled":
@@ -624,10 +646,14 @@ export const AIAIC_MR: Dict = {
     "खरेदीदाराने तुम्हाला पैसे दिले का? आधी तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
   "aiaic.farmer.money.direct.said_got":
     "तुम्ही सांगितले की {day} रोजी तुम्हाला {amount} मिळाले. AIAIC ने हे पेमेंट स्वतः पाहिलेले नाही.",
+  "aiaic.farmer.money.direct.said_got_any":
+    "तुम्ही सांगितले की तुम्हाला पैसे मिळाले. AIAIC ने हे पेमेंट स्वतः पाहिलेले नाही.",
   "aiaic.farmer.money.direct.said_not_yet":
     "तुम्ही सांगितले की पैसे आलेले नाहीत. हे AIAIC च्या लोकांच्या यादीत आहे.",
   "aiaic.farmer.money.direct.buyer_says":
     "खरेदीदार म्हणतो की त्याने {amount} भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
+  "aiaic.farmer.money.direct.buyer_says_any":
+    "खरेदीदार म्हणतो की त्याने पैसे भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
 
   "aiaic.payout.title": "तुमचे पैसे कुठे जातात",
   "aiaic.payout.not_offered": "AIAIC मार्फत तुम्हाला पैसे देणे इथे सुरू नाही.",
@@ -660,6 +686,7 @@ export const AIAIC_MR: Dict = {
     "तुमची माहिती तपासली गेली. AIAIC मार्फत पैसे {time} नंतर पाठवता येतील.",
   "aiaic.farmer.payout.ready_bank":
     "तयार: तुमचे पैसे {hint} ने संपणाऱ्या बँक खात्यात पाठवले जातील.",
+  "aiaic.farmer.payout.ready_bank_any": "तयार: तुमचे पैसे तुमच्या बँक खात्यात पाठवले जातील.",
   "aiaic.farmer.payout.ready_upi": "तयार: तुमचे पैसे तुमच्या UPI आयडीवर पाठवले जातील.",
   "aiaic.farmer.payout.refused":
     "Razorpay ने ही माहिती स्वीकारली नाही. यातील काहीही AIAIC ने ठेवलेले नाही. पुन्हा प्रयत्न करण्यासाठी AIAIC ची व्यक्ती मदत करू शकते.",
@@ -701,6 +728,8 @@ export const AIAIC_MR: Dict = {
   "aiaic.transport.info_only": "फक्त माहिती: हे दरपत्रक नाही, बुकिंग नाही.",
   "aiaic.transport.loading": "खर्च काढत आहे…",
   "aiaic.transport.choose_mandi": "मंडी निवडा",
+  "aiaic.transport.choose_district": "तुमचा जिल्हा निवडा",
+  "aiaic.transport.source.official": "MSRTC चे दरपत्रक ({day})",
   "aiaic.transport.map": "मार्ग",
   "aiaic.transport.note.from_district_centre":
     "तुमच्या शेतापासून नाही, तुमच्या जिल्ह्याच्या मध्यापासून मोजले.",
@@ -736,8 +765,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.chip.practice": "अभ्यास",
   "aiaic.chip.test": "परीक्षण",
   "aiaic.chip.local": "नमूना भंडार",
-  "aiaic.local.line":
-    "यहाँ की बिक्री इस ऐप के अपने नमूना भंडार में रखी जाती है: AIAIC जुड़ा नहीं है।",
+  "aiaic.local.line": "यहाँ की बिक्री इस ऐप के अपने नमूना भंडार में रखी जाती है, AIAIC में नहीं।",
   "aiaic.practice.tip": "अभ्यास खाता: असली पैसा नहीं, असली उपज नहीं।",
   "aiaic.loading": "AIAIC से पढ़ रहे हैं…",
   "aiaic.retry": "फिर से कोशिश करें",
@@ -810,6 +838,9 @@ export const AIAIC_HI: Dict = {
     "भुगतान के बारे में आपकी बात इस सर्वर पर नहीं ली जाती।",
   "aiaic.refused.payment_route_is_razorpay":
     "इस बिक्री का पैसा Razorpay के ज़रिए जाता है: आप तक क्या पहुँचा, यह AIAIC बताता है।",
+  "aiaic.refused.link_still_possible":
+    "AIAIC अभी भी इस बिक्री के लिए खरीदार का भुगतान लिंक बना सकता है: कुछ भी दर्ज नहीं हुआ।",
+  "aiaic.refused.not_handed_over_yet": "आपका माल सौंपने के बाद भुगतान के बारे में पूछा जाएगा।",
   "aiaic.refused.order_closed": "यह बिक्री रद्द हुई।",
   "aiaic.refused.mandi_not_held": "ऐसी कोई मंडी AIAIC के पास नहीं है: सूची में से एक चुनें।",
   "aiaic.refused.mandi_not_placed": "इस मंडी की जगह मालूम नहीं: दूसरी चुनें।",
@@ -955,6 +986,8 @@ export const AIAIC_HI: Dict = {
   "aiaic.money.not_yet": "अभी नहीं",
   "aiaic.farmer.money.will_send_bank":
     "खरीदार के लिंक से भुगतान करते ही Razorpay आपके {amount} {hint} पर ख़त्म होने वाले बैंक खाते में भेजेगा।",
+  "aiaic.farmer.money.will_send_bank_any":
+    "खरीदार के लिंक से भुगतान करते ही Razorpay आपके {amount} आपके बैंक खाते में भेजेगा।",
   "aiaic.farmer.money.will_send_upi":
     "खरीदार के लिंक से भुगतान करते ही Razorpay आपके {amount} आपकी UPI आईडी पर भेजेगा।",
   "aiaic.farmer.money.fee_on_top":
@@ -964,6 +997,8 @@ export const AIAIC_HI: Dict = {
     "खरीदार ने भुगतान कर दिया। आपका माल पहुँचने तक Razorpay आपके {amount} रोककर रखता है।",
   "aiaic.farmer.money.sent_bank":
     "आपके {amount} {hint} पर ख़त्म होने वाले बैंक खाते में भेजे गए। आम तौर पर ये लगभग 2 कामकाजी दिनों में पहुँचते हैं।",
+  "aiaic.farmer.money.sent_bank_any":
+    "आपके {amount} आपके बैंक खाते में भेजे गए। आम तौर पर ये लगभग 2 कामकाजी दिनों में पहुँचते हैं।",
   "aiaic.farmer.money.sent_upi":
     "आपके {amount} आपकी UPI आईडी पर भेजे गए। आम तौर पर ये कुछ मिनटों में पहुँचते हैं।",
   "aiaic.farmer.money.settled":
@@ -983,10 +1018,14 @@ export const AIAIC_HI: Dict = {
     "क्या खरीदार ने आपको पैसा दिया? पहले अपने बैंक का संदेश या UPI ऐप देखें।",
   "aiaic.farmer.money.direct.said_got":
     "आपने बताया कि आपको {day} को {amount} मिले। AIAIC ने यह भुगतान ख़ुद नहीं देखा।",
+  "aiaic.farmer.money.direct.said_got_any":
+    "आपने बताया कि आपको पैसा मिल गया। AIAIC ने यह भुगतान ख़ुद नहीं देखा।",
   "aiaic.farmer.money.direct.said_not_yet":
     "आपने बताया कि पैसा नहीं आया। यह AIAIC के लोगों की सूची में है।",
   "aiaic.farmer.money.direct.buyer_says":
     "खरीदार कहता है कि उसने {amount} दिए। अपने बैंक का संदेश या UPI ऐप देखें।",
+  "aiaic.farmer.money.direct.buyer_says_any":
+    "खरीदार कहता है कि उसने पैसा दिया। अपने बैंक का संदेश या UPI ऐप देखें।",
 
   "aiaic.payout.title": "आपका पैसा कहाँ जाता है",
   "aiaic.payout.not_offered": "AIAIC के ज़रिए आपको भुगतान यहाँ चालू नहीं है।",
@@ -1019,6 +1058,7 @@ export const AIAIC_HI: Dict = {
     "आपकी जानकारी जाँच ली गई। AIAIC के ज़रिए पैसा {time} के बाद भेजा जा सकेगा।",
   "aiaic.farmer.payout.ready_bank":
     "तैयार: आपका पैसा {hint} पर ख़त्म होने वाले बैंक खाते में भेजा जाएगा।",
+  "aiaic.farmer.payout.ready_bank_any": "तैयार: आपका पैसा आपके बैंक खाते में भेजा जाएगा।",
   "aiaic.farmer.payout.ready_upi": "तैयार: आपका पैसा आपकी UPI आईडी पर भेजा जाएगा।",
   "aiaic.farmer.payout.refused":
     "Razorpay ने यह जानकारी स्वीकार नहीं की। AIAIC ने इसमें से कुछ भी नहीं रखा। दोबारा कोशिश करने में AIAIC का कोई व्यक्ति मदद कर सकता है।",
@@ -1061,6 +1101,8 @@ export const AIAIC_HI: Dict = {
   "aiaic.transport.info_only": "सिर्फ़ जानकारी: यह भाव-पत्र नहीं, बुकिंग नहीं।",
   "aiaic.transport.loading": "खर्च निकाल रहे हैं…",
   "aiaic.transport.choose_mandi": "मंडी चुनें",
+  "aiaic.transport.choose_district": "अपना ज़िला चुनें",
+  "aiaic.transport.source.official": "MSRTC का भाड़ा-पत्र ({day})",
   "aiaic.transport.map": "रास्ता",
   "aiaic.transport.note.from_district_centre": "आपके खेत से नहीं, आपके ज़िले के बीच से नापा गया।",
   "aiaic.transport.note.to_mandi_town": "मंडी के कस्बे तक नापा गया।",
