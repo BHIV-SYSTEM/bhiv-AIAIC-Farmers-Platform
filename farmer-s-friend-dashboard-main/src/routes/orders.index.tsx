@@ -14,6 +14,7 @@ import {
   ShoppingBag,
   Tag,
   Truck,
+  Wallet,
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
@@ -83,12 +84,22 @@ function OrdersPage() {
           </p>
         </div>
 
-        <Link
-          to="/listings"
-          className="flex min-h-12 w-full sm:w-auto items-center justify-center rounded-xl border-2 border-border bg-card px-4 text-base font-bold text-foreground hover:bg-muted"
-        >
-          {t("nav.listings")}
-        </Link>
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <Link
+            to="/payments"
+            className="flex min-h-11 flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl border-2 border-primary/40 bg-primary/10 px-3.5 py-1.5 text-sm font-bold text-primary hover:bg-primary/20"
+          >
+            <Wallet className="size-4 shrink-0" />
+            <span>{t("nav.payments")}</span>
+          </Link>
+
+          <Link
+            to="/listings"
+            className="flex min-h-11 flex-1 sm:flex-initial items-center justify-center rounded-xl border-2 border-border bg-card px-4 py-1.5 text-sm font-bold text-foreground hover:bg-muted"
+          >
+            {t("nav.listings")}
+          </Link>
+        </div>
       </div>
 
       {/* Honest Sandbox / Demonstrative Buyer Matching Notice */}
@@ -219,6 +230,11 @@ function OrderCard({ order }: { order: ProduceOrder }) {
               {order.status === "DECLINED" && <XCircle className="size-3" />}
               {t(`order.status.${order.status}`)}
             </span>
+            {order.isSandboxDemo && (
+              <span className="rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 text-[11px] font-bold shrink-0">
+                {t("common.demoSandbox")}
+              </span>
+            )}
           </div>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-2">
@@ -241,40 +257,46 @@ function OrderCard({ order }: { order: ProduceOrder }) {
 
         {/* Financial Overview */}
         <div className="flex flex-col rounded-2xl bg-muted/40 p-3 sm:p-0 sm:bg-transparent sm:items-end">
-          <span className="text-xs font-semibold text-muted-foreground">
-            {t("financial.netPayout")}
+          <span className="text-xs font-semibold text-muted-foreground text-left sm:text-right">
+            {t("financial.estimatedAmountReceived")}
           </span>
           <span className="text-2xl sm:text-3xl font-black text-foreground">
             ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
           </span>
           <span className="text-xs text-muted-foreground font-semibold">
-            Gross: ₹{order.grossAmount.toLocaleString("en-IN")}
+            Total Produce Value: ₹{order.grossAmount.toLocaleString("en-IN")}
           </span>
         </div>
       </div>
 
-      {/* Itemized summary chips */}
-      <div className="mt-4 grid grid-cols-1 gap-2 rounded-2xl bg-secondary/60 p-3 text-xs sm:grid-cols-3">
+      {/* Itemized summary chips in exact required order */}
+      <div className="mt-4 grid grid-cols-1 gap-2 rounded-2xl bg-secondary/60 p-3 text-xs sm:grid-cols-4">
+        <div className="flex items-center gap-1.5 text-foreground/80">
+          <span className="font-semibold text-muted-foreground">1. Total:</span>
+          <span className="font-bold text-foreground">
+            ₹{order.grossAmount.toLocaleString("en-IN")}
+          </span>
+        </div>
+
         <div className="flex items-start gap-1.5 text-foreground/80">
           <Truck className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
           <div className="min-w-0">
-            <span>
-              {t("financial.estimatedTransport")}: ₹{order.estimatedTransportCost}
+            <span>2. Transport: - ₹{order.estimatedTransportCost.toLocaleString("en-IN")}</span>
+            <span className="text-[10px] text-muted-foreground block">
+              ({t("financial.transport.statusEstimated")})
             </span>
-            <span className="text-[10px] text-muted-foreground block">(Estimated charge)</span>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 text-foreground/80">
           <Tag className="size-3.5 shrink-0 text-muted-foreground" />
           <span className="break-words">
-            {t("financial.mandiCess")}: ₹{order.estimatedPlatformFee}
+            3. Fee: - ₹{order.estimatedPlatformFee.toLocaleString("en-IN")}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-foreground/80">
-          <span className="font-semibold shrink-0">Payment Terms:</span>
-          <span className="break-words">{order.terms}</span>
+        <div className="flex items-center gap-1.5 text-primary font-bold">
+          <span>4. Net: ₹{order.estimatedNetPayout.toLocaleString("en-IN")}</span>
         </div>
       </div>
 

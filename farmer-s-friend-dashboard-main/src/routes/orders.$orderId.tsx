@@ -22,6 +22,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { BankDetailsCard } from "@/components/farm/BankDetailsCard";
+import { PaymentStatusStepper } from "@/components/farm/PaymentStatusStepper";
+import { WheelsEyeLogisticsCard } from "@/components/farm/WheelsEyeLogisticsCard";
 import { useI18n } from "@/lib/i18n";
 import { getOrderById, acceptOrder, declineOrder } from "@/lib/transactions.functions";
 import type { ProduceOrder } from "@/lib/transaction-types";
@@ -176,6 +179,11 @@ function OrderDetailPage() {
                 {order.status === "DECLINED" && <XCircle className="size-3.5" />}
                 {t(`order.status.${order.status}`)}
               </span>
+              {order.isSandboxDemo && (
+                <span className="rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 px-2.5 py-1 text-xs font-bold shrink-0">
+                  {t("common.demoSandbox")}
+                </span>
+              )}
             </div>
 
             <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground break-words">
@@ -190,14 +198,14 @@ function OrderDetailPage() {
           </div>
 
           <div className="flex flex-col rounded-2xl bg-muted/40 p-3 sm:p-0 sm:bg-transparent sm:items-end">
-            <span className="text-xs font-semibold text-muted-foreground">
-              {t("financial.netPayout")}
+            <span className="text-xs font-semibold text-muted-foreground text-left sm:text-right">
+              {t("financial.estimatedAmountReceived")}
             </span>
             <span className="text-2xl sm:text-3xl font-black text-foreground">
               ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
             </span>
             <span className="text-xs text-muted-foreground font-semibold">
-              Gross: ₹{order.grossAmount.toLocaleString("en-IN")}
+              Total Produce Value: ₹{order.grossAmount.toLocaleString("en-IN")}
             </span>
           </div>
         </div>
@@ -326,10 +334,11 @@ function OrderDetailPage() {
 
           {/* Mobile Stacked Card Breakdown (<sm) */}
           <div className="space-y-2.5 sm:hidden">
+            {/* 1. Total value of produce */}
             <div className="rounded-2xl border border-border bg-card p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-foreground">
-                  {t("financial.grossValue")}
+                  1. {t("financial.grossValue")}
                 </span>
                 <span className="text-base font-extrabold text-foreground whitespace-nowrap">
                   ₹{order.grossAmount.toLocaleString("en-IN")}
@@ -341,38 +350,46 @@ function OrderDetailPage() {
               </span>
             </div>
 
-            <div className="rounded-2xl border border-border bg-secondary/30 p-3">
+            {/* 2. Transportation charge */}
+            <div className="rounded-2xl border border-border bg-secondary/30 p-3 space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-foreground">
-                  {t("financial.estimatedTransport")}
-                </span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-xs font-semibold text-foreground">
+                    2. {t("financial.estimatedTransport")}
+                  </span>
+                  <span className="rounded bg-muted px-1.5 py-0.2 text-[10px] font-bold text-muted-foreground uppercase shrink-0">
+                    {t("financial.transport.statusEstimated")}
+                  </span>
+                </div>
                 <span className="text-sm font-bold text-foreground whitespace-nowrap">
                   - ₹{order.estimatedTransportCost.toLocaleString("en-IN")}
                 </span>
               </div>
-              <span className="text-[11px] text-muted-foreground block mt-0.5">
-                {t("financial.basis")}: {t("financial.estimatedTransport")}
+              <span className="text-[11px] text-muted-foreground block">
+                {t("financial.transport.payerUnconfirmed")}
               </span>
             </div>
 
+            {/* 3. Other fees or deductions */}
             <div className="rounded-2xl border border-border bg-card p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold text-foreground">
-                  {t("financial.mandiCess")}
+                  3. {t("financial.mandiCess")}
                 </span>
                 <span className="text-sm font-bold text-foreground whitespace-nowrap">
                   - ₹{order.estimatedPlatformFee.toLocaleString("en-IN")}
                 </span>
               </div>
               <span className="text-[11px] text-muted-foreground block mt-0.5">
-                {t("financial.basis")}: {t("financial.mandiCess")}
+                {t("financial.mandiCessNote")}
               </span>
             </div>
 
+            {/* 4. Estimated amount the farmer will receive */}
             <div className="rounded-2xl border-2 border-primary/40 bg-primary/10 p-3.5">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-extrabold text-foreground">
-                  {t("financial.netPayout")}
+                  4. {t("financial.estimatedAmountReceived")}
                 </span>
                 <span className="text-xl font-black text-primary whitespace-nowrap">
                   ₹{order.estimatedNetPayout.toLocaleString("en-IN")}
@@ -395,9 +412,10 @@ function OrderDetailPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
+                {/* 1. Total value of produce */}
                 <tr>
                   <td className="px-4 py-3 font-bold text-foreground break-words">
-                    {t("financial.grossValue")}
+                    1. {t("financial.grossValue")}
                   </td>
                   <td className="px-4 py-3 text-right text-muted-foreground">
                     {order.quantityQuintals} Q × ₹{order.offeredPricePerQuintal}/Q
@@ -407,29 +425,36 @@ function OrderDetailPage() {
                   </td>
                 </tr>
 
+                {/* 2. Transportation charge */}
                 <tr className="bg-secondary/20">
                   <td className="px-4 py-3 text-foreground">
-                    <span className="font-semibold block break-words">
-                      {t("financial.estimatedTransport")}
-                    </span>
-                    <span className="block text-xs text-muted-foreground break-words">
-                      {t("financial.transportDeductionNote")}
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold block break-words">
+                        2. {t("financial.estimatedTransport")}
+                      </span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase">
+                        {t("financial.transport.statusEstimated")}
+                      </span>
+                    </div>
+                    <span className="block text-xs text-muted-foreground break-words mt-0.5">
+                      {t("financial.transport.payerUnconfirmed")}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right text-muted-foreground">
-                    {t("financial.basis")}
+                    {t("financial.transport.deductedNote")}
                   </td>
                   <td className="px-4 py-3 text-right font-semibold text-foreground whitespace-nowrap">
                     - ₹{order.estimatedTransportCost.toLocaleString("en-IN")}
                   </td>
                 </tr>
 
+                {/* 3. Other fees or deductions */}
                 <tr>
                   <td className="px-4 py-3 text-foreground">
                     <span className="font-semibold block break-words">
-                      {t("financial.mandiCess")}
+                      3. {t("financial.mandiCess")}
                     </span>
-                    <span className="block text-xs text-muted-foreground break-words">
+                    <span className="block text-xs text-muted-foreground break-words mt-0.5">
                       {t("financial.mandiCessNote")}
                     </span>
                   </td>
@@ -441,9 +466,10 @@ function OrderDetailPage() {
                   </td>
                 </tr>
 
+                {/* 4. Estimated amount the farmer will receive */}
                 <tr className="bg-primary/10">
                   <td className="px-4 py-4 text-base font-extrabold text-foreground">
-                    {t("financial.netPayout")}
+                    4. {t("financial.estimatedAmountReceived")}
                   </td>
                   <td className="px-4 py-4 text-right text-xs font-bold text-muted-foreground">
                     {t("financial.payableToFarmer")}
@@ -461,6 +487,15 @@ function OrderDetailPage() {
             {t("financial.disclosure.body")}
           </div>
         </section>
+
+        {/* Dedicated WheelsEye Logistics Card */}
+        <WheelsEyeLogisticsCard order={order} />
+
+        {/* Decoupled Payment Status Stepper */}
+        <PaymentStatusStepper order={order} />
+
+        {/* Safe Non-Persisting Bank Details Setup Card */}
+        <BankDetailsCard isSandboxDemo={order.isSandboxDemo} />
 
         {/* 4. Governance & Verification Separation */}
         <section className="rounded-3xl border-2 border-border bg-card p-4 sm:p-5 space-y-3.5">

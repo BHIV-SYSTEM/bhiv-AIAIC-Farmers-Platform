@@ -162,7 +162,10 @@ export function SimpleAdviceHero({
 
       {/* 4. Full Relevant Detail (Expanded Section) */}
       {isExpanded && children ? (
-        <div id="advice-expanded-details" className="space-y-6 pt-2 animate-in fade-in duration-200">
+        <div
+          id="advice-expanded-details"
+          className="space-y-6 pt-2 animate-in fade-in duration-200"
+        >
           {children}
         </div>
       ) : null}

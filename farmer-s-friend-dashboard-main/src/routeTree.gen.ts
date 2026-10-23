@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AskRouteImport } from './routes/ask'
 import { Route as ListingsRouteImport } from './routes/listings'
+import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as AdviceServiceRouteImport } from './routes/advice.$service'
@@ -32,6 +33,11 @@ const AskRoute = AskRouteImport.update({
 const ListingsRoute = ListingsRouteImport.update({
   id: '/listings',
   path: '/listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentsRoute = PaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultRoute = ResultRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ask': typeof AskRoute
   '/listings': typeof ListingsRoute
+  '/payments': typeof PaymentsRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/advice/$service': typeof AdviceServiceRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ask': typeof AskRoute
   '/listings': typeof ListingsRoute
+  '/payments': typeof PaymentsRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/advice/$service': typeof AdviceServiceRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/ask': typeof AskRoute
   '/listings': typeof ListingsRoute
+  '/payments': typeof PaymentsRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/advice/$service': typeof AdviceServiceRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ask'
     | '/listings'
+    | '/payments'
     | '/result'
     | '/review'
     | '/advice/$service'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ask'
     | '/listings'
+    | '/payments'
     | '/result'
     | '/review'
     | '/advice/$service'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ask'
     | '/listings'
+    | '/payments'
     | '/result'
     | '/review'
     | '/advice/$service'
@@ -139,6 +151,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AskRoute: typeof AskRoute
   ListingsRoute: typeof ListingsRoute
+  PaymentsRoute: typeof PaymentsRoute
   ResultRoute: typeof ResultRoute
   ReviewRoute: typeof ReviewRoute
   AdviceServiceRoute: typeof AdviceServiceRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/listings'
       fullPath: '/listings'
       preLoaderRoute: typeof ListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payments': {
+      id: '/payments'
+      path: '/payments'
+      fullPath: '/payments'
+      preLoaderRoute: typeof PaymentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/result': {
@@ -219,6 +239,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AskRoute: AskRoute,
   ListingsRoute: ListingsRoute,
+  PaymentsRoute: PaymentsRoute,
   ResultRoute: ResultRoute,
   ReviewRoute: ReviewRoute,
   AdviceServiceRoute: AdviceServiceRoute,
