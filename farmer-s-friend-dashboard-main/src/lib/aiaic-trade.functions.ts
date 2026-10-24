@@ -8,6 +8,7 @@ import {
   type MineForScreen,
   type NearbyMandis,
   type ReferencePrice,
+  type StorageVerdict,
   type TradeMode,
   type TransportEstimate,
 } from "./aiaic-trade";
@@ -154,6 +155,24 @@ export const getTransportEstimate = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<AiaicResult<TransportEstimate>> => {
     const { transportEstimate } = await import("./aiaic-trade.server");
     return transportEstimate(data);
+  });
+
+/** AIAIC's storage verdict card (GET /storage/verdict): store or sell now and the nearest warehouses by name. */
+export const getStorageVerdict = createServerFn({ method: "GET" })
+  .validator((d: unknown) =>
+    z
+      .object({
+        crop: z.string().trim().min(1).max(80),
+        district,
+        state,
+        quantity_q: qty.optional(),
+        lang,
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<AiaicResult<StorageVerdict>> => {
+    const { storageVerdict } = await import("./aiaic-trade.server");
+    return storageVerdict(data);
   });
 
 export const getNearbyMandis = createServerFn({ method: "GET" })

@@ -29,6 +29,7 @@ import {
   type MineForScreen,
   type NearbyMandis,
   type ReferencePrice,
+  type StorageVerdict,
   type TradeMode,
   type TransportEstimate,
 } from "./aiaic-trade";
@@ -792,6 +793,29 @@ export async function transportEstimate(q: EstimateInput): Promise<AiaicResult<T
   };
   return keptTransport(`estimate:${JSON.stringify(query)}`, () =>
     call<TransportEstimate>({ path: "/transport/estimate", query, auth: false }),
+  );
+}
+
+/**
+ * GET /storage/verdict: store or sell now, and the nearest public warehouses by name (contract section 21); only its
+ * declared parameters are sent, and an answer is kept for a while, like the transport card's.
+ */
+export async function storageVerdict(q: {
+  crop: string;
+  district: string;
+  state: string;
+  quantity_q?: number | undefined;
+  lang: string;
+}): Promise<AiaicResult<StorageVerdict>> {
+  const query: Query = {
+    crop: q.crop,
+    district: q.district,
+    state: q.state,
+    quantity_q: q.quantity_q,
+    lang: q.lang,
+  };
+  return keptTransport(`storage:${JSON.stringify(query)}`, () =>
+    call<StorageVerdict>({ path: "/storage/verdict", query, auth: false }),
   );
 }
 

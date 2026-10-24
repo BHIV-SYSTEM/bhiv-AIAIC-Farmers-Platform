@@ -101,7 +101,12 @@ export function commissionSentence(read: PricingRead): string {
       "AIAIC's commission setting is being corrected; until it is, Krishi Sampada (AIAIC) makes no payment " +
       "link that carries a farmer's share."
     );
-  if (!c.set) return "AIAIC charges no commission at present.";
+  // none set: AIAIC's model and today's rate (the owner, 24 Oct 2026: it does not charge one now, but it will)
+  if (!c.set)
+    return (
+      "AIAIC charges a commission on produce sold through it. Its rate, and who pays it, are shown here and on " +
+      "every payment before anyone pays. At present the rate is 0%: no commission is charged."
+    );
   const rate = percentWords(c.percent, c.bps);
   if (rate === null) return NOT_READ;
   const base = `AIAIC's commission is ${rate} of the agreed price (rounded down to the paisa)`;
