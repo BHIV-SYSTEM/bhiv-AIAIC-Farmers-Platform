@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AskRouteImport } from './routes/ask'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ListingsRouteImport } from './routes/listings'
 import { Route as PaymentsRouteImport } from './routes/payments'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as ReviewRouteImport } from './routes/review'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdviceServiceRouteImport } from './routes/advice.$service'
 import { Route as ListingNewRouteImport } from './routes/listing.new'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
@@ -25,9 +31,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AskRoute = AskRouteImport.update({
   id: '/ask',
   path: '/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListingsRoute = ListingsRouteImport.update({
@@ -40,6 +56,21 @@ const PaymentsRoute = PaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultRoute = ResultRouteImport.update({
   id: '/result',
   path: '/result',
@@ -48,6 +79,11 @@ const ResultRoute = ResultRouteImport.update({
 const ReviewRoute = ReviewRouteImport.update({
   id: '/review',
   path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdviceServiceRoute = AdviceServiceRouteImport.update({
@@ -73,11 +109,17 @@ const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/ask': typeof AskRoute
+  '/contact': typeof ContactRoute
   '/listings': typeof ListingsRoute
   '/payments': typeof PaymentsRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -85,11 +127,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/ask': typeof AskRoute
+  '/contact': typeof ContactRoute
   '/listings': typeof ListingsRoute
   '/payments': typeof PaymentsRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -98,11 +146,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/ask': typeof AskRoute
+  '/contact': typeof ContactRoute
   '/listings': typeof ListingsRoute
   '/payments': typeof PaymentsRoute
+  '/pricing': typeof PricingRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
@@ -112,11 +166,17 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/ask'
+    | '/contact'
     | '/listings'
     | '/payments'
+    | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/result'
     | '/review'
+    | '/terms'
     | '/advice/$service'
     | '/listing/new'
     | '/orders/$orderId'
@@ -124,11 +184,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/ask'
+    | '/contact'
     | '/listings'
     | '/payments'
+    | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/result'
     | '/review'
+    | '/terms'
     | '/advice/$service'
     | '/listing/new'
     | '/orders/$orderId'
@@ -136,11 +202,17 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/ask'
+    | '/contact'
     | '/listings'
     | '/payments'
+    | '/pricing'
+    | '/privacy'
+    | '/refund-policy'
     | '/result'
     | '/review'
+    | '/terms'
     | '/advice/$service'
     | '/listing/new'
     | '/orders/$orderId'
@@ -149,11 +221,17 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AskRoute: typeof AskRoute
+  ContactRoute: typeof ContactRoute
   ListingsRoute: typeof ListingsRoute
   PaymentsRoute: typeof PaymentsRoute
+  PricingRoute: typeof PricingRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   ResultRoute: typeof ResultRoute
   ReviewRoute: typeof ReviewRoute
+  TermsRoute: typeof TermsRoute
   AdviceServiceRoute: typeof AdviceServiceRoute
   ListingNewRoute: typeof ListingNewRoute
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
@@ -169,11 +247,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ask': {
       id: '/ask'
       path: '/ask'
       fullPath: '/ask'
       preLoaderRoute: typeof AskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listings': {
@@ -190,6 +282,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaymentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/result': {
       id: '/result'
       path: '/result'
@@ -202,6 +315,13 @@ declare module '@tanstack/react-router' {
       path: '/review'
       fullPath: '/review'
       preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/advice/$service': {
@@ -237,11 +357,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AskRoute: AskRoute,
+  ContactRoute: ContactRoute,
   ListingsRoute: ListingsRoute,
   PaymentsRoute: PaymentsRoute,
+  PricingRoute: PricingRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   ResultRoute: ResultRoute,
   ReviewRoute: ReviewRoute,
+  TermsRoute: TermsRoute,
   AdviceServiceRoute: AdviceServiceRoute,
   ListingNewRoute: ListingNewRoute,
   OrdersOrderIdRoute: OrdersOrderIdRoute,

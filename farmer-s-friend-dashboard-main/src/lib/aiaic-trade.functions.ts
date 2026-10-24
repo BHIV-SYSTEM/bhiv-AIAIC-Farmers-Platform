@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import {
   PRESS_KEY_RE,
+  type AiaicPricing,
   type AiaicResult,
   type MineForScreen,
   type NearbyMandis,
@@ -127,6 +128,14 @@ export const reportPayment = createServerFn({ method: "POST" })
     const { reportPayment: report } = await import("./aiaic-trade.server");
     return report(data.key, data.order_id, data.what);
   });
+
+/** AIAIC's commission as its server holds it now (its public GET /payments/pricing), for the pricing page. */
+export const getAiaicPricing = createServerFn({ method: "GET" }).handler(
+  async (): Promise<AiaicResult<AiaicPricing>> => {
+    const { aiaicPricing } = await import("./aiaic-trade.server");
+    return aiaicPricing();
+  },
+);
 
 export const getTransportEstimate = createServerFn({ method: "GET" })
   .validator((d: unknown) =>

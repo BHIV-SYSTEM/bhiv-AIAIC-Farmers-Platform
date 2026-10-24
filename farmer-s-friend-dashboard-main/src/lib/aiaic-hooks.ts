@@ -1,9 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
-import type { AiaicProblem, AiaicResult, MineForScreen, TradeMode } from "./aiaic-trade";
-import { getMyTrade, getTradeMode } from "./aiaic-trade.functions";
+import type {
+  AiaicPricing,
+  AiaicProblem,
+  AiaicResult,
+  MineForScreen,
+  TradeMode,
+} from "./aiaic-trade";
+import { getAiaicPricing, getMyTrade, getTradeMode } from "./aiaic-trade.functions";
 import { useI18n } from "./i18n";
+
+/** AIAIC's commission as its server holds it now (public GET /payments/pricing through this server). */
+export function useAiaicPricing() {
+  const fn = useServerFn(getAiaicPricing);
+  return useQuery<AiaicResult<AiaicPricing>>({
+    queryKey: ["aiaic-pricing"],
+    queryFn: () => fn(),
+    staleTime: 5 * 60_000,
+    retry: 1,
+  });
+}
 
 /** Where this app's sales live (from the server's settings): AIAIC, or the app's own demo store. */
 export function useTradeMode() {

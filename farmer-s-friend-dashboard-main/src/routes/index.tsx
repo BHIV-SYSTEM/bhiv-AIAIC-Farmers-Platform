@@ -48,6 +48,9 @@ function Home() {
         <p className="mt-3 break-words text-base leading-relaxed text-foreground/80 sm:text-lg">
           {t("home.lead")}
         </p>
+        <p className="mt-2 break-words text-sm leading-relaxed text-foreground/75 sm:text-base">
+          {t("home.what")}
+        </p>
       </header>
 
       <div className="mt-6 sm:mt-8">

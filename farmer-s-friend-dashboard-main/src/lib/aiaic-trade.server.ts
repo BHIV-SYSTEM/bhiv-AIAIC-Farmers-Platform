@@ -16,10 +16,13 @@
  */
 import { AIAIC_HEADERS, isTunnelErrorBody, resolveBaseUrl } from "./aiaic-base.server";
 import {
+  commissionOf,
   namesOf,
+  pricingOf,
   problem,
   type AiaicCrisis,
   type AiaicMine,
+  type AiaicPricing,
   type Json,
   type AiaicProblem,
   type AiaicResult,
@@ -106,6 +109,7 @@ export function resetForTests(): void {
   practice = null;
   transportKept.clear();
   namesKept.clear();
+  pricingKept = null;
 }
 
 function isProblem(x: Session | AiaicProblem): x is AiaicProblem {
@@ -470,7 +474,11 @@ export function mineForBrowser(raw: unknown): AiaicMine {
         : [];
       order["payment"] = pick(src["payment"], PAYMENT_KEYS);
       if (src["money"] && typeof src["money"] === "object") {
-        order["money"] = pick(src["money"], MONEY_KEYS);
+        const money = pick<Record<string, unknown>>(src["money"], MONEY_KEYS);
+        // AIAIC's commission on this sale (24 Oct 2026), field by field; an AIAIC not yet updated sends none.
+        const commission = commissionOf((src["money"] as Record<string, unknown>)["commission"]);
+        if (commission) money["commission"] = commission;
+        order["money"] = money;
       }
       return order as unknown as AiaicMine["orders"][number];
     }),
@@ -721,6 +729,28 @@ export async function reportPayment(
     { what },
   );
   return r.ok ? { ok: true, data: true } : r;
+}
+
+// ------------------------------------------------------------------------------------------- AIAIC's pricing
+
+const PRICING_KEEP_MS = 5 * 60_000;
+let pricingKept: { at: number; answer: AiaicResult<AiaicPricing> } | null = null;
+
+/**
+ * GET /payments/pricing (AIAIC's contract, section 17c; public, no sign-in, and it sends no key, person or order):
+ * AIAIC's commission as its server holds it now, for the pricing page's sentence. Only those facts leave this server.
+ * An answer is kept 5 minutes; a refusal (an AIAIC not yet updated answers 404) or an unreadable answer is SAID, and
+ * asked again next time.
+ */
+export async function aiaicPricing(): Promise<AiaicResult<AiaicPricing>> {
+  if (pricingKept && Date.now() - pricingKept.at < PRICING_KEEP_MS) return pricingKept.answer;
+  const r = await call<unknown>({ path: "/payments/pricing", auth: false });
+  if (!r.ok) return r;
+  const pricing = pricingOf(r.data);
+  if (!pricing) return { ok: false, problem: problem("aiaic_answer_unreadable") };
+  const answer = { ok: true as const, data: pricing };
+  pricingKept = { at: Date.now(), answer };
+  return answer;
 }
 
 // ------------------------------------------------------------------------------------------------ transport

@@ -7,6 +7,8 @@ import { useState } from "react";
 import { usePress } from "@/lib/aiaic-crisis";
 import {
   buyerLine,
+  commissionFromHer,
+  commissionParts,
   cropName,
   dayOf,
   findOffer,
@@ -19,6 +21,7 @@ import {
   quintalWords,
   quintals,
   rupees,
+  type AiaicCommission,
   type AiaicOrder,
   type AiaicProblem,
   type MineForScreen,
@@ -354,7 +357,7 @@ function MoneyCard({ order }: { order: AiaicOrder }) {
   const money = order.money;
   const card = moneyCard(t, order);
   // a refusal of her last press stays in sight even when the card has nothing else to say
-  if (!money || (!card && !problem)) return null;
+  if (!money || (!card && !problem && !money.commission)) return null;
 
   const report = async (what: "received" | "not_received") => {
     setBusy(true);
@@ -377,9 +380,15 @@ function MoneyCard({ order }: { order: AiaicOrder }) {
         {money.test_mode ? <ModeChip kind="test" /> : null}
       </div>
       {card ? <p className="text-base font-bold text-foreground">{card.line}</p> : null}
+      <CommissionBlock commission={money.commission} />
       {money.fee_on_top && typeof money.share_inr === "number" ? (
         <p className="text-xs font-semibold text-muted-foreground">
-          {t("aiaic.farmer.money.fee_on_top", { amount: rupees(money.share_inr) })}
+          {t(
+            commissionFromHer(money.commission)
+              ? "aiaic.farmer.money.fee_on_top_after_commission"
+              : "aiaic.farmer.money.fee_on_top",
+            { amount: rupees(money.share_inr) },
+          )}
         </p>
       ) : null}
       {problem ? <ProblemCard problem={problem} /> : null}
@@ -404,5 +413,57 @@ function MoneyCard({ order }: { order: AiaicOrder }) {
         </div>
       ) : null}
     </section>
+  );
+}
+
+/**
+ * AIAIC's commission on this sale, from its payment link's own record (AIAIC's `money.commission`): the agreed price,
+ * the commission and who pays it, and what she receives, all AIAIC's own numbers. Nothing when AIAIC sends none (no
+ * share of hers at Razorpay yet, or an AIAIC not yet updated).
+ */
+function CommissionBlock({ commission }: { commission: AiaicCommission | null | undefined }) {
+  const { t } = useI18n();
+  if (!commission) return null;
+  if (!commission.set)
+    return (
+      <p className="text-xs font-semibold text-muted-foreground">{t("aiaic.commission.none")}</p>
+    );
+  const c = commissionParts(commission);
+  const who =
+    c.payer === "buyer"
+      ? t("aiaic.commission.by_buyer")
+      : c.payer === "farmer"
+        ? t("aiaic.commission.by_farmer")
+        : c.payer === "split"
+          ? c.fromHer !== null && c.fromBuyer !== null
+            ? t("aiaic.commission.by_both", { buyer: rupees(c.fromBuyer), her: rupees(c.fromHer) })
+            : t("aiaic.commission.by_both_plain")
+          : null;
+  return (
+    <div className="space-y-1.5 rounded-2xl border-2 border-border bg-card p-3 text-sm">
+      {commission.price_inr !== null ? (
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="font-semibold text-muted-foreground">
+            {t("aiaic.commission.agreed")}
+          </span>
+          <span className="font-bold text-foreground">{rupees(commission.price_inr)}</span>
+        </div>
+      ) : null}
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="font-semibold text-muted-foreground">
+          {c.rate
+            ? t("aiaic.commission.title", { rate: c.rate })
+            : t("aiaic.commission.title_no_rate")}
+        </span>
+        <span className="font-bold text-foreground">{rupees(c.amount)}</span>
+      </div>
+      {who ? <p className="text-xs text-muted-foreground">{who}</p> : null}
+      {c.youReceive !== null ? (
+        <div className="flex items-baseline justify-between gap-2 border-t border-border pt-1.5">
+          <span className="font-bold text-foreground">{t("aiaic.commission.you_receive")}</span>
+          <span className="text-base font-black text-primary">{rupees(c.youReceive)}</span>
+        </div>
+      ) : null}
+    </div>
   );
 }
