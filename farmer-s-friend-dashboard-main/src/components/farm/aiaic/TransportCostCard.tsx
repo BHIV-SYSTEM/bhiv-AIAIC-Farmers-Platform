@@ -30,6 +30,14 @@ function estateOf(state: string | null | undefined): Estate {
   return s === "mp" || s.includes("madhya") ? "mp" : "mh";
 }
 
+/** A mandi's name by its letters only, without "APMC", to match a name an answer wrote to AIAIC's list. */
+function mandiKey(name: string | null | undefined): string {
+  return (name ?? "")
+    .toLowerCase()
+    .replace(/\bapmc\b/g, "")
+    .replace(/[^a-z]/g, "");
+}
+
 const SELECT =
   "min-h-12 w-full rounded-xl border-2 border-input bg-background px-3 text-base font-semibold text-foreground outline-none focus:border-ring";
 
@@ -46,6 +54,7 @@ export function TransportCostCard({
   fromState,
   fromDistrict,
   fromText,
+  toMandi,
   className = "",
 }: {
   crop: string;
@@ -56,6 +65,9 @@ export function TransportCostCard({
   /** Her PICKUP place as free text (the demo store's order): the district it names first is the default; none named,
    * she chooses (never the buyer's end, never the list's first district). */
   fromText?: string | null | undefined;
+  /** The mandi an answer named (the advice's own mandi): chosen first when AIAIC's nearby list holds it, else the
+   * card's own default; she can always choose another. */
+  toMandi?: string | null | undefined;
   className?: string;
 }) {
   const { t, lang } = useI18n();
@@ -86,18 +98,26 @@ export function TransportCostCard({
     setDistrict(startDistrict(districtList, [fromDistrict], fromText));
   }, [districtList, fromDistrict, fromText, district]);
 
+  // A wider list when an answer named a mandi, so that mandi is more likely held in it.
+  const nearbyLimit = toMandi ? 40 : 15;
   const nearby = useQuery({
-    queryKey: ["aiaic-nearby", estate, district],
-    queryFn: () => nearbyFn({ data: { district, state: estate, limit: 15 } }),
+    queryKey: ["aiaic-nearby", estate, district, nearbyLimit],
+    queryFn: () => nearbyFn({ data: { district, state: estate, limit: nearbyLimit } }),
     enabled: Boolean(district),
     staleTime: 30 * 60_000,
   });
   const mandis = useMemo(() => (nearby.data?.ok ? nearby.data.data.mandis : []), [nearby.data]);
-  // The first mandi far enough to measure a trip to; she can choose any other.
+  // The mandi the answer named, when AIAIC's list holds it (names compared by their letters, "APMC" left out).
+  const named = useMemo(() => {
+    const key = mandiKey(toMandi);
+    return key ? (mandis.find((m) => mandiKey(m.mandi) === key)?.mandi ?? "") : "";
+  }, [toMandi, mandis]);
+  // Her own choice first, then the mandi the answer named, then the first mandi far enough to measure a trip to.
   const mandi = useMemo(() => {
     if (mandiPick && mandis.some((m) => m.mandi === mandiPick)) return mandiPick;
+    if (named) return named;
     return (mandis.find((m) => m.straight_km >= 5) ?? mandis[0])?.mandi ?? "";
-  }, [mandiPick, mandis]);
+  }, [mandiPick, mandis, named]);
   const mandiRow = mandis.find((m) => m.mandi === mandi);
 
   const estimate = useQuery({
