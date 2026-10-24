@@ -15,6 +15,7 @@ import { useState } from "react";
 import { usePress } from "@/lib/aiaic-crisis";
 import { useMine } from "@/lib/aiaic-hooks";
 import {
+  commissionParts,
   cropName,
   moneySaid,
   moneyTotals,
@@ -24,6 +25,7 @@ import {
   quintalWords,
   quintals,
   rupees,
+  type AiaicCommission,
   type AiaicProblem,
   type MineForScreen,
   type PayoutAccountBlock,
@@ -133,6 +135,11 @@ function EachSale({ data }: { data: MineForScreen }) {
               </div>
               <p className="text-sm font-semibold text-foreground">{t(paymentLine(o).key)}</p>
               {said ? <p className="text-sm text-foreground/85">{said}</p> : null}
+              {o.money?.commission?.set ? (
+                <p className="text-xs font-semibold text-muted-foreground">
+                  {commissionLine(t, o.money.commission)}
+                </p>
+              ) : null}
               <Link
                 to="/orders/$orderId"
                 params={{ orderId: o.order_id }}
@@ -147,6 +154,19 @@ function EachSale({ data }: { data: MineForScreen }) {
       )}
     </section>
   );
+}
+
+/** One sale's commission in one line, from AIAIC's own numbers for that sale's payment link. */
+function commissionLine(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  commission: AiaicCommission,
+): string {
+  const c = commissionParts(commission);
+  return t("aiaic.commission.line", {
+    rate: c.rate ?? "—",
+    amount: rupees(c.amount),
+    share: rupees(c.youReceive),
+  });
 }
 
 /** Synthetic values for a TEST server (AIAIC's own recorder uses the same kind): never a person's details. */

@@ -269,6 +269,20 @@ export const AIAIC_EN: Dict = {
     "When the buyer pays through the link, Razorpay sends your {amount} to your UPI ID.",
   "aiaic.farmer.money.fee_on_top":
     "The buyer pays the payment fee on top: you receive your full {amount}.",
+  "aiaic.farmer.money.fee_on_top_after_commission":
+    "The buyer pays the payment fee on top. After AIAIC's commission, you receive {amount}.",
+  "aiaic.commission.title": "AIAIC's commission ({rate})",
+  "aiaic.commission.title_no_rate": "AIAIC's commission",
+  "aiaic.commission.agreed": "Agreed price",
+  "aiaic.commission.you_receive": "You receive",
+  "aiaic.commission.by_buyer":
+    "The buyer pays it on top of the price: it does not come out of your share.",
+  "aiaic.commission.by_farmer": "It comes out of your share.",
+  "aiaic.commission.by_both":
+    "Shared: the buyer pays {buyer} on top, and {her} comes out of your share.",
+  "aiaic.commission.by_both_plain": "Shared between the buyer and you.",
+  "aiaic.commission.none": "AIAIC takes no commission on this sale.",
+  "aiaic.commission.line": "AIAIC's commission ({rate}): {amount}. You receive {share}.",
   "aiaic.farmer.money.sending": "The buyer paid. Razorpay is sending your {amount} now.",
   "aiaic.farmer.money.held":
     "The buyer paid. Razorpay keeps your {amount} until your produce is delivered.",
@@ -669,6 +683,20 @@ export const AIAIC_MR: Dict = {
     "खरेदीदाराने लिंकवरून पैसे भरले की Razorpay तुमचे {amount} तुमच्या UPI आयडीवर पाठवेल.",
   "aiaic.farmer.money.fee_on_top":
     "पेमेंटचे शुल्क खरेदीदार वरून भरतो: तुम्हाला तुमचे पूर्ण {amount} मिळतात.",
+  "aiaic.farmer.money.fee_on_top_after_commission":
+    "पेमेंटचे शुल्क खरेदीदार वरून भरतो. AIAIC चे कमिशन वजा जाता तुम्हाला {amount} मिळतात.",
+  "aiaic.commission.title": "AIAIC चे कमिशन ({rate})",
+  "aiaic.commission.title_no_rate": "AIAIC चे कमिशन",
+  "aiaic.commission.agreed": "ठरलेली किंमत",
+  "aiaic.commission.you_receive": "तुम्हाला मिळतात",
+  "aiaic.commission.by_buyer":
+    "खरेदीदार ते किमतीवर वरून भरतो: ते तुमच्या वाट्यातून कापले जात नाही.",
+  "aiaic.commission.by_farmer": "ते तुमच्या वाट्यातून कापले जाते.",
+  "aiaic.commission.by_both":
+    "दोघांत वाटलेले: खरेदीदार {buyer} वरून भरतो, आणि {her} तुमच्या वाट्यातून कापले जातात.",
+  "aiaic.commission.by_both_plain": "खरेदीदार आणि तुमच्यात वाटलेले.",
+  "aiaic.commission.none": "या विक्रीवर AIAIC कोणतेही कमिशन घेत नाही.",
+  "aiaic.commission.line": "AIAIC चे कमिशन ({rate}): {amount}. तुम्हाला {share} मिळतात.",
   "aiaic.farmer.money.sending": "खरेदीदाराने पैसे भरले. Razorpay आत्ता तुमचे {amount} पाठवत आहे.",
   "aiaic.farmer.money.held":
     "खरेदीदाराने पैसे भरले. तुमचा माल पोहोचेपर्यंत Razorpay तुमचे {amount} राखून ठेवते.",
@@ -1068,6 +1096,19 @@ export const AIAIC_HI: Dict = {
     "खरीदार के लिंक से भुगतान करते ही Razorpay आपके {amount} आपकी UPI आईडी पर भेजेगा।",
   "aiaic.farmer.money.fee_on_top":
     "भुगतान का शुल्क खरीदार ऊपर से देता है: आपको आपके पूरे {amount} मिलते हैं।",
+  "aiaic.farmer.money.fee_on_top_after_commission":
+    "भुगतान का शुल्क खरीदार ऊपर से देता है। AIAIC का कमीशन घटाकर आपको {amount} मिलते हैं।",
+  "aiaic.commission.title": "AIAIC का कमीशन ({rate})",
+  "aiaic.commission.title_no_rate": "AIAIC का कमीशन",
+  "aiaic.commission.agreed": "तय कीमत",
+  "aiaic.commission.you_receive": "आपको मिलते हैं",
+  "aiaic.commission.by_buyer": "खरीदार इसे कीमत के ऊपर से देता है: यह आपके हिस्से से नहीं कटता।",
+  "aiaic.commission.by_farmer": "यह आपके हिस्से से कटता है।",
+  "aiaic.commission.by_both":
+    "दोनों में बँटा हुआ: खरीदार {buyer} ऊपर से देता है, और {her} आपके हिस्से से कटते हैं।",
+  "aiaic.commission.by_both_plain": "खरीदार और आपके बीच बँटा हुआ।",
+  "aiaic.commission.none": "इस बिक्री पर AIAIC कोई कमीशन नहीं लेता।",
+  "aiaic.commission.line": "AIAIC का कमीशन ({rate}): {amount}। आपको {share} मिलते हैं।",
   "aiaic.farmer.money.sending": "खरीदार ने भुगतान कर दिया। Razorpay अभी आपके {amount} भेज रहा है।",
   "aiaic.farmer.money.held":
     "खरीदार ने भुगतान कर दिया। आपका माल पहुँचने तक Razorpay आपके {amount} रोककर रखता है।",

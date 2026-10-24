@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { BUSINESS } from "../lib/business";
 import { I18nProvider, useI18n } from "../lib/i18n";
 import { reportError } from "../lib/error-reporting";
 import { TopNav } from "../components/farm/TopNav";
@@ -121,11 +122,37 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+/** The six pages every page links to from its footer (About Us, Contact Us, Pricing Details and the three policies). */
+const FOOTER_LINKS = [
+  { to: "/about", key: "footer.about" },
+  { to: "/contact", key: "footer.contact" },
+  { to: "/pricing", key: "footer.pricing" },
+  { to: "/terms", key: "footer.terms" },
+  { to: "/privacy", key: "footer.privacy" },
+  { to: "/refund-policy", key: "footer.refund" },
+] as const;
+
 function FooterNote() {
   const { t } = useI18n();
   return (
     <footer className="border-t-2 border-border px-4 py-5 pb-24 text-center text-xs text-muted-foreground sm:text-sm">
-      {t("footer.note")}
+      <nav
+        aria-label={t("footer.links")}
+        className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-1 gap-y-0.5"
+      >
+        {FOOTER_LINKS.map((l) => (
+          <Link
+            key={l.to}
+            to={l.to}
+            className="inline-flex min-h-10 items-center rounded-lg px-2 font-semibold text-foreground underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-ring"
+            activeProps={{ className: "underline" }}
+          >
+            {t(l.key)}
+          </Link>
+        ))}
+      </nav>
+      <p className="mt-2">{t("footer.operated_by", { name: BUSINESS.legalName })}</p>
+      <p className="mt-1">{t("footer.note")}</p>
     </footer>
   );
 }

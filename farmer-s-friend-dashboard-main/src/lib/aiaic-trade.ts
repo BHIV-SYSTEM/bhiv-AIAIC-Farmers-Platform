@@ -99,6 +99,8 @@ export type AiaicMoney = {
   destination_hint?: string | null | undefined;
   fee_on_top?: boolean | undefined;
   fee_line_key?: string | undefined;
+  /** AIAIC's commission on this sale, from its payment link's own record (`commissionOf`). */
+  commission?: AiaicCommission | null | undefined;
   state?: string | null | undefined;
   utr?: string | null | undefined;
   settled_at?: string | null | undefined;
@@ -114,6 +116,124 @@ export type AiaicMoney = {
       }[]
     | undefined;
 };
+
+/**
+ * AIAIC's commission on one sale (its contract, section 17d: `money.commission`, 24 Oct 2026), from that sale's
+ * payment link's own record, never from the setting now: `set` false when the link was made with no commission.
+ * `price_inr` is the agreed price, `she_receives_inr` what the link sends her, `commission_inr` what AIAIC keeps.
+ * `payer` is who pays it: "buyer" (on top), "farmer" (out of her share), or another word a later AIAIC may send.
+ */
+export type AiaicCommission = {
+  set: boolean;
+  bps: number | null;
+  percent: number | null;
+  payer: string | null;
+  commission_inr: number | null;
+  price_inr: number | null;
+  she_receives_inr: number | null;
+};
+
+function finiteOrNull(v: unknown): number | null {
+  return typeof v === "number" && Number.isFinite(v) ? v : null;
+}
+
+/** AIAIC's `money.commission`, field by field (nothing else of it reaches the browser); null when it is not one. */
+export function commissionOf(raw: unknown): AiaicCommission | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  if (typeof r["set"] !== "boolean") return null;
+  return {
+    set: r["set"],
+    bps: finiteOrNull(r["bps"]),
+    percent: finiteOrNull(r["percent"]),
+    payer: typeof r["payer"] === "string" ? r["payer"] : null,
+    commission_inr: finiteOrNull(r["commission_inr"]),
+    price_inr: finiteOrNull(r["price_inr"]),
+    she_receives_inr: finiteOrNull(r["she_receives_inr"]),
+  };
+}
+
+/** What her commission block says, worked from AIAIC's own numbers only (in paise, so no rupee is mis-rounded). */
+export type CommissionParts = {
+  /** "2.5%" */
+  rate: string | null;
+  amount: number | null;
+  youReceive: number | null;
+  /** "buyer" | "farmer" | "split" as AIAIC sends it; null for a word this app does not know. */
+  payer: "buyer" | "farmer" | "split" | null;
+  /** Of the commission: what came out of her share (price less what she receives) and what the buyer paid on top. */
+  fromHer: number | null;
+  fromBuyer: number | null;
+};
+
+export function commissionParts(c: AiaicCommission): CommissionParts {
+  const p = c.percent ?? (c.bps === null ? null : c.bps / 100);
+  const rate = p === null ? null : `${Number(p.toFixed(2))}%`;
+  const payer = c.payer === "buyer" || c.payer === "farmer" || c.payer === "split" ? c.payer : null;
+  let fromHer: number | null = null;
+  let fromBuyer: number | null = null;
+  if (c.commission_inr !== null && c.price_inr !== null && c.she_receives_inr !== null) {
+    const her = Math.round(c.price_inr * 100) - Math.round(c.she_receives_inr * 100);
+    const buyer = Math.round(c.commission_inr * 100) - her;
+    if (her >= 0 && buyer >= 0) {
+      fromHer = her / 100;
+      fromBuyer = buyer / 100;
+    }
+  }
+  return {
+    rate,
+    amount: c.commission_inr,
+    youReceive: c.she_receives_inr,
+    payer,
+    fromHer,
+    fromBuyer,
+  };
+}
+
+/** Whether some of AIAIC's commission on this sale comes out of her share (then "your full amount" is not said). */
+export function commissionFromHer(c: AiaicCommission | null | undefined): boolean {
+  if (!c || !c.set) return false;
+  if (c.payer === "farmer" || c.payer === "split") return true;
+  const parts = commissionParts(c);
+  return parts.fromHer !== null && parts.fromHer > 0;
+}
+
+/**
+ * AIAIC's public pricing facts (`GET /payments/pricing`, no sign-in), as far as this app shows them: the commission
+ * as AIAIC's server holds it now, and whether its payment-fee rule is set.
+ */
+export type AiaicPricing = {
+  commission: {
+    set: boolean;
+    valid: boolean;
+    bps: number | null;
+    percent: number | null;
+    payer: string | null;
+  };
+  payment_fee_set: boolean;
+};
+
+/** AIAIC's pricing answer, field by field; null when it is not one (then the page says it could not be read). */
+export function pricingOf(raw: unknown): AiaicPricing | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  const c = r["commission"];
+  if (!c || typeof c !== "object" || Array.isArray(c)) return null;
+  const cr = c as Record<string, unknown>;
+  if (typeof cr["set"] !== "boolean" || typeof cr["valid"] !== "boolean") return null;
+  const fee = r["payment_fee"];
+  return {
+    commission: {
+      set: cr["set"],
+      valid: cr["valid"],
+      bps: finiteOrNull(cr["bps"]),
+      percent: finiteOrNull(cr["percent"]),
+      payer: typeof cr["payer"] === "string" ? cr["payer"] : null,
+    },
+    payment_fee_set:
+      !!fee && typeof fee === "object" && (fee as Record<string, unknown>)["set"] === true,
+  };
+}
 
 export type AiaicOrder = {
   order_id: string;

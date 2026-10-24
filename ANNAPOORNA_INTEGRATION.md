@@ -50,3 +50,22 @@ income, and every page shows a small **Practice** chip.
 
 Open `/orders`: it shows **Offers for you** and **My sales** (and no "Demo store" line). If a setting is missing or
 wrong, the page says which one in one line.
+
+## The six pages in every footer, and AIAIC's commission
+
+Every page's footer links six pages: About Us (`/about`), Contact Us (`/contact`), Pricing Details (`/pricing`),
+Terms & Conditions (`/terms`), Privacy Policy (`/privacy`) and Cancellation & Refund Policy (`/refund-policy`). Their
+texts are `farmer-s-friend-dashboard-main/src/content/policies/*.md`, in English; on a Marathi or Hindi screen one line
+above the text says so in that language. The operator's details (legal name, address, support e-mail and phone,
+grievance officer, courts' city) are in `src/lib/business.ts`, as the owner gave them on 24 Oct 2026: change them
+there, once.
+
+The Pricing Details page says AIAIC's commission from AIAIC's own setting, read from AIAIC's public
+`GET /payments/pricing` (no sign-in; nothing of a person is sent; the answer is kept 5 minutes). An AIAIC server
+without that route yet answers 404: the page then says the commission could not be read, and when a commission is
+fixed and shown. It never guesses a rate.
+
+Where an AIAIC order's money is shown (the order page's "Your money" card and the Payments page), AIAIC's
+`money.commission` is shown when AIAIC sends it: the agreed price, AIAIC's commission and who pays it, and what she
+receives, all AIAIC's own numbers for that sale's payment link. An AIAIC server not yet updated sends none, and nothing
+is shown. Nothing to set.
