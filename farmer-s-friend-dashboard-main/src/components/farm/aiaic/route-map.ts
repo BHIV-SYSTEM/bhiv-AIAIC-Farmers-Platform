@@ -17,7 +17,7 @@
  * This app's server sends no Content-Security-Policy today. If one is ever added, its `img-src` must let in
  * https://tile.openstreetmap.org (and any other tile host used), or the browser refuses every tile.
  */
-import type { NearbyMandi, TransportEstimate } from "@/lib/aiaic-trade";
+import { placeShown, type NearbyMandi, type TransportEstimate } from "@/lib/aiaic-trade";
 
 export const OSM_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const OSM_COPYRIGHT_URL = "https://www.openstreetmap.org/copyright";
@@ -99,6 +99,23 @@ export function isPlace(p: { lat?: unknown; lon?: unknown } | null | undefined):
   );
 }
 
+/**
+ * Whose name is said BELOW its dot: of the two places named on the map (her district and the mandi chosen), the more
+ * southern one; every other name is said above its dot. Two names close together (a mandi near her district, a long
+ * name in Marathi or Hindi) then never cover each other.
+ */
+export function nameBelow(
+  p: { lat: number; kind: MapPlace["kind"] },
+  shown: readonly { lat: number; kind: MapPlace["kind"] }[],
+): boolean {
+  const home = shown.find((q) => q.kind === "home");
+  const chosen = shown.find((q) => q.kind === "chosen");
+  if (!home || !chosen) return false;
+  if (p.kind === "home") return home.lat < chosen.lat;
+  if (p.kind === "chosen") return chosen.lat <= home.lat;
+  return false;
+}
+
 /** A line's point: [lat, lon], both drawable. */
 export function isPair(q: unknown): q is readonly [unknown, unknown] {
   return Array.isArray(q) && q.length >= 2 && isPlace({ lat: q[0], lon: q[1] });
@@ -117,12 +134,18 @@ export const NEARBY_DOTS = 12;
 
 /**
  * The map's places, line and distance from AIAIC's transport estimate, as AIAIC's own transport card makes them: her
- * district (said by its name in her language when the page has it), the mandi chosen, the other mandis near her as
- * dots, and the road's own line when AIAIC sent one (a GeoJSON line is [lon, lat]: turned round for the map), else a
- * straight line between the two ends, drawn dashed (an estimate is never drawn as a road).
+ * district, the mandi chosen, the other mandis near her as dots, and the road's own line when AIAIC sent one (a GeoJSON
+ * line is [lon, lat]: turned round for the map), else a straight line between the two ends, drawn dashed (an estimate is
+ * never drawn as a road).
+ *
+ * Every place is labelled in her language `lang` from the names AIAIC sends beside it (`names[lang]`, contract section
+ * 20); a server not yet updated sends none, and the label is then as before: her district by the name the page has for
+ * it (`fromName`, AIAIC's district list in her language) else AIAIC's district, a mandi by AIAIC's label. Places are
+ * told apart by their keys (`mandi`), never by a label.
  */
 export function routeMapOf(
   est: TransportEstimate,
+  lang: string,
   fromName: string | null | undefined,
   nearby: readonly NearbyMandi[] = [],
 ): { places: MapPlace[]; route: MapRoute; distance: MapDistance } {
@@ -133,11 +156,21 @@ export function routeMapOf(
   const others: MapPlace[] = nearby
     .filter((m) => m.mandi !== to.mandi)
     .slice(0, NEARBY_DOTS)
-    .map((m) => ({ lat: m.lat, lon: m.lon, label: m.mandi, kind: "mandi" }));
+    .map((m) => ({
+      lat: m.lat,
+      lon: m.lon,
+      label: placeShown(m.names, lang, m.mandi),
+      kind: "mandi",
+    }));
   return {
     places: [
-      { lat: from.lat, lon: from.lon, label: fromName || from.district, kind: "home" },
-      { lat: to.lat, lon: to.lon, label: to.mandi, kind: "chosen" },
+      {
+        lat: from.lat,
+        lon: from.lon,
+        label: placeShown(from.names, lang, fromName || from.district),
+        kind: "home",
+      },
+      { lat: to.lat, lon: to.lon, label: placeShown(to.names, lang, to.mandi), kind: "chosen" },
       ...others,
     ],
     route:

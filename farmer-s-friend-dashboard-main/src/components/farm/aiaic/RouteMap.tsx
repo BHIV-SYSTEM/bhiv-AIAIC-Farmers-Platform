@@ -10,6 +10,7 @@ import {
   isPair,
   isPlace,
   kmSaid,
+  nameBelow,
   tileUrlFrom,
   type MapDistance,
   type MapPlace,
@@ -22,8 +23,10 @@ import {
  * maps where they help: her district and the mandis, the route line and distance"). It asks no server of its own: what
  * it shows is what the page was told.
  *
- * - places: `home` (her district) and `chosen` (the mandi chosen) are named on the map, the other mandis when pointed
- *   at. Circle markers: drawn, so no image file is fetched for them.
+ * - places: `home` (her district) and `chosen` (the mandi chosen) are named on the map (the more southern of the two
+ *   below its dot, so two names close together never cover each other), the other mandis when pointed at. Each name is
+ *   as the page gives it: in her language from AIAIC's names (`routeMapOf`). Circle markers: drawn, so no image file is
+ *   fetched for them.
  * - route: ONE line as [lat, lon] pairs. An estimate (no road route was had) is drawn dashed: a straight line between
  *   two places is no road. `provider` names who made a road route ("geoapify"): its credit is then on the map too.
  * - distance: "N km by road", or "about N km (estimate)".
@@ -83,10 +86,11 @@ function drawPlaces(
     if (p.label) {
       const name = document.createElement("span");
       name.textContent = p.label;
+      const below = nameBelow(p, shown);
       marker.bindTooltip(name, {
         permanent: p.kind === "home" || p.kind === "chosen",
-        direction: "top",
-        offset: [0, -8],
+        direction: below ? "bottom" : "top",
+        offset: below ? [0, 8] : [0, -8],
       });
     }
     marker.addTo(group);
@@ -103,11 +107,12 @@ function drawPlaces(
   const size = map.getSize();
   if (all.length === 1) map.setView(first, 10);
   else if (!(size.x > 0 && size.y > 0)) map.setView(L.latLngBounds(all).getCenter(), 8);
-  // more room at the top: the distance is said in the top left corner, over the map, and must hide no place's name
+  // more room at the top: the distance is said in the top left corner, over the map, and must hide no place's name;
+  // room at the bottom for a name said below its dot (`nameBelow`), above the credits
   else
     map.fitBounds(L.latLngBounds(all), {
       paddingTopLeft: [28, 56],
-      paddingBottomRight: [28, 28],
+      paddingBottomRight: [28, 44],
       maxZoom: 12,
     });
 }

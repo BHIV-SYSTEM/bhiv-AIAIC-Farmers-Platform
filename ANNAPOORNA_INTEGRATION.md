@@ -14,6 +14,15 @@ only the district, the mandi and the weight are sent) at `AIAIC_BASE_URL`, or at
 With the settings, a new listing gets no automatic demo bid: buyers' offers are made by AIAIC's operators on AIAIC's
 dashboard (its Farm to retail page, `/trade`), and appear under Orders & Offers.
 
+## Places in Marathi and Hindi
+
+On a Marathi or Hindi page, the transport card's mandi list, the map's places and the mandis compared on Get my advice
+are named in her language from what AIAIC sends beside each place: `names` on `GET /transport/estimate` (`from`, `to`)
+and on `GET /transport/nearby-mandis` (`mandis[]`), and `mandi_shown` on `summary.price_compare.rows[]` (AIAIC's
+backend contract, section 20). A town with no Marathi or Hindi name held stays in Latin letters inside her words, as
+AIAIC sends it. These names are only shown: the mandi sent back to AIAIC is always its own label. An AIAIC server that
+does not send them yet is read as before (a mandi by its label). Nothing to set.
+
 ## The settings to add (names only; the values come from the AIAIC owner)
 
 | Setting | What it holds |

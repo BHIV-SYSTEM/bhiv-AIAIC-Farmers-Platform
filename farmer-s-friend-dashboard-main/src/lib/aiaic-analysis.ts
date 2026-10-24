@@ -128,8 +128,13 @@ export function signalLayout(
 export type PriceCompareRole = "chosen" | "compared" | "other_day" | "beyond_reach";
 
 export type PriceCompareRow = {
+  /** AIAIC's label for the mandi: the row's key (matched on, never translated). */
   mandi: string;
-  /** The mandi as her language says it, where AIAIC sends one. */
+  /**
+   * `summary.price_compare.rows[].mandi_shown` (AIAIC's contract, section 20, push 2n): the mandi in the answer's
+   * language ("Lasalgaon बाजार समिती", "नागदा मंडी"; in English the same as `mandi`), or null where AIAIC sends none (a
+   * server not yet updated): the row is then said by its label (`rowShown`).
+   */
   mandi_shown: string | null;
   price: number;
   km_text: string | null;
@@ -182,6 +187,9 @@ export function priceCompareOf(raw: unknown): PriceCompare | null {
     rows,
   };
 }
+
+/** A compared mandi as her page says it: AIAIC's `mandi_shown` (her language), else its label as before. */
+export const rowShown = (r: PriceCompareRow): string => r.mandi_shown ?? r.mandi;
 
 /** The first source an AIAIC summary names (`sections[id=sources].items[0]`), or null. */
 export type SummarySource = {

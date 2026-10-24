@@ -16,6 +16,7 @@
  */
 import { AIAIC_HEADERS, isTunnelErrorBody, resolveBaseUrl } from "./aiaic-base.server";
 import {
+  namesOf,
   problem,
   type AiaicCrisis,
   type AiaicMine,
@@ -764,6 +765,36 @@ export async function transportEstimate(q: EstimateInput): Promise<AiaicResult<T
   );
 }
 
+const NEARBY_KEYS = [
+  "mandi",
+  "state",
+  "district_key",
+  "straight_km",
+  "road_km_estimate",
+  "lat",
+  "lon",
+] as const;
+
+/**
+ * GET /transport/nearby-mandis, kept to what the transport card shows: each mandi's key, place and distance, and its
+ * names in Marathi and Hindi when AIAIC sends them (contract section 20; a server not yet updated sends none and the
+ * card says the label, as before), and every credit.
+ */
+export function nearbyForBrowser(raw: unknown): NearbyMandis {
+  const r = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const mandis = Array.isArray(r["mandis"]) ? r["mandis"] : [];
+  return {
+    mandis: mandis.map((m) => {
+      const row = pick<NearbyMandis["mandis"][number]>(m, NEARBY_KEYS);
+      const names = namesOf((m as Record<string, unknown> | null)?.["names"]);
+      return names ? { ...row, names } : row;
+    }),
+    attribution: Array.isArray(r["attribution"])
+      ? (r["attribution"] as NearbyMandis["attribution"])
+      : [],
+  };
+}
+
 export async function nearbyMandis(q: {
   district: string;
   state: string;
@@ -777,25 +808,6 @@ export async function nearbyMandis(q: {
       auth: false,
     });
     if (!r.ok) return r;
-    const mandis = Array.isArray(r.data["mandis"]) ? r.data["mandis"] : [];
-    return {
-      ok: true as const,
-      data: {
-        mandis: mandis.map((m) =>
-          pick<NearbyMandis["mandis"][number]>(m, [
-            "mandi",
-            "state",
-            "district_key",
-            "straight_km",
-            "road_km_estimate",
-            "lat",
-            "lon",
-          ]),
-        ),
-        attribution: Array.isArray(r.data["attribution"])
-          ? (r.data["attribution"] as NearbyMandis["attribution"])
-          : [],
-      },
-    };
+    return { ok: true as const, data: nearbyForBrowser(r.data) };
   });
 }

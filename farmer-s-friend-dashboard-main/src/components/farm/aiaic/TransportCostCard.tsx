@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   QUANTITY_CHOICES,
   attributionsOf,
+  placeShown,
   quintalWords,
   quintals,
   rupeeRange,
@@ -149,15 +150,15 @@ export function TransportCostCard({
     nearby.data?.ok ? nearby.data.data.attribution : [],
     est?.attribution,
   );
-  // The map, fed as AIAIC's own transport card feeds it: her district (its name in her language), the mandi, the
-  // mandis near her as dots, the road's line when AIAIC sent one (else a dashed straight line), the km said as road
-  // or estimate.
+  // The map, fed as AIAIC's own transport card feeds it: her district, the mandi, the mandis near her as dots, each
+  // named in her language (AIAIC's names, else as before), the road's line when AIAIC sent one (else a dashed straight
+  // line), the km said as road or estimate.
   const fromName = est
     ? districtList.find((d) => d.key === est.from.district_key)?.name
     : undefined;
   const map = useMemo(
-    () => (est ? routeMapOf(est, fromName, mandis) : null),
-    [est, fromName, mandis],
+    () => (est ? routeMapOf(est, lang, fromName, mandis) : null),
+    [est, lang, fromName, mandis],
   );
 
   return (
@@ -261,9 +262,10 @@ export function TransportCostCard({
                 {mandis.length ? null : (
                   <option value="">{t("aiaic.transport.choose_mandi")}</option>
                 )}
+                {/* each mandi said in her language (AIAIC's names, else its label); its label is what is sent */}
                 {mandis.map((m) => (
                   <option key={`${m.state}:${m.mandi}`} value={m.mandi}>
-                    {m.mandi} · ~
+                    {placeShown(m.names, lang, m.mandi)} · ~
                     {t("aiaic.transport.km", {
                       km: Math.round(m.road_km_estimate ?? m.straight_km),
                     })}

@@ -1,0 +1,413 @@
+{
+  "_recorded": {
+    "by": "reports/push2_2026-10-23/W2_record_transport.py",
+    "route": "GET /transport/nearby-mandis",
+    "at": "2026-10-24T08:50:50+00:00",
+    "status": 200,
+    "request": {
+      "params": {
+        "district": "Nashik",
+        "state": "mh",
+        "limit": 12,
+        "same_state": "true"
+      }
+    },
+    "note": "A real answer of the real route (service.main through FastAPI's TestClient on this laptop, no database read: every request names its district). No Geoapify key was set for this request, so the distance is the straight line x 1.3, said to be an estimate. Replayed by the web tests, never edited by hand."
+  },
+  "answer": {
+    "from": {
+      "state": "maharashtra",
+      "district_key": "nashik",
+      "district": "Nashik",
+      "lat": 19.997,
+      "lon": 73.789,
+      "approximate": null,
+      "place_class": "unknown",
+      "area": "unknown",
+      "settlement": "Nashik",
+      "names": {
+        "en": "Nashik",
+        "translated": {
+          "mr": true,
+          "hi": true
+        },
+        "mr": "नाशिक",
+        "hi": "नासिक"
+      }
+    },
+    "mandis": [
+      {
+        "mandi": "Nashik(Devlali) APMC",
+        "also_named": [
+          "Nashik(Devlali)"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Nashik",
+        "lat": 20.01125,
+        "lon": 73.79024,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 1.6,
+        "road_km_estimate": 2.1,
+        "names": {
+          "en": "Nashik(Devlali) APMC",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "नाशिक (Devlali) बाजार समिती",
+          "hi": "नासिक (Devlali) मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Dindori",
+        "also_named": [
+          "Dindori",
+          "Dindori APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Dindori",
+        "lat": 20.20373,
+        "lon": 73.83259,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 23.4,
+        "road_km_estimate": 30.5,
+        "names": {
+          "en": "APMC Dindori",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Dindori बाजार समिती",
+          "hi": "Dindori मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Pimpalgaon Baswant",
+        "also_named": [
+          "Pimpalgaon Baswant APMC",
+          "Pimpalgaon Baswant(Saykheda)",
+          "Pimpalgaon Baswant(Saykheda) APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Pimpalgaon Baswant",
+        "lat": 20.16795,
+        "lon": 73.98845,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 28.2,
+        "road_km_estimate": 36.7,
+        "names": {
+          "en": "APMC Pimpalgaon Baswant",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Pimpalgaon Baswant बाजार समिती",
+          "hi": "Pimpalgaon Baswant मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Ghoti",
+        "also_named": [
+          "Ghoti",
+          "Ghoti APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Ghoti",
+        "lat": 19.71678,
+        "lon": 73.62447,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 35.6,
+        "road_km_estimate": 46.3,
+        "names": {
+          "en": "APMC Ghoti",
+          "translated": {
+            "mr": true,
+            "hi": false
+          },
+          "mr": "घोटी बाजार समिती",
+          "hi": "Ghoti मंडी"
+        }
+      },
+      {
+        "mandi": "Dindori(Vani)",
+        "also_named": [
+          "Dindori(Vani) APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Vani",
+        "lat": 20.33061,
+        "lon": 73.88946,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 38.5,
+        "road_km_estimate": 50.1,
+        "names": {
+          "en": "Dindori(Vani)",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Dindori (Vani) बाजार समिती",
+          "hi": "Dindori (Vani) मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Lasalgaon",
+        "also_named": [
+          "Lasalgaon",
+          "Lasalgaon APMC",
+          "Lasalgaon(Niphad)",
+          "Lasalgaon(Niphad) APMC",
+          "Lasalgaon(Vinchur)",
+          "Lasalgaon(Vinchur) APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Lasalgaon",
+        "lat": 20.14268,
+        "lon": 74.23775,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "village",
+        "area": "rural",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 49.6,
+        "road_km_estimate": 64.5,
+        "names": {
+          "en": "APMC Lasalgaon",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Lasalgaon बाजार समिती",
+          "hi": "Lasalgaon मंडी"
+        }
+      },
+      {
+        "mandi": "Akole APMC",
+        "also_named": [
+          "Akole"
+        ],
+        "state": "maharashtra",
+        "district_key": "ahmednagar",
+        "place": "Akole",
+        "lat": 19.54193,
+        "lon": 74.00926,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "city",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 55.6,
+        "road_km_estimate": 72.3,
+        "names": {
+          "en": "Akole APMC",
+          "translated": {
+            "mr": true,
+            "hi": true
+          },
+          "mr": "अकोले बाजार समिती",
+          "hi": "अकोले मंडी"
+        }
+      },
+      {
+        "mandi": "Chandvad APMC",
+        "also_named": [
+          "Chandvad"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Chandvad",
+        "lat": 20.32781,
+        "lon": 74.23872,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 59.6,
+        "road_km_estimate": 77.5,
+        "names": {
+          "en": "Chandvad APMC",
+          "translated": {
+            "mr": true,
+            "hi": true
+          },
+          "mr": "चांदवड बाजार समिती",
+          "hi": "चांदवड मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Kalvan",
+        "also_named": [
+          "Kalvan",
+          "Kalvan APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Kalvan",
+        "lat": 20.49041,
+        "lon": 74.02536,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "suburb",
+        "area": "urban",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 60.2,
+        "road_km_estimate": 78.2,
+        "names": {
+          "en": "APMC Kalvan",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Kalvan बाजार समिती",
+          "hi": "Kalvan मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Sangamner",
+        "also_named": [
+          "Sangamner",
+          "Sangamner APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "ahmednagar",
+        "place": "Sangamner",
+        "lat": 19.56634,
+        "lon": 74.21126,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "town",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 65.2,
+        "road_km_estimate": 84.7,
+        "names": {
+          "en": "APMC Sangamner",
+          "translated": {
+            "mr": true,
+            "hi": false
+          },
+          "mr": "संगमनेर बाजार समिती",
+          "hi": "Sangamner मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Kopargaon",
+        "also_named": [
+          "Kopargaon",
+          "Kopargaon APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "ahmednagar",
+        "place": "Kopargaon",
+        "lat": 19.885,
+        "lon": 74.4762,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "town",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 72.9,
+        "road_km_estimate": 94.8,
+        "names": {
+          "en": "APMC Kopargaon",
+          "translated": {
+            "mr": true,
+            "hi": false
+          },
+          "mr": "कोपरगाव बाजार समिती",
+          "hi": "Kopargaon मंडी"
+        }
+      },
+      {
+        "mandi": "APMC Yeola",
+        "also_named": [
+          "Yeola",
+          "Yeola APMC"
+        ],
+        "state": "maharashtra",
+        "district_key": "nashik",
+        "place": "Yeola",
+        "lat": 20.04291,
+        "lon": 74.48804,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "geoapify",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 73.2,
+        "road_km_estimate": 95.2,
+        "names": {
+          "en": "APMC Yeola",
+          "translated": {
+            "mr": true,
+            "hi": false
+          },
+          "mr": "येवला बाजार समिती",
+          "hi": "Yeola मंडी"
+        }
+      }
+    ],
+    "count": 12,
+    "held": {
+      "mandis": 938,
+      "at_their_own_town": 503,
+      "at_their_district_centre": 435
+    },
+    "distance_is": "straight line between the two points, in km; road_km_estimate is that x 1.3, an estimate. GET /transport/estimate gives the road distance when one can be had.",
+    "attribution": [
+      {
+        "text": "© OpenStreetMap contributors",
+        "url": "https://www.openstreetmap.org/copyright",
+        "licence": "ODbL 1.0"
+      },
+      {
+        "text": "Powered by Geoapify",
+        "url": "https://www.geoapify.com/"
+      }
+    ],
+    "points_source": {
+      "built_on": "2026-10-23",
+      "title": "District centres and mandi towns of Maharashtra and Madhya Pradesh: points, place classes, sources",
+      "rule": "A name is read to its town (a sub-yard 'X(Y)' tries Y, then X). An answer is kept only when it is a settlement, an administrative area or a marketplace in the mandi's state, the geocoder's own district for it is the mandi's district (or the district it was carved from), or, where it names none, the mandi's district centre is the nearest one, and it lies within 200 km of that centre; a Geoapify answer must also carry the town's own name. Anything else is refused, never guessed."
+    }
+  }
+}
