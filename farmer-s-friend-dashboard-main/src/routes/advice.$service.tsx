@@ -8,6 +8,7 @@ import { EvidenceCard } from "@/components/farm/EvidenceCard";
 import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
+import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -215,6 +216,7 @@ function AdviceServicePage() {
             matchedCard={matchedCard}
             priceSeries={priceSeriesQuery.data}
             askAHuman={farmerAdviceQuery.data?.ask_a_human}
+            distress={Boolean(farmerAdviceQuery.data?.distress)}
           />
         )}
       </div>
@@ -229,6 +231,7 @@ function ItemDetail({
   matchedCard,
   priceSeries,
   askAHuman,
+  distress = false,
 }: {
   item: IntelligenceItem;
   service: Service;
@@ -241,6 +244,8 @@ function ItemDetail({
   matchedCard?: FarmerAdviceCard | undefined;
   priceSeries?: any;
   askAHuman?: AskAHuman | undefined;
+  /** Words of distress were typed: the crisis box leads, and no money card is added below it. */
+  distress?: boolean;
 }) {
   const { t, lang } = useI18n();
   const [showTechnical, setShowTechnical] = useState(false);
@@ -262,6 +267,13 @@ function ItemDetail({
   const subject = [item.subject?.crop || farm.crop, item.subject?.region || farm.region]
     .filter(Boolean)
     .join(" • ");
+  // For the transport card on a mandi answer: her crop, and the mandi this answer is about (the one she asked for,
+  // else the one the engine's own label names, "Sell at APMC Savner"); no mandi named: the card's own default.
+  const transportCrop = farm.crop || item.subject?.crop || "";
+  const advisedMandi =
+    farm.mandi ||
+    (item.recommendation_detail ?? "").match(/^\s*sell at\s+([^.(]+?)\s*(?:[.(]|$)/i)?.[1] ||
+    undefined;
   const serviceLabel = t(`service.${service}`);
   const headline = matchedCard?.answer_headline || recommendationLabel(item.recommendation, lang);
   const spoken = adviceText(item, serviceLabel, t, lang);
@@ -325,6 +337,18 @@ function ItemDetail({
           <section aria-label={t("chart.title")}>
             <PriceSeriesChart series={priceSeries} />
           </section>
+        ) : null}
+
+        {/* AIAIC's transport cost from her district to the mandi this answer names (the sale form's own card) */}
+        {service === "market" && transportCrop && farm.region && !distress ? (
+          <TransportCostCard
+            crop={transportCrop}
+            cropLabel={item.subject?.crop || transportCrop}
+            quantityQ={10}
+            fromState={farm.state}
+            fromDistrict={farm.region}
+            toMandi={advisedMandi}
+          />
         ) : null}
 
         {/* Official Groundwater / Soil Caveat (for water & crop services) */}

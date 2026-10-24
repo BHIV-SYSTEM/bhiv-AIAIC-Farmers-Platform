@@ -9,6 +9,7 @@ import { RecommendationCard } from "@/components/farm/RecommendationCard";
 import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
+import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
 import { catalogOptions, catalogQueryOptions, subjectSupport } from "@/lib/catalog-query";
 import { getFarmerAdvice } from "@/lib/farmer-advice.functions";
@@ -150,6 +151,13 @@ function ResultPage() {
     ? (cached?.results ?? [])
     : (query.data?.results ?? []);
 
+  // For the transport card: the mandi the market answer is about (the one she asked for, else the one the engine's
+  // own label names, "Sell at APMC Savner"); none named: the card's own default.
+  const marketResult = results.find((r) => r.service === "market");
+  const marketLabel = marketResult?.ok ? (marketResult.items[0]?.recommendation_detail ?? "") : "";
+  const advisedMandi =
+    search.mandi || marketLabel.match(/^\s*sell at\s+([^.(]+?)\s*(?:[.(]|$)/i)?.[1] || undefined;
+
   const savedWhen = cached
     ? new Intl.DateTimeFormat(lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "mr-IN", {
         dateStyle: "medium",
@@ -278,6 +286,18 @@ function ResultPage() {
               <div>
                 <PriceSeriesChart series={priceSeriesQuery.data} />
               </div>
+            ) : null}
+
+            {/* AIAIC's transport cost from her district to the mandi the market answer names (the sale form's card) */}
+            {services.includes("market") && search.crop && search.region && !isDistress ? (
+              <TransportCostCard
+                crop={search.crop}
+                cropLabel={search.crop}
+                quantityQ={10}
+                fromState={search.state}
+                fromDistrict={search.region}
+                toMandi={advisedMandi}
+              />
             ) : null}
 
             {/* Services Detailed Advice Cards */}
