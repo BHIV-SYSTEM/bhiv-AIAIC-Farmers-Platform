@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
 import { AlertTriangle } from "lucide-react";
@@ -18,11 +19,14 @@ export function RecommendationCard({
   item,
   index,
   search,
+  children,
 }: {
   service: Service;
   item: IntelligenceItem;
   index: number;
   search: { region?: string; crop?: string; mandi?: string; land?: string; services?: string };
+  /** Shown under the answer's own words (never under an abstention): the market answer's price comparison. */
+  children?: ReactNode;
 }) {
   const { t, lang } = useI18n();
   const abstained = isAbstention(item);
@@ -58,6 +62,7 @@ export function RecommendationCard({
               {item.recommendation_detail}
             </p>
           ) : null}
+          {children}
         </>
       )}
 
