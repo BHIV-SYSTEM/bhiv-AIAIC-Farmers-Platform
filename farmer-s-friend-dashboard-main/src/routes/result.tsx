@@ -7,6 +7,9 @@ import { DashboardSummary } from "@/components/farm/DashboardSummary";
 import { PlantCheck } from "@/components/farm/PlantCheck";
 import { RecommendationCard } from "@/components/farm/RecommendationCard";
 import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
+import { CropSignals } from "@/components/farm/aiaic/CropSignals";
+import { PriceBrief } from "@/components/farm/aiaic/PriceBrief";
+import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
 import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
@@ -60,7 +63,8 @@ function ResultPage() {
     staleTime: 60_000,
   });
 
-  // 2. Confirmed Historical Mandi Price Series Query (/places/price-series)
+  // 2. Confirmed Historical Mandi Price Series Query (/places/price-series): the market's chart, or, without the
+  // market answer, AIAIC's price line inside its usual range (`PriceBrief`); never both
   const priceSeriesQuery = useQuery({
     queryKey: ["price-series", search.crop, search.region, search.state, activeLang],
     queryFn: () =>
@@ -73,7 +77,7 @@ function ResultPage() {
           lang: activeLang,
         },
       }),
-    enabled: Boolean(services.includes("market") && search.crop && search.region),
+    enabled: Boolean(search.crop && search.region),
     staleTime: 5 * 60_000,
   });
 
@@ -154,6 +158,9 @@ function ResultPage() {
   // For the transport card: the mandi the market answer is about (the one she asked for, else the one the engine's
   // own label names, "Sell at APMC Savner"); none named: the card's own default.
   const marketResult = results.find((r) => r.service === "market");
+  const marketChosen = services.includes("market");
+  // AIAIC's farmer app pins the crop's price line first when no market answer could be given
+  const marketAnswered = Boolean(marketResult?.ok && marketResult.items.length > 0);
   const marketLabel = marketResult?.ok ? (marketResult.items[0]?.recommendation_detail ?? "") : "";
   const advisedMandi =
     search.mandi || marketLabel.match(/^\s*sell at\s+([^.(]+?)\s*(?:[.(]|$)/i)?.[1] || undefined;
@@ -282,10 +289,35 @@ function ResultPage() {
             </div>
 
             {/* Confirmed Historical Mandi Price Series (if market selected) */}
-            {priceSeriesQuery.data?.available ? (
+            {marketChosen && !isDistress && priceSeriesQuery.data?.available ? (
               <div>
                 <PriceSeriesChart series={priceSeriesQuery.data} />
               </div>
+            ) : null}
+
+            {/* AIAIC's price line inside its usual range, ONLY where the chart above is not shown (never two charts of
+                one thing): without the market answer, or AIAIC's one line on why it holds no line */}
+            {search.crop &&
+            search.region &&
+            !isDistress &&
+            !(marketChosen && priceSeriesQuery.data?.available) ? (
+              <PriceBrief
+                series={priceSeriesQuery.data}
+                crop={search.crop}
+                failed={priceSeriesQuery.isError}
+                onRetry={() => void priceSeriesQuery.refetch()}
+              />
+            ) : null}
+
+            {/* What AIAIC holds about her crop here: its price against the usual range, MSP, storing, bad years, water
+                need, season, area and yield, each with whose figure, source and date */}
+            {search.crop && search.region && !isDistress ? (
+              <CropSignals
+                district={search.region}
+                crop={search.crop}
+                state={search.state}
+                pin={marketAnswered ? [] : ["price_position"]}
+              />
             ) : null}
 
             {/* AIAIC's transport cost from her district to the mandi the market answer names (the sale form's card) */}
@@ -392,7 +424,19 @@ function ResultPage() {
                         item={enhancedItem}
                         index={index}
                         search={linkSearch}
-                      />
+                      >
+                        {/* The price on the first line, and the mandis the market answer compared */}
+                        {result.service === "market" &&
+                        index === 0 &&
+                        !isDistress &&
+                        matchedCard?.abstained !== true ? (
+                          <PriceCompare
+                            compare={matchedCard?.summary?.price_compare}
+                            source={matchedCard?.summary?.source}
+                            className="mt-3"
+                          />
+                        ) : null}
+                      </RecommendationCard>
                     );
                   });
                 })}
