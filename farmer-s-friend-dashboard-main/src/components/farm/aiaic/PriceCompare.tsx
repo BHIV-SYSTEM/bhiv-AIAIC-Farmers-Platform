@@ -1,5 +1,6 @@
 import {
   dayLabel,
+  rowShown,
   rupeesWhole,
   type PriceCompare as Compare,
   type PriceCompareRole,
@@ -90,7 +91,7 @@ export function PriceCompare({
                         : "font-semibold text-foreground"
                     }
                   >
-                    {r.mandi_shown ?? r.mandi}
+                    {rowShown(r)}
                   </span>
                   {r.badge ? (
                     <span

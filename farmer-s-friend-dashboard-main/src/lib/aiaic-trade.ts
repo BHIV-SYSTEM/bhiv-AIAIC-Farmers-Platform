@@ -518,6 +518,58 @@ export function districtName(names: Record<string, string>, district: string | n
   return names[district] ?? names[district.toLowerCase()] ?? district;
 }
 
+/**
+ * A PLACE'S NAMES, as AIAIC sends them beside the place's key (its contract, section 20, push 2n): `{en, mr, hi,
+ * translated: {mr, hi}}` on `from`/`to` of GET /transport/estimate, on `mandis[]` of GET /transport/nearby-mandis, and
+ * elsewhere. Marathi and Hindi come from OpenStreetMap's own `name:mr` and `name:hi`; a town with no name held there
+ * stays in Latin letters inside her words ("Lasalgaon बाजार समिती", `translated: false`), never a guessed spelling, and
+ * "APMC" is never in them. A name is only SHOWN: the key (`mandi`, `district_key`) is what is matched and sent back.
+ */
+export type PlaceNames = {
+  en?: string | null | undefined;
+  mr?: string | null | undefined;
+  hi?: string | null | undefined;
+  translated?: { mr?: boolean | undefined; hi?: boolean | undefined } | null | undefined;
+};
+
+/** A place's names kept to their declared shape (strings, and booleans under `translated`), or null when AIAIC sent
+ * none: what this server passes to the browser. */
+export function namesOf(raw: unknown): PlaceNames | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  const out: PlaceNames = {};
+  for (const lang of ["en", "mr", "hi"] as const) {
+    const v = r[lang];
+    if (typeof v === "string" && v.trim()) out[lang] = v;
+  }
+  if (!out.en && !out.mr && !out.hi) return null;
+  const tr = r["translated"];
+  if (tr && typeof tr === "object" && !Array.isArray(tr)) {
+    const t = tr as Record<string, unknown>;
+    const mr = t["mr"];
+    const hi = t["hi"];
+    const translated: NonNullable<PlaceNames["translated"]> = {};
+    if (typeof mr === "boolean") translated.mr = mr;
+    if (typeof hi === "boolean") translated.hi = hi;
+    out.translated = translated;
+  }
+  return out;
+}
+
+/**
+ * A place as her page says it: AIAIC's name in her language (`names[lang]`), else `fallback`, the name this page showed
+ * before AIAIC sent names (a server not yet updated sends none: the label or the district, as before).
+ */
+export function placeShown(
+  names: PlaceNames | null | undefined,
+  lang: string,
+  fallback: string | null | undefined,
+): string {
+  const said =
+    names && typeof names === "object" ? (names as Record<string, unknown>)[lang] : undefined;
+  return typeof said === "string" && said.trim() ? said.trim() : (fallback ?? "");
+}
+
 /** One row of AIAIC's district list (GET /places/districts): its key and its English name. */
 export type DistrictRow = { key: string; name_en: string };
 
@@ -712,6 +764,8 @@ export type TransportEstimate = {
     lat: number;
     lon: number;
     place_class?: string | null | undefined;
+    /** Her district's names (contract section 20); absent from a server not yet updated. */
+    names?: PlaceNames | null | undefined;
   };
   to: {
     mandi: string;
@@ -720,6 +774,8 @@ export type TransportEstimate = {
     lat: number;
     lon: number;
     located_by?: string | undefined;
+    /** The mandi's names (contract section 20); `mandi` stays the key. */
+    names?: PlaceNames | null | undefined;
   };
   quantity_q: number;
   route_type: {
@@ -789,6 +845,8 @@ export type NearbyMandi = {
   /** The mandi's point (OpenStreetMap data, geocoded once by AIAIC): drawn as a dot on the transport card's map. */
   lat?: number | null | undefined;
   lon?: number | null | undefined;
+  /** The mandi's names (contract section 20): shown in her language; `mandi` stays the key she sends back. */
+  names?: PlaceNames | null | undefined;
 };
 
 export type NearbyMandis = {

@@ -21,6 +21,8 @@ import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
+import { NEARBY_DOTS, nameBelow, routeMapOf } from "../src/components/farm/aiaic/route-map";
+import { priceCompareOf, rowShown } from "../src/lib/aiaic-analysis";
 import {
   PRESS_KEY_RE,
   WITHOUT,
@@ -31,10 +33,12 @@ import {
   moneyCard,
   moneySaid,
   moneyTotals,
+  namesOf,
   newPressKey,
   offerViews,
   paymentLine,
   payoutDetailsProblem,
+  placeShown,
   pressAndRaise,
   pressed,
   problem,
@@ -800,6 +804,216 @@ test("A21 ANN-5 the demo store says where its sales are kept; the doc names its 
   assert.ok(doc.includes(FALLBACK_BASE_URL), "the default address it calls is named");
 });
 
+// ------------------ A, push 2n (24 Oct 2026): places said in her language from AIAIC's names (contract section 20)
+
+/**
+ * AIAIC's push-2n recordings (real answers of its routes as they answer once push 2n is deployed, copied from AIAIC's
+ * repo unchanged): the mandis near Nashik and a trip from Nashik to Lasalgaon with each place's `names`, and two Get my
+ * advice answers whose market card compares mandis with `mandi_shown`, in Marathi (onion, Nashik) and Hindi (soybean,
+ * Indore). The answers of the server deployed before it (`transport_nearby_nashik`, `transport_estimate_estimate`)
+ * carry no names: the page then says every place as before.
+ */
+const NAMED_NEARBY = "transport_nearby_nashik_named";
+const NAMED_TRIP = "transport_estimate_lasalgaon_named";
+const NAMED_ADVICE = {
+  mr: "farmer_advice_onion_nashik_mr_named",
+  hi: "farmer_advice_soybean_indore_hi_named",
+} as const;
+type RawNames = { en: string; mr: string; hi: string; translated: { mr: boolean; hi: boolean } };
+type RawNearby = { mandis: { mandi: string; names: RawNames }[] };
+const LATIN = /[A-Za-z]/;
+const APMC = /\bAPMC\b/i;
+
+test("A22 a mandi near her is said in her language from AIAIC's names; its key stays; no names: as before", () => {
+  const raw = answer<RawNearby>(NAMED_NEARBY);
+  const kept = client.nearbyForBrowser(raw);
+  assert.ok(kept.mandis.length >= 10, `only ${kept.mandis.length} mandis`);
+  assert.equal(kept.mandis.length, raw.mandis.length);
+  const allowed = new Set([
+    "mandi",
+    "state",
+    "district_key",
+    "straight_km",
+    "road_km_estimate",
+    "lat",
+    "lon",
+    "names",
+  ]);
+  const said = { mr: { whole: 0, latinKept: 0 }, hi: { whole: 0, latinKept: 0 } };
+  kept.mandis.forEach((m, i) => {
+    const r = raw.mandis[i]!;
+    for (const k of Object.keys(m)) assert.ok(allowed.has(k), `${k} left the server`);
+    assert.equal(m.mandi, r.mandi, "the key is AIAIC's label, unchanged");
+    assert.deepEqual(m.names, r.names, `${r.mandi}: the names as AIAIC sent them`);
+    assert.equal(placeShown(m.names, "en", m.mandi), r.names.en);
+    for (const lang of ["mr", "hi"] as const) {
+      const shown = placeShown(m.names, lang, m.mandi);
+      assert.equal(shown, r.names[lang], `${r.mandi} in ${lang}`);
+      assert.notEqual(
+        shown,
+        m.mandi,
+        `${lang}: the market committee "${m.mandi}" is said in her words`,
+      );
+      assert.ok(!APMC.test(shown), `${lang}: "${shown}" says APMC`);
+      if (r.names.translated[lang]) {
+        assert.ok(
+          !LATIN.test(shown),
+          `${lang}: "${shown}" is said whole yet carries Latin letters`,
+        );
+        said[lang].whole += 1;
+      } else said[lang].latinKept += 1;
+    }
+  });
+  // both kinds are in the recording: a town said whole, and a town with no name held kept as written (never guessed)
+  for (const lang of ["mr", "hi"] as const) {
+    assert.ok(
+      said[lang].whole > 0 && said[lang].latinKept > 0,
+      `${lang}: ${JSON.stringify(said[lang])}`,
+    );
+  }
+
+  // a server not yet updated: no names leave this server, and every mandi is said by its label, as before
+  const before = client.nearbyForBrowser(answer("transport_nearby_nashik"));
+  assert.ok(before.mandis.length > 0, "today's recorded answer holds mandis");
+  for (const m of before.mandis) {
+    assert.equal("names" in m, false, `${m.mandi}: names made up`);
+    for (const lang of LANGS) assert.equal(placeShown(m.names, lang, m.mandi), m.mandi);
+  }
+
+  // names of another shape are not passed on, and a blank name is no name
+  assert.equal(namesOf(null), null);
+  assert.equal(namesOf("Nashik"), null);
+  assert.equal(namesOf({ mr: 5, hi: ["x"], en: " " }), null);
+  assert.deepEqual(namesOf({ en: "Nashik", translated: { mr: "yes", hi: true }, extra: "x" }), {
+    en: "Nashik",
+    translated: { hi: true },
+  });
+  assert.equal(placeShown({ en: "Nashik", mr: "  " }, "mr", "Nashik"), "Nashik");
+  assert.equal(placeShown(null, "hi", null), "");
+});
+
+test("A23 the map names her district and every mandi in her language; places are told apart by their keys", () => {
+  const trip = est(NAMED_TRIP);
+  const near = client.nearbyForBrowser(answer(NAMED_NEARBY)).mandis;
+  const pageName = "her district, as the page's own list names it";
+  assert.ok(
+    near.some((m) => m.mandi === trip.to.mandi),
+    "the chosen mandi is in the list near her",
+  );
+  for (const lang of LANGS) {
+    const map = routeMapOf(trip, lang, pageName, near);
+    const [home, chosen, ...dots] = map.places;
+    assert.equal(home?.kind, "home");
+    assert.equal(home?.label, trip.from.names?.[lang], `${lang}: her district by AIAIC's names`);
+    assert.equal(chosen?.kind, "chosen");
+    assert.equal(chosen?.label, trip.to.names?.[lang], `${lang}: the mandi chosen`);
+    const others = near.filter((m) => m.mandi !== trip.to.mandi).slice(0, NEARBY_DOTS);
+    assert.equal(others.length, near.length - 1, "the chosen mandi is not drawn twice");
+    assert.deepEqual(
+      dots.map((d) => d.label),
+      others.map((m) => m.names?.[lang]),
+      `${lang}: every dot by its names`,
+    );
+    if (lang !== "en") {
+      for (const p of map.places) assert.ok(!APMC.test(String(p.label)), `${lang}: ${p.label}`);
+    }
+  }
+  // names change no line and no distance
+  const en = routeMapOf(trip, "en", pageName, near);
+  for (const lang of ["mr", "hi"] as const) {
+    const said = routeMapOf(trip, lang, pageName, near);
+    assert.deepEqual(said.route, en.route);
+    assert.deepEqual(said.distance, en.distance);
+    assert.deepEqual(
+      said.places.map((p) => [p.lat, p.lon, p.kind]),
+      en.places.map((p) => [p.lat, p.lon, p.kind]),
+    );
+  }
+
+  // the two names on the map never cover each other: the more southern one is said below its dot, every other above
+  const drawn = en.places.map((p) => ({ lat: Number(p.lat), kind: p.kind }));
+  const below = drawn.map((p) => nameBelow(p, drawn));
+  assert.equal(
+    below[0],
+    drawn[0]!.lat < drawn[1]!.lat,
+    "her district below when it is the more southern",
+  );
+  assert.equal(below[1], !below[0], "one of the two names above its dot, the other below");
+  assert.ok(
+    below.slice(2).every((b) => !b),
+    "every other mandi's name above its dot",
+  );
+  const level = [
+    { lat: 20, kind: "home" as const },
+    { lat: 20, kind: "chosen" as const },
+  ];
+  assert.deepEqual(
+    level.map((p) => nameBelow(p, level)),
+    [false, true],
+    "on one latitude: still one below",
+  );
+  assert.equal(nameBelow(drawn[0]!, drawn.slice(0, 1)), false, "one name alone: above its dot");
+
+  // a server not yet updated: her district by the page's own name, else AIAIC's; a mandi by its label, as before
+  const old = est("transport_estimate_estimate");
+  const oldNear = client.nearbyForBrowser(answer("transport_nearby_nashik")).mandis;
+  for (const lang of LANGS) {
+    const map = routeMapOf(old, lang, pageName, oldNear);
+    assert.equal(map.places[0]?.label, pageName);
+    assert.equal(map.places[1]?.label, old.to.mandi);
+    assert.deepEqual(
+      map.places.slice(2).map((p) => p.label),
+      oldNear
+        .filter((m) => m.mandi !== old.to.mandi)
+        .slice(0, NEARBY_DOTS)
+        .map((m) => m.mandi),
+    );
+    assert.equal(routeMapOf(old, lang, null, oldNear).places[0]?.label, old.from.district);
+  }
+});
+
+test("A24 the mandis an advice compared: AIAIC's rows[].mandi_shown, the key kept; mr and hi say no APMC", () => {
+  type RawCompare = {
+    headline: string;
+    rows: { mandi: string; mandi_shown: string; role: string }[];
+  };
+  for (const lang of ["mr", "hi"] as const) {
+    const raw = answer<{ lang?: string; cards: { summary?: { price_compare?: RawCompare } }[] }>(
+      NAMED_ADVICE[lang],
+    );
+    const compared = raw.cards.flatMap((c) =>
+      c.summary?.price_compare ? [c.summary.price_compare] : [],
+    );
+    assert.ok(compared.length >= 1, `${lang}: no card compares mandis`);
+    for (const pc of compared) {
+      const compare = priceCompareOf(pc);
+      assert.ok(compare, `${lang}: the comparison is read`);
+      assert.equal(compare.rows.length, pc.rows.length);
+      compare.rows.forEach((row, i) => {
+        const r = pc.rows[i]!;
+        assert.equal(row.mandi, r.mandi, "the key stays AIAIC's label");
+        assert.equal(row.mandi_shown, r.mandi_shown, "read by the contract's own field name");
+        assert.equal(rowShown(row), r.mandi_shown);
+        assert.notEqual(rowShown(row), row.mandi, `${lang}: "${row.mandi}" is said in her words`);
+        assert.ok(!APMC.test(rowShown(row)), `${lang}: "${rowShown(row)}" says APMC`);
+      });
+      // the bars and AIAIC's own sentence name the chosen mandi the same way
+      const chosen = compare.rows.find((r) => r.role === "chosen");
+      assert.ok(chosen, `${lang}: no chosen mandi`);
+      assert.ok(compare.headline?.includes(rowShown(chosen)), `${lang}: ${compare.headline}`);
+      // a server not yet updated sends no mandi_shown: each mandi is said by its label, as before
+      const before = priceCompareOf({
+        ...pc,
+        rows: pc.rows.map(({ mandi_shown: _shown, ...rest }) => rest),
+      });
+      assert.deepEqual(
+        before?.rows.map(rowShown),
+        pc.rows.map((r) => r.mandi),
+      );
+    }
+  }
+});
+
 // --------------------------------------------------------- B. the server client against a stand-in AIAIC
 
 const USER = "standin-practice-farmer";
@@ -819,6 +1033,8 @@ type StandIn = {
   distressOnWrite: boolean;
   /** The fixture GET /farmer/trade answers with, when set (else by `practice`). */
   mine: string | null;
+  /** The fixture GET /transport/nearby-mandis answers with. */
+  nearby: string;
   close: () => Promise<void>;
 };
 
@@ -835,6 +1051,7 @@ async function standIn(): Promise<StandIn> {
     expireNext: false,
     distressOnWrite: false,
     mine: null,
+    nearby: "transport_nearby_nashik",
     close: async () => {},
   };
   const valid = () => `standin-token-${s.tokenNo}`;
@@ -869,8 +1086,7 @@ async function standIn(): Promise<StandIn> {
           return send(200, { crops: [{ crop: "onion", name: "कांदा" }] });
         if (u.pathname === "/places/districts")
           return send(200, { districts: [{ key: "nashik", name: "नाशिक", name_en: "Nashik" }] });
-        if (u.pathname === "/transport/nearby-mandis")
-          return send(200, answer("transport_nearby_nashik"));
+        if (u.pathname === "/transport/nearby-mandis") return send(200, answer(s.nearby));
         if (u.pathname === "/transport/estimate") {
           if (u.searchParams.get("mandi") === "No Such Mandi Anywhere")
             return send(404, answer("transport_refused_mandi_not_held"));
@@ -1251,6 +1467,34 @@ test("B13 ANN-1 her 'I got the money' goes with no amount, and AIAIC's answer to
       assert.equal(said, DICTS[lang]["aiaic.farmer.money.direct.said_got_any"], lang);
       assert.ok(said && !HOLE.test(said), `${lang}: "${said}"`);
     }
+  } finally {
+    await s.close();
+  }
+});
+
+test("B14 push 2n: the nearby mandis' names pass through this server; nothing else new leaves it", async () => {
+  const s = await standIn();
+  try {
+    settings(s.url, null, null);
+    s.nearby = NAMED_NEARBY;
+    const r = await client.nearbyMandis({ district: "nashik", state: "mh", limit: 12 });
+    assert.ok(r.ok, "the names' answer is read");
+    const raw = answer<RawNearby>(NAMED_NEARBY);
+    assert.deepEqual(
+      r.data.mandis.map((m) => [m.mandi, m.names]),
+      raw.mandis.map((m) => [m.mandi, m.names]),
+    );
+    const text = JSON.stringify(r.data);
+    for (const word of ['"also_named"', '"geocoder"', '"located_by"', '"point_kind"', '"place"'])
+      assert.ok(!text.includes(word), `${word} left the server`);
+    s.nearby = "transport_nearby_nashik";
+    const before = await client.nearbyMandis({ district: "nashik", state: "mh", limit: 15 });
+    assert.ok(before.ok, "a server not yet updated is read as before");
+    assert.ok(
+      before.data.mandis.every((m) => !("names" in m)),
+      "it sends no names: none are made up",
+    );
+    assert.equal(s.logins, 0, "no sign-in for a public read");
   } finally {
     await s.close();
   }
