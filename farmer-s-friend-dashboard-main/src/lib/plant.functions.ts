@@ -62,7 +62,9 @@ export const analyzePlantPhoto = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PlantResult> => {
     const fetchedAt = new Date().toISOString();
     const envUrl = process.env["PLANT_BASE_URL"];
-    const baseUrl = (envUrl || "http://163.128.209.18:8017/aqiaic/plant").replace(/\/+$/, "");
+    const baseUrl = (
+      envUrl || "https://krishisampada.blackholeinfiverse.com/api/aqiaic/plant"
+    ).replace(/\/+$/, "");
     if (!baseUrl) {
       return { configured: false, ok: false, reason: "offline", observations: [], fetchedAt };
     }
