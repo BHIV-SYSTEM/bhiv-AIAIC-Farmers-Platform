@@ -83,6 +83,17 @@ export type PriceSeriesResponse = {
   newest_day?: string;
   points: PricePoint[];
   error?: string;
+  /** AIAIC's HTTP status when it refused (a 404 is a crop the district's own list does not hold). */
+  status?: number;
+  /** Why no line is drawn (`available: false`), in her language, and its code. */
+  reason?: string;
+  reason_code?: string;
+  /** Whose prices these are: the dataset and its publisher (AIAIC's `source`). */
+  source?: { dataset?: string; publisher?: string; licence?: string };
+  counts?: { days_with_prices?: number; days_asked?: number; mandis?: number; quotes?: number };
+  newest_age_days?: number;
+  /** The days the grade rule left out, said (so a newer day named elsewhere never contradicts the line). */
+  left_out_note?: string;
 };
 
 /**
@@ -213,6 +224,7 @@ export const getPriceSeries = createServerFn({ method: "GET" })
           available: false,
           points: [],
           error: `HTTP ${res.status}`,
+          status: res.status,
         };
       }
       const json = await res.json();
@@ -231,6 +243,12 @@ export const getPriceSeries = createServerFn({ method: "GET" })
         note: json.note,
         newest_day: json.newest_day,
         points: Array.isArray(json.points) ? json.points : [],
+        reason: json.reason,
+        reason_code: json.reason_code,
+        source: json.source,
+        counts: json.counts,
+        newest_age_days: json.newest_age_days,
+        left_out_note: json.left_out_note,
       };
     } catch (err: any) {
       console.error("[places] getPriceSeries error", err);

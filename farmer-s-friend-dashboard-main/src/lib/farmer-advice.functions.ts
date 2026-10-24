@@ -1,6 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import {
+  priceCompareOf,
+  summarySourceOf,
+  type PriceCompare,
+  type SummarySource,
+} from "./aiaic-analysis";
+
 const farmerAdviceQuerySchema = z.object({
   crop: z.string().trim().min(1),
   region: z.string().trim().min(1),
@@ -17,6 +24,10 @@ export type FarmerAdviceAction = {
 export type FarmerAdviceSummary = {
   action?: FarmerAdviceAction | undefined;
   decision_id?: string | undefined;
+  /** The mandis the market answer compared (AIAIC's `price_compare`, only on a district's "sell at" answer). */
+  price_compare?: PriceCompare | undefined;
+  /** The first source the answer names, with its date. */
+  source?: SummarySource | undefined;
 };
 
 export type FarmerAdviceCard = {
@@ -141,6 +152,8 @@ export const getFarmerAdvice = createServerFn({ method: "GET" })
                         : undefined,
                     decision_id:
                       typeof c.summary.decision_id === "string" ? c.summary.decision_id : undefined,
+                    price_compare: priceCompareOf(c.summary.price_compare) ?? undefined,
+                    source: summarySourceOf(c.summary.sections) ?? undefined,
                   }
                 : undefined,
             abstained: typeof c.abstained === "boolean" ? c.abstained : undefined,

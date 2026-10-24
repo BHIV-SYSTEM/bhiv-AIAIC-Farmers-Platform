@@ -6,6 +6,10 @@ import { z } from "zod";
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
 import { EvidenceCard } from "@/components/farm/EvidenceCard";
 import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
+import { CropSignals } from "@/components/farm/aiaic/CropSignals";
+import { PriceBrief } from "@/components/farm/aiaic/PriceBrief";
+import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
+import { FOR_SERVICE } from "@/lib/aiaic-analysis";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
 import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
@@ -315,6 +319,15 @@ function ItemDetail({
                 item.recommendation_detail ??
                 (abstained ? t("abstain.body") : "")}
             </p>
+            {/* The price on the first line, and the mandis the market answer compared (never under an abstention or
+                a crisis) */}
+            {service === "market" && !abstained && !distress ? (
+              <PriceCompare
+                compare={matchedCard?.summary?.price_compare}
+                source={matchedCard?.summary?.source}
+                className="mt-4"
+              />
+            ) : null}
             {subject ? <p className="mt-3 text-base text-muted-foreground">{subject}</p> : null}
           </div>
 
@@ -333,10 +346,25 @@ function ItemDetail({
         </section>
 
         {/* Confirmed: Historical Price Series with 5-Year Benchmark Range (for market service) */}
-        {service === "market" && priceSeries?.available ? (
+        {service === "market" && !distress && priceSeries?.available ? (
           <section aria-label={t("chart.title")}>
             <PriceSeriesChart series={priceSeries} />
           </section>
+        ) : null}
+
+        {/* No chart above: AIAIC's one line on why it holds no price line (never a second chart of the same) */}
+        {service === "market" && !distress && priceSeries && !priceSeries.available ? (
+          <PriceBrief series={priceSeries} crop={farm.crop || item.subject?.crop || ""} />
+        ) : null}
+
+        {/* What AIAIC holds about her crop here, this answer's own facts first (AIAIC's FOR_SERVICE) */}
+        {farm.crop && farm.region && !distress ? (
+          <CropSignals
+            district={farm.region}
+            crop={farm.crop}
+            state={farm.state}
+            only={FOR_SERVICE[service]}
+          />
         ) : null}
 
         {/* AIAIC's transport cost from her district to the mandi this answer names (the sale form's own card) */}
