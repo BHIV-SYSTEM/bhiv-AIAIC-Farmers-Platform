@@ -1101,3 +1101,46 @@ export function routeSketch(
   const last = xy[xy.length - 1] ?? [width - pad, height / 2];
   return { path, dashed: !road, from: first, to: last };
 }
+
+/**
+ * One warehouse on AIAIC's storage verdict card (GET /storage/verdict, AIAIC_BACKEND_CONTRACT.md section 21). Every
+ * sentence (`*.text`) is AIAIC's own, in the language asked; only what the card shows is typed.
+ */
+export type StorageWarehouse = {
+  operator: string;
+  operator_shown: string | null;
+  operator_full: string | null;
+  name: string;
+  name_shown: string | null;
+  place_shown: string | null;
+  km?: number | null;
+  farmer_rate: { text: string | null; rebate_text: string | null } | null;
+  trip: {
+    text: string | null;
+    per_quintal_text: string | null;
+    distance?: { km: number | null } | null;
+  } | null;
+  wdra: { registered: boolean; text?: string | null } | null;
+  under_half_full: { text: string | null } | null;
+  storing?: { word: string | null; net_gain_per_q?: { text: string | null } | null } | null;
+};
+
+/** AIAIC's storage verdict card: store or sell now, and the nearest public warehouses by name (section 21). */
+export type StorageVerdict = {
+  lang: string;
+  verdict: {
+    code: string;
+    word: string;
+    text: string;
+    months_text: string | null;
+    warehouse: StorageWarehouse | null;
+    net_gain_per_q: { text: string | null } | null;
+    chosen_by: { text: string | null } | null;
+    uncalibrated: string | null;
+  };
+  warehouses: StorageWarehouse[];
+  operators_not_listed: { operator: string; text: string | null }[];
+  wdra_others: { text: string | null } | null;
+  sources: { text: string | null }[];
+  attribution: { text: string; url?: string }[];
+};

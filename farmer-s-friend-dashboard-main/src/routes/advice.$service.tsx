@@ -12,6 +12,7 @@ import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
 import { FOR_SERVICE } from "@/lib/aiaic-analysis";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
+import { StorageVerdictCard } from "@/components/farm/aiaic/StorageVerdictCard";
 import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import {
   AlertTriangle,
@@ -377,6 +378,12 @@ function ItemDetail({
             fromDistrict={farm.region}
             toMandi={advisedMandi}
           />
+        ) : null}
+
+        {/* AIAIC's storage verdict: store or sell now, and the nearest public warehouses by name (nothing until AIAIC
+            answers) */}
+        {service === "storage" && farm.crop && farm.region && !distress ? (
+          <StorageVerdictCard crop={farm.crop} district={farm.region} state={farm.state} />
         ) : null}
 
         {/* Official Groundwater / Soil Caveat (for water & crop services) */}

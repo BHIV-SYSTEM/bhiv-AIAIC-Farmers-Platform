@@ -368,6 +368,10 @@ export const AIAIC_EN: Dict = {
   "aiaic.payments.source":
     "Paid: Razorpay's verified word. Sent and in your bank: Razorpay's word about your share.",
 
+  "aiaic.storage.title": "Store or sell now: the nearest warehouses",
+  "aiaic.storage.km": "{km} km",
+  "aiaic.storage.net": "After storage, loss and the trip",
+  "aiaic.storage.details": "Every warehouse, how this one was chosen, the sources",
   "aiaic.transport.title": "Transport cost",
   "aiaic.transport.from": "From",
   "aiaic.transport.to": "To mandi",
@@ -782,6 +786,10 @@ export const AIAIC_MR: Dict = {
   "aiaic.payments.source":
     "भरलेले: Razorpay ने तपासलेले. पाठवलेले आणि बँकेत: तुमच्या वाट्याबद्दल Razorpay चे म्हणणे.",
 
+  "aiaic.storage.title": "साठवायचे की आता विकायचे: जवळची गोदामे",
+  "aiaic.storage.km": "{km} किमी",
+  "aiaic.storage.net": "साठवण, नुकसान आणि वाहतुकीनंतर",
+  "aiaic.storage.details": "प्रत्येक गोदाम, हे कसे निवडले, स्रोत",
   "aiaic.transport.title": "वाहतूक खर्च",
   "aiaic.transport.from": "कुठून",
   "aiaic.transport.to": "कोणत्या मंडीत",
@@ -1194,6 +1202,10 @@ export const AIAIC_HI: Dict = {
   "aiaic.payments.source":
     "भरा: Razorpay का जाँचा हुआ। भेजा और बैंक में: आपके हिस्से के बारे में Razorpay की बात।",
 
+  "aiaic.storage.title": "भंडारण करें या अभी बेचें: पास के गोदाम",
+  "aiaic.storage.km": "{km} किमी",
+  "aiaic.storage.net": "भंडारण, नुकसान और ढुलाई के बाद",
+  "aiaic.storage.details": "हर गोदाम, यह कैसे चुना गया, स्रोत",
   "aiaic.transport.title": "ढुलाई का खर्च",
   "aiaic.transport.from": "कहाँ से",
   "aiaic.transport.to": "किस मंडी तक",

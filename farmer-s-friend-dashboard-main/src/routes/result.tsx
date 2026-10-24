@@ -12,6 +12,7 @@ import { PriceBrief } from "@/components/farm/aiaic/PriceBrief";
 import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
+import { StorageVerdictCard } from "@/components/farm/aiaic/StorageVerdictCard";
 import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
 import { catalogOptions, catalogQueryOptions, subjectSupport } from "@/lib/catalog-query";
@@ -329,6 +330,16 @@ function ResultPage() {
                 fromState={search.state}
                 fromDistrict={search.region}
                 toMandi={advisedMandi}
+              />
+            ) : null}
+
+            {/* AIAIC's storage verdict: store or sell now, and the nearest public warehouses by name (nothing until
+                AIAIC answers) */}
+            {services.includes("storage") && search.crop && search.region && !isDistress ? (
+              <StorageVerdictCard
+                crop={search.crop}
+                district={search.region}
+                state={search.state}
               />
             ) : null}
 
