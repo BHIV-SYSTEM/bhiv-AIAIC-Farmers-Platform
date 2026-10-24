@@ -56,7 +56,9 @@ async function runHealthCheck() {
   const rawTx = JSON.parse(fs.readFileSync(transactionsFile, "utf-8"));
   assert.ok(Array.isArray(rawTx.listings), "rawTx.listings must be an array");
   assert.ok(Array.isArray(rawTx.orders), "rawTx.orders must be an array");
-  console.log(`✓ data/transactions.json verified: ${rawTx.listings.length} listings, ${rawTx.orders.length} orders`);
+  console.log(
+    `✓ data/transactions.json verified: ${rawTx.listings.length} listings, ${rawTx.orders.length} orders`,
+  );
 
   const serverOrders = await getAllOrders();
   assert.ok(serverOrders.length > 0, "Server must return at least 1 order");
@@ -66,7 +68,9 @@ async function runHealthCheck() {
   assert.strictEqual(targetOrder?.offeredPricePerQuintal, 5050);
   assert.strictEqual(targetOrder?.grossAmount, 126250);
   assert.strictEqual(targetOrder?.estimatedNetPayout, 122475);
-  console.log(`✓ Target order ORD-20261021-9964 data matches: Gross ₹${targetOrder?.grossAmount}, Net ₹${targetOrder?.estimatedNetPayout}`);
+  console.log(
+    `✓ Target order ORD-20261021-9964 data matches: Gross ₹${targetOrder?.grossAmount}, Net ₹${targetOrder?.estimatedNetPayout}`,
+  );
 
   // 3. Multilingual Localization Engine
   console.log("\n[Section 3] Multilingual Localization System");
@@ -87,13 +91,25 @@ async function runHealthCheck() {
 
   // 4. Vaani TTS Service Support
   assert.strictEqual(isVaaniLanguageSupported("hi"), true, "Hindi must be supported by Vaani TTS");
-  assert.strictEqual(isVaaniLanguageSupported("mr"), false, "Marathi is unsupported upstream by deployed Vaani server");
-  assert.strictEqual(isVaaniLanguageSupported("en"), false, "English should not route to Hindi Vaani TTS");
-  console.log("✓ Vaani TTS language support rules verified (Hindi active, Marathi & English rejected with clear messaging)");
+  assert.strictEqual(
+    isVaaniLanguageSupported("mr"),
+    false,
+    "Marathi is unsupported upstream by deployed Vaani server",
+  );
+  assert.strictEqual(
+    isVaaniLanguageSupported("en"),
+    false,
+    "English should not route to Hindi Vaani TTS",
+  );
+  console.log(
+    "✓ Vaani TTS language support rules verified (Hindi active, Marathi & English rejected with clear messaging)",
+  );
 
   // 5. Integration Status Confirmations
   console.log("\n[Section 5] Partner & Gateway Connection Status");
-  console.log("✓ WheelsEye Logistics: Disclosed as UNCONNECTED / APPROXIMATE ESTIMATE (As specified)");
+  console.log(
+    "✓ WheelsEye Logistics: Disclosed as UNCONNECTED / APPROXIMATE ESTIMATE (As specified)",
+  );
   console.log("✓ Bank Details Setup: Disclosed as PROTOTYPE / ZERO-PERSISTENCE (As specified)");
 
   console.log("\n==================================================================");

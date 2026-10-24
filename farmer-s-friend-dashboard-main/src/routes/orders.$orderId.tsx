@@ -22,6 +22,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { TradeSwitch } from "@/components/farm/aiaic/AiaicBits";
+import { AiaicOrderDetail } from "@/components/farm/aiaic/AiaicOrderDetail";
+import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import { BankDetailsCard } from "@/components/farm/BankDetailsCard";
 import { PaymentStatusStepper } from "@/components/farm/PaymentStatusStepper";
 import { WheelsEyeLogisticsCard } from "@/components/farm/WheelsEyeLogisticsCard";
@@ -44,7 +47,19 @@ export const Route = createFileRoute("/orders/$orderId")({
   component: OrderDetailPage,
 });
 
+/** Her offer or sale in AIAIC when this server is set up for AIAIC; else the demo store's order, as before. */
 function OrderDetailPage() {
+  const { orderId } = Route.useParams();
+  return (
+    <TradeSwitch
+      width="max-w-3xl"
+      aiaic={() => <AiaicOrderDetail id={orderId} />}
+      local={() => <LocalOrderDetailPage />}
+    />
+  );
+}
+
+function LocalOrderDetailPage() {
   const { orderId } = Route.useParams();
   const { t } = useI18n();
   const queryClient = useQueryClient();
@@ -490,6 +505,14 @@ function OrderDetailPage() {
 
         {/* Dedicated WheelsEye Logistics Card */}
         <WheelsEyeLogisticsCard order={order} />
+
+        {/* AIAIC's transport estimate (a public route: no sign-in), a truck-booking style card */}
+        <TransportCostCard
+          crop={order.crop}
+          cropLabel={order.crop}
+          quantityQ={order.quantityQuintals}
+          fromText={order.pickupLocation}
+        />
 
         {/* Decoupled Payment Status Stepper */}
         <PaymentStatusStepper order={order} />

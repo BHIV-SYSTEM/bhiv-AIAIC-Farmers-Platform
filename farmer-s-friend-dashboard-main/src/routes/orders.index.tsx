@@ -20,6 +20,8 @@ import {
 import { useState } from "react";
 import { z } from "zod";
 
+import { TradeSwitch } from "@/components/farm/aiaic/AiaicBits";
+import { AiaicOrders } from "@/components/farm/aiaic/AiaicOrders";
 import { useI18n } from "@/lib/i18n";
 import { getOrders } from "@/lib/transactions.functions";
 import type { ProduceOrder, OrderStatus } from "@/lib/transaction-types";
@@ -45,7 +47,12 @@ export const Route = createFileRoute("/orders/")({
   component: OrdersPage,
 });
 
+/** Offers on her lots and her sales in AIAIC when this server is set up for AIAIC; else the demo store's, as before. */
 function OrdersPage() {
+  return <TradeSwitch aiaic={() => <AiaicOrders />} local={() => <LocalOrdersPage />} />;
+}
+
+function LocalOrdersPage() {
   const { t } = useI18n();
   const search = Route.useSearch();
   const getOrdersFn = useServerFn(getOrders);

@@ -1,0 +1,21 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "POST /farmer/trade/offers/ofr_3da2dc41bf3cfe28be91/accept",
+    "at": "2026-10-23T20:00:47+00:00",
+    "status": 409,
+    "replay": null,
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": {}
+    },
+    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer), her own act, so its records are real (synthetic: false) on this test database; the buyer is named as a recording. Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "detail": {
+      "reason_code": "lot_sold",
+      "message": "The lot was sold to another offer: this offer can no longer be accepted."
+    }
+  }
+}

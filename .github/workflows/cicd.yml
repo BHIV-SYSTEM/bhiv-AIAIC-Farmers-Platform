@@ -121,6 +121,8 @@ jobs:
           AIAIC_BASE_URL=${{ secrets.AIAIC_BASE_URL || 'http://163.128.209.18:8017' }}
           PLANT_BASE_URL=${{ secrets.PLANT_BASE_URL || '' }}
           AIAIC_PORT=${{ secrets.AIAIC_PORT || '3008' }}
+          AIAIC_FARMER_USERNAME=${{ secrets.AIAIC_FARMER_USERNAME || '' }}
+          AIAIC_FARMER_PASSWORD=${{ secrets.AIAIC_FARMER_PASSWORD || '' }}
           EOF
           fi
 

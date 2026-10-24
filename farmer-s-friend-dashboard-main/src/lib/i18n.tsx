@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
+import { AIAIC_EN, AIAIC_HI, AIAIC_MR } from "./i18n-aiaic";
+
 export const LANGUAGES = [
   { code: "en", label: "English" },
   { code: "hi", label: "हिंदी" },
@@ -1353,7 +1355,12 @@ const mr: Dict = {
   "common.demoSandbox": "डेमो / सँडबॉक्स",
 };
 
-export const DICTS: Record<Lang, Dict> = { en, hi, mr };
+// The words of the screens that read AIAIC's sale, payment and transport routes (`i18n-aiaic.ts`).
+export const DICTS: Record<Lang, Dict> = {
+  en: { ...en, ...AIAIC_EN },
+  hi: { ...hi, ...AIAIC_HI },
+  mr: { ...mr, ...AIAIC_MR },
+};
 const STORAGE_KEY = "aiaic.lang";
 
 type I18nValue = {
@@ -1381,7 +1388,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: string, vars?: Record<string, string | number>) => {
-      const template = DICTS[lang][key] ?? en[key] ?? key;
+      const template = DICTS[lang][key] ?? DICTS.en[key] ?? key;
       if (!vars) return template;
       return Object.entries(vars).reduce(
         (acc, [k, v]) => acc.replaceAll(`{${k}}`, String(v)),

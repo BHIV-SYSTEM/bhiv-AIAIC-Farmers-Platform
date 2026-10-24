@@ -1,0 +1,235 @@
+{
+ "_recorded": {
+  "by": "reports/handover_tools/record_plan_answers.py",
+  "route": "GET /places/districts",
+  "at": "2026-10-07T05:45:36+00:00",
+  "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
+  "request": {
+   "state": "mh",
+   "lang": "en"
+  },
+  "note": "A real answer of the real route on the committed evidence. Never edited by hand."
+ },
+ "answer": {
+  "state": "maharashtra",
+  "lang": "en",
+  "districts": [
+   {
+    "key": "ahmednagar",
+    "name": "Ahilyanagar",
+    "name_en": "Ahilyanagar",
+    "translated": true
+   },
+   {
+    "key": "akola",
+    "name": "Akola",
+    "name_en": "Akola",
+    "translated": true
+   },
+   {
+    "key": "amravati",
+    "name": "Amravati",
+    "name_en": "Amravati",
+    "translated": true
+   },
+   {
+    "key": "beed",
+    "name": "Beed",
+    "name_en": "Beed",
+    "translated": true
+   },
+   {
+    "key": "bhandara",
+    "name": "Bhandara",
+    "name_en": "Bhandara",
+    "translated": true
+   },
+   {
+    "key": "buldhana",
+    "name": "Buldhana",
+    "name_en": "Buldhana",
+    "translated": true
+   },
+   {
+    "key": "chandrapur",
+    "name": "Chandrapur",
+    "name_en": "Chandrapur",
+    "translated": true
+   },
+   {
+    "key": "aurangabad",
+    "name": "Chhatrapati Sambhajinagar",
+    "name_en": "Chhatrapati Sambhajinagar",
+    "translated": true
+   },
+   {
+    "key": "osmanabad",
+    "name": "Dharashiv",
+    "name_en": "Dharashiv",
+    "translated": true
+   },
+   {
+    "key": "dhule",
+    "name": "Dhule",
+    "name_en": "Dhule",
+    "translated": true
+   },
+   {
+    "key": "gadchiroli",
+    "name": "Gadchiroli",
+    "name_en": "Gadchiroli",
+    "translated": true
+   },
+   {
+    "key": "gondia",
+    "name": "Gondia",
+    "name_en": "Gondia",
+    "translated": true
+   },
+   {
+    "key": "hingoli",
+    "name": "Hingoli",
+    "name_en": "Hingoli",
+    "translated": true
+   },
+   {
+    "key": "jalgaon",
+    "name": "Jalgaon",
+    "name_en": "Jalgaon",
+    "translated": true
+   },
+   {
+    "key": "jalna",
+    "name": "Jalna",
+    "name_en": "Jalna",
+    "translated": true
+   },
+   {
+    "key": "kolhapur",
+    "name": "Kolhapur",
+    "name_en": "Kolhapur",
+    "translated": true
+   },
+   {
+    "key": "latur",
+    "name": "Latur",
+    "name_en": "Latur",
+    "translated": true
+   },
+   {
+    "key": "mumbai",
+    "name": "Mumbai",
+    "name_en": "Mumbai",
+    "translated": true
+   },
+   {
+    "key": "mumbai sub",
+    "name": "Mumbai Suburban",
+    "name_en": "Mumbai Suburban",
+    "translated": true
+   },
+   {
+    "key": "nagpur",
+    "name": "Nagpur",
+    "name_en": "Nagpur",
+    "translated": true
+   },
+   {
+    "key": "nanded",
+    "name": "Nanded",
+    "name_en": "Nanded",
+    "translated": true
+   },
+   {
+    "key": "nandurbar",
+    "name": "Nandurbar",
+    "name_en": "Nandurbar",
+    "translated": true
+   },
+   {
+    "key": "nashik",
+    "name": "Nashik",
+    "name_en": "Nashik",
+    "translated": true
+   },
+   {
+    "key": "palghar",
+    "name": "Palghar",
+    "name_en": "Palghar",
+    "translated": true
+   },
+   {
+    "key": "parbhani",
+    "name": "Parbhani",
+    "name_en": "Parbhani",
+    "translated": true
+   },
+   {
+    "key": "pune",
+    "name": "Pune",
+    "name_en": "Pune",
+    "translated": true
+   },
+   {
+    "key": "raigad",
+    "name": "Raigad",
+    "name_en": "Raigad",
+    "translated": true
+   },
+   {
+    "key": "ratnagiri",
+    "name": "Ratnagiri",
+    "name_en": "Ratnagiri",
+    "translated": true
+   },
+   {
+    "key": "sangli",
+    "name": "Sangli",
+    "name_en": "Sangli",
+    "translated": true
+   },
+   {
+    "key": "satara",
+    "name": "Satara",
+    "name_en": "Satara",
+    "translated": true
+   },
+   {
+    "key": "sindhudurg",
+    "name": "Sindhudurg",
+    "name_en": "Sindhudurg",
+    "translated": true
+   },
+   {
+    "key": "solapur",
+    "name": "Solapur",
+    "name_en": "Solapur",
+    "translated": true
+   },
+   {
+    "key": "thane",
+    "name": "Thane",
+    "name_en": "Thane",
+    "translated": true
+   },
+   {
+    "key": "wardha",
+    "name": "Wardha",
+    "name_en": "Wardha",
+    "translated": true
+   },
+   {
+    "key": "washim",
+    "name": "Washim",
+    "name_en": "Washim",
+    "translated": true
+   },
+   {
+    "key": "yavatmal",
+    "name": "Yavatmal",
+    "name_en": "Yavatmal",
+    "translated": true
+   }
+  ]
+ }
+}

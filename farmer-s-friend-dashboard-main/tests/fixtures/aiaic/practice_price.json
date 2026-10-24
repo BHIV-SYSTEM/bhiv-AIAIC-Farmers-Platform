@@ -1,0 +1,105 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "GET /farmer/trade/price",
+    "at": "2026-10-23T20:00:48+00:00",
+    "status": 200,
+    "replay": null,
+    "signed_in": true,
+    "request": {
+      "params": {
+        "crop": "onion"
+      },
+      "body": null
+    },
+    "note": "A real answer of the real route on a *_test database: a PRACTICE account's own sale in the app (the owner's decision D-185; tenant rec-farmer, the farmers' workspace for the run), so its records are rehearsal data (synthetic: true), never a farmer's income; its buyer is a rehearsal buyer named as a recording; for the payment Razorpay is STOOD IN FOR on this machine (test-only TEST keys; no request reached Razorpay; no money). Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "crop": "onion",
+    "district": "Nashik",
+    "source": "Agmarknet daily mandi prices (data.gov.in, Government Open Data Licence - India), as stored by AIAIC",
+    "source_name": "Agmarknet",
+    "what_it_is": "Mandi modal prices reported on that day. Not an offer, not a valuation of this lot.",
+    "labels_read": {},
+    "held": true,
+    "price_day": "2026-09-24",
+    "age_days": 5,
+    "mandis": [
+      {
+        "mandi": "APMC Pimpalgaon Baswant",
+        "modal_price_per_q": 4300.0
+      },
+      {
+        "mandi": "APMC Lasalgaon",
+        "modal_price_per_q": 4200.0
+      },
+      {
+        "mandi": "APMC Nasik",
+        "modal_price_per_q": 4100.0
+      },
+      {
+        "mandi": "Lasalgaon(Niphad)",
+        "modal_price_per_q": 4050.0
+      },
+      {
+        "mandi": "APMC Manmad",
+        "modal_price_per_q": 4000.0
+      },
+      {
+        "mandi": "Lasalgaon(Vinchur)",
+        "modal_price_per_q": 4000.0
+      },
+      {
+        "mandi": "APMC Sinner",
+        "modal_price_per_q": 3950.0
+      },
+      {
+        "mandi": "APMC Chandwad",
+        "modal_price_per_q": 3930.0
+      },
+      {
+        "mandi": "APMC Devala",
+        "modal_price_per_q": 3925.0
+      },
+      {
+        "mandi": "APMC Kalvan",
+        "modal_price_per_q": 3851.0
+      },
+      {
+        "mandi": "APMC Satana",
+        "modal_price_per_q": 3800.0
+      },
+      {
+        "mandi": "APMC Yeola",
+        "modal_price_per_q": 3675.0
+      },
+      {
+        "mandi": "APMC Nampur",
+        "modal_price_per_q": 3600.0
+      },
+      {
+        "mandi": "APMC Umrane",
+        "modal_price_per_q": 3600.0
+      },
+      {
+        "mandi": "Pimpalgaon Baswant(Saykheda)",
+        "modal_price_per_q": 3550.0
+      }
+    ],
+    "mandis_reporting": 15,
+    "middle_of_all_per_q": 3930.0,
+    "lowest_per_q": 3550.0,
+    "highest_per_q": 4300.0,
+    "note": "Compared on Unhali (other), the variety most mandis reported that day; 1 mandi that reported only another variety or grade is listed apart, not compared.",
+    "suggested_ask_per_q": 3930,
+    "suggestion_is": "the middle of 15 mandi modal prices in Nashik on 2026-09-24 (lowest Rs 3,550, highest Rs 4,300), from Agmarknet: a starting point for her asking price, never an offer or a valuation of this lot",
+    "trace": {
+      "request_id": "5d1fc8b1cf8545648172ed91379b6a42",
+      "decision_ids": [],
+      "price_day": "not held",
+      "price_from": "not held",
+      "datasets": "not held",
+      "build": "unknown"
+    }
+  }
+}

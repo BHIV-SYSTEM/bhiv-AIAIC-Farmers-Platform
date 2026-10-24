@@ -1,0 +1,62 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trade_answers.py",
+    "route": "POST /farmer/trade/offers/ofr_dcef2ffada3bd1744a7c/accept",
+    "at": "2026-10-23T20:00:49+00:00",
+    "status": 201,
+    "replay": "false",
+    "signed_in": true,
+    "request": {
+      "params": null,
+      "body": {}
+    },
+    "note": "A real answer of the real route on a *_test database: a PRACTICE account's own sale in the app (the owner's decision D-185; tenant rec-farmer, the farmers' workspace for the run), so its records are rehearsal data (synthetic: true), never a farmer's income; its buyer is a rehearsal buyer named as a recording; for the payment Razorpay is STOOD IN FOR on this machine (test-only TEST keys; no request reached Razorpay; no money). Replayed by the web and phone tests, never edited by hand."
+  },
+  "answer": {
+    "order_id": "ord_351284bd6496131104f6",
+    "transaction_id": "txn_81220939afad60f566ab",
+    "tenant_id": "rec-farmer",
+    "offer_id": "ofr_dcef2ffada3bd1744a7c",
+    "listing_id": "lst_f0f39f2836592b311a53",
+    "lot_id": "lot_92e1fc3329299f5552b4",
+    "farmer_id": "frm_3c4e526b8b4d7e46fe58",
+    "buyer_id": "byr_7efa6d4e446a3b43abb2",
+    "crop": "onion",
+    "variety": null,
+    "grade": null,
+    "quantity_q": 40.0,
+    "price_per_q": 3980.0,
+    "amount_inr": 159200.0,
+    "delivery_terms": "The buyer collects from the farm within 3 days",
+    "terms_code": "buyer_collects",
+    "order_state": "accepted",
+    "cancel_reason_code": null,
+    "payment_state": "not_connected",
+    "vajra_state": "not_connected",
+    "vajra_ref": null,
+    "vajra_simulated": false,
+    "settlement_state": "not_connected",
+    "fee_state": "no_approved_fee_rule",
+    "payment_route": "none",
+    "payout_timing": null,
+    "synthetic": true,
+    "trace_id": "4963a60e94d149ee926e6e215da08d55",
+    "created_at": "2026-10-23T20:00:49.269370+00:00",
+    "updated_at": "2026-10-23T20:00:49.269370+00:00",
+    "offers_closed": [],
+    "command": {
+      "command_id": "cmd_af9fc8d0b0acb2a4acca",
+      "delivery_state": "not_sent",
+      "blocker": "TANTRA's order gate is not configured on this server (AIAIC_TANTRA_GATE_URL): its address and authentication have not been supplied, and TANTRA's live /initiate answered 400 on 21 Oct 2026 (Ranjit). Nothing is sent; the command is kept.",
+      "command_sha256": "f3db1879794cc6f5d779143fc60855dba83874e85996a534b5aa466d3c5bd7e5"
+    },
+    "trace": {
+      "request_id": "4963a60e94d149ee926e6e215da08d55",
+      "decision_ids": [],
+      "price_day": "not held",
+      "price_from": "not held",
+      "datasets": "not held",
+      "build": "unknown"
+    }
+  }
+}

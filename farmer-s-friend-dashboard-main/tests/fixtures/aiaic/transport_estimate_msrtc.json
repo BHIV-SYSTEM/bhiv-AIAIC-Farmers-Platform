@@ -1,0 +1,189 @@
+{
+ "_recorded": {
+  "by": "reports/push2_2026-10-23/A_record_transport_fixtures.py (AIAIC repo)",
+  "route": "GET /transport/estimate",
+  "at": "2026-10-23T20:34:48+00:00",
+  "status": 200,
+  "request": {
+   "params": {
+    "mandi": "APMC Ahilyanagar",
+    "quantity_q": 80,
+    "district": "nashik",
+    "state": "mh",
+    "mandi_state": "mh",
+    "mandi_district": "ahmednagar",
+    "from_place": "farm"
+   }
+  },
+  "note": "A real answer of AIAIC's own route, run in-process on this machine with no Geoapify key, so the distance is AIAIC's estimate (straight line x 1.3). Replayed by Annapoorna's tests, never edited."
+ },
+ "answer": {
+  "from": {
+   "state": "maharashtra",
+   "district_key": "nashik",
+   "district": "Nashik",
+   "lat": 19.997,
+   "lon": 73.789,
+   "approximate": null,
+   "place_class": "unknown",
+   "area": "unknown",
+   "settlement": "Nashik",
+   "trip_starts_at": "farm",
+   "end_area": "rural"
+  },
+  "to": {
+   "mandi": "APMC Ahilyanagar",
+   "also_named": [
+    "Ahilyanagar APMC",
+    "Ahmednagar",
+    "Ahmednagar APMC"
+   ],
+   "state": "maharashtra",
+   "district_key": "ahmednagar",
+   "place": "Ahilyanagar",
+   "lat": 19.09295,
+   "lon": 74.74935,
+   "located_by": "mandi_town",
+   "point_kind": "town",
+   "place_class": "city",
+   "area": "urban",
+   "geocoder": "nominatim",
+   "geocoded_on": "2026-10-23",
+   "district": "Ahilyanagar"
+  },
+  "quantity_q": 80.0,
+  "route_type": {
+   "key": "rural_urban",
+   "from_area": "rural",
+   "to_area": "urban",
+   "possible": [
+    "rural_urban"
+   ],
+   "factor_low": 1.1,
+   "factor_high": 1.1,
+   "assumption": true,
+   "applied": false,
+   "factors": {
+    "urban_urban": 1.0,
+    "rural_urban": 1.1,
+    "rural_rural": 1.2
+   },
+   "why": "No source read separates rural and urban freight rates. Less-connected roads and the empty return cost more: 'Routes to hill areas or less-connected districts cost more, because the truck may wait days for a load back' (TruckGuru, 2026-10-10)."
+  },
+  "distance": {
+   "km": 184.9,
+   "method": "estimate",
+   "straight_km": 142.2,
+   "factor": 1.3,
+   "why_not_road": "no_routing_key",
+   "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+  },
+  "route": null,
+  "vehicle": {
+   "key": "msrtc_truck",
+   "name": "MSRTC MAHACARGO TRUCK (9 TON)",
+   "names": {
+    "en": "MSRTC MAHACARGO TRUCK (9 TON)",
+    "mr": "एसटी महाकार्गो ट्रक (9 टन)",
+    "hi": "एमएसआरटीसी महाकार्गो ट्रक (9 टन)"
+   },
+   "capacity_kg": 9000,
+   "capacity_q": 90,
+   "routing_mode": "truck",
+   "rate": "official"
+  },
+  "trips": 1,
+  "loads_q": [
+   80.0
+  ],
+  "rate": {
+   "kind": "official",
+   "source": {
+    "key": "msrtc_mahacargo_2023",
+    "name": "MSRTC Mahacargo freight rates, as reported by The Hitavada",
+    "url": "https://thehitavada.com/Encyc/2023/7/31/Goods-transport-MSRTC-suffers-drop-in-revenue-over-three-years.html",
+    "page_date": "2023-07-31",
+    "read_on": "2026-10-23",
+    "operator": "Maharashtra State Road Transport Corporation (MSRTC), its goods service (Mahacargo)",
+    "published_by": "The Hitavada (a news report of MSRTC's rates; MSRTC's own chart is not online)",
+    "label": "MSRTC Mahacargo, published Jul 2023; current chart not confirmed"
+   },
+   "bands": [
+    {
+     "up_to_km": 200,
+     "rs_per_km": 57
+    },
+    {
+     "up_to_km": null,
+     "rs_per_km": 55
+    }
+   ],
+   "printed_up_to_km": 251,
+   "minimum_per_trip_rs": 4500,
+   "confirmed_current": false,
+   "official": true,
+   "label": "MSRTC Mahacargo, published Jul 2023; current chart not confirmed",
+   "distance_band": null,
+   "applied_per_km_low": 57.0,
+   "applied_per_km_high": 57.0,
+   "minimum_per_trip": {
+    "low_rs": 4500,
+    "high_rs": 4500,
+    "from": [
+     "msrtc_mahacargo_2023"
+    ]
+   },
+   "minimum_applied": false,
+   "return_in_high": true
+  },
+  "fare_per_trip": {
+   "low_rs": 10539,
+   "high_rs": 21079
+  },
+  "cost": {
+   "low_rs": 10539,
+   "high_rs": 21079
+  },
+  "per_quintal": {
+   "low_rs": 131,
+   "high_rs": 264
+  },
+  "notes": [
+   {
+    "code": "from_district_centre",
+    "text": "Measured from your district's centre, not from your farm."
+   },
+   {
+    "code": "to_mandi_town",
+    "text": "Measured to the mandi's town."
+   },
+   {
+    "code": "distance_estimate",
+    "text": "Straight line x 1.3: an estimate."
+   },
+   {
+    "code": "official_rate_dated",
+    "text": "MSRTC Mahacargo, published Jul 2023; current chart not confirmed.",
+    "values": {
+     "label": "MSRTC Mahacargo, published Jul 2023; current chart not confirmed"
+    }
+   },
+   {
+    "code": "route_type_not_applied",
+    "text": "MSRTC's chart is the same on every road."
+   },
+   {
+    "code": "return_in_high",
+    "text": "High end: the return trip paid too."
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "information_only": true
+ }
+}
