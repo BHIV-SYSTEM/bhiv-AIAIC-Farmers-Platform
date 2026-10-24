@@ -786,6 +786,9 @@ export type NearbyMandi = {
   district_key?: string | undefined;
   straight_km: number;
   road_km_estimate?: number | undefined;
+  /** The mandi's point (OpenStreetMap data, geocoded once by AIAIC): drawn as a dot on the transport card's map. */
+  lat?: number | null | undefined;
+  lon?: number | null | undefined;
 };
 
 export type NearbyMandis = {

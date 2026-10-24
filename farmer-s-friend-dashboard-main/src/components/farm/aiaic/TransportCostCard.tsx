@@ -8,7 +8,6 @@ import {
   attributionsOf,
   quintalWords,
   quintals,
-  routeSketch,
   rupeeRange,
   rupees,
   sourcesSaid,
@@ -22,6 +21,8 @@ import { getPlacesDistricts } from "@/lib/places.functions";
 import { cn } from "@/lib/utils";
 
 import { ProblemCard } from "./AiaicBits";
+import { RouteMap } from "./RouteMap";
+import { routeMapOf } from "./route-map";
 
 type Estate = "mh" | "mp";
 
@@ -147,6 +148,16 @@ export function TransportCostCard({
   const credits = attributionsOf(
     nearby.data?.ok ? nearby.data.data.attribution : [],
     est?.attribution,
+  );
+  // The map, fed as AIAIC's own transport card feeds it: her district (its name in her language), the mandi, the
+  // mandis near her as dots, the road's line when AIAIC sent one (else a dashed straight line), the km said as road
+  // or estimate.
+  const fromName = est
+    ? districtList.find((d) => d.key === est.from.district_key)?.name
+    : undefined;
+  const map = useMemo(
+    () => (est ? routeMapOf(est, fromName, mandis) : null),
+    [est, fromName, mandis],
   );
 
   return (
@@ -307,10 +318,16 @@ export function TransportCostCard({
 
       {est ? (
         <>
-          <RouteSketch
-            est={est}
-            fromName={districtList.find((d) => d.key === est.from.district_key)?.name}
-          />
+          {map ? (
+            <RouteMap
+              places={map.places}
+              route={map.route}
+              distance={map.distance}
+              height={200}
+              title={t("aiaic.transport.map")}
+              testid="aiaic-transport-map"
+            />
+          ) : null}
           <SourcesLine est={est} />
           <button
             type="button"
@@ -396,46 +413,6 @@ function TruckGlyph() {
       <circle cx="14" cy="29" r="5" className="fill-card stroke-primary" strokeWidth="2.5" />
       <circle cx="48" cy="29" r="5" className="fill-card stroke-primary" strokeWidth="2.5" />
     </svg>
-  );
-}
-
-/** The route as AIAIC had it: Geoapify's road line, or a dashed straight line for an estimate. */
-function RouteSketch({ est, fromName }: { est: TransportEstimate; fromName?: string | undefined }) {
-  const { t } = useI18n();
-  const w = 320;
-  const h = 110;
-  const s = routeSketch(est, w, h);
-  return (
-    <figure className="overflow-hidden rounded-2xl border border-border bg-muted/40">
-      <svg
-        viewBox={`0 0 ${w} ${h}`}
-        className="h-28 w-full"
-        role="img"
-        aria-label={t("aiaic.transport.map")}
-      >
-        <path
-          d={s.path}
-          fill="none"
-          className="stroke-primary"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray={s.dashed ? "7 6" : undefined}
-        />
-        <circle
-          cx={s.from[0]}
-          cy={s.from[1]}
-          r="6"
-          className="fill-card stroke-primary"
-          strokeWidth="3"
-        />
-        <circle cx={s.to[0]} cy={s.to[1]} r="6" className="fill-primary" />
-      </svg>
-      <figcaption className="flex justify-between gap-2 px-3 pb-2 text-[11px] font-bold text-foreground">
-        <span className="truncate">{fromName ?? est.from.district}</span>
-        <span className="truncate text-right">{est.to.mandi}</span>
-      </figcaption>
-    </figure>
   );
 }
 

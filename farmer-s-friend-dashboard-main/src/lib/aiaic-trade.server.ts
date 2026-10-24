@@ -788,6 +788,8 @@ export async function nearbyMandis(q: {
             "district_key",
             "straight_km",
             "road_km_estimate",
+            "lat",
+            "lon",
           ]),
         ),
         attribution: Array.isArray(r.data["attribution"])
