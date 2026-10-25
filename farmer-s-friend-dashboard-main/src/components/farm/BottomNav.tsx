@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Leaf, ClipboardList, ShoppingBag, Wallet } from "lucide-react";
+import { Leaf, ClipboardList, LifeBuoy, ShoppingBag, Wallet } from "lucide-react";
 
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -23,13 +23,14 @@ export function BottomNav() {
   const isListingsActive = currentPath.startsWith("/listing");
   const isOrdersActive = currentPath.startsWith("/orders");
   const isPaymentsActive = currentPath.startsWith("/payments");
+  const isHelpActive = currentPath.startsWith("/help");
 
   return (
     <nav
       aria-label="Mobile Navigation"
       className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-border bg-background/95 backdrop-blur pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-1.5 shadow-lg"
     >
-      <div className="mx-auto grid max-w-md grid-cols-4 gap-1 px-1.5">
+      <div className="mx-auto grid max-w-md grid-cols-5 gap-1 px-1.5">
         {/* 1. Advisory Tab */}
         <Link
           to="/"
@@ -91,6 +92,23 @@ export function BottomNav() {
           <Wallet className={cn("size-5 shrink-0", isPaymentsActive && "stroke-[2.5]")} />
           <span className="mt-0.5 text-[11px] leading-tight truncate max-w-full px-0.5">
             {t("nav.payments") || "Payments"}
+          </span>
+        </Link>
+
+        {/* 5. Help: her questions to AIAIC's team (push 4b) */}
+        <Link
+          to="/help"
+          className={cn(
+            "flex min-h-12 flex-col items-center justify-center rounded-2xl py-1 text-center transition-colors touch-manipulation",
+            isHelpActive
+              ? "bg-primary/10 text-primary font-extrabold"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground font-semibold",
+          )}
+          data-testid="nav-help"
+        >
+          <LifeBuoy className={cn("size-5 shrink-0", isHelpActive && "stroke-[2.5]")} />
+          <span className="mt-0.5 text-[11px] leading-tight truncate max-w-full px-0.5">
+            {t("nav.help")}
           </span>
         </Link>
       </div>

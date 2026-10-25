@@ -14,6 +14,7 @@ import { BUSINESS } from "../lib/business";
 import { I18nProvider, useI18n } from "../lib/i18n";
 import { reportError } from "../lib/error-reporting";
 import { TopNav } from "../components/farm/TopNav";
+import { AccountNotices } from "../components/farm/AccountChip";
 import { BottomNav } from "../components/farm/BottomNav";
 
 function NotFoundComponent() {
@@ -165,6 +166,7 @@ function RootComponent() {
       <I18nProvider>
         <div className="flex min-h-screen flex-col bg-background text-foreground">
           <TopNav />
+          <AccountNotices />
           <main className="flex-1 pb-20 sm:pb-24">
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />

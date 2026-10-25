@@ -14,11 +14,13 @@ Annapoorna is built on Krishi Sampada (AIAIC), an agricultural intelligence plat
 - **Plant check.** A photo of a leaf, checked by AIAIC's plant service.
 - **Read aloud.** The advice can be read out, for those who prefer to listen.
 - **Transport cost.** What moving your produce to a mandi may cost, from AIAIC's estimate.
-- **Selling, as practice for now.** The Sell, My Listings, Orders & Offers and Payments screens run on AIAIC's sale service through a practice account (or, where the app is not connected to it, on the app's own demonstration store): the listings, offers and orders there are rehearsal records, and no real money moves. Real sales, with payments, are made on Krishi Sampada (AIAIC), under AIAIC's terms.
+- **Help.** Ask AIAIC's team a question; their answers appear on the Help tab.
+- **A guest, or a farmer account.** Everything above works without an account. A farmer can also register a username and password with AIAIC from the app; AIAIC's team approves each registration, and the app says when it is approved.
+- **Selling.** The Sell, My Listings, Orders & Offers and Payments screens run on AIAIC's sale service. For a guest they use a practice account (or, where the app is not connected to it, the app's own demonstration store): the listings, offers and orders there are rehearsal records, and no real money moves. For a signed-in farmer they are her own records on Krishi Sampada (AIAIC), under AIAIC's terms.
 
 ## What Annapoorna is not
 
-Annapoorna does not buy or sell produce, does not take payments and does not lend money. It has no sign-in.
+Annapoorna does not buy or sell produce, does not take payments and does not lend money.
 
 ## Contact
 

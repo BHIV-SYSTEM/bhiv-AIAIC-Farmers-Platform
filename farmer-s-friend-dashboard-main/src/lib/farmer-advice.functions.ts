@@ -96,11 +96,9 @@ export const getFarmerAdvice = createServerFn({ method: "GET" })
     url.searchParams.set("lang", data.lang);
 
     try {
-      const response = await fetch(url.toString(), {
-        method: "GET",
-        headers: AIAIC_HEADERS,
-        signal: AbortSignal.timeout(20_000),
-      });
+      // who asked (push 4b): her token when she is signed in, else this device's id; AIAIC records the advice under it
+      const { fetchForHer } = await import("./aiaic-identity.server");
+      const response = await fetchForHer(url.toString(), { ...AIAIC_HEADERS }, 20_000);
 
       if (!response.ok) {
         return {
