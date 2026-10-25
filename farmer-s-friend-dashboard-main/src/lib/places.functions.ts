@@ -103,7 +103,7 @@ export const getPlacesDistricts = createServerFn({ method: "GET" })
   .validator((params: unknown) => districtsQuerySchema.parse(params))
   .handler(
     async ({ data }): Promise<{ ok: boolean; districts: DistrictItem[]; error?: string }> => {
-      const { resolveBaseUrl, AIAIC_HEADERS } = await import("./aiaic-base.server");
+      const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
       const { baseUrl } = resolveBaseUrl();
 
       const url = new URL(`${baseUrl}/places/districts`);
@@ -112,7 +112,7 @@ export const getPlacesDistricts = createServerFn({ method: "GET" })
 
       try {
         const res = await fetch(url.toString(), {
-          headers: AIAIC_HEADERS,
+          headers: aiaicHeaders(),
           signal: AbortSignal.timeout(15_000),
         });
         if (!res.ok) return { ok: false, districts: [], error: `HTTP ${res.status}` };
@@ -134,7 +134,7 @@ export const getPlacesCrops = createServerFn({ method: "GET" })
     async ({
       data,
     }): Promise<{ ok: boolean; crops: CropItem[]; firstPage: string[]; error?: string }> => {
-      const { resolveBaseUrl, AIAIC_HEADERS } = await import("./aiaic-base.server");
+      const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
       const { baseUrl } = resolveBaseUrl();
 
       const url = new URL(`${baseUrl}/places/crops`);
@@ -144,7 +144,7 @@ export const getPlacesCrops = createServerFn({ method: "GET" })
 
       try {
         const res = await fetch(url.toString(), {
-          headers: AIAIC_HEADERS,
+          headers: aiaicHeaders(),
           signal: AbortSignal.timeout(15_000),
         });
         if (!res.ok) return { ok: false, crops: [], firstPage: [], error: `HTTP ${res.status}` };
@@ -168,7 +168,7 @@ export const resolvePlace = createServerFn({ method: "GET" })
   .validator((params: unknown) => resolvePlaceQuerySchema.parse(params))
   .handler(
     async ({ data }): Promise<{ ok: boolean; status?: string; place?: any; error?: string }> => {
-      const { resolveBaseUrl, AIAIC_HEADERS } = await import("./aiaic-base.server");
+      const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
       const { baseUrl } = resolveBaseUrl();
 
       const url = new URL(`${baseUrl}/places/resolve`);
@@ -178,7 +178,7 @@ export const resolvePlace = createServerFn({ method: "GET" })
 
       try {
         const res = await fetch(url.toString(), {
-          headers: AIAIC_HEADERS,
+          headers: aiaicHeaders(),
           signal: AbortSignal.timeout(10_000),
         });
         if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
@@ -197,7 +197,7 @@ export const resolvePlace = createServerFn({ method: "GET" })
 export const getPriceSeries = createServerFn({ method: "GET" })
   .validator((params: unknown) => priceSeriesQuerySchema.parse(params))
   .handler(async ({ data }): Promise<PriceSeriesResponse> => {
-    const { resolveBaseUrl, AIAIC_HEADERS } = await import("./aiaic-base.server");
+    const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
     const { baseUrl } = resolveBaseUrl();
 
     const url = new URL(`${baseUrl}/places/price-series`);
@@ -209,7 +209,7 @@ export const getPriceSeries = createServerFn({ method: "GET" })
 
     try {
       const res = await fetch(url.toString(), {
-        headers: AIAIC_HEADERS,
+        headers: aiaicHeaders(),
         signal: AbortSignal.timeout(15_000),
       });
       if (!res.ok) {
@@ -273,7 +273,7 @@ export const getPriceSeries = createServerFn({ method: "GET" })
 export const getViewBrief = createServerFn({ method: "GET" })
   .validator((params: unknown) => viewBriefQuerySchema.parse(params))
   .handler(async ({ data }): Promise<{ ok: boolean; brief?: any; error?: string }> => {
-    const { resolveBaseUrl, AIAIC_HEADERS } = await import("./aiaic-base.server");
+    const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
     const { baseUrl } = resolveBaseUrl();
 
     const url = new URL(`${baseUrl}/view/brief`);
@@ -284,7 +284,7 @@ export const getViewBrief = createServerFn({ method: "GET" })
 
     try {
       const res = await fetch(url.toString(), {
-        headers: AIAIC_HEADERS,
+        headers: aiaicHeaders(),
         signal: AbortSignal.timeout(15_000),
       });
       if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };

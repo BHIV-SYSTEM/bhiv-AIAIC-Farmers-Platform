@@ -1,10 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CircleCheck, LogIn, LogOut, MessageCircleReply, UserRound } from "lucide-react";
+import { CircleCheck, LogIn, LogOut, MessageCircleReply, Trash2, UserRound } from "lucide-react";
 import { useState } from "react";
 
-import { getMyNotices, markNoticeRead, signOutFarmer } from "@/lib/aiaic-account.functions";
+import { accountWords } from "@/lib/aiaic-account";
+import {
+  eraseMyAccount,
+  getMyNotices,
+  markNoticeRead,
+  signOutFarmer,
+} from "@/lib/aiaic-account.functions";
 import { useMe } from "@/lib/aiaic-me";
 import { useI18n } from "@/lib/i18n";
 
@@ -18,7 +24,20 @@ export function AccountChip() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [eraseAsked, setEraseAsked] = useState(false);
   const outFn = useServerFn(signOutFarmer);
+  const eraseFn = useServerFn(eraseMyAccount);
+  // her account erased by herself (push 4b audit, R-10): AIAIC's DELETE /farmer/me; the next page says it once
+  const erase = useMutation({
+    mutationFn: () => eraseFn(),
+    onSuccess: async (r) => {
+      if (!r.ok) return;
+      setOpen(false);
+      setEraseAsked(false);
+      await qc.invalidateQueries();
+      void navigate({ to: "/" });
+    },
+  });
   const out = useMutation({
     mutationFn: () => outFn(),
     onSuccess: async () => {
@@ -74,6 +93,53 @@ export function AccountChip() {
               <LogOut className="size-4" aria-hidden />
               {t("aiaic.account.sign_out")}
             </button>
+            {eraseAsked ? (
+              <div className="mt-1 space-y-2 border-t border-border px-2 pt-2" role="group">
+                <p className="text-sm font-semibold text-foreground">
+                  {t("aiaic.account.erase_confirm")}
+                </p>
+                {erase.data && !erase.data.ok ? (
+                  <p role="alert" className="text-sm font-semibold text-destructive">
+                    {accountWords(t, erase.data.code)}
+                  </p>
+                ) : erase.isError ? (
+                  <p role="alert" className="text-sm font-semibold text-destructive">
+                    {accountWords(t, "aiaic_unavailable")}
+                  </p>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => erase.mutate()}
+                    disabled={erase.isPending}
+                    className="min-h-11 rounded-xl bg-destructive px-3 py-2 text-sm font-extrabold text-destructive-foreground disabled:opacity-60"
+                    data-testid="account-erase-yes"
+                  >
+                    {erase.isPending ? t("aiaic.account.busy") : t("aiaic.account.erase_yes")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEraseAsked(false)}
+                    className="min-h-11 rounded-xl border-2 border-border px-3 py-2 text-sm font-bold text-foreground"
+                  >
+                    {t("aiaic.account.erase_no")}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  erase.reset();
+                  setEraseAsked(true);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-base font-bold text-destructive hover:bg-muted"
+                data-testid="account-erase"
+              >
+                <Trash2 className="size-4" aria-hidden />
+                {t("aiaic.account.erase")}
+              </button>
+            )}
           </div>
         </>
       ) : null}
@@ -107,7 +173,8 @@ export function AccountNotices() {
     void qc.invalidateQueries({ queryKey: ["aiaic-notices"] });
   };
   const shown = (notices.data ?? []).filter((n) => !gone.includes(n.id));
-  const note = me.data && !me.data.signedIn && me.data.signedOutNote && !noteSeen;
+  const note =
+    me.data && !me.data.signedIn && (me.data.signedOutNote || me.data.erasedNote) && !noteSeen;
   if (!shown.length && !note) return null;
   return (
     <div
@@ -119,7 +186,9 @@ export function AccountNotices() {
           role="status"
           className="flex items-center justify-between gap-2 rounded-2xl border-2 border-border bg-card p-3 text-sm font-semibold"
         >
-          <span>{t("aiaic.account.signed_out_note")}</span>
+          <span>
+            {t(me.data?.erasedNote ? "aiaic.account.erased" : "aiaic.account.signed_out_note")}
+          </span>
           <button
             type="button"
             className="rounded-xl px-3 py-1.5 font-bold hover:bg-muted"

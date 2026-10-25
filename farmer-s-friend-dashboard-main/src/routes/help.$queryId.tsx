@@ -4,10 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Send } from "lucide-react";
 import { useState } from "react";
 
-import { CrisisCard } from "@/components/farm/aiaic/CrisisFirst";
+import { HelpCrisis } from "@/components/farm/aiaic/HelpCrisis";
 import { accountWords } from "@/lib/aiaic-account";
 import { getMyQuery, writeToTeam } from "@/lib/aiaic-account.functions";
-import { problem } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -50,12 +49,22 @@ function QueryPage() {
       }
     },
   });
-  const r = write.data && !write.data.ok ? write.data : null;
-  if (r?.code === "crisis") {
+  // a call that never came back (no network, a server error) is said as that (push 4b audit, R-14)
+  const r =
+    write.data && !write.data.ok
+      ? write.data
+      : write.isError
+        ? { code: "aiaic_unavailable" }
+        : null;
+  if (r && "crisis" in r && r.code === "crisis") {
     return (
-      <div className="mx-auto w-full max-w-md space-y-4 px-4 pb-24 pt-6">
-        <CrisisCard problem={problem("crisis", { crisis: r.crisis ?? null })} />
-      </div>
+      <HelpCrisis
+        crisis={r.crisis ?? null}
+        onBack={() => {
+          write.reset();
+          setText("");
+        }}
+      />
     );
   }
   const q = one.data?.ok ? one.data.query : null;
@@ -68,11 +77,23 @@ function QueryPage() {
         <ArrowLeft className="size-5" aria-hidden />
         {t("aiaic.help.back")}
       </Link>
-      {one.isPending ? null : !q ? (
-        <p className="rounded-2xl border-2 border-dashed border-border bg-card p-5 text-center text-base font-semibold text-muted-foreground">
+      {one.isPending ? (
+        <p className="text-base font-semibold text-muted-foreground" role="status">
+          {t("aiaic.help.loading")}
+        </p>
+      ) : !q ? (
+        <p
+          className="rounded-2xl border-2 border-dashed border-border bg-card p-5 text-center text-base font-semibold text-muted-foreground"
+          role="alert"
+        >
           {accountWords(
             t,
-            one.data && !one.data.ok ? one.data.code : "query_not_found",
+            // never "not found" for a call that failed: that is said as it is (R-14)
+            one.isError
+              ? "aiaic_unavailable"
+              : one.data && !one.data.ok
+                ? one.data.code
+                : "query_not_found",
             "aiaic.help.code",
           )}
         </p>

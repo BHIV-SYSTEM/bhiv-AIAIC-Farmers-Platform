@@ -73,7 +73,7 @@ export const AIAIC_EN: Dict = {
     "Sign in with the username and password you registered. You can also go on as a guest: the advice is the same.",
   "aiaic.account.title_register": "Register",
   "aiaic.account.intro_register":
-    "Make your own account: your questions and your sales stay with you. AIAIC's team approves each registration.",
+    "Make your own account: your questions and sales are kept with your account, not this phone. AIAIC's team approves each registration.",
   "aiaic.account.username": "Username",
   "aiaic.account.username_hint": "3 to 64 letters or numbers, no spaces (. _ - allowed)",
   "aiaic.account.password": "Password",
@@ -87,7 +87,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.account.choose_district": "Choose your district",
   "aiaic.account.notice_title": "What registering keeps",
   "aiaic.account.notice":
-    "AIAIC keeps your username, your name if you give it, your state and district, and what you ask in this app, to answer you. AIAIC's team approves registrations and reads the questions you send. Your password is kept only in a scrambled form. You can ask for your account to be erased.",
+    "AIAIC keeps your username, your password (only in a scrambled form), your name if you give it, your state, district and language. Under your account it also keeps what you ask in this app, the storage and transport cards you look at, your help questions and your sales. AIAIC's team (its admins and reviewers) sees these together in one record, approves registrations, answers your questions and may check advice for you from its dashboard. They are kept until AIAIC's retention period ends or you erase your account: in the app (your name at the top, then Erase my account) or by writing to the grievance officer named on the Contact page, who also hears complaints. You may also complain to the Data Protection Board of India.",
   "aiaic.account.agree": "I have read this and I agree",
   "aiaic.account.submit_register": "Register",
   "aiaic.account.submit_signin": "Sign in",
@@ -162,11 +162,49 @@ export const AIAIC_EN: Dict = {
   "aiaic.help.write_again": "Write again",
   "aiaic.help.back": "All your questions",
   "aiaic.help.guest_note":
-    "You are using the app as a guest: your questions stay with this phone. Questions you ask after signing in are kept with your account.",
+    "You are using the app as a guest: AIAIC keeps your questions under this phone's id, not your name, and only this phone can read the answers. AIAIC's team reads them, with what was asked from this phone. Questions you ask after signing in are kept with your account.",
   "aiaic.help.code.sign_in_or_device":
     "This phone could not be recognised. Please open the app again.",
   "aiaic.help.code.farmers_only": "Questions are for farmers' accounts.",
   "aiaic.help.code.query_not_found": "This question was not found.",
+  "aiaic.help.crisis_note":
+    "Your message was not sent to AIAIC's team and was not kept, so that it stays private. The people at these numbers are trained to help, free, at any hour. You can still ask the team about your farm or your sale here.",
+  "aiaic.help.back_to_form": "Back to Help",
+  "aiaic.help.loading": "Reading your questions…",
+  "aiaic.help.code.aiaic_unavailable":
+    "The team's service could not be reached just now. Please check your connection and try again.",
+  "aiaic.help.code.unavailable":
+    "The team's service could not be reached just now. Please check your connection and try again.",
+  "aiaic.help.code.busy":
+    "Many people are writing to the team right now. Please try again in a few minutes.",
+  "aiaic.help.code.aiaic_signed_out":
+    "You were signed out, so your message was not sent. Please sign in again and send it.",
+  "aiaic.help.code.signed_in":
+    "You are signed in: your questions are your account's. To remove them, erase your account.",
+  "aiaic.help.forget_title": "This phone's questions",
+  "aiaic.help.forget_text":
+    "Your questions and the team's answers are kept under this phone's id, not your name. You can have them removed.",
+  "aiaic.help.forget": "Forget this phone's questions",
+  "aiaic.help.forget_confirm":
+    "Remove your questions and the team's answers from AIAIC? This cannot be undone.",
+  "aiaic.help.forget_yes": "Yes, remove them",
+  "aiaic.help.forget_no": "Keep them",
+  "aiaic.help.forgotten": "Done. This phone's questions are removed, and the phone has a new id.",
+  "aiaic.account.code.busy":
+    "Many people are using the app right now. Please wait a few minutes and try again.",
+  "aiaic.account.code.password_required": "Please type your password.",
+  "aiaic.account.code.not_signed_in": "You are not signed in.",
+  "aiaic.account.code.aiaic_signed_out": "You were signed out. Please sign in again.",
+  "aiaic.account.notice_privacy": "Read the full Privacy Policy",
+  "aiaic.account.rejected_next":
+    "You can still use all the advice as a guest. To register again, choose a new username. To ask why, write to AIAIC's team on the Help tab.",
+  "aiaic.account.ask_help": "Ask on the Help tab",
+  "aiaic.account.erase": "Erase my account",
+  "aiaic.account.erase_confirm":
+    "Erase your account? Your account, your help questions and the cards you looked at are removed. AIAIC's past answers are kept with no link to you, and your sales stay as records of the sale without your name. This cannot be undone.",
+  "aiaic.account.erase_yes": "Yes, erase it",
+  "aiaic.account.erase_no": "Cancel",
+  "aiaic.account.erased": "Your account is erased.",
   "aiaic.help.code.topic_not_known": "Choose what it is about.",
   "aiaic.help.code.text_required": "Please write your question.",
   "aiaic.help.code.text_too_long": "Please write at most 2000 letters.",
@@ -619,7 +657,7 @@ export const AIAIC_MR: Dict = {
     "नोंदणी करताना दिलेल्या वापरकर्ता नावाने आणि पासवर्डने साइन इन करा. तुम्ही पाहुणे म्हणूनही पुढे जाऊ शकता: सल्ला तोच मिळतो.",
   "aiaic.account.title_register": "नोंदणी",
   "aiaic.account.intro_register":
-    "तुमचे स्वतःचे खाते तयार करा: तुमचे प्रश्न आणि तुमची विक्री तुमच्याकडेच राहते. प्रत्येक नोंदणीला AIAIC ची टीम मंजुरी देते.",
+    "तुमचे स्वतःचे खाते तयार करा: तुमचे प्रश्न आणि विक्री या फोनऐवजी तुमच्या खात्यासोबत ठेवले जातात. प्रत्येक नोंदणीला AIAIC ची टीम मंजुरी देते.",
   "aiaic.account.username": "वापरकर्ता नाव",
   "aiaic.account.username_hint": "3 ते 64 अक्षरे किंवा अंक, जागा नको (. _ - चालेल)",
   "aiaic.account.password": "पासवर्ड",
@@ -633,7 +671,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.account.choose_district": "तुमचा जिल्हा निवडा",
   "aiaic.account.notice_title": "नोंदणीत काय ठेवले जाते",
   "aiaic.account.notice":
-    "तुम्हाला उत्तर देण्यासाठी AIAIC तुमचे वापरकर्ता नाव, दिल्यास तुमचे नाव, तुमचे राज्य आणि जिल्हा, आणि या ॲपमध्ये तुम्ही विचारलेले ठेवते. नोंदणीला AIAIC ची टीम मंजुरी देते आणि तुम्ही पाठवलेले प्रश्न वाचते. तुमचा पासवर्ड फक्त बदललेल्या (गुप्त) स्वरूपात ठेवला जातो. तुम्ही तुमचे खाते पुसून टाकण्यास सांगू शकता.",
+    "AIAIC तुमचे वापरकर्ता नाव, तुमचा पासवर्ड (फक्त बदललेल्या, गुप्त स्वरूपात), दिल्यास तुमचे नाव, तुमचे राज्य, जिल्हा आणि भाषा ठेवते. तुमच्या खात्याखाली तुम्ही या ॲपमध्ये काय विचारता, तुम्ही पाहिलेली साठवण आणि वाहतुकीची कार्डे, तुमचे मदतीचे प्रश्न आणि तुमची विक्री हेही ठेवले जाते. AIAIC ची टीम (तिचे प्रशासक आणि तपासनीस) हे सर्व एकाच नोंदीत पाहते, नोंदणीला मंजुरी देते, तुमच्या प्रश्नांना उत्तर देते आणि आपल्या डॅशबोर्डवरून तुमच्यासाठी सल्ला तपासू शकते. AIAIC चा ठेवण्याचा कालावधी संपेपर्यंत किंवा तुम्ही तुमचे खाते पुसून टाकेपर्यंत हे ठेवले जाते: ॲपमध्ये (वर तुमचे नाव, मग 'माझे खाते पुसून टाका') किंवा संपर्क पानावर दिलेल्या तक्रार निवारण अधिकाऱ्याला लिहून, जे तक्रारीही ऐकतात. तुम्ही भारताच्या डेटा संरक्षण मंडळाकडेही तक्रार करू शकता.",
   "aiaic.account.agree": "मी हे वाचले आहे आणि मला मान्य आहे",
   "aiaic.account.submit_register": "नोंदणी करा",
   "aiaic.account.submit_signin": "साइन इन करा",
@@ -707,10 +745,49 @@ export const AIAIC_MR: Dict = {
   "aiaic.help.write_again": "पुन्हा लिहा",
   "aiaic.help.back": "तुमचे सर्व प्रश्न",
   "aiaic.help.guest_note":
-    "तुम्ही ॲप पाहुणे म्हणून वापरत आहात: तुमचे प्रश्न या फोनवरच राहतात. साइन इन केल्यानंतर विचारलेले प्रश्न तुमच्या खात्यासोबत राहतात.",
+    "तुम्ही ॲप पाहुणे म्हणून वापरत आहात: AIAIC तुमचे प्रश्न तुमच्या नावाखाली नव्हे, तर या फोनच्या ओळख क्रमांकाखाली ठेवते आणि उत्तरे फक्त याच फोनवर वाचता येतात. AIAIC ची टीम ते, या फोनवरून विचारलेल्या गोष्टींसोबत वाचते. साइन इन केल्यानंतर विचारलेले प्रश्न तुमच्या खात्यासोबत राहतात.",
   "aiaic.help.code.sign_in_or_device": "हा फोन ओळखता आला नाही. कृपया ॲप पुन्हा उघडा.",
   "aiaic.help.code.farmers_only": "प्रश्न शेतकऱ्यांच्या खात्यांसाठी आहेत.",
   "aiaic.help.code.query_not_found": "हा प्रश्न सापडला नाही.",
+  "aiaic.help.crisis_note":
+    "तुमचा संदेश AIAIC च्या टीमकडे पाठवला गेला नाही आणि ठेवलाही गेला नाही, म्हणजे तो खाजगी राहील. या क्रमांकांवरील लोक मदतीसाठी प्रशिक्षित आहेत, मोफत, कोणत्याही वेळी. तुमच्या शेतीबद्दल किंवा विक्रीबद्दल तुम्ही इथे टीमला अजूनही विचारू शकता.",
+  "aiaic.help.back_to_form": "मदतीकडे परत",
+  "aiaic.help.loading": "तुमचे प्रश्न वाचत आहोत…",
+  "aiaic.help.code.aiaic_unavailable":
+    "टीमची सेवा आत्ता पोहोचू शकली नाही. कृपया तुमचे नेटवर्क तपासा आणि पुन्हा प्रयत्न करा.",
+  "aiaic.help.code.unavailable":
+    "टीमची सेवा आत्ता पोहोचू शकली नाही. कृपया तुमचे नेटवर्क तपासा आणि पुन्हा प्रयत्न करा.",
+  "aiaic.help.code.busy":
+    "आत्ता बरेच लोक टीमला लिहीत आहेत. कृपया काही मिनिटांनी पुन्हा प्रयत्न करा.",
+  "aiaic.help.code.aiaic_signed_out":
+    "तुम्ही साइन आउट झालात, त्यामुळे तुमचा संदेश पाठवला गेला नाही. कृपया पुन्हा साइन इन करून तो पाठवा.",
+  "aiaic.help.code.signed_in":
+    "तुम्ही साइन इन केले आहे: तुमचे प्रश्न तुमच्या खात्याचे आहेत. ते काढण्यासाठी तुमचे खाते पुसून टाका.",
+  "aiaic.help.forget_title": "या फोनवरील प्रश्न",
+  "aiaic.help.forget_text":
+    "तुमचे प्रश्न आणि टीमची उत्तरे तुमच्या नावाखाली नव्हे, तर या फोनच्या ओळख क्रमांकाखाली ठेवली आहेत. तुम्ही ती काढून टाकू शकता.",
+  "aiaic.help.forget": "या फोनवरील प्रश्न विसरा",
+  "aiaic.help.forget_confirm":
+    "तुमचे प्रश्न आणि टीमची उत्तरे AIAIC मधून काढून टाकायची? हे परत करता येणार नाही.",
+  "aiaic.help.forget_yes": "होय, काढून टाका",
+  "aiaic.help.forget_no": "ठेवा",
+  "aiaic.help.forgotten":
+    "झाले. या फोनवरील प्रश्न काढले आहेत आणि फोनला नवा ओळख क्रमांक मिळाला आहे.",
+  "aiaic.account.code.busy":
+    "आत्ता बरेच लोक ॲप वापरत आहेत. कृपया काही मिनिटे थांबून पुन्हा प्रयत्न करा.",
+  "aiaic.account.code.password_required": "कृपया तुमचा पासवर्ड टाइप करा.",
+  "aiaic.account.code.not_signed_in": "तुम्ही साइन इन केलेले नाही.",
+  "aiaic.account.code.aiaic_signed_out": "तुम्ही साइन आउट झालात. कृपया पुन्हा साइन इन करा.",
+  "aiaic.account.notice_privacy": "संपूर्ण गोपनीयता धोरण वाचा",
+  "aiaic.account.rejected_next":
+    "तुम्ही पाहुणे म्हणून सर्व सल्ला अजूनही वापरू शकता. पुन्हा नोंदणी करण्यासाठी नवे वापरकर्ता नाव निवडा. कारण विचारायचे असल्यास मदत टॅबवर AIAIC च्या टीमला लिहा.",
+  "aiaic.account.ask_help": "मदत टॅबवर विचारा",
+  "aiaic.account.erase": "माझे खाते पुसून टाका",
+  "aiaic.account.erase_confirm":
+    "तुमचे खाते पुसून टाकायचे? तुमचे खाते, तुमचे मदतीचे प्रश्न आणि तुम्ही पाहिलेली कार्डे काढली जातील. AIAIC ची जुनी उत्तरे तुमच्याशी कोणताही संबंध न ठेवता ठेवली जातात, आणि तुमची विक्री तुमच्या नावाशिवाय विक्रीची नोंद म्हणून राहते. हे परत करता येणार नाही.",
+  "aiaic.account.erase_yes": "होय, पुसून टाका",
+  "aiaic.account.erase_no": "रद्द करा",
+  "aiaic.account.erased": "तुमचे खाते पुसून टाकले आहे.",
   "aiaic.help.code.topic_not_known": "कशाबद्दल आहे ते निवडा.",
   "aiaic.help.code.text_required": "कृपया तुमचा प्रश्न लिहा.",
   "aiaic.help.code.text_too_long": "कृपया जास्तीत जास्त 2000 अक्षरे लिहा.",
@@ -1162,7 +1239,7 @@ export const AIAIC_HI: Dict = {
     "पंजीकरण के समय दिए उपयोगकर्ता नाम और पासवर्ड से साइन इन करें। आप अतिथि के रूप में भी आगे बढ़ सकते हैं: सलाह वही मिलती है।",
   "aiaic.account.title_register": "पंजीकरण",
   "aiaic.account.intro_register":
-    "अपना खाता बनाएँ: आपके प्रश्न और आपकी बिक्री आपके पास रहती है। हर पंजीकरण को AIAIC की टीम मंज़ूरी देती है।",
+    "अपना खाता बनाएँ: आपके प्रश्न और बिक्री इस फ़ोन के बजाय आपके खाते के साथ रखे जाते हैं। हर पंजीकरण को AIAIC की टीम मंज़ूरी देती है।",
   "aiaic.account.username": "उपयोगकर्ता नाम",
   "aiaic.account.username_hint": "3 से 64 अक्षर या अंक, बिना जगह के (. _ - चलेगा)",
   "aiaic.account.password": "पासवर्ड",
@@ -1176,7 +1253,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.account.choose_district": "अपना ज़िला चुनें",
   "aiaic.account.notice_title": "पंजीकरण में क्या रखा जाता है",
   "aiaic.account.notice":
-    "आपको उत्तर देने के लिए AIAIC आपका उपयोगकर्ता नाम, दें तो आपका नाम, आपका राज्य और ज़िला, और इस ऐप में आपने जो पूछा वह रखता है। पंजीकरण को AIAIC की टीम मंज़ूरी देती है और आपके भेजे प्रश्न पढ़ती है। आपका पासवर्ड केवल बदले हुए (गुप्त) रूप में रखा जाता है। आप अपना खाता मिटाने के लिए कह सकते हैं।",
+    "AIAIC आपका उपयोगकर्ता नाम, आपका पासवर्ड (सिर्फ़ बदले हुए, गुप्त रूप में), दिया हो तो आपका नाम, आपका राज्य, ज़िला और भाषा रखता है। आपके खाते के तहत यह भी रखा जाता है कि आप इस ऐप में क्या पूछते हैं, आपने भंडारण और ढुलाई के कौन से कार्ड देखे, आपके मदद के प्रश्न और आपकी बिक्री। AIAIC की टीम (उसके प्रशासक और समीक्षक) यह सब एक ही रिकॉर्ड में देखती है, पंजीकरण मंज़ूर करती है, आपके प्रश्नों के जवाब देती है और अपने डैशबोर्ड से आपके लिए सलाह जाँच सकती है। यह AIAIC की रखने की अवधि ख़त्म होने तक या आपके खाता मिटाने तक रखा जाता है: ऐप में (ऊपर आपका नाम, फिर 'मेरा खाता मिटाएँ') या संपर्क पेज पर दिए शिकायत अधिकारी को लिखकर, जो शिकायतें भी सुनते हैं। आप भारत के डेटा संरक्षण बोर्ड से भी शिकायत कर सकते हैं।",
   "aiaic.account.agree": "मैंने यह पढ़ लिया है और मुझे मंज़ूर है",
   "aiaic.account.submit_register": "पंजीकरण करें",
   "aiaic.account.submit_signin": "साइन इन करें",
@@ -1250,10 +1327,47 @@ export const AIAIC_HI: Dict = {
   "aiaic.help.write_again": "फिर से लिखें",
   "aiaic.help.back": "आपके सभी प्रश्न",
   "aiaic.help.guest_note":
-    "आप ऐप अतिथि के रूप में इस्तेमाल कर रहे हैं: आपके प्रश्न इसी फ़ोन पर रहते हैं। साइन इन करने के बाद पूछे गए प्रश्न आपके खाते के साथ रहते हैं।",
+    "आप ऐप अतिथि के रूप में इस्तेमाल कर रहे हैं: AIAIC आपके प्रश्न आपके नाम के तहत नहीं, बल्कि इस फ़ोन की पहचान संख्या के तहत रखता है, और जवाब सिर्फ़ इसी फ़ोन पर पढ़े जा सकते हैं। AIAIC की टीम उन्हें, इस फ़ोन से पूछी गई बातों के साथ पढ़ती है। साइन इन करने के बाद पूछे गए प्रश्न आपके खाते के साथ रहते हैं।",
   "aiaic.help.code.sign_in_or_device": "यह फ़ोन पहचाना नहीं जा सका। कृपया ऐप फिर से खोलें।",
   "aiaic.help.code.farmers_only": "प्रश्न किसानों के खातों के लिए हैं।",
   "aiaic.help.code.query_not_found": "यह प्रश्न नहीं मिला।",
+  "aiaic.help.crisis_note":
+    "आपका संदेश AIAIC की टीम को नहीं भेजा गया और रखा भी नहीं गया, ताकि वह निजी रहे। इन नंबरों पर लोग मदद के लिए प्रशिक्षित हैं, मुफ़्त, किसी भी समय। अपनी खेती या बिक्री के बारे में आप यहाँ टीम से अब भी पूछ सकते हैं।",
+  "aiaic.help.back_to_form": "मदद पर वापस",
+  "aiaic.help.loading": "आपके प्रश्न पढ़ रहे हैं…",
+  "aiaic.help.code.aiaic_unavailable":
+    "टीम की सेवा अभी नहीं मिल सकी। कृपया अपना नेटवर्क जाँचें और फिर कोशिश करें।",
+  "aiaic.help.code.unavailable":
+    "टीम की सेवा अभी नहीं मिल सकी। कृपया अपना नेटवर्क जाँचें और फिर कोशिश करें।",
+  "aiaic.help.code.busy": "अभी बहुत लोग टीम को लिख रहे हैं। कृपया कुछ मिनट बाद फिर कोशिश करें।",
+  "aiaic.help.code.aiaic_signed_out":
+    "आप साइन आउट हो गए, इसलिए आपका संदेश नहीं भेजा गया। कृपया फिर से साइन इन करके उसे भेजें।",
+  "aiaic.help.code.signed_in":
+    "आप साइन इन हैं: आपके प्रश्न आपके खाते के हैं। उन्हें हटाने के लिए अपना खाता मिटाएँ।",
+  "aiaic.help.forget_title": "इस फ़ोन के प्रश्न",
+  "aiaic.help.forget_text":
+    "आपके प्रश्न और टीम के जवाब आपके नाम के तहत नहीं, इस फ़ोन की पहचान संख्या के तहत रखे गए हैं। आप उन्हें हटवा सकते हैं।",
+  "aiaic.help.forget": "इस फ़ोन के प्रश्न भूल जाएँ",
+  "aiaic.help.forget_confirm": "अपने प्रश्न और टीम के जवाब AIAIC से हटाएँ? यह वापस नहीं हो सकता।",
+  "aiaic.help.forget_yes": "हाँ, हटाएँ",
+  "aiaic.help.forget_no": "रहने दें",
+  "aiaic.help.forgotten":
+    "हो गया। इस फ़ोन के प्रश्न हटा दिए गए हैं, और फ़ोन को नई पहचान संख्या मिल गई है।",
+  "aiaic.account.code.busy":
+    "अभी बहुत लोग ऐप इस्तेमाल कर रहे हैं। कृपया कुछ मिनट रुककर फिर कोशिश करें।",
+  "aiaic.account.code.password_required": "कृपया अपना पासवर्ड टाइप करें।",
+  "aiaic.account.code.not_signed_in": "आप साइन इन नहीं हैं।",
+  "aiaic.account.code.aiaic_signed_out": "आप साइन आउट हो गए। कृपया फिर से साइन इन करें।",
+  "aiaic.account.notice_privacy": "पूरी गोपनीयता नीति पढ़ें",
+  "aiaic.account.rejected_next":
+    "आप अतिथि के रूप में सारी सलाह अब भी इस्तेमाल कर सकते हैं। फिर से पंजीकरण के लिए नया उपयोगकर्ता नाम चुनें। कारण पूछना हो तो मदद टैब पर AIAIC की टीम को लिखें।",
+  "aiaic.account.ask_help": "मदद टैब पर पूछें",
+  "aiaic.account.erase": "मेरा खाता मिटाएँ",
+  "aiaic.account.erase_confirm":
+    "अपना खाता मिटाएँ? आपका खाता, आपके मदद के प्रश्न और आपके देखे कार्ड हटा दिए जाएँगे। AIAIC के पुराने जवाब आपसे बिना किसी जुड़ाव के रखे जाते हैं, और आपकी बिक्री आपके नाम के बिना बिक्री के रिकॉर्ड के रूप में रहती है। यह वापस नहीं हो सकता।",
+  "aiaic.account.erase_yes": "हाँ, मिटाएँ",
+  "aiaic.account.erase_no": "रद्द करें",
+  "aiaic.account.erased": "आपका खाता मिटा दिया गया है।",
   "aiaic.help.code.topic_not_known": "किस बारे में है, वह चुनें।",
   "aiaic.help.code.text_required": "कृपया अपना प्रश्न लिखें।",
   "aiaic.help.code.text_too_long": "कृपया अधिकतम 2000 अक्षर लिखें।",

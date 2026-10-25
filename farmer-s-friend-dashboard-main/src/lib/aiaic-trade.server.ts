@@ -17,7 +17,7 @@
  * - Nothing here falls back to the local store: when AIAIC is set up and does not answer, that is SAID.
  */
 import {
-  AIAIC_HEADERS,
+  aiaicHeaders,
   isTunnelErrorBody,
   resolveBaseUrl,
   signInAllowed,
@@ -124,7 +124,7 @@ async function signIn(baseUrl: string): Promise<Session | AiaicProblem> {
     try {
       res = await fetch(`${baseUrl}/auth/login`, {
         method: "POST",
-        headers: { ...AIAIC_HEADERS, "content-type": "application/json" },
+        headers: { ...aiaicHeaders(), "content-type": "application/json" },
         body: JSON.stringify({
           username: (process.env[USERNAME_ENV] ?? "").trim(),
           password: process.env[PASSWORD_ENV] ?? "",
@@ -249,7 +249,7 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
   }
   for (let attempt = 0; attempt < 2; attempt++) {
-    const headers: Record<string, string> = { ...AIAIC_HEADERS };
+    const headers: Record<string, string> = aiaicHeaders();
     if (her) {
       Object.assign(headers, askerHeaders({ kind: "her", session: her }));
     } else if (opts.as === "trade") {

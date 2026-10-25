@@ -18,7 +18,7 @@
  * - A password is never logged, never kept, never returned; a token never leaves this server.
  */
 import {
-  AIAIC_HEADERS,
+  aiaicHeaders,
   isTunnelErrorBody,
   resolveBaseUrl,
   signInAllowed,
@@ -38,6 +38,7 @@ import {
   askerHeaders,
   deviceId,
   dropHerSession,
+  forgetDevice,
   herSession,
   keepHerSession,
   takeNote,
@@ -50,7 +51,11 @@ type Answer = { status: number; body: Record<string, unknown> | null; unreachabl
 
 async function ask(
   path: string,
-  init: { method?: "GET" | "POST"; body?: unknown; headers?: Record<string, string> } = {},
+  init: {
+    method?: "GET" | "POST" | "DELETE";
+    body?: unknown;
+    headers?: Record<string, string>;
+  } = {},
 ): Promise<Answer> {
   const { baseUrl } = resolveBaseUrl();
   let res: Response;
@@ -58,7 +63,7 @@ async function ask(
     res = await fetch(`${baseUrl}${path}`, {
       method: init.method ?? "GET",
       headers: {
-        ...AIAIC_HEADERS,
+        ...aiaicHeaders(),
         ...(init.body === undefined ? {} : { "content-type": "application/json" }),
         ...(init.headers ?? {}),
       },
@@ -109,7 +114,9 @@ function codeOf(a: Answer): { code: string; reason: string | null } {
       };
   }
   if (a.status === 401) return { code: "wrong_credentials", reason: null };
-  if (a.status === 429) return { code: "too_many_tries", reason: null };
+  // a 429 is about the app's traffic (AIAIC sees every farmer behind this server unless the app's key is set), never
+  // "you tried too often" said to a farmer who did nothing wrong (push 4b audit, R-07)
+  if (a.status === 429) return { code: "busy", reason: null };
   if (a.status === 422) return { code: "not_accepted", reason: null };
   if (a.status >= 500 || a.status === 0) return { code: "aiaic_unavailable", reason: null };
   return { code: "other", reason: null };
@@ -130,13 +137,16 @@ export async function whoIsHere(): Promise<Me> {
         username: her.username,
         displayName: her.displayName,
         signedOutNote: false,
+        erasedNote: false,
       };
   } else deviceId(); // a guest's device gets its id on the first look
+  const note = takeNote();
   return {
     signedIn: false,
     username: null,
     displayName: null,
-    signedOutNote: takeNote() === "signed_out",
+    signedOutNote: note === "signed_out",
+    erasedNote: note === "erased",
   };
 }
 
@@ -185,7 +195,11 @@ export async function register(q: {
   state: "mh" | "mp";
   district: string;
   lang: string;
+  /** Her own tick on the notice's box, and the version of the notice the page showed her (push 4b audit, R-05). */
+  agreed: true;
+  noticeVersion: string;
 }): Promise<AccountOutcome> {
+  if (q.noticeVersion !== REGISTRATION_NOTICE_VERSION) return { ok: false, code: "notice_changed" };
   if (!signInAllowed(resolveBaseUrl().baseUrl))
     return { ok: false, code: "aiaic_sign_in_needs_https" };
   const a = await ask("/farmer/register", {
@@ -196,8 +210,8 @@ export async function register(q: {
       ...(q.displayName ? { display_name: q.displayName } : {}),
       state: q.state,
       district: q.district,
-      consent: true,
-      notice_version: REGISTRATION_NOTICE_VERSION,
+      consent: q.agreed,
+      notice_version: q.noticeVersion,
       lang: q.lang,
     },
   });
@@ -250,7 +264,11 @@ export async function noticeRead(id: number): Promise<void> {
 
 // ------------------------------------------------------------------------------------------------ her queries
 
-/** One call for her queries, with who asked; a token AIAIC no longer takes ends her session (said once). */
+/**
+ * One call for her queries, with who asked; a token AIAIC no longer takes ends her session (said once). A READ is then
+ * asked again as this device; a WRITE never is (push 4b audit, R-09): her words are never filed under the phone, where
+ * a later guest would read them and erasing her account would not remove them. She is told she was signed out.
+ */
 async function askAsHer(
   path: string,
   init: { method?: "GET" | "POST"; body?: unknown } = {},
@@ -259,6 +277,12 @@ async function askAsHer(
   const a = await ask(path, { ...init, headers: askerHeaders(who) });
   if (a.status === 401 && who.kind === "her") {
     dropHerSession("signed_out");
+    if ((init.method ?? "GET") !== "GET")
+      return {
+        status: 401,
+        body: { detail: { reason_code: "aiaic_signed_out" } },
+        unreachable: false,
+      };
     return ask(path, { ...init, headers: askerHeaders(asker()) });
   }
   return a;
@@ -317,4 +341,60 @@ export async function writeAgain(q: {
   if (crisis) return { ok: false, code: "crisis", crisis };
   if (a.status !== 200 || !a.body) return { ok: false, code: codeOf(a).code };
   return { ok: true, query: a.body as unknown as HelpQuery };
+}
+
+// ------------------------------------------------------------------------------------------------ before a refusal
+
+/**
+ * WORDS SHE TYPED, READ FOR DISTRESS BEFORE ANY REFUSAL ON THIS PHONE (push 4b audit, R-03; the platform's rule D-105:
+ * nothing answers a person in crisis before the scan does). When the page would refuse a form for something else (no
+ * topic chosen, a username of the wrong shape, the notice not ticked, no password yet), what she typed goes first to
+ * AIAIC's `/safety/check`, which keeps nothing: its crisis card, or null.
+ */
+export async function scanFirst(q: { text: string; lang: string }): Promise<Crisis | null> {
+  const text = q.text.trim().slice(0, 2000);
+  if (!text) return null;
+  const a = await ask("/safety/check", { method: "POST", body: { text, lang: q.lang } });
+  return crisisOf(a.body);
+}
+
+// ------------------------------------------------------------------------------------------------ her erasure
+
+/**
+ * Her account erased, by herself (push 4b audit, R-10; AIAIC's `DELETE /farmer/me`): her account, profile, notices,
+ * help questions and looks go; each past answer is kept with no link to her; her sales stay as records of the sale
+ * without her name. Her session ends here.
+ */
+export async function eraseMyAccount(): Promise<AccountOutcome> {
+  const her = herSession();
+  if (!her) return { ok: false, code: "not_signed_in" };
+  const a = await ask("/farmer/me", {
+    method: "DELETE",
+    headers: { authorization: `Bearer ${her.token}` },
+  });
+  if (a.status === 200) {
+    dropHerSession("erased"); // said once on the next page: her account is erased
+    return { ok: true };
+  }
+  if (a.status === 401) dropHerSession("signed_out");
+  return { ok: false, ...codeOf(a) };
+}
+
+/**
+ * A guest's questions and looks forgotten (push 4b audit, R-10; AIAIC's `POST /farmer/guest/forget`): removed under
+ * this phone's id; each past answer kept without it. The phone then gets a new id, so nothing joins what comes next to
+ * what was forgotten.
+ */
+export async function forgetThisPhone(): Promise<AccountOutcome> {
+  if (herSession()) return { ok: false, code: "signed_in" };
+  const id = deviceId();
+  if (!id) return { ok: false, code: "aiaic_unavailable" };
+  const a = await ask("/farmer/guest/forget", {
+    method: "POST",
+    body: {},
+    headers: askerHeaders({ kind: "device", id }),
+  });
+  if (a.status !== 200) return { ok: false, ...codeOf(a) };
+  forgetDevice();
+  return { ok: true };
 }

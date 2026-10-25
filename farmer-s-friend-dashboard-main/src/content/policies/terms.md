@@ -14,7 +14,7 @@ Annapoorna gives free farm advice, a plant check, read-aloud, transport cost and
 
 - Keep your password to yourself. What is done while you are signed in is done with your account.
 - Register only for yourself, with true details. AIAIC's team may refuse a registration.
-- To have your account erased, write to the grievance officer named on [Contact Us](contact). Our [Privacy Policy](privacy) says what is kept and for how long.
+- To have your account erased, use "Erase my account" in the app (your name at the top), or write to the grievance officer named on [Contact Us](contact). Our [Privacy Policy](privacy) says what is kept and for how long.
 
 ## 4. Advice is information, not a guarantee
 

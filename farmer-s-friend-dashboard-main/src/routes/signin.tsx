@@ -5,8 +5,9 @@ import { Clock, Eye, EyeOff, LogIn, XCircle } from "lucide-react";
 import { useState } from "react";
 
 import { CrisisCard } from "@/components/farm/aiaic/CrisisFirst";
-import { accountWords } from "@/lib/aiaic-account";
+import { accountWords, wordsToScan } from "@/lib/aiaic-account";
 import { signInFarmer } from "@/lib/aiaic-account.functions";
+import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import { problem } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 
@@ -32,13 +33,16 @@ function SignInPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [show, setShow] = useState(false);
+  const [local, setLocal] = useState<string | null>(null);
+  const scan = useScanBeforeRefusing();
+  const activeLang = lang === "mr" || lang === "hi" ? lang : "en";
   const go = useMutation({
     mutationFn: () =>
       signFn({
         data: {
           username: username.trim(),
           password,
-          lang: lang === "mr" || lang === "hi" ? lang : "en",
+          lang: activeLang,
         },
       }),
     onSuccess: async (r) => {
@@ -49,11 +53,21 @@ function SignInPage() {
       }
     },
   });
-  const r = go.data && !go.data.ok ? go.data : null;
-  if (r?.code === "crisis") {
+  // a call that never came back (no network, a server error) is said as that (push 4b audit, R-14)
+  const r =
+    go.data && !go.data.ok
+      ? go.data
+      : go.isError
+        ? ({ ok: false, code: "aiaic_unavailable" } as const)
+        : null;
+  if (r?.code === "crisis" || scan.inCrisis) {
     return (
       <div className="mx-auto w-full max-w-md space-y-4 px-4 pb-24 pt-6">
-        <CrisisCard problem={problem("crisis", { crisis: r.crisis ?? null })} />
+        <CrisisCard
+          problem={problem("crisis", {
+            crisis: (r && "crisis" in r ? r.crisis : null) ?? scan.crisis,
+          })}
+        />
       </div>
     );
   }
@@ -76,9 +90,17 @@ function SignInPage() {
           <p className="text-base font-semibold text-muted-foreground">
             {t(waiting ? "aiaic.account.awaiting" : "aiaic.account.rejected")}
           </p>
-          {!waiting && r.reason ? (
+          {!waiting && "reason" in r && r.reason ? (
             <p className="rounded-2xl bg-muted p-3 text-base font-semibold text-foreground">
               {t("aiaic.account.rejected_reason", { reason: r.reason })}
+            </p>
+          ) : null}
+          {!waiting ? (
+            <p
+              className="text-base font-semibold text-muted-foreground"
+              data-testid="signin-rejected-next"
+            >
+              {t("aiaic.account.rejected_next")}
             </p>
           ) : null}
           <div className="flex flex-col gap-2 pt-2">
@@ -88,6 +110,14 @@ function SignInPage() {
                 className="rounded-2xl bg-primary px-4 py-3 text-lg font-extrabold text-primary-foreground"
               >
                 {t("aiaic.account.register_again")}
+              </Link>
+            ) : null}
+            {!waiting ? (
+              <Link
+                to="/help"
+                className="rounded-2xl border-2 border-border px-4 py-3 text-lg font-bold text-foreground"
+              >
+                {t("aiaic.account.ask_help")}
               </Link>
             ) : null}
             <Link
@@ -115,7 +145,17 @@ function SignInPage() {
         className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (username.trim() && password) go.mutate();
+          if (!username.trim()) return;
+          // a username typed alone is read for distress before the page asks for a password (R-03)
+          if (!password)
+            return void scan.refuse(
+              wordsToScan(username),
+              activeLang,
+              "password_required",
+              setLocal,
+            );
+          setLocal(null);
+          go.mutate();
         }}
       >
         <label className="block space-y-1">
@@ -156,23 +196,25 @@ function SignInPage() {
             </button>
           </div>
         </label>
-        {r ? (
+        {local || r ? (
           <p
             role="alert"
             className="rounded-2xl border-2 border-destructive bg-danger-soft p-3 text-base font-semibold"
             data-testid="signin-refused"
           >
-            {accountWords(t, r.code)}
+            {accountWords(t, local ?? r?.code ?? "other")}
           </p>
         ) : null}
         <button
           type="submit"
-          disabled={go.isPending || !username.trim() || !password}
+          disabled={go.isPending || scan.scanning || !username.trim()}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-xl font-extrabold text-primary-foreground disabled:opacity-60"
           data-testid="signin-submit"
         >
           <LogIn className="size-5" aria-hidden />
-          {go.isPending ? t("aiaic.account.busy") : t("aiaic.account.submit_signin")}
+          {go.isPending || scan.scanning
+            ? t("aiaic.account.busy")
+            : t("aiaic.account.submit_signin")}
         </button>
       </form>
       <div className="space-y-2 text-center">

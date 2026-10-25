@@ -51,6 +51,10 @@ export const registerFarmer = createServerFn({ method: "POST" })
         state: z.enum(["mh", "mp"]),
         district: z.string().trim().min(1).max(64),
         lang,
+        // her own tick on the notice, and the notice the page showed (push 4b audit, R-05): no call can register
+        // her without them, a page with a bug or a script included
+        agreed: z.literal(true),
+        noticeVersion: z.string().min(1).max(40),
       })
       .parse(d),
   )
@@ -58,6 +62,31 @@ export const registerFarmer = createServerFn({ method: "POST" })
     const { register } = await import("./aiaic-account.server");
     return register(data);
   });
+
+/** What she typed, read for distress before this phone refuses the form for anything else (push 4b audit, R-03). */
+export const scanFirst = createServerFn({ method: "POST" })
+  .validator((d: unknown) => z.object({ text: z.string().max(2000), lang }).parse(d))
+  .handler(async ({ data }): Promise<AccountOutcome> => {
+    const { scanFirst: scan } = await import("./aiaic-account.server");
+    const crisis = await scan(data);
+    return crisis ? { ok: false, code: "crisis", crisis } : { ok: true };
+  });
+
+/** Her account erased, by herself (push 4b audit, R-10). */
+export const eraseMyAccount = createServerFn({ method: "POST" }).handler(
+  async (): Promise<AccountOutcome> => {
+    const { eraseMyAccount: erase } = await import("./aiaic-account.server");
+    return erase();
+  },
+);
+
+/** A guest's questions and looks forgotten, and a new id for this phone (push 4b audit, R-10). */
+export const forgetThisPhone = createServerFn({ method: "POST" }).handler(
+  async (): Promise<AccountOutcome> => {
+    const { forgetThisPhone: forget } = await import("./aiaic-account.server");
+    return forget();
+  },
+);
 
 export const getMyNotices = createServerFn({ method: "GET" }).handler(
   async (): Promise<Notice[]> => {

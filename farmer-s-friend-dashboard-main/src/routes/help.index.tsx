@@ -11,17 +11,18 @@ import {
   Smartphone,
   Sprout,
   Tag,
+  Trash2,
   Truck,
   Wallet,
   Warehouse,
 } from "lucide-react";
 import { useState } from "react";
 
-import { CrisisCard } from "@/components/farm/aiaic/CrisisFirst";
+import { HelpCrisis } from "@/components/farm/aiaic/HelpCrisis";
 import { accountWords, TOPICS, type Topic } from "@/lib/aiaic-account";
-import { askTeam, getMyQueries } from "@/lib/aiaic-account.functions";
+import { askTeam, forgetThisPhone, getMyQueries } from "@/lib/aiaic-account.functions";
 import { useMe } from "@/lib/aiaic-me";
-import { problem } from "@/lib/aiaic-trade";
+import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import { loadFarm } from "@/lib/farm-storage";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -52,18 +53,23 @@ const MAX_TEXT = 2000;
  * HELP (push 4b, 25 Oct 2026; the owner: "in app add the farmers help or query tab which will be raised by farmer and
  * will be reflected in the dashboard"): ask AIAIC's team (a topic, her words; her saved farm's state, district and crop
  * go with it), and her questions with their answers. A signed-in farmer's are her account's; a guest's stay with this
- * phone. A crisis typed here gets the crisis card first, and nothing of it is kept.
+ * phone's id on AIAIC (she can have them forgotten). A crisis typed here gets the crisis card first, and nothing of it
+ * is kept; her words are read for distress BEFORE this page refuses the form for anything else (push 4b audit, R-03).
  */
 function HelpPage() {
   const { t, lang } = useI18n();
+  const activeLang = lang === "mr" || lang === "hi" ? lang : "en";
   const me = useMe();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const listFn = useServerFn(getMyQueries);
   const askFn = useServerFn(askTeam);
+  const forgetFn = useServerFn(forgetThisPhone);
+  const scan = useScanBeforeRefusing();
   const [topic, setTopic] = useState<Topic | null>(null);
   const [text, setText] = useState("");
   const [local, setLocal] = useState<string | null>(null);
+  const [forgetAsked, setForgetAsked] = useState(false);
   const list = useQuery({ queryKey: ["aiaic-help"], queryFn: () => listFn(), retry: 0 });
   const ask = useMutation({
     mutationFn: () => {
@@ -75,7 +81,7 @@ function HelpPage() {
           state: farm?.state === "mp" ? "mp" : farm?.state === "mh" ? "mh" : null,
           district: farm?.region || null,
           crop: farm?.crop || null,
-          lang: lang === "mr" || lang === "hi" ? lang : "en",
+          lang: activeLang,
         },
       });
     },
@@ -88,16 +94,31 @@ function HelpPage() {
       }
     },
   });
-  const r = ask.data && !ask.data.ok ? ask.data : null;
-  if (r?.code === "crisis") {
+  const forget = useMutation({
+    mutationFn: () => forgetFn(),
+    onSuccess: async (r) => {
+      setForgetAsked(false);
+      if (r.ok) await qc.invalidateQueries();
+    },
+  });
+  // a call that never came back (no network, a server error) is said as that, never as "nothing asked" (R-14)
+  const r =
+    ask.data && !ask.data.ok ? ask.data : ask.isError ? { code: "aiaic_unavailable" } : null;
+  if ((r && "crisis" in r && r.code === "crisis") || scan.inCrisis) {
     return (
-      <div className="mx-auto w-full max-w-md space-y-4 px-4 pb-24 pt-6">
-        <CrisisCard problem={problem("crisis", { crisis: r.crisis ?? null })} />
-      </div>
+      <HelpCrisis
+        crisis={(r && "crisis" in r ? r.crisis : null) ?? scan.crisis}
+        onBack={() => {
+          ask.reset();
+          scan.reset();
+          setText("");
+        }}
+      />
     );
   }
   const refused = local ?? r?.code ?? null;
   const queries = list.data?.ok ? list.data.queries : [];
+  const forgot = forget.data;
   return (
     <div className="mx-auto w-full max-w-2xl space-y-5 px-4 pb-24 pt-6 sm:pt-8">
       <header className="space-y-1">
@@ -122,8 +143,9 @@ function HelpPage() {
         className="space-y-3 rounded-3xl border-2 border-primary/30 bg-card p-4 shadow-sm"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!topic) return setLocal("topic_not_known");
           if (!text.trim()) return setLocal("text_required");
+          // no topic chosen: her words are read for distress before the page asks for one (R-03)
+          if (!topic) return void scan.refuse(text, activeLang, "topic_not_known", setLocal);
           setLocal(null);
           ask.mutate();
         }}
@@ -181,21 +203,33 @@ function HelpPage() {
         ) : null}
         <button
           type="submit"
-          disabled={ask.isPending}
+          disabled={ask.isPending || scan.scanning}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-xl font-extrabold text-primary-foreground disabled:opacity-60"
           data-testid="help-send"
         >
           <Send className="size-5" aria-hidden />
-          {ask.isPending ? t("aiaic.account.busy") : t("aiaic.help.send")}
+          {ask.isPending || scan.scanning ? t("aiaic.account.busy") : t("aiaic.help.send")}
         </button>
       </form>
       <section className="space-y-2" aria-labelledby="help-mine">
         <h2 id="help-mine" className="text-xl font-extrabold text-foreground">
           {t("aiaic.help.mine")}
         </h2>
-        {list.isPending ? null : list.data && !list.data.ok ? (
-          <p role="alert" className="text-base font-semibold text-muted-foreground">
-            {accountWords(t, list.data.code, "aiaic.help.code")}
+        {list.isPending ? (
+          <p className="text-base font-semibold text-muted-foreground" role="status">
+            {t("aiaic.help.loading")}
+          </p>
+        ) : list.isError || (list.data && !list.data.ok) ? (
+          <p
+            role="alert"
+            className="text-base font-semibold text-muted-foreground"
+            data-testid="help-list-failed"
+          >
+            {accountWords(
+              t,
+              list.data && !list.data.ok ? list.data.code : "aiaic_unavailable",
+              "aiaic.help.code",
+            )}
           </p>
         ) : queries.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-border p-4 text-center text-base font-semibold text-muted-foreground">
@@ -243,6 +277,69 @@ function HelpPage() {
           </ul>
         )}
       </section>
+      {me.data && !me.data.signedIn ? (
+        <section
+          className="space-y-2 rounded-2xl border-2 border-border bg-muted/30 p-4"
+          aria-labelledby="help-forget"
+          data-testid="help-forget"
+        >
+          <h2 id="help-forget" className="text-lg font-extrabold text-foreground">
+            {t("aiaic.help.forget_title")}
+          </h2>
+          <p className="text-sm font-semibold text-muted-foreground">
+            {t("aiaic.help.forget_text")}
+          </p>
+          {forgot ? (
+            <p role="status" className="text-base font-semibold text-foreground">
+              {forgot.ok
+                ? t("aiaic.help.forgotten")
+                : accountWords(t, forgot.code, "aiaic.help.code")}
+            </p>
+          ) : forget.isError ? (
+            <p role="alert" className="text-base font-semibold text-foreground">
+              {accountWords(t, "aiaic_unavailable", "aiaic.help.code")}
+            </p>
+          ) : null}
+          {forgetAsked ? (
+            <div className="space-y-2" role="group">
+              <p className="text-base font-bold text-foreground">
+                {t("aiaic.help.forget_confirm")}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={forget.isPending}
+                  onClick={() => forget.mutate()}
+                  className="min-h-11 rounded-xl bg-destructive px-4 py-2 text-base font-extrabold text-destructive-foreground disabled:opacity-60"
+                  data-testid="help-forget-yes"
+                >
+                  {forget.isPending ? t("aiaic.account.busy") : t("aiaic.help.forget_yes")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForgetAsked(false)}
+                  className="min-h-11 rounded-xl border-2 border-border px-4 py-2 text-base font-bold text-foreground"
+                >
+                  {t("aiaic.help.forget_no")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                forget.reset();
+                setForgetAsked(true);
+              }}
+              className="flex min-h-11 items-center gap-2 rounded-xl border-2 border-border px-4 py-2 text-base font-bold text-foreground"
+              data-testid="help-forget-open"
+            >
+              <Trash2 className="size-4" aria-hidden />
+              {t("aiaic.help.forget")}
+            </button>
+          )}
+        </section>
+      ) : null}
     </div>
   );
 }

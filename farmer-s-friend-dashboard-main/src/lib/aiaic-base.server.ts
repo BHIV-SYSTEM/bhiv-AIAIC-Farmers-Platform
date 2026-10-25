@@ -1,3 +1,5 @@
+import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
+
 /**
  * Where the AIAIC engine lives. The demo runs behind an ngrok tunnel whose URL
  * changes on every restart, so this is a server-side setting (`AIAIC_BASE_URL`)
@@ -46,6 +48,48 @@ export const AIAIC_HEADERS = {
   "ngrok-skip-browser-warning": "true",
   "x-aiaic-channel": "farmer_app",
 } as const;
+
+/** The farmer app's key, shared with AIAIC only (push 4b audit, R-07; AIAIC_BACKEND_CONTRACT.md section 24). */
+const APP_KEY_ENV = "AIAIC_FARMER_APP_KEY";
+const MIN_APP_KEY_LENGTH = 32;
+const IP_RE = /^[0-9A-Fa-f:.]{2,45}$/;
+
+/**
+ * The visitor's address as the hosting platform names it on THIS server's incoming request (Cloudflare's
+ * `cf-connecting-ip`, else `x-real-ip`, else the first `x-forwarded-for` entry, else the socket): never a header
+ * forwarded from the browser's own call to AIAIC. A platform that let a browser set these would let a visitor choose the
+ * address AIAIC's limits see for her, never more than that. Null outside a request, or when none reads as an address.
+ */
+function visitorAddress(): string | null {
+  try {
+    for (const name of ["cf-connecting-ip", "x-real-ip", "x-forwarded-for"] as const) {
+      const first = (getRequestHeader(name) ?? "").split(",")[0]?.trim();
+      if (first && IP_RE.test(first)) return first;
+    }
+    const ip = getRequestIP();
+    return ip && IP_RE.test(ip) ? ip : null;
+  } catch {
+    return null; // outside a request (the tests call the clients directly)
+  }
+}
+
+/**
+ * The headers of every call this server makes to AIAIC. With the farmer app's key set on this server (at least 32
+ * characters, the same value as AIAIC's own `AIAIC_FARMER_APP_KEY`), each call carries it with the visitor's address, so
+ * AIAIC keeps each farmer's own sign-in, registration and Help limits (without it every farmer shares this server's
+ * address: 30 mistyped passwords pause everyone's sign-in) and believes a guest's device id only from this app. The key
+ * is never logged, never sent anywhere but AIAIC, never put in the page.
+ */
+export function aiaicHeaders(): Record<string, string> {
+  const key = (process.env[APP_KEY_ENV] ?? "").trim();
+  if (key.length < MIN_APP_KEY_LENGTH) return { ...AIAIC_HEADERS };
+  const ip = visitorAddress();
+  return {
+    ...AIAIC_HEADERS,
+    "x-aiaic-app-key": key,
+    ...(ip ? { "x-aiaic-client-address": ip } : {}),
+  };
+}
 
 /**
  * True when a response body came from ngrok itself rather than the engine.

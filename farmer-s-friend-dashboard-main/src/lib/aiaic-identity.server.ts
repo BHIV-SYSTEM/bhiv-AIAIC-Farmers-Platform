@@ -52,8 +52,8 @@ export type HerSession = {
   expiresAt: number;
 };
 
-/** What the account chip says once: her session was dropped because AIAIC no longer took her token. */
-export type Note = "signed_out";
+/** What the app says once: her session was dropped because AIAIC no longer took her token, or she erased her account. */
+export type Note = "signed_out" | "erased";
 
 export type Asker =
   { kind: "her"; session: HerSession } | { kind: "device"; id: string } | { kind: "nobody" };
@@ -115,8 +115,13 @@ export function newDeviceId(): string {
 /** The id made in a request that came without one, so every call of that request sends the same id. */
 const madeIn = new WeakMap<object, string>();
 
+/** Requests in which this device's id was forgotten (push 4b audit, R-10): none is read or made for the rest of it. */
+const forgottenIn = new WeakSet<object>();
+
 /** This device's id: the one it keeps, else one made now and kept (null outside a request, or when it cannot be kept). */
 export function deviceId(): string | null {
+  const req0 = thisRequest();
+  if (req0 && forgottenIn.has(req0)) return null;
   const kept = read(GUEST_COOKIE);
   if (kept && GUEST_ID_RE.test(kept)) return kept;
   const req = thisRequest();
@@ -132,6 +137,14 @@ export function deviceId(): string | null {
 /** Made on a device's first request (the request layer in `start.ts`), so its first page's reads share one id. */
 export function ensureDeviceId(): void {
   deviceId();
+}
+
+/** This device's id forgotten (push 4b audit, R-10: a guest's questions and looks were just erased under it): its
+ * cookie removed, so the next request makes a new id and nothing joins what comes next to what was forgotten. */
+export function forgetDevice(): void {
+  remove(GUEST_COOKIE);
+  const req = thisRequest();
+  if (req) forgottenIn.add(req);
 }
 
 // ------------------------------------------------------------------------------------------------ her session
@@ -200,7 +213,7 @@ export function dropHerSession(note: Note | null): void {
 /** The note a dropped session left, said once: read and removed. */
 export function takeNote(): Note | null {
   const v = read(NOTE_COOKIE);
-  if (v !== "signed_out") return null;
+  if (v !== "signed_out" && v !== "erased") return null;
   remove(NOTE_COOKIE);
   return v;
 }
@@ -228,8 +241,9 @@ export function askerHeaders(a: Asker): Record<string, string> {
 }
 
 /**
- * A read AIAIC records as an analysis (`/farmer/advice`, `/intelligence/*`, `/places/crop-signals`), made for her: her
- * token when she is signed in, else this device's id. A token AIAIC refuses (401) drops her session (the account chip
+ * A read made for her: her token when she is signed in, else this device's id. AIAIC records `/farmer/advice` and
+ * `/intelligence/*` as analyses under it; `/places/crop-signals` goes this way too but AIAIC does not record it (its
+ * contract, section 23; push 4b audit, R-22). A token AIAIC refuses (401) drops her session (the account chip
  * says so once) and the read goes again, once, as a guest: the answer does not depend on who asked.
  */
 export async function fetchForHer(

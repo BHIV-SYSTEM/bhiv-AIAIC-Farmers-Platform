@@ -16,8 +16,7 @@ let cache: { at: number; value: Catalog } | null = null;
 
 export const getCatalog = createServerFn({ method: "GET" }).handler(
   async (): Promise<CatalogResult> => {
-    const { resolveBaseUrl, AIAIC_HEADERS, isTunnelErrorBody } =
-      await import("./aiaic-base.server");
+    const { resolveBaseUrl, aiaicHeaders, isTunnelErrorBody } = await import("./aiaic-base.server");
     const { baseUrl, configured } = resolveBaseUrl();
 
     if (cache && Date.now() - cache.at < TTL_MS) {
@@ -28,7 +27,7 @@ export const getCatalog = createServerFn({ method: "GET" }).handler(
     try {
       response = await fetch(`${baseUrl}/catalog`, {
         method: "GET",
-        headers: AIAIC_HEADERS,
+        headers: aiaicHeaders(),
         signal: AbortSignal.timeout(15_000),
       });
     } catch (error) {

@@ -11,9 +11,9 @@ Annapoorna (the "AIAIC Kisan" app) is run by {{operator_name}}, {{registered_add
 You can use Annapoorna as a guest, without an account. You can also register a farmer account with Krishi Sampada (AIAIC) from the app.
 
 - **As a guest:** Annapoorna's server gives your phone a device id, kept in a cookie (`aiaic_guest`). It is made of random characters and holds no name or number. It goes with your advice, storage, transport and help requests to AIAIC, so that AIAIC's team can see what was asked from one device, and so that your help questions stay with your phone. It is kept up to 400 days, or until you clear this site's data in your browser.
-- **Registering:** the app sends AIAIC your username, your password, your name if you give it, your state and district, your language and your agreement to the registration notice. AIAIC keeps your password only as a bcrypt hash, never in readable form; neither Annapoorna nor AIAIC writes it in a log. AIAIC's team approves or refuses each registration, and the app tells you when your account is approved.
+- **Registering:** the app sends AIAIC your username, your password, your name if you give it, your state and district, your language and your agreement to the registration notice. AIAIC keeps your password only as a bcrypt hash, never in readable form; neither Annapoorna nor AIAIC writes it in a log. AIAIC's team approves or refuses each registration. Once it is approved you can sign in, and the app greets you with the approval then (before you sign in, the app has no way to reach you). If it is refused, signing in shows the team's reason.
 - **Signing in:** AIAIC's sign-in token is kept in a cookie (`aiaic_session`) that only Annapoorna's server reads; the page's own scripts cannot read it. It ends when the token ends (12 hours, unless AIAIC's operator sets another period) or when you sign out; when AIAIC ends it first, a third cookie (`aiaic_note`) keeps for one day that the app should tell you so. While you are signed in, your requests go to AIAIC with your account instead of the device id. Registering or signing in never joins what was asked as a guest to your account.
-- The app asks for no phone number or Aadhaar number. PAN and bank or UPI details are asked only on the payout form described under Selling.
+- On the screens connected to AIAIC, the app asks for no phone number or Aadhaar number (the demonstration store, used only when the app is not connected to AIAIC, has a form of its own: see Selling). PAN and bank or UPI details are asked only on the payout form described under Selling.
 
 ## What is sent where, and why
 
@@ -26,6 +26,8 @@ You can use Annapoorna as a guest, without an account. You can also register a f
 
 ## Help questions
 
+**Checks the team runs for you.** From its dashboard, AIAIC's team may ask the same advice for you (its "app view"), for example to look into a question you sent; each answer is recorded under your account as checked for you, with the name of the team member who asked; when your account is erased, these records are kept without any link to you, like AIAIC's other answers.
+
 When you ask AIAIC's team a question on the Help tab, the app sends AIAIC its topic, your words, your saved farm's state, district and crop, and your language, with your account when you are signed in, else with the device id. AIAIC's team (its admin and reviewer accounts) reads it in AIAIC's dashboard, beside what was asked from your account or device, and answers; the answers appear on the Help tab. If what you write reads as distress, the app first shows where to find help, and that message is not kept. Please do not write a bank account, Aadhaar or PAN number in a question.
 
 ## Selling
@@ -36,7 +38,11 @@ When you ask AIAIC's team a question on the Help tab, the app sends AIAIC its to
 
 ## How long records are kept
 
-AIAIC keeps the records of its answers, the notes of storage and transport looks and the help questions until its operator's retention period ends, where the operator has set one. To have your account erased, write to the grievance officer named above: your help questions and the notes of your looks are removed with it, the records of AIAIC's answers are kept without your account, and your sale records stay as records of the sale without your name. A guest's records are tied only to the device id; once you clear this site's data, nothing on your phone ties them to you any more.
+AIAIC keeps the records of its answers, the notes of storage and transport looks and the help questions until its operator removes the records older than its retention period (the operator runs this removal; where no period is set, nothing is removed by age, and records are kept until they are erased). A registration that was refused, or never decided, is erased whole once it is older than that period.
+
+**Erasing your account.** Signed in, erase it yourself in the app (your name at the top, then "Erase my account"), or write to the grievance officer named above, who can erase it for you (also when you cannot sign in). Your help questions and the notes of your looks are removed with it, the records of AIAIC's answers are kept without your account, and your sale records stay as records of the sale without your name.
+
+**As a guest.** Your records are tied only to the device id. On the Help tab, "Forget this phone's questions" removes your questions and the notes of your looks from AIAIC, keeps its answers without the device id, and gives your phone a new id. Clearing this site's data in your browser only removes the id from your phone.
 
 ## On your device
 
@@ -48,7 +54,7 @@ Only as described above: Krishi Sampada (AIAIC) and its team, the BHIV Vaani voi
 
 ## Your rights
 
-To ask what data we hold about you, to correct or erase it, or to complain, write to the grievance officer named above.
+To ask what data we hold about you, to correct or erase it, or to complain, write to the grievance officer named above. You may also complain to the Data Protection Board of India.
 
 ## Changes to this policy
 

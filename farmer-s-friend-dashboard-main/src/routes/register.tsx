@@ -6,8 +6,14 @@ import { useEffect, useState } from "react";
 
 import { BigSelect } from "@/components/farm/BigSelect";
 import { CrisisCard } from "@/components/farm/aiaic/CrisisFirst";
-import { accountWords } from "@/lib/aiaic-account";
+import {
+  accountWords,
+  REGISTRATION_NOTICE_VERSION,
+  registerRefusal,
+  wordsToScan,
+} from "@/lib/aiaic-account";
 import { registerFarmer } from "@/lib/aiaic-account.functions";
+import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import { problem } from "@/lib/aiaic-trade";
 import { loadFarm } from "@/lib/farm-storage";
 import { useI18n } from "@/lib/i18n";
@@ -26,8 +32,6 @@ export const Route = createFileRoute("/register")({
   }),
   component: RegisterPage,
 });
-
-const USERNAME_RE = /^[A-Za-z0-9._-]{3,64}$/;
 
 /**
  * REGISTER (push 4b, 25 Oct 2026; the owner: "keep it right now with simple farmer usernames and passwords"): her
@@ -49,6 +53,7 @@ function RegisterPage() {
   const [show, setShow] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [local, setLocal] = useState<string | null>(null);
+  const scan = useScanBeforeRefusing();
   const districts = useQuery({
     queryKey: ["places-districts", state, activeLang],
     queryFn: () => getPlacesDistricts({ data: { state, lang: activeLang } }),
@@ -69,23 +74,31 @@ function RegisterPage() {
           state,
           district,
           lang: activeLang,
+          // her own tick, and the notice this page showed her (push 4b audit, R-05)
+          agreed: true as const,
+          noticeVersion: REGISTRATION_NOTICE_VERSION,
         },
       }),
   });
   const submit = () => {
-    if (!USERNAME_RE.test(username.trim())) return setLocal("invalid_username");
-    if (password.length < 8) return setLocal("password_too_short");
-    if (password !== again) return setLocal("password_mismatch");
-    if (!district) return setLocal("place_not_held");
-    if (!agreed) return setLocal("consent_required");
+    const refusal = registerRefusal({ username, password, again, district, agreed });
+    // what she typed (her username and name) is read for distress BEFORE this page refuses the form (R-03)
+    if (refusal)
+      return void scan.refuse(wordsToScan(username, name), activeLang, refusal, setLocal);
     setLocal(null);
     go.mutate();
   };
-  const r = go.data;
-  if (r && !r.ok && r.code === "crisis") {
+  // a call that never came back (no network, a server error) is said as that (R-14)
+  const r =
+    go.data ?? (go.isError ? ({ ok: false, code: "aiaic_unavailable" } as const) : undefined);
+  if ((r && !r.ok && r.code === "crisis") || scan.inCrisis) {
     return (
       <div className="mx-auto w-full max-w-md space-y-4 px-4 pb-24 pt-6">
-        <CrisisCard problem={problem("crisis", { crisis: r.crisis ?? null })} />
+        <CrisisCard
+          problem={problem("crisis", {
+            crisis: (r && !r.ok && "crisis" in r ? r.crisis : null) ?? scan.crisis,
+          })}
+        />
       </div>
     );
   }
@@ -249,6 +262,12 @@ function RegisterPage() {
             {t("aiaic.account.notice_title")}
           </h2>
           <p className="text-sm font-semibold text-muted-foreground">{t("aiaic.account.notice")}</p>
+          <Link
+            to="/privacy"
+            className="inline-block text-sm font-extrabold text-primary underline"
+          >
+            {t("aiaic.account.notice_privacy")}
+          </Link>
           <label className="flex min-h-11 items-center gap-3 text-base font-bold text-foreground">
             <input
               type="checkbox"
@@ -271,12 +290,14 @@ function RegisterPage() {
         ) : null}
         <button
           type="submit"
-          disabled={go.isPending}
+          disabled={go.isPending || scan.scanning}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3.5 text-xl font-extrabold text-primary-foreground disabled:opacity-60"
           data-testid="register-submit"
         >
           <UserPlus className="size-5" aria-hidden />
-          {go.isPending ? t("aiaic.account.busy") : t("aiaic.account.submit_register")}
+          {go.isPending || scan.scanning
+            ? t("aiaic.account.busy")
+            : t("aiaic.account.submit_register")}
         </button>
       </form>
       <p className="text-center text-base font-semibold text-muted-foreground">
