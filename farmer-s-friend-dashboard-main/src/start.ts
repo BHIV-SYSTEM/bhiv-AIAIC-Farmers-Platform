@@ -25,7 +25,15 @@ const csrfMiddleware = createCsrfMiddleware({
   filter: (ctx) => ctx.handlerType === "serverFn",
 });
 
+// This device's id (push 4b, `aiaic-identity.server.ts`): made on its first request, before the page's own calls run,
+// so they all send the same id rather than each making one.
+const deviceIdMiddleware = createMiddleware().server(async ({ next }) => {
+  const { ensureDeviceId } = await import("./lib/aiaic-identity.server");
+  ensureDeviceId();
+  return next();
+});
+
 export const startInstance = createStart(() => ({
   functionMiddleware: [attachSupabaseAuth],
-  requestMiddleware: [errorMiddleware, csrfMiddleware],
+  requestMiddleware: [errorMiddleware, csrfMiddleware, deviceIdMiddleware],
 }));

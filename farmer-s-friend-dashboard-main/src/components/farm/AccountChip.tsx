@@ -48,11 +48,12 @@ export function AccountChip() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={t("aiaic.account.signed_in_as", { name })}
-        className="flex min-h-11 max-w-[11rem] items-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 text-sm font-bold text-foreground"
+        className="flex min-h-11 min-w-11 max-w-[11rem] items-center justify-center gap-1.5 rounded-xl border border-primary/40 bg-primary/10 px-3 py-1.5 text-sm font-bold text-foreground"
         data-testid="account-chip"
       >
         <UserRound className="size-4 text-primary shrink-0" aria-hidden />
-        <span className="truncate" data-name="">
+        {/* on a phone the icon alone (the brand keeps its room); her name is in the menu and the label */}
+        <span className="hidden min-w-0 truncate sm:block" data-name="">
           {name}
         </span>
       </button>
