@@ -22,6 +22,7 @@ import { Route as ResultRouteImport } from './routes/result'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdviceServiceRouteImport } from './routes/advice.$service'
+import { Route as ListingListingIdRouteImport } from './routes/listing.$listingId'
 import { Route as ListingNewRouteImport } from './routes/listing.new'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
@@ -91,6 +92,11 @@ const AdviceServiceRoute = AdviceServiceRouteImport.update({
   path: '/advice/$service',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ListingListingIdRoute = ListingListingIdRouteImport.update({
+  id: '/listing/$listingId',
+  path: '/listing/$listingId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ListingNewRoute = ListingNewRouteImport.update({
   id: '/listing/new',
   path: '/listing/new',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/review': typeof ReviewRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/listing/$listingId': typeof ListingListingIdRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/orders/': typeof OrdersIndexRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/review': typeof ReviewRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/listing/$listingId': typeof ListingListingIdRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/orders': typeof OrdersIndexRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/review': typeof ReviewRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/listing/$listingId': typeof ListingListingIdRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/orders/': typeof OrdersIndexRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/review'
     | '/terms'
     | '/advice/$service'
+    | '/listing/$listingId'
     | '/listing/new'
     | '/orders/$orderId'
     | '/orders/'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/review'
     | '/terms'
     | '/advice/$service'
+    | '/listing/$listingId'
     | '/listing/new'
     | '/orders/$orderId'
     | '/orders'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/review'
     | '/terms'
     | '/advice/$service'
+    | '/listing/$listingId'
     | '/listing/new'
     | '/orders/$orderId'
     | '/orders/'
@@ -233,6 +245,7 @@ export interface RootRouteChildren {
   ReviewRoute: typeof ReviewRoute
   TermsRoute: typeof TermsRoute
   AdviceServiceRoute: typeof AdviceServiceRoute
+  ListingListingIdRoute: typeof ListingListingIdRoute
   ListingNewRoute: typeof ListingNewRoute
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdviceServiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/listing/$listingId': {
+      id: '/listing/$listingId'
+      path: '/listing/$listingId'
+      fullPath: '/listing/$listingId'
+      preLoaderRoute: typeof ListingListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/listing/new': {
       id: '/listing/new'
       path: '/listing/new'
@@ -369,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewRoute: ReviewRoute,
   TermsRoute: TermsRoute,
   AdviceServiceRoute: AdviceServiceRoute,
+  ListingListingIdRoute: ListingListingIdRoute,
   ListingNewRoute: ListingNewRoute,
   OrdersOrderIdRoute: OrdersOrderIdRoute,
   OrdersIndexRoute: OrdersIndexRoute,

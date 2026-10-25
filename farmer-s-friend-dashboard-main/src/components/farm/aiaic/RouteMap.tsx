@@ -48,6 +48,8 @@ const PLACE_STYLE: Record<MapPlace["kind"], { color: string; fillColor: string; 
     home: { color: "#2e6b3e", fillColor: "#2e6b3e", radius: 8 },
     chosen: { color: "#9a4508", fillColor: "#9a4508", radius: 8 },
     mandi: { color: "#2a5f90", fillColor: "#2a5f90", radius: 6 },
+    // another public warehouse a storage answer lists (violet, as on AIAIC's dashboard)
+    warehouse: { color: "#5b3f8c", fillColor: "#5b3f8c", radius: 6 },
   };
 /** The route, drawn solid. */
 const LINE_STYLE = { color: "#2e6b3e", weight: 4, opacity: 1 };

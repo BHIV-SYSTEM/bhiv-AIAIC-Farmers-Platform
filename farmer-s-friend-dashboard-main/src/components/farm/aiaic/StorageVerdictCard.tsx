@@ -1,5 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
 import {
   BadgeCheck,
   ChevronDown,
@@ -12,10 +10,18 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import type { StorageVerdict, StorageWarehouse } from "@/lib/aiaic-trade";
-import { getStorageVerdict } from "@/lib/aiaic-trade.functions";
+import {
+  KEY_ASSUMED,
+  away,
+  sameWarehouse as same,
+  useStorageVerdict,
+  warehousePlaces,
+} from "@/lib/aiaic-storage";
+import type { StorageWarehouse } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+
+import { RouteMap } from "./RouteMap";
 
 /**
  * AIAIC's STORAGE VERDICT (GET /storage/verdict, AIAIC_BACKEND_CONTRACT.md section 21): store or sell now in one line,
@@ -34,15 +40,6 @@ const TONE = {
 /** The verdict's chip by its code: a code this card does not know is shown as "not sure" would be. */
 const toneOf = (code: string) =>
   code === "store" || code === "sell_now" ? TONE[code] : TONE.unsure;
-
-function estateOf(state: string | null | undefined): "mh" | "mp" {
-  const s = (state ?? "").toLowerCase();
-  return s === "mp" || s.includes("madhya") ? "mp" : "mh";
-}
-
-const away = (w: StorageWarehouse | null | undefined) => w?.km ?? w?.trip?.distance?.km ?? null;
-const same = (a: StorageWarehouse, b: StorageWarehouse | null) =>
-  !!b && a.operator === b.operator && a.name === b.name;
 
 function Marks({ w }: { w: StorageWarehouse }) {
   const wdra = w.wdra?.registered ? w.wdra.text : null;
@@ -79,31 +76,16 @@ export function StorageVerdictCard({
   quantityQ?: number | undefined;
   className?: string;
 }) {
-  const { t, lang } = useI18n();
-  const verdictFn = useServerFn(getStorageVerdict);
+  const { t } = useI18n();
   const [more, setMore] = useState(false);
-  const estate = estateOf(state);
-  const q = useQuery({
-    queryKey: ["aiaic-storage-verdict", estate, district, crop, quantityQ ?? null, lang],
-    queryFn: () =>
-      verdictFn({
-        data: {
-          crop,
-          district,
-          state: estate,
-          lang,
-          ...(quantityQ && quantityQ > 0 ? { quantity_q: quantityQ } : {}),
-        },
-      }),
-    enabled: Boolean(crop && district),
-    staleTime: 30 * 60_000,
-    retry: 0,
-  });
-  const card: StorageVerdict | null = q.data?.ok ? q.data.data : null;
+  const card = useStorageVerdict({ crop, district, state, quantityQ });
   const v = card?.verdict;
   if (!card || !v?.text) return null;
   const w = v.warehouse;
   const km = away(w);
+  const places = warehousePlaces(card);
+  const assumed = (v.assumptions ?? []).filter((a) => a.text);
+  const keyAssumed = assumed.filter((a) => KEY_ASSUMED.includes(a.code));
   const Mark = v.code === "store" ? Warehouse : v.code === "sell_now" ? IndianRupee : CircleHelp;
   return (
     <section
@@ -129,6 +111,18 @@ export function StorageVerdictCard({
         ) : null}
       </div>
       <p className="text-base font-semibold leading-snug text-foreground">{v.text}</p>
+      {keyAssumed.length ? (
+        <ul className="flex flex-wrap gap-1.5">
+          {keyAssumed.map((a) => (
+            <li
+              key={a.code}
+              className="rounded-full border border-amber-500/50 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-900"
+            >
+              {a.text}
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {w ? (
         <div className="space-y-2 rounded-xl border border-border bg-muted/50 p-3">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-bold text-foreground">
@@ -183,6 +177,16 @@ export function StorageVerdictCard({
           ) : null}
           <Marks w={w} />
         </div>
+      ) : null}
+      {/* THE WAREHOUSES ON A MAP (push 4, the owner: "can we add map there as well with the locations of those"): the
+          one the verdict names in orange, the others violet; each where AIAIC places it */}
+      {places.length ? (
+        <RouteMap
+          places={places}
+          height={220}
+          title={t("aiaic.storage.map")}
+          testid="storage-map"
+        />
       ) : null}
       {v.uncalibrated ? (
         <p className="text-xs font-semibold text-amber-800">{v.uncalibrated}</p>
@@ -243,6 +247,13 @@ export function StorageVerdictCard({
           {card.operators_not_listed.map((o) => (o.text ? <p key={o.operator}>{o.text}</p> : null))}
           {card.wdra_others?.text ? <p>{card.wdra_others.text}</p> : null}
           {v.chosen_by?.text ? <p>{v.chosen_by.text}</p> : null}
+          {assumed.length ? (
+            <ul className="list-disc space-y-0.5 pl-4">
+              {assumed.map((a) => (
+                <li key={a.code}>{a.text}</li>
+              ))}
+            </ul>
+          ) : null}
           {card.sources.length ? (
             <ul className="list-disc space-y-0.5 pl-4">
               {card.sources.map((s, i) => (s.text ? <li key={i}>{s.text}</li> : null))}

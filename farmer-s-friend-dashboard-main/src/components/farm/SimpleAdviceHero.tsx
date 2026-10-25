@@ -28,6 +28,7 @@ export function SimpleAdviceHero({
   subject,
   askAHuman,
   children,
+  glance,
   defaultExpanded = false,
 }: {
   card?: FarmerAdviceCard | undefined;
@@ -36,6 +37,8 @@ export function SimpleAdviceHero({
   subject?: string | undefined;
   askAHuman?: AskAHuman | undefined;
   children?: ReactNode;
+  /** The answer at a glance (push 4): drawn right under the paragraph, seen without opening the details. */
+  glance?: ReactNode;
   defaultExpanded?: boolean;
 }) {
   const { t, lang } = useI18n();
@@ -114,6 +117,9 @@ export function SimpleAdviceHero({
             {summary.paragraph}
           </p>
         </div>
+
+        {/* The answer at a glance, under the paragraph and outside the details (push 4) */}
+        {glance}
 
         {/* Audio Playback Control Next to Advice */}
         <div className="mt-4 pt-4 border-t border-border">

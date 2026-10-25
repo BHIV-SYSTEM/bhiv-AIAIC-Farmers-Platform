@@ -87,7 +87,7 @@ function OffersAndSales({ data }: { data: MineForScreen }) {
   );
 }
 
-function OfferRow({ view, data }: { view: OfferView; data: MineForScreen }) {
+export function OfferRow({ view, data }: { view: OfferView; data: MineForScreen }) {
   const { t } = useI18n();
   const o = view.offer;
   const ask = view.listing.ask_price_per_q;
@@ -156,7 +156,7 @@ function OfferRow({ view, data }: { view: OfferView; data: MineForScreen }) {
   );
 }
 
-function SaleRow({ order, data }: { order: AiaicOrder; data: MineForScreen }) {
+export function SaleRow({ order, data }: { order: AiaicOrder; data: MineForScreen }) {
   const { t } = useI18n();
   return (
     <Link
