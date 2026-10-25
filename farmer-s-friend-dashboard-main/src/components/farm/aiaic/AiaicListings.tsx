@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ClipboardList, MapPin, PlusCircle, RefreshCw } from "lucide-react";
+import { ChevronRight, ClipboardList, MapPin, PlusCircle, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 import { usePress } from "@/lib/aiaic-crisis";
@@ -124,8 +124,15 @@ function Lot({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
             </span>
             {lot.synthetic ? <ModeChip kind="practice" /> : null}
           </div>
+          {/* the crop opens the listing in full (push 4: "make them clickable which will lead to more details") */}
           <h2 className="mt-1.5 break-words text-xl font-extrabold text-foreground">
-            {cropName(data.cropNames, lot.crop)}
+            <Link
+              to="/listing/$listingId"
+              params={{ listingId: lot.listing_id }}
+              className="underline-offset-4 hover:underline"
+            >
+              {cropName(data.cropNames, lot.crop)}
+            </Link>
           </h2>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="size-3.5" aria-hidden />
@@ -159,6 +166,15 @@ function Lot({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
           })}
         </p>
       </div>
+
+      <Link
+        to="/listing/$listingId"
+        params={{ listingId: lot.listing_id }}
+        className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-xl border-2 border-primary/40 bg-card px-3 text-sm font-bold text-primary"
+      >
+        {t("aiaic.lots.details")}
+        <ChevronRight className="size-4" aria-hidden />
+      </Link>
 
       {problem ? (
         <div className="mt-3">

@@ -1123,6 +1123,8 @@ export type StorageWarehouse = {
   wdra: { registered: boolean; text?: string | null } | null;
   under_half_full: { text: string | null } | null;
   storing?: { word: string | null; net_gain_per_q?: { text: string | null } | null } | null;
+  /** Where AIAIC places it (the point it holds for the warehouse), for the card's map; absent: not on the map. */
+  point?: { lat: number | null; lon: number | null } | null;
 };
 
 /** AIAIC's storage verdict card: store or sell now, and the nearest public warehouses by name (section 21). */
@@ -1137,6 +1139,8 @@ export type StorageVerdict = {
     net_gain_per_q: { text: string | null } | null;
     chosen_by: { text: string | null } | null;
     uncalibrated: string | null;
+    /** What the verdict assumed, each AIAIC's own sentence (e.g. "Assumed: 1% of the crop lost each month ..."). */
+    assumptions?: { code: string; text: string | null }[];
   };
   warehouses: StorageWarehouse[];
   operators_not_listed: { operator: string; text: string | null }[];

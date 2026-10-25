@@ -17,6 +17,7 @@ import {
   type TransportEstimate,
 } from "@/lib/aiaic-trade";
 import { getNearbyMandis, getTransportEstimate } from "@/lib/aiaic-trade.functions";
+import { estateOf, mandiKey, type Estate } from "@/lib/aiaic-trip";
 import { useI18n } from "@/lib/i18n";
 import { getPlacesDistricts } from "@/lib/places.functions";
 import { cn } from "@/lib/utils";
@@ -25,20 +26,7 @@ import { ProblemCard } from "./AiaicBits";
 import { RouteMap } from "./RouteMap";
 import { routeMapOf } from "./route-map";
 
-type Estate = "mh" | "mp";
-
-function estateOf(state: string | null | undefined): Estate {
-  const s = (state ?? "").toLowerCase();
-  return s === "mp" || s.includes("madhya") ? "mp" : "mh";
-}
-
-/** A mandi's name by its letters only, without "APMC", to match a name an answer wrote to AIAIC's list. */
-function mandiKey(name: string | null | undefined): string {
-  return (name ?? "")
-    .toLowerCase()
-    .replace(/\bapmc\b/g, "")
-    .replace(/[^a-z]/g, "");
-}
+// her state and a mandi's letters-only key: shared with the answer at a glance, which asks the same trip (push 4)
 
 const SELECT =
   "min-h-12 w-full rounded-xl border-2 border-input bg-background px-3 text-base font-semibold text-foreground outline-none focus:border-ring";

@@ -12,6 +12,8 @@ import { PriceBrief } from "@/components/farm/aiaic/PriceBrief";
 import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
+import { AnswerAtAGlance } from "@/components/farm/aiaic/AnswerAtAGlance";
+import { priceCompareOf } from "@/lib/aiaic-analysis";
 import { StorageVerdictCard } from "@/components/farm/aiaic/StorageVerdictCard";
 import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
@@ -165,6 +167,13 @@ function ResultPage() {
   const marketLabel = marketResult?.ok ? (marketResult.items[0]?.recommendation_detail ?? "") : "";
   const advisedMandi =
     search.mandi || marketLabel.match(/^\s*sell at\s+([^.(]+?)\s*(?:[.(]|$)/i)?.[1] || undefined;
+  // The answer at a glance (push 4): the market card's own comparison, never one that card withholds (an abstained
+  // answer shows no comparison there, so none here either)
+  const marketCard = farmerAdviceQuery.data?.cards?.find((c) => c.service === "market");
+  const marketCompare =
+    marketCard && marketCard.abstained !== true
+      ? priceCompareOf(marketCard.summary?.price_compare)
+      : null;
 
   const savedWhen = cached
     ? new Intl.DateTimeFormat(lang === "en" ? "en-IN" : lang === "hi" ? "hi-IN" : "mr-IN", {
@@ -256,6 +265,17 @@ function ResultPage() {
             response={farmerAdviceQuery.data}
             subject={subject}
             askAHuman={farmerAdviceQuery.data?.ask_a_human}
+            glance={
+              search.crop && search.region && !isDistress ? (
+                <AnswerAtAGlance
+                  crop={search.crop}
+                  district={search.region}
+                  state={search.state}
+                  compare={marketCompare}
+                  toMandi={advisedMandi}
+                />
+              ) : null
+            }
           >
             {/* Confirmed Important Guidance Note */}
             {farmerAdviceQuery.data?.important ? (

@@ -62,12 +62,15 @@ export const ROUTE_CREDITS: Record<string, { before: string; name: string; url: 
   geoapify: { before: "Powered by", name: "Geoapify", url: "https://www.geoapify.com/" },
 };
 
-/** A place on the map: `home` (her district), `chosen` (the mandi chosen) or `mandi` (another mandi near her). */
+/**
+ * A place on the map: `home` (her district), `chosen` (the mandi chosen, or the warehouse a storage answer names),
+ * `mandi` (another mandi near her) or `warehouse` (another public warehouse a storage answer lists).
+ */
 export type MapPlace = {
   lat: number | string | null | undefined;
   lon: number | string | null | undefined;
   label?: string | null | undefined;
-  kind: "home" | "chosen" | "mandi";
+  kind: "home" | "chosen" | "mandi" | "warehouse";
 };
 
 /** ONE line, as [lat, lon] pairs (Leaflet's order). An estimate (no road route was had) is drawn dashed. */

@@ -210,7 +210,14 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
           </div>
 
           <h3 className="mt-1.5 break-words text-xl font-extrabold text-foreground sm:mt-2 sm:text-2xl">
-            {listing.crop}
+            {/* the crop opens the listing in full (push 4) */}
+            <Link
+              to="/listing/$listingId"
+              params={{ listingId: listing.id }}
+              className="underline-offset-4 hover:underline"
+            >
+              {listing.crop}
+            </Link>
             {listing.variety ? (
               <span className="ml-1.5 break-words text-base font-semibold text-muted-foreground sm:ml-2 sm:text-lg">
                 ({listing.variety})
@@ -273,6 +280,15 @@ function ListingCard({ listing }: { listing: ProduceListing }) {
         <span className="text-xs text-muted-foreground">
           Created: {new Date(listing.createdAt).toLocaleString()}
         </span>
+
+        <Link
+          to="/listing/$listingId"
+          params={{ listingId: listing.id }}
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border-2 border-primary/40 bg-card px-4 text-sm font-bold text-primary sm:min-h-12 sm:w-auto sm:text-base"
+        >
+          <span>{t("aiaic.lots.details")}</span>
+          <ChevronRight className="size-4" />
+        </Link>
 
         <button
           type="button"
