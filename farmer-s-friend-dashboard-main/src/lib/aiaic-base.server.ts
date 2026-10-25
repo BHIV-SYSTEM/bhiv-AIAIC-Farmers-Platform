@@ -36,10 +36,15 @@ export function signInAllowed(baseUrl: string): boolean {
   return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
 }
 
-/** The engine is fronted by ngrok, which otherwise serves an HTML warning page. */
+/**
+ * The engine is fronted by ngrok, which otherwise serves an HTML warning page. The channel (push 4b) labels every
+ * analysis AIAIC records for this app's calls as the farmer app's, not as an unnamed caller's ("api"); it is a label
+ * from AIAIC's closed list and changes no answer.
+ */
 export const AIAIC_HEADERS = {
   accept: "application/json",
   "ngrok-skip-browser-warning": "true",
+  "x-aiaic-channel": "farmer_app",
 } as const;
 
 /**
