@@ -126,7 +126,9 @@ Configure these secrets in GitHub Repository Settings (`Settings` $\rightarrow$ 
 | `VM_USERNAME` | SSH username | `ubuntu` / `azureuser` |
 | `VM_PASSWORD` | SSH password (or secret authentication string) | `********` |
 | `AIAIC_ENV_FILE` *(Recommended)* | Complete production `.env` payload (from `.env.production.template`) | *See template below* |
-| `AIAIC_BASE_URL` *(Optional)* | Upstream decision engine backend URL | `http://163.128.209.18:8017` |
+| `AIAIC_BASE_URL` *(Optional)* | Upstream decision engine backend URL. Farmer sign-in and registration need https, or a private address such as `http://host.docker.internal:<port>` when AIAIC runs on the same VM (a password is never sent in clear across the internet) | `http://163.128.209.18:8017` |
+| `AIAIC_FARMER_APP_KEY` *(Recommended with farmer accounts)* | The farmer app's key: the SAME value as AIAIC's own `AIAIC_FARMER_APP_KEY`, at least 32 characters. Set it here FIRST, then on AIAIC. With it AIAIC limits each farmer by her own address and believes a guest's device id only from this app, and this app signs its device cookie. Sent to AIAIC only over https or to a private address. Empty: as before (every farmer shares this server's address in AIAIC's limits) | *a random 48-character secret* |
+| `AIAIC_VISITOR_ADDRESS_FROM` *(Optional)* | Where this server reads its visitor's address. Unset: the peer of its own socket (right when port 3008 is published directly). `cf-connecting-ip` only when Cloudflare is the only way in; `x-real-ip`, or `x-forwarded-for` (its last entry), only when that proxy is the only way in. A visitor can write any of these headers herself | *(unset)* |
 | `SUPABASE_URL` *(Optional)* | Supabase project URL | `https://fhwwpasgebufuznthynv.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` *(Optional)* | Supabase public API key | `sb_publishable_xTto...` |
 

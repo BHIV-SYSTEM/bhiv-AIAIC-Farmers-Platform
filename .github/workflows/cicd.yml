@@ -123,6 +123,8 @@ jobs:
           AIAIC_PORT=${{ secrets.AIAIC_PORT || '3008' }}
           AIAIC_FARMER_USERNAME=${{ secrets.AIAIC_FARMER_USERNAME || '' }}
           AIAIC_FARMER_PASSWORD=${{ secrets.AIAIC_FARMER_PASSWORD || '' }}
+          AIAIC_FARMER_APP_KEY=${{ secrets.AIAIC_FARMER_APP_KEY || '' }}
+          AIAIC_VISITOR_ADDRESS_FROM=${{ secrets.AIAIC_VISITOR_ADDRESS_FROM || '' }}
           EOF
           fi
 

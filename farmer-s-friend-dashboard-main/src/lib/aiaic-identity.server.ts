@@ -4,7 +4,9 @@
  * - THIS DEVICE'S ID: the httpOnly cookie `aiaic_guest`, 32 lowercase hex characters made once by this server with Web
  *   Crypto (never personal: no name, no number). Sent to AIAIC as `X-AIAIC-Guest` on her reads while nobody is signed
  *   in, so AIAIC records what a guest looked at under her device (the owner: "all the working and analysis done under
- *   guest should be also recorded"), and so her help queries stay hers on this phone.
+ *   guest should be also recorded"), and so her help queries stay hers on this phone. With the farmer app's key set,
+ *   the cookie holds the id and its HMAC under that key, and a cookie this server did not issue is no device's: an id
+ *   read off the team's screen or a link opens nothing here (push 4b re-check, E-02).
  * - HER SESSION after she signs in: the httpOnly cookie `aiaic_session`, holding AIAIC's token with her username, her
  *   name and the token's expiry (for the account chip). Read and written only here, in server functions: never readable
  *   by the page's script, never in localStorage, never logged, never returned to the browser. It expires with the token.
@@ -15,6 +17,8 @@
  *   once (`aiaic_note`).
  * - Outside a request (the tests run this server's clients directly) there is no cookie: a guest with no device id.
  */
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 import {
   deleteCookie,
   getCookie,
@@ -23,7 +27,7 @@ import {
   setCookie,
 } from "@tanstack/react-start/server";
 
-import { resolveBaseUrl, signInAllowed } from "./aiaic-base.server";
+import { farmerAppKey, resolveBaseUrl, signInAllowed } from "./aiaic-base.server";
 
 export const GUEST_COOKIE = "aiaic_guest";
 export const SESSION_COOKIE = "aiaic_session";
@@ -112,6 +116,30 @@ export function newDeviceId(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function deviceIdMac(id: string, key: string): string {
+  return createHmac("sha256", key).update(`aiaic_guest:${id}`).digest("base64url");
+}
+
+/** The cookie's value for a device id: with the farmer app's key, the id and its HMAC under it; without, the bare id. */
+export function deviceCookieValue(id: string, key: string | null): string {
+  return key ? `${id}.${deviceIdMac(id, key)}` : id;
+}
+
+/**
+ * The device id a cookie holds when this server issued it (push 4b re-check, E-02): with the key, only an id whose HMAC
+ * matches; without the key, the id as it is (as before the key). Null otherwise.
+ */
+export function deviceIdOfCookie(value: string | undefined, key: string | null): string | null {
+  if (!value) return null;
+  const [id, mac, extra] = value.split(".");
+  if (!id || !GUEST_ID_RE.test(id) || extra !== undefined) return null;
+  if (!key) return id;
+  if (!mac) return null;
+  const want = Buffer.from(deviceIdMac(id, key));
+  const got = Buffer.from(mac);
+  return got.length === want.length && timingSafeEqual(got, want) ? id : null;
+}
+
 /** The id made in a request that came without one, so every call of that request sends the same id. */
 const madeIn = new WeakMap<object, string>();
 
@@ -122,14 +150,15 @@ const forgottenIn = new WeakSet<object>();
 export function deviceId(): string | null {
   const req0 = thisRequest();
   if (req0 && forgottenIn.has(req0)) return null;
-  const kept = read(GUEST_COOKIE);
-  if (kept && GUEST_ID_RE.test(kept)) return kept;
+  const key = farmerAppKey();
+  const kept = deviceIdOfCookie(read(GUEST_COOKIE), key);
+  if (kept) return kept;
   const req = thisRequest();
   if (!req) return null;
   const made = madeIn.get(req);
   if (made) return made;
   const id = newDeviceId();
-  if (!write(GUEST_COOKIE, id, GUEST_KEEP_S)) return null;
+  if (!write(GUEST_COOKIE, deviceCookieValue(id, key), GUEST_KEEP_S)) return null;
   madeIn.set(req, id);
   return id;
 }

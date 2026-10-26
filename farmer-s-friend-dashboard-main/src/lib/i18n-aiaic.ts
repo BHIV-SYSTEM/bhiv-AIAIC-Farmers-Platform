@@ -87,7 +87,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.account.choose_district": "Choose your district",
   "aiaic.account.notice_title": "What registering keeps",
   "aiaic.account.notice":
-    "AIAIC keeps your username, your password (only in a scrambled form), your name if you give it, your state, district and language. Under your account it also keeps what you ask in this app, the storage and transport cards you look at, your help questions and your sales. AIAIC's team (its admins and reviewers) sees these together in one record, approves registrations, answers your questions and may check advice for you from its dashboard. They are kept until AIAIC's retention period ends or you erase your account: in the app (your name at the top, then Erase my account) or by writing to the grievance officer named on the Contact page, who also hears complaints. You may also complain to the Data Protection Board of India.",
+    "AIAIC keeps your username, your password (only in a scrambled form), your name if you give it, your state, district and language. Under your account it also keeps what you ask in this app, the storage and transport cards you look at, your help questions and your sales. AIAIC's team (its admins and reviewers) sees these together in one record, approves registrations, answers your questions and may check advice for you from its dashboard. They are kept until you erase your account: in the app (your name at the top, then Erase my account) or by writing to the grievance officer named on the Contact page, who also hears complaints. Where AIAIC has set a retention period, its team may also remove records older than that. You may also complain to the Data Protection Board of India.",
   "aiaic.account.agree": "I have read this and I agree",
   "aiaic.account.submit_register": "Register",
   "aiaic.account.submit_signin": "Sign in",
@@ -162,13 +162,13 @@ export const AIAIC_EN: Dict = {
   "aiaic.help.write_again": "Write again",
   "aiaic.help.back": "All your questions",
   "aiaic.help.guest_note":
-    "You are using the app as a guest: AIAIC keeps your questions under this phone's id, not your name, and only this phone can read the answers. AIAIC's team reads them, with what was asked from this phone. Questions you ask after signing in are kept with your account.",
+    "You are using the app as a guest: AIAIC keeps your questions under this phone's id, not your name, and shows the answers on this phone. AIAIC's team reads them, with what was asked from this phone. Questions you ask after signing in are kept with your account.",
   "aiaic.help.code.sign_in_or_device":
     "This phone could not be recognised. Please open the app again.",
   "aiaic.help.code.farmers_only": "Questions are for farmers' accounts.",
   "aiaic.help.code.query_not_found": "This question was not found.",
   "aiaic.help.crisis_note":
-    "Your message was not sent to AIAIC's team and was not kept, so that it stays private. The people at these numbers are trained to help, free, at any hour. You can still ask the team about your farm or your sale here.",
+    "Your message was not sent to AIAIC's team and was not kept, so that it stays private. Tele-MANAS (14416) is free, answers at any hour, and its counsellors are trained to help. You can still ask the team about your farm or your sale here.",
   "aiaic.help.back_to_form": "Back to Help",
   "aiaic.help.loading": "Reading your questions…",
   "aiaic.help.code.aiaic_unavailable":
@@ -176,7 +176,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.help.code.unavailable":
     "The team's service could not be reached just now. Please check your connection and try again.",
   "aiaic.help.code.busy":
-    "Many people are writing to the team right now. Please try again in a few minutes.",
+    "Many messages were sent from here in the last hour, so sending is paused for a while. Please try again later.",
   "aiaic.help.code.aiaic_signed_out":
     "You were signed out, so your message was not sent. Please sign in again and send it.",
   "aiaic.help.code.signed_in":
@@ -191,7 +191,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.help.forget_no": "Keep them",
   "aiaic.help.forgotten": "Done. This phone's questions are removed, and the phone has a new id.",
   "aiaic.account.code.busy":
-    "Many people are using the app right now. Please wait a few minutes and try again.",
+    "Too many tries were made from here in a short time, so this is paused for a while. Please wait (up to an hour) and try again.",
   "aiaic.account.code.password_required": "Please type your password.",
   "aiaic.account.code.not_signed_in": "You are not signed in.",
   "aiaic.account.code.aiaic_signed_out": "You were signed out. Please sign in again.",
@@ -671,7 +671,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.account.choose_district": "तुमचा जिल्हा निवडा",
   "aiaic.account.notice_title": "नोंदणीत काय ठेवले जाते",
   "aiaic.account.notice":
-    "AIAIC तुमचे वापरकर्ता नाव, तुमचा पासवर्ड (फक्त बदललेल्या, गुप्त स्वरूपात), दिल्यास तुमचे नाव, तुमचे राज्य, जिल्हा आणि भाषा ठेवते. तुमच्या खात्याखाली तुम्ही या ॲपमध्ये काय विचारता, तुम्ही पाहिलेली साठवण आणि वाहतुकीची कार्डे, तुमचे मदतीचे प्रश्न आणि तुमची विक्री हेही ठेवले जाते. AIAIC ची टीम (तिचे प्रशासक आणि तपासनीस) हे सर्व एकाच नोंदीत पाहते, नोंदणीला मंजुरी देते, तुमच्या प्रश्नांना उत्तर देते आणि आपल्या डॅशबोर्डवरून तुमच्यासाठी सल्ला तपासू शकते. AIAIC चा ठेवण्याचा कालावधी संपेपर्यंत किंवा तुम्ही तुमचे खाते पुसून टाकेपर्यंत हे ठेवले जाते: ॲपमध्ये (वर तुमचे नाव, मग 'माझे खाते पुसून टाका') किंवा संपर्क पानावर दिलेल्या तक्रार निवारण अधिकाऱ्याला लिहून, जे तक्रारीही ऐकतात. तुम्ही भारताच्या डेटा संरक्षण मंडळाकडेही तक्रार करू शकता.",
+    "AIAIC तुमचे वापरकर्ता नाव, तुमचा पासवर्ड (फक्त बदललेल्या, गुप्त स्वरूपात), दिल्यास तुमचे नाव, तुमचे राज्य, जिल्हा आणि भाषा ठेवते. तुमच्या खात्याखाली तुम्ही या ॲपमध्ये काय विचारता, तुम्ही पाहिलेली साठवण आणि वाहतुकीची कार्डे, तुमचे मदतीचे प्रश्न आणि तुमची विक्री हेही ठेवले जाते. AIAIC ची टीम (तिचे प्रशासक आणि तपासनीस) हे सर्व एकाच नोंदीत पाहते, नोंदणीला मंजुरी देते, तुमच्या प्रश्नांना उत्तर देते आणि आपल्या डॅशबोर्डवरून तुमच्यासाठी सल्ला तपासू शकते. तुम्ही तुमचे खाते पुसून टाकेपर्यंत हे ठेवले जाते: ॲपमध्ये (वर तुमचे नाव, मग 'माझे खाते पुसून टाका') किंवा संपर्क पानावर दिलेल्या तक्रार निवारण अधिकाऱ्याला लिहून, जे तक्रारीही ऐकतात. AIAIC ने ठेवण्याचा कालावधी ठरवला असल्यास, त्याहून जुन्या नोंदी AIAIC ची टीम काढूनही टाकू शकते. तुम्ही भारताच्या डेटा संरक्षण मंडळाकडेही तक्रार करू शकता.",
   "aiaic.account.agree": "मी हे वाचले आहे आणि मला मान्य आहे",
   "aiaic.account.submit_register": "नोंदणी करा",
   "aiaic.account.submit_signin": "साइन इन करा",
@@ -745,12 +745,12 @@ export const AIAIC_MR: Dict = {
   "aiaic.help.write_again": "पुन्हा लिहा",
   "aiaic.help.back": "तुमचे सर्व प्रश्न",
   "aiaic.help.guest_note":
-    "तुम्ही ॲप पाहुणे म्हणून वापरत आहात: AIAIC तुमचे प्रश्न तुमच्या नावाखाली नव्हे, तर या फोनच्या ओळख क्रमांकाखाली ठेवते आणि उत्तरे फक्त याच फोनवर वाचता येतात. AIAIC ची टीम ते, या फोनवरून विचारलेल्या गोष्टींसोबत वाचते. साइन इन केल्यानंतर विचारलेले प्रश्न तुमच्या खात्यासोबत राहतात.",
+    "तुम्ही ॲप पाहुणे म्हणून वापरत आहात: AIAIC तुमचे प्रश्न तुमच्या नावाखाली नव्हे, तर या फोनच्या ओळख क्रमांकाखाली ठेवते आणि उत्तरे याच फोनवर दाखवते. AIAIC ची टीम ते, या फोनवरून विचारलेल्या गोष्टींसोबत वाचते. साइन इन केल्यानंतर विचारलेले प्रश्न तुमच्या खात्यासोबत राहतात.",
   "aiaic.help.code.sign_in_or_device": "हा फोन ओळखता आला नाही. कृपया ॲप पुन्हा उघडा.",
   "aiaic.help.code.farmers_only": "प्रश्न शेतकऱ्यांच्या खात्यांसाठी आहेत.",
   "aiaic.help.code.query_not_found": "हा प्रश्न सापडला नाही.",
   "aiaic.help.crisis_note":
-    "तुमचा संदेश AIAIC च्या टीमकडे पाठवला गेला नाही आणि ठेवलाही गेला नाही, म्हणजे तो खाजगी राहील. या क्रमांकांवरील लोक मदतीसाठी प्रशिक्षित आहेत, मोफत, कोणत्याही वेळी. तुमच्या शेतीबद्दल किंवा विक्रीबद्दल तुम्ही इथे टीमला अजूनही विचारू शकता.",
+    "तुमचा संदेश AIAIC च्या टीमकडे पाठवला गेला नाही आणि ठेवलाही गेला नाही, म्हणजे तो खाजगी राहील. टेली-मानस (14416) मोफत आहे, कोणत्याही वेळी उत्तर देते, आणि तिथले समुपदेशक मदतीसाठी प्रशिक्षित आहेत. तुमच्या शेतीबद्दल किंवा विक्रीबद्दल तुम्ही इथे टीमला अजूनही विचारू शकता.",
   "aiaic.help.back_to_form": "मदतीकडे परत",
   "aiaic.help.loading": "तुमचे प्रश्न वाचत आहोत…",
   "aiaic.help.code.aiaic_unavailable":
@@ -758,7 +758,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.help.code.unavailable":
     "टीमची सेवा आत्ता पोहोचू शकली नाही. कृपया तुमचे नेटवर्क तपासा आणि पुन्हा प्रयत्न करा.",
   "aiaic.help.code.busy":
-    "आत्ता बरेच लोक टीमला लिहीत आहेत. कृपया काही मिनिटांनी पुन्हा प्रयत्न करा.",
+    "गेल्या तासात येथून खूप संदेश पाठवले गेले, म्हणून पाठवणे काही वेळासाठी थांबवले आहे. कृपया नंतर पुन्हा प्रयत्न करा.",
   "aiaic.help.code.aiaic_signed_out":
     "तुम्ही साइन आउट झालात, त्यामुळे तुमचा संदेश पाठवला गेला नाही. कृपया पुन्हा साइन इन करून तो पाठवा.",
   "aiaic.help.code.signed_in":
@@ -774,7 +774,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.help.forgotten":
     "झाले. या फोनवरील प्रश्न काढले आहेत आणि फोनला नवा ओळख क्रमांक मिळाला आहे.",
   "aiaic.account.code.busy":
-    "आत्ता बरेच लोक ॲप वापरत आहेत. कृपया काही मिनिटे थांबून पुन्हा प्रयत्न करा.",
+    "येथून थोड्या वेळात खूप प्रयत्न झाले, म्हणून हे काही वेळासाठी थांबवले आहे. कृपया थोडा वेळ (एक तासापर्यंत) थांबा आणि पुन्हा प्रयत्न करा.",
   "aiaic.account.code.password_required": "कृपया तुमचा पासवर्ड टाइप करा.",
   "aiaic.account.code.not_signed_in": "तुम्ही साइन इन केलेले नाही.",
   "aiaic.account.code.aiaic_signed_out": "तुम्ही साइन आउट झालात. कृपया पुन्हा साइन इन करा.",
@@ -1253,7 +1253,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.account.choose_district": "अपना ज़िला चुनें",
   "aiaic.account.notice_title": "पंजीकरण में क्या रखा जाता है",
   "aiaic.account.notice":
-    "AIAIC आपका उपयोगकर्ता नाम, आपका पासवर्ड (सिर्फ़ बदले हुए, गुप्त रूप में), दिया हो तो आपका नाम, आपका राज्य, ज़िला और भाषा रखता है। आपके खाते के तहत यह भी रखा जाता है कि आप इस ऐप में क्या पूछते हैं, आपने भंडारण और ढुलाई के कौन से कार्ड देखे, आपके मदद के प्रश्न और आपकी बिक्री। AIAIC की टीम (उसके प्रशासक और समीक्षक) यह सब एक ही रिकॉर्ड में देखती है, पंजीकरण मंज़ूर करती है, आपके प्रश्नों के जवाब देती है और अपने डैशबोर्ड से आपके लिए सलाह जाँच सकती है। यह AIAIC की रखने की अवधि ख़त्म होने तक या आपके खाता मिटाने तक रखा जाता है: ऐप में (ऊपर आपका नाम, फिर 'मेरा खाता मिटाएँ') या संपर्क पेज पर दिए शिकायत अधिकारी को लिखकर, जो शिकायतें भी सुनते हैं। आप भारत के डेटा संरक्षण बोर्ड से भी शिकायत कर सकते हैं।",
+    "AIAIC आपका उपयोगकर्ता नाम, आपका पासवर्ड (सिर्फ़ बदले हुए, गुप्त रूप में), दिया हो तो आपका नाम, आपका राज्य, ज़िला और भाषा रखता है। आपके खाते के तहत यह भी रखा जाता है कि आप इस ऐप में क्या पूछते हैं, आपने भंडारण और ढुलाई के कौन से कार्ड देखे, आपके मदद के प्रश्न और आपकी बिक्री। AIAIC की टीम (उसके प्रशासक और समीक्षक) यह सब एक ही रिकॉर्ड में देखती है, पंजीकरण मंज़ूर करती है, आपके प्रश्नों के जवाब देती है और अपने डैशबोर्ड से आपके लिए सलाह जाँच सकती है। यह आपके खाता मिटाने तक रखा जाता है: ऐप में (ऊपर आपका नाम, फिर 'मेरा खाता मिटाएँ') या संपर्क पेज पर दिए शिकायत अधिकारी को लिखकर, जो शिकायतें भी सुनते हैं। अगर AIAIC ने रखने की अवधि तय की है, तो उससे पुराने रिकॉर्ड AIAIC की टीम हटा भी सकती है। आप भारत के डेटा संरक्षण बोर्ड से भी शिकायत कर सकते हैं।",
   "aiaic.account.agree": "मैंने यह पढ़ लिया है और मुझे मंज़ूर है",
   "aiaic.account.submit_register": "पंजीकरण करें",
   "aiaic.account.submit_signin": "साइन इन करें",
@@ -1327,19 +1327,20 @@ export const AIAIC_HI: Dict = {
   "aiaic.help.write_again": "फिर से लिखें",
   "aiaic.help.back": "आपके सभी प्रश्न",
   "aiaic.help.guest_note":
-    "आप ऐप अतिथि के रूप में इस्तेमाल कर रहे हैं: AIAIC आपके प्रश्न आपके नाम के तहत नहीं, बल्कि इस फ़ोन की पहचान संख्या के तहत रखता है, और जवाब सिर्फ़ इसी फ़ोन पर पढ़े जा सकते हैं। AIAIC की टीम उन्हें, इस फ़ोन से पूछी गई बातों के साथ पढ़ती है। साइन इन करने के बाद पूछे गए प्रश्न आपके खाते के साथ रहते हैं।",
+    "आप ऐप अतिथि के रूप में इस्तेमाल कर रहे हैं: AIAIC आपके प्रश्न आपके नाम के तहत नहीं, बल्कि इस फ़ोन की पहचान संख्या के तहत रखता है, और जवाब इसी फ़ोन पर दिखाता है। AIAIC की टीम उन्हें, इस फ़ोन से पूछी गई बातों के साथ पढ़ती है। साइन इन करने के बाद पूछे गए प्रश्न आपके खाते के साथ रहते हैं।",
   "aiaic.help.code.sign_in_or_device": "यह फ़ोन पहचाना नहीं जा सका। कृपया ऐप फिर से खोलें।",
   "aiaic.help.code.farmers_only": "प्रश्न किसानों के खातों के लिए हैं।",
   "aiaic.help.code.query_not_found": "यह प्रश्न नहीं मिला।",
   "aiaic.help.crisis_note":
-    "आपका संदेश AIAIC की टीम को नहीं भेजा गया और रखा भी नहीं गया, ताकि वह निजी रहे। इन नंबरों पर लोग मदद के लिए प्रशिक्षित हैं, मुफ़्त, किसी भी समय। अपनी खेती या बिक्री के बारे में आप यहाँ टीम से अब भी पूछ सकते हैं।",
+    "आपका संदेश AIAIC की टीम को नहीं भेजा गया और रखा भी नहीं गया, ताकि वह निजी रहे। टेली-मानस (14416) मुफ़्त है, किसी भी समय जवाब देता है, और वहाँ के काउंसलर मदद के लिए प्रशिक्षित हैं। अपनी खेती या बिक्री के बारे में आप यहाँ टीम से अब भी पूछ सकते हैं।",
   "aiaic.help.back_to_form": "मदद पर वापस",
   "aiaic.help.loading": "आपके प्रश्न पढ़ रहे हैं…",
   "aiaic.help.code.aiaic_unavailable":
     "टीम की सेवा अभी नहीं मिल सकी। कृपया अपना नेटवर्क जाँचें और फिर कोशिश करें।",
   "aiaic.help.code.unavailable":
     "टीम की सेवा अभी नहीं मिल सकी। कृपया अपना नेटवर्क जाँचें और फिर कोशिश करें।",
-  "aiaic.help.code.busy": "अभी बहुत लोग टीम को लिख रहे हैं। कृपया कुछ मिनट बाद फिर कोशिश करें।",
+  "aiaic.help.code.busy":
+    "पिछले एक घंटे में यहाँ से बहुत संदेश भेजे गए, इसलिए भेजना कुछ समय के लिए रोका गया है। कृपया बाद में फिर कोशिश करें।",
   "aiaic.help.code.aiaic_signed_out":
     "आप साइन आउट हो गए, इसलिए आपका संदेश नहीं भेजा गया। कृपया फिर से साइन इन करके उसे भेजें।",
   "aiaic.help.code.signed_in":
@@ -1354,7 +1355,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.help.forgotten":
     "हो गया। इस फ़ोन के प्रश्न हटा दिए गए हैं, और फ़ोन को नई पहचान संख्या मिल गई है।",
   "aiaic.account.code.busy":
-    "अभी बहुत लोग ऐप इस्तेमाल कर रहे हैं। कृपया कुछ मिनट रुककर फिर कोशिश करें।",
+    "यहाँ से कम समय में बहुत ज़्यादा कोशिशें हुईं, इसलिए यह कुछ समय के लिए रोका गया है। कृपया थोड़ा रुककर (एक घंटे तक) फिर कोशिश करें।",
   "aiaic.account.code.password_required": "कृपया अपना पासवर्ड टाइप करें।",
   "aiaic.account.code.not_signed_in": "आप साइन इन नहीं हैं।",
   "aiaic.account.code.aiaic_signed_out": "आप साइन आउट हो गए। कृपया फिर से साइन इन करें।",

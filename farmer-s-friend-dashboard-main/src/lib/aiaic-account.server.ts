@@ -32,6 +32,7 @@ import {
   type QueriesResult,
   type QueryResult,
   REGISTRATION_NOTICE_VERSION,
+  wordsToScan,
 } from "./aiaic-account";
 import {
   asker,
@@ -114,8 +115,8 @@ function codeOf(a: Answer): { code: string; reason: string | null } {
       };
   }
   if (a.status === 401) return { code: "wrong_credentials", reason: null };
-  // a 429 is about the app's traffic (AIAIC sees every farmer behind this server unless the app's key is set), never
-  // "you tried too often" said to a farmer who did nothing wrong (push 4b audit, R-07)
+  // a 429 is a pause after many tries from here (hers, or this address's), said without blame and without a cause
+  // AIAIC did not give (push 4b audit, R-07; re-check, E-03)
   if (a.status === 429) return { code: "busy", reason: null };
   if (a.status === 422) return { code: "not_accepted", reason: null };
   if (a.status >= 500 || a.status === 0) return { code: "aiaic_unavailable", reason: null };
@@ -158,7 +159,11 @@ export async function signIn(q: {
   lang: string;
 }): Promise<AccountOutcome> {
   if (!signInAllowed(resolveBaseUrl().baseUrl))
-    return { ok: false, code: "aiaic_sign_in_needs_https" };
+    return refusedAfterTheScan(
+      { ok: false, code: "aiaic_sign_in_needs_https" },
+      wordsToScan(q.username),
+      q.lang,
+    );
   const a = await ask("/auth/login", {
     method: "POST",
     body: { username: q.username, password: q.password, lang: q.lang },
@@ -186,6 +191,20 @@ export function signOut(): AccountOutcome {
   return { ok: true };
 }
 
+/**
+ * A refusal this server gives before AIAIC is asked, said only after what she typed was read for distress (push 4b
+ * re-check, E-04; the platform's rule D-105: nothing answers a person in crisis before the scan does): AIAIC's crisis
+ * card when her words read as one.
+ */
+async function refusedAfterTheScan(
+  refusal: AccountOutcome,
+  words: string,
+  lang: string,
+): Promise<AccountOutcome> {
+  const crisis = await scanFirst({ text: words, lang });
+  return crisis ? { ok: false, code: "crisis", crisis } : refusal;
+}
+
 // ------------------------------------------------------------------------------------------------ register
 
 export async function register(q: {
@@ -199,9 +218,18 @@ export async function register(q: {
   agreed: true;
   noticeVersion: string;
 }): Promise<AccountOutcome> {
-  if (q.noticeVersion !== REGISTRATION_NOTICE_VERSION) return { ok: false, code: "notice_changed" };
-  if (!signInAllowed(resolveBaseUrl().baseUrl))
-    return { ok: false, code: "aiaic_sign_in_needs_https" };
+  const early =
+    q.noticeVersion !== REGISTRATION_NOTICE_VERSION
+      ? "notice_changed"
+      : !signInAllowed(resolveBaseUrl().baseUrl)
+        ? "aiaic_sign_in_needs_https"
+        : null;
+  if (early)
+    return refusedAfterTheScan(
+      { ok: false, code: early },
+      wordsToScan(q.username, q.displayName),
+      q.lang,
+    );
   const a = await ask("/farmer/register", {
     method: "POST",
     body: {

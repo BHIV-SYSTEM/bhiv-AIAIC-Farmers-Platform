@@ -6,10 +6,10 @@
 /** The registration notice's version this app shows (AIAIC refuses another with `notice_changed`). Tied to the
  * notice's words: `tests/aiaic_account_suite.ts` checks `NOTICE_WORDS_SHA256` against the three languages' text, so the
  * words cannot change without a new version (push 4b audit, R-05). */
-export const REGISTRATION_NOTICE_VERSION = "registration-2026-10-25b";
+export const REGISTRATION_NOTICE_VERSION = "registration-2026-10-26";
 /** sha256 of the notice's words in en, mr and hi (`aiaic.account.notice` each), joined by a newline. */
 export const NOTICE_WORDS_SHA256 =
-  "b7bceb1bf723aea1232854bde2a5ae8b895292541db71181dbad7bd1fa302cf6";
+  "b626f6ed38ebbd36cbbd892202e67d03ecf05f26df2a3970619bfdce84121cd7";
 
 /** The first thing this phone would refuse in a registration form, or null. What she typed is read for distress
  * BEFORE any of these is said (push 4b audit, R-03). */
