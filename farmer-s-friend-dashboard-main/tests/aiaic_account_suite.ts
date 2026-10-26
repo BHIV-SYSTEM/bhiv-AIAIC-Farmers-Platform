@@ -19,7 +19,7 @@ import {
   wordsToScan,
 } from "../src/lib/aiaic-account";
 import { register } from "../src/lib/aiaic-account.server";
-import { pickVisitorAddress } from "../src/lib/aiaic-base.server";
+import { aiaicHeaders, pickVisitorAddress } from "../src/lib/aiaic-base.server";
 import { deviceCookieValue, deviceIdOfCookie } from "../src/lib/aiaic-identity.server";
 import { AIAIC_EN, AIAIC_HI, AIAIC_MR } from "../src/lib/i18n-aiaic";
 
@@ -111,6 +111,31 @@ test("E-01 the visitor's address is the socket's unless the deployment names the
     null,
     "named, absent",
   );
+});
+
+test("E-07 the app's key goes only where a password may go: https, or this machine or its network", () => {
+  const before = { key: process.env["AIAIC_FARMER_APP_KEY"], base: process.env["AIAIC_BASE_URL"] };
+  const sent = (base: string) => {
+    process.env["AIAIC_BASE_URL"] = base;
+    return "x-aiaic-app-key" in aiaicHeaders();
+  };
+  try {
+    process.env["AIAIC_FARMER_APP_KEY"] = "q".repeat(40);
+    equal(sent("http://203.0.113.10:8017"), false, "plain http to a public address");
+    equal(sent("https://aiaic.example.org"), true, "https");
+    equal(sent("http://127.0.0.1:8791"), true, "this machine");
+    equal(sent("http://host.docker.internal:8017"), true, "the host of this container");
+    process.env["AIAIC_FARMER_APP_KEY"] = "short";
+    equal(sent("https://aiaic.example.org"), false, "a key under 32 characters is no key");
+  } finally {
+    for (const [name, value] of [
+      ["AIAIC_FARMER_APP_KEY", before.key],
+      ["AIAIC_BASE_URL", before.base],
+    ] as const) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
 });
 
 test("E-02 with the key, only a device cookie this server issued names a device", () => {
