@@ -1,4 +1,5 @@
-import { AIAIC_HEADERS, isTunnelErrorBody, resolveBaseUrl } from "./aiaic-base.server";
+import { aiaicHeaders, isTunnelErrorBody, resolveBaseUrl } from "./aiaic-base.server";
+import { fetchForHer } from "./aiaic-identity.server";
 import {
   signalItemOf,
   type CropSignalsAnswer,
@@ -31,7 +32,8 @@ export async function cropSignals(q: {
 
   let res: Response;
   try {
-    res = await fetch(url, { headers: AIAIC_HEADERS, signal: AbortSignal.timeout(WAIT_MS) });
+    // who asked (push 4b): her token when she is signed in, else this device's id
+    res = await fetchForHer(url, aiaicHeaders(), WAIT_MS);
   } catch (err) {
     const name = err instanceof Error ? err.name : "";
     console.error("[aiaic-analysis] crop-signals not reached", name);

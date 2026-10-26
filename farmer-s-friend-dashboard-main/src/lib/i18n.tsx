@@ -159,7 +159,7 @@ const en: Dict = {
   "policy.in_english": "This policy is in English.",
   "policy.info_in_english": "This page is in English.",
   "home.what":
-    "Free advice on market prices, weather, water and crop care, a plant photo check and transport cost estimates, all from Krishi Sampada (AIAIC); selling here is practice only for now.",
+    "Free advice on market prices, weather, water and crop care, a plant photo check and transport cost estimates, all from Krishi Sampada (AIAIC); for a guest, selling here is practice only.",
   "plant.title": "Check a plant photo",
   "plant.lead":
     "Take a clear photo of one leaf or plant. The system will describe what it can see. It will not tell you which medicine to spray.",
@@ -624,7 +624,7 @@ const hi: Dict = {
   "policy.in_english": "यह नीति अंग्रेज़ी में है।",
   "policy.info_in_english": "यह जानकारी अंग्रेज़ी में है।",
   "home.what":
-    "बाज़ार भाव, मौसम, पानी और फ़सल की देखभाल पर मुफ़्त सलाह, पौधे की फोटो की जाँच और ढुलाई के खर्च का अनुमान, सब कृषि संपदा (AIAIC) से; यहाँ बिक्री अभी सिर्फ़ अभ्यास के लिए है।",
+    "बाज़ार भाव, मौसम, पानी और फ़सल की देखभाल पर मुफ़्त सलाह, पौधे की फोटो की जाँच और ढुलाई के खर्च का अनुमान, सब कृषि संपदा (AIAIC) से; अतिथि के लिए यहाँ बिक्री सिर्फ़ अभ्यास है।",
   "plant.title": "पौधे की फोटो जाँचें",
   "plant.lead":
     "एक पत्ते या पौधे की साफ फोटो लें। सिस्टम बताएगा कि उसे क्या दिख रहा है। कौन सी दवा छिड़कें, यह नहीं बताएगा।",
@@ -1080,7 +1080,7 @@ const mr: Dict = {
   "policy.in_english": "हे धोरण इंग्रजीत आहे.",
   "policy.info_in_english": "ही माहिती इंग्रजीत आहे.",
   "home.what":
-    "बाजारभाव, हवामान, पाणी व पीक काळजी यांवर मोफत सल्ला, झाडाच्या फोटोची तपासणी आणि वाहतूक खर्चाचा अंदाज, हे सर्व कृषी संपदा (AIAIC) कडून; येथे विक्री सध्या फक्त सरावासाठी आहे.",
+    "बाजारभाव, हवामान, पाणी व पीक काळजी यांवर मोफत सल्ला, झाडाच्या फोटोची तपासणी आणि वाहतूक खर्चाचा अंदाज, हे सर्व कृषी संपदा (AIAIC) कडून; पाहुण्यासाठी येथे विक्री फक्त सरावासाठी आहे.",
   "plant.title": "झाडाचा फोटो तपासा",
   "plant.lead":
     "एका पानाचा किंवा झाडाचा स्पष्ट फोटो काढा. यंत्रणा जे दिसते ते सांगेल. कोणते औषध फवारायचे हे सांगणार नाही.",

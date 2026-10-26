@@ -18,10 +18,14 @@ import { Route as PaymentsRouteImport } from './routes/payments'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as ReviewRouteImport } from './routes/review'
+import { Route as SigninRouteImport } from './routes/signin'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdviceServiceRouteImport } from './routes/advice.$service'
+import { Route as HelpIndexRouteImport } from './routes/help.index'
+import { Route as HelpQueryIdRouteImport } from './routes/help.$queryId'
 import { Route as ListingListingIdRouteImport } from './routes/listing.$listingId'
 import { Route as ListingNewRouteImport } from './routes/listing.new'
 import { Route as OrdersIndexRouteImport } from './routes/orders.index'
@@ -72,6 +76,11 @@ const RefundPolicyRoute = RefundPolicyRouteImport.update({
   path: '/refund-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultRoute = ResultRouteImport.update({
   id: '/result',
   path: '/result',
@@ -82,6 +91,11 @@ const ReviewRoute = ReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -90,6 +104,16 @@ const TermsRoute = TermsRouteImport.update({
 const AdviceServiceRoute = AdviceServiceRouteImport.update({
   id: '/advice/$service',
   path: '/advice/$service',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpIndexRoute = HelpIndexRouteImport.update({
+  id: '/help/',
+  path: '/help/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpQueryIdRoute = HelpQueryIdRouteImport.update({
+  id: '/help/$queryId',
+  path: '/help/$queryId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListingListingIdRoute = ListingListingIdRouteImport.update({
@@ -123,13 +147,17 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
+  '/register': typeof RegisterRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/help/$queryId': typeof HelpQueryIdRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/help/': typeof HelpIndexRoute
   '/orders/': typeof OrdersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -142,13 +170,17 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
+  '/register': typeof RegisterRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/help/$queryId': typeof HelpQueryIdRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/help': typeof HelpIndexRoute
   '/orders': typeof OrdersIndexRoute
 }
 export interface FileRoutesById {
@@ -162,13 +194,17 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/refund-policy': typeof RefundPolicyRoute
+  '/register': typeof RegisterRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/signin': typeof SigninRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
+  '/help/$queryId': typeof HelpQueryIdRoute
   '/listing/$listingId': typeof ListingListingIdRoute
   '/listing/new': typeof ListingNewRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/help/': typeof HelpIndexRoute
   '/orders/': typeof OrdersIndexRoute
 }
 export interface FileRouteTypes {
@@ -183,13 +219,17 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/refund-policy'
+    | '/register'
     | '/result'
     | '/review'
+    | '/signin'
     | '/terms'
     | '/advice/$service'
+    | '/help/$queryId'
     | '/listing/$listingId'
     | '/listing/new'
     | '/orders/$orderId'
+    | '/help/'
     | '/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -202,13 +242,17 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/refund-policy'
+    | '/register'
     | '/result'
     | '/review'
+    | '/signin'
     | '/terms'
     | '/advice/$service'
+    | '/help/$queryId'
     | '/listing/$listingId'
     | '/listing/new'
     | '/orders/$orderId'
+    | '/help'
     | '/orders'
   id:
     | '__root__'
@@ -221,13 +265,17 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/refund-policy'
+    | '/register'
     | '/result'
     | '/review'
+    | '/signin'
     | '/terms'
     | '/advice/$service'
+    | '/help/$queryId'
     | '/listing/$listingId'
     | '/listing/new'
     | '/orders/$orderId'
+    | '/help/'
     | '/orders/'
   fileRoutesById: FileRoutesById
 }
@@ -241,13 +289,17 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
+  RegisterRoute: typeof RegisterRoute
   ResultRoute: typeof ResultRoute
   ReviewRoute: typeof ReviewRoute
+  SigninRoute: typeof SigninRoute
   TermsRoute: typeof TermsRoute
   AdviceServiceRoute: typeof AdviceServiceRoute
+  HelpQueryIdRoute: typeof HelpQueryIdRoute
   ListingListingIdRoute: typeof ListingListingIdRoute
   ListingNewRoute: typeof ListingNewRoute
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
+  HelpIndexRoute: typeof HelpIndexRoute
   OrdersIndexRoute: typeof OrdersIndexRoute
 }
 
@@ -316,6 +368,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RefundPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/result': {
       id: '/result'
       path: '/result'
@@ -330,6 +389,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -342,6 +408,20 @@ declare module '@tanstack/react-router' {
       path: '/advice/$service'
       fullPath: '/advice/$service'
       preLoaderRoute: typeof AdviceServiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help/': {
+      id: '/help/'
+      path: '/help'
+      fullPath: '/help/'
+      preLoaderRoute: typeof HelpIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help/$queryId': {
+      id: '/help/$queryId'
+      path: '/help/$queryId'
+      fullPath: '/help/$queryId'
+      preLoaderRoute: typeof HelpQueryIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listing/$listingId': {
@@ -385,13 +465,17 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   RefundPolicyRoute: RefundPolicyRoute,
+  RegisterRoute: RegisterRoute,
   ResultRoute: ResultRoute,
   ReviewRoute: ReviewRoute,
+  SigninRoute: SigninRoute,
   TermsRoute: TermsRoute,
   AdviceServiceRoute: AdviceServiceRoute,
+  HelpQueryIdRoute: HelpQueryIdRoute,
   ListingListingIdRoute: ListingListingIdRoute,
   ListingNewRoute: ListingNewRoute,
   OrdersOrderIdRoute: OrdersOrderIdRoute,
+  HelpIndexRoute: HelpIndexRoute,
   OrdersIndexRoute: OrdersIndexRoute,
 }
 export const routeTree = rootRouteImport

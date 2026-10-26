@@ -31,8 +31,9 @@ const qty = z.number().positive().max(100_000);
 
 export const getTradeMode = createServerFn({ method: "GET" }).handler(
   async (): Promise<TradeMode> => {
-    const { tradeMode } = await import("./aiaic-trade.server");
-    return tradeMode();
+    // a signed-in farmer's sales are her own record in AIAIC; a guest's, the server's settings (push 4b)
+    const { tradeModeNow } = await import("./aiaic-trade.server");
+    return tradeModeNow();
   },
 );
 

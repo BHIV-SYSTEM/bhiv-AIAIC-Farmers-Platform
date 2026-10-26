@@ -1,0 +1,43 @@
+{
+ "_recorded": {
+  "route": "POST /safety/check",
+  "request": {
+   "text": "I want to die"
+  },
+  "status": 200,
+  "as": "nobody",
+  "by": "reports/push4_2026-10-25/P4B_rec_ops.py (the app in-process over the working tree, fastapi TestClient)",
+  "at": "2026-10-25T20:07:30+00:00",
+  "note": "A real answer of the real route about TEST records this recorder seeded on a *_test database and removed afterwards (accounts t_rec_*, records marked '(a test record)'): no real person. Never edited by hand."
+ },
+ "answer": {
+  "crop": null,
+  "place": null,
+  "state": null,
+  "distress": true,
+  "wrote_devanagari": false,
+  "lead_language": "en",
+  "labels": {},
+  "answer": "Please talk to someone today.",
+  "message": "What you wrote matters more than any crop advice we could give you, so we have not shown any. You are not alone in this, and help is free and confidential.",
+  "talk_to_someone": [
+   {
+    "name": "Tele-MANAS (24x7, free)",
+    "phone": "14416",
+    "note": "Government of India mental health helpline. You can call at any hour."
+   },
+   {
+    "name": "Tele-MANAS toll-free (24x7, free)",
+    "phone": "1800-891-4416"
+   },
+   {
+    "name": "Kisan Call Centre (farming support)",
+    "phone": "1800-180-1551"
+   }
+  ],
+  "also": "Your Krishi Vigyan Kendra, your FPO, or your village agriculture officer can sit with you and go through your situation in person. Ask them today, not next week.",
+  "privacy_note": "What you typed was read to decide this, and then thrown away. We did not store it.",
+  "advice_withheld": "Crop and price advice is deliberately not shown on this screen. Ask again without a message when you want it.",
+  "not_yet_checked_by_experts": true
+ }
+}

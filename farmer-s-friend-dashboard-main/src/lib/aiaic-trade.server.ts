@@ -1,20 +1,34 @@
 /**
  * AIAIC's sale, payment and transport routes, called from THIS SERVER only.
  *
- * - Her sale (`/farmer/trade/*`, AIAIC's contract sections 17b and 17d) is read and written as ONE AIAIC farmer
- *   account, signed in from the server settings AIAIC_FARMER_USERNAME and AIAIC_FARMER_PASSWORD (read here by name;
- *   never logged, never sent to the browser). The token AIAIC gives is kept in this process's memory until shortly
- *   before it expires, and asked for again once when AIAIC says it is no longer valid.
- * - This app has no sign-in of its own: everyone who opens it acts as that one account. So it may be only AIAIC's
- *   PRACTICE farmer (her records are rehearsal data and no real money moves); a real farmer's account is refused before
- *   anything of hers is shown or written (`aiaic_account_not_practice`).
- * - The password crosses the network only over https, or to an address on this machine or its private network
- *   (`aiaic_sign_in_needs_https` otherwise).
- * - Transport (`/transport/*`, section 19) needs no sign-in: it is a public read, kept here for 30 minutes so the
- *   road routes AIAIC asks Geoapify for are not spent twice on the same trip.
+ * - A FARMER SIGNED IN to this app (push 4b, `aiaic-identity.server.ts`) reads and writes HER OWN sale record
+ *   (`/farmer/trade/*`, AIAIC's contract sections 17b and 17d) with her own AIAIC token. AIAIC's own rules govern it.
+ * - A GUEST's sale screens are read and written as ONE AIAIC farmer account, signed in from the server settings
+ *   AIAIC_FARMER_USERNAME and AIAIC_FARMER_PASSWORD (read here by name; never logged, never sent to the browser). The
+ *   token AIAIC gives is kept in this process's memory until shortly before it expires, and asked for again once when
+ *   AIAIC says it is no longer valid. Every guest acts as that one account, so it may be only AIAIC's PRACTICE farmer
+ *   (her records are rehearsal data and no real money moves); a real farmer's account set there is refused before
+ *   anything of it is shown or written (`aiaic_account_not_practice`).
+ * - A password, and a token AIAIC gave for one, cross the network only over https, or to an address on this machine or
+ *   its private network (`signInAllowed`; `aiaic_sign_in_needs_https` otherwise).
+ * - Transport and storage (`/transport/*`, `/storage/verdict`, sections 19 and 21) need no sign-in: public reads, sent
+ *   with who asked (her token, else this device's id: AIAIC keeps a look), and kept here for 30 minutes so the road
+ *   routes AIAIC asks Geoapify for are not spent twice on the same trip (a look served from here is not re-recorded).
  * - Nothing here falls back to the local store: when AIAIC is set up and does not answer, that is SAID.
  */
-import { AIAIC_HEADERS, isTunnelErrorBody, resolveBaseUrl } from "./aiaic-base.server";
+import {
+  aiaicHeaders,
+  isTunnelErrorBody,
+  resolveBaseUrl,
+  signInAllowed,
+} from "./aiaic-base.server";
+import {
+  askerHeaders,
+  deviceId,
+  dropHerSession,
+  herSession,
+  type HerSession,
+} from "./aiaic-identity.server";
 import {
   commissionOf,
   namesOf,
@@ -53,30 +67,10 @@ function settingSet(name: string): boolean {
   return typeof v === "string" && v.trim().length > 0;
 }
 
-/**
- * True when a password may be sent to this address: https anywhere; plain http only to this machine, its private
- * network (10/8, 172.16/12, 192.168/16), `host.docker.internal`, or a container's own name (no dot).
- */
-export function signInAllowed(baseUrl: string): boolean {
-  let u: URL;
-  try {
-    u = new URL(baseUrl);
-  } catch {
-    return false;
-  }
-  if (u.protocol === "https:") return true;
-  if (u.protocol !== "http:") return false;
-  const host = u.hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  if (host === "localhost" || host === "host.docker.internal" || host === "::1") return true;
-  if (!host.includes(".") && !host.includes(":")) return true;
-  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
-  if (!m) return false;
-  const a = Number(m[1]);
-  const b = Number(m[2]);
-  return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
-}
+/** The rule now lives beside AIAIC's address (`aiaic-base.server.ts`): it holds for her sign-in too. */
+export { signInAllowed };
 
-/** Where this app's sales live, from the settings alone (no network): see `TradeMode`. */
+/** Where a GUEST's sales live, from the settings alone (no network): see `TradeMode`. */
 export function tradeMode(): TradeMode {
   const hasUser = settingSet(USERNAME_ENV);
   const hasPassword = settingSet(PASSWORD_ENV);
@@ -91,6 +85,11 @@ export function tradeMode(): TradeMode {
       problem: problem("aiaic_sign_in_needs_https", { setting: "AIAIC_BASE_URL" }),
     };
   return { mode: "aiaic", problem: null };
+}
+
+/** Where HER sales live now: in AIAIC, as her own record, when she is signed in; else a guest's (`tradeMode`). */
+export function tradeModeNow(): TradeMode {
+  return herSession() ? { mode: "aiaic", problem: null } : tradeMode();
 }
 
 // ------------------------------------------------------------------------------------------------ the session
@@ -125,7 +124,7 @@ async function signIn(baseUrl: string): Promise<Session | AiaicProblem> {
     try {
       res = await fetch(`${baseUrl}/auth/login`, {
         method: "POST",
-        headers: { ...AIAIC_HEADERS, "content-type": "application/json" },
+        headers: { ...aiaicHeaders(), "content-type": "application/json" },
         body: JSON.stringify({
           username: (process.env[USERNAME_ENV] ?? "").trim(),
           password: process.env[PASSWORD_ENV] ?? "",
@@ -187,7 +186,14 @@ type CallOpts = {
   body?: unknown;
   /** The press's Idempotency-Key (writes). */
   key?: string;
-  auth: boolean;
+  /**
+   * Who the call is made as (push 4b):
+   * - `trade`: her sale. HER OWN token when she is signed in (her own record; AIAIC's rules govern it), else the
+   *   server's practice account (a guest's sale screens, as before).
+   * - `person`: a public read AIAIC keeps as what she looked at: her token, else this device's id (never both).
+   * - `none`: a public list (places, the payment pricing): nobody named.
+   */
+  as: "trade" | "person" | "none";
 };
 
 function crisisOf(body: Record<string, unknown>): AiaicCrisis {
@@ -230,7 +236,9 @@ export function refusalOf(status: number, body: unknown): AiaicProblem {
 
 async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
   const { baseUrl } = resolveBaseUrl();
-  if (opts.auth) {
+  // her own session, for her sale and her looks (none outside a request, or once AIAIC refused her token)
+  let her: HerSession | null = opts.as === "none" ? null : herSession();
+  if (opts.as === "trade" && !her) {
     const mode = tradeMode();
     if (mode.mode !== "aiaic")
       return { ok: false, problem: problem("aiaic_setting_missing", { setting: USERNAME_ENV }) };
@@ -241,11 +249,16 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
   }
   for (let attempt = 0; attempt < 2; attempt++) {
-    const headers: Record<string, string> = { ...AIAIC_HEADERS };
-    if (opts.auth) {
+    const headers: Record<string, string> = aiaicHeaders();
+    if (her) {
+      Object.assign(headers, askerHeaders({ kind: "her", session: her }));
+    } else if (opts.as === "trade") {
       const s = await currentSession(baseUrl);
       if (isProblem(s)) return { ok: false, problem: s };
       headers["authorization"] = `Bearer ${s.token}`;
+    } else if (opts.as === "person") {
+      const id = deviceId();
+      if (id) Object.assign(headers, askerHeaders({ kind: "device", id }));
     }
     if (opts.body !== undefined) headers["content-type"] = "application/json";
     if (opts.key) headers["idempotency-key"] = opts.key;
@@ -263,7 +276,16 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
     const text = await res.text();
     if (isTunnelErrorBody(text))
       return { ok: false, problem: problem("aiaic_unavailable", { status: res.status }) };
-    if (res.status === 401 && opts.auth && attempt === 0) {
+    if (res.status === 401 && her) {
+      // HER token is no longer taken (expired, or her account is no longer in use): her session is dropped and the app
+      // says so once. A public read goes again as this device (its answer does not depend on who asked); her sale is
+      // never sent again as anyone else: she is asked to sign in again.
+      dropHerSession("signed_out");
+      her = null;
+      if (opts.as === "person" && attempt === 0) continue;
+      return { ok: false, problem: problem("aiaic_signed_out") };
+    }
+    if (res.status === 401 && opts.as === "trade" && attempt === 0) {
       // The token is no longer good (expired early, or AIAIC's signing key changed): sign in again, once. A 401 wrote
       // nothing, so the same press goes again with its same key.
       session = null;
@@ -530,7 +552,7 @@ async function cropNamesOf(state: string, district: string, lang: string) {
     const r = await call<{ crops?: { crop: string; name: string }[] }>({
       path: "/places/crops",
       query: { district: district.toLowerCase(), state, lang },
-      auth: false,
+      as: "none",
     });
     const out: Record<string, string> = {};
     if (r.ok) for (const c of r.data.crops ?? []) if (c.crop && c.name) out[c.crop] = c.name;
@@ -543,7 +565,7 @@ async function districtNamesOf(state: string, lang: string) {
     const r = await call<{ districts?: { key: string; name: string; name_en: string }[] }>({
       path: "/places/districts",
       query: { state, lang },
-      auth: false,
+      as: "none",
     });
     const out: Record<string, string> = {};
     if (r.ok)
@@ -566,10 +588,12 @@ function notePractice(mine: AiaicMine): AiaicProblem | null {
 /** GET /farmer/trade, kept small, with the names of her crops and districts in her language. A real farmer's
  * account is refused here, before anything of hers leaves this server. */
 export async function getMine(lang: string): Promise<AiaicResult<MineForScreen>> {
-  const r = await call<unknown>({ path: "/farmer/trade", auth: true });
+  const signedIn = Boolean(herSession());
+  const r = await call<unknown>({ path: "/farmer/trade", as: "trade" });
   if (!r.ok) return r;
   const mine = mineForBrowser(r.data);
-  const refused = notePractice(mine);
+  // the practice gate is the server's own account's (every guest acts as it); a signed-in farmer's record is her own
+  const refused = signedIn ? null : notePractice(mine);
   if (refused) return { ok: false, problem: refused };
   const places = new Map<string, { state: string; district: string }>();
   const add = (state: string | null | undefined, district: string | null | undefined) => {
@@ -591,10 +615,11 @@ export async function getMine(lang: string): Promise<AiaicResult<MineForScreen>>
 
 /** Every write is made only for a practice account (read again every 10 minutes). */
 async function practiceFirst(): Promise<AiaicProblem | null> {
+  if (herSession()) return null; // her own account: AIAIC's own rules govern her writes
   if (practice && Date.now() - practice.at < PRACTICE_RECHECK_MS) {
     return practice.is ? null : problem("aiaic_account_not_practice", { setting: USERNAME_ENV });
   }
-  const r = await call<unknown>({ path: "/farmer/trade", auth: true });
+  const r = await call<unknown>({ path: "/farmer/trade", as: "trade" });
   if (!r.ok) return r.problem;
   return notePractice(mineForBrowser(r.data));
 }
@@ -604,7 +629,7 @@ export async function getPrice(q: {
   state: string;
   district: string;
 }): Promise<AiaicResult<ReferencePrice>> {
-  const r = await call<unknown>({ path: "/farmer/trade/price", query: q, auth: true });
+  const r = await call<unknown>({ path: "/farmer/trade/price", query: q, as: "trade" });
   if (!r.ok) return r;
   return { ok: true, data: pick<ReferencePrice>(r.data, REFERENCE_KEYS) };
 }
@@ -612,7 +637,7 @@ export async function getPrice(q: {
 async function write<T>(path: string, key: string, body: unknown): Promise<AiaicResult<T>> {
   const refused = await practiceFirst();
   if (refused) return { ok: false, problem: refused };
-  return call<T>({ path, method: "POST", body, key, auth: true });
+  return call<T>({ path, method: "POST", body, key, as: "trade" });
 }
 
 export type SellInput = {
@@ -745,7 +770,7 @@ let pricingKept: { at: number; answer: AiaicResult<AiaicPricing> } | null = null
  */
 export async function aiaicPricing(): Promise<AiaicResult<AiaicPricing>> {
   if (pricingKept && Date.now() - pricingKept.at < PRICING_KEEP_MS) return pricingKept.answer;
-  const r = await call<unknown>({ path: "/payments/pricing", auth: false });
+  const r = await call<unknown>({ path: "/payments/pricing", as: "none" });
   if (!r.ok) return r;
   const pricing = pricingOf(r.data);
   if (!pricing) return { ok: false, problem: problem("aiaic_answer_unreadable") };
@@ -792,7 +817,7 @@ export async function transportEstimate(q: EstimateInput): Promise<AiaicResult<T
     from_place: q.from_place,
   };
   return keptTransport(`estimate:${JSON.stringify(query)}`, () =>
-    call<TransportEstimate>({ path: "/transport/estimate", query, auth: false }),
+    call<TransportEstimate>({ path: "/transport/estimate", query, as: "person" }),
   );
 }
 
@@ -815,7 +840,7 @@ export async function storageVerdict(q: {
     lang: q.lang,
   };
   return keptTransport(`storage:${JSON.stringify(query)}`, () =>
-    call<StorageVerdict>({ path: "/storage/verdict", query, auth: false }),
+    call<StorageVerdict>({ path: "/storage/verdict", query, as: "person" }),
   );
 }
 
@@ -859,7 +884,7 @@ export async function nearbyMandis(q: {
     const r = await call<Record<string, unknown>>({
       path: "/transport/nearby-mandis",
       query,
-      auth: false,
+      as: "none",
     });
     if (!r.ok) return r;
     return { ok: true as const, data: nearbyForBrowser(r.data) };

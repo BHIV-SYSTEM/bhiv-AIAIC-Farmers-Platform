@@ -75,15 +75,13 @@ async function fetchService(args: {
     fetchedAt,
   });
 
-  const { AIAIC_HEADERS, isTunnelErrorBody } = await import("./aiaic-base.server");
+  const { aiaicHeaders, isTunnelErrorBody } = await import("./aiaic-base.server");
 
   let response: Response;
   try {
-    response = await fetch(url, {
-      method: "GET",
-      headers: AIAIC_HEADERS,
-      signal: AbortSignal.timeout(20_000),
-    });
+    // who asked (push 4b): her token when she is signed in, else this device's id
+    const { fetchForHer } = await import("./aiaic-identity.server");
+    response = await fetchForHer(url, aiaicHeaders(), 20_000);
   } catch (error) {
     console.error(`[aiaic] ${service} request failed`, error);
     return fail("offline", undefined, "network");

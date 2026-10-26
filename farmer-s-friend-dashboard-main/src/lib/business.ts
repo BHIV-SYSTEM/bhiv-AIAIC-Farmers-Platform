@@ -27,7 +27,7 @@ export const BUSINESS = {
   /** The registered office's city: its courts hear disputes under the terms. */
   jurisdictionCity: "Mumbai",
   /** The day the page texts were last changed. */
-  lastUpdated: "24 October 2026",
+  lastUpdated: "26 October 2026",
 } as const;
 
 /** Krishi Sampada (AIAIC), where real sales and their payments are made. Its home page links all its own policies. */
