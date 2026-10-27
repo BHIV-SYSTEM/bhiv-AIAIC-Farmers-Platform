@@ -69,6 +69,8 @@ export type AiaicListing = {
   offers: AiaicOffer[];
   /** This lot gathered into another sale at a collection point (AIAIC, 27 Oct 2026); null when it was not. */
   pooled_in?: AiaicPooled | null | undefined;
+  /** A group's sale plan with this lot (AIAIC section 26, 27 Oct 2026); null when none is being asked. */
+  group_plan?: AiaicGroupPlan | null | undefined;
 };
 
 export type AiaicStep = {
@@ -771,6 +773,35 @@ export function pooledLine(t: Words, p: AiaicPooled): string {
     ? `${head} · ${t("aiaic.pooled.total", { q: quintals(p.quantity_q) })}`
     : head;
 }
+
+/** A group's sale plan with her lot (AIAIC section 26): where her district's lots would go, what her lot keeps, how
+ * many farmers are in it, and her answer. Never another farmer's name. A plan, not an offer. */
+export type AiaicGroupPlan = {
+  plan_id: string;
+  price_day: string | null;
+  crop: string;
+  quantity_q: number;
+  kept_rs: number | null;
+  kept_basis?: string | null | undefined;
+  not_sent_q?: number | null | undefined;
+  goes_to: {
+    mandi: string;
+    quantity_q: number;
+    gross_price: number;
+    km?: number | null | undefined;
+    truckloads?: number | null | undefined;
+    trip_rs?: number | null | undefined;
+  }[];
+  with_farmers?: number | undefined;
+  group_farmers?: number | undefined;
+  group_lots?: number | undefined;
+  answer: "waiting" | "joined" | "declined";
+  answered_at?: string | null | undefined;
+  can_answer: boolean;
+  sent_at?: string | undefined;
+  simulated?: boolean | undefined;
+  note?: string | undefined;
+};
 
 /** A buyer's demand AIAIC's team chose to show farmers (AIAIC, 27 Oct 2026): never its name, never an offer. */
 export type BuyerDemand = {

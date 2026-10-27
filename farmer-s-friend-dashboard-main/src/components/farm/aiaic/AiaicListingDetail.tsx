@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
 import { OfferRow, SaleRow } from "./AiaicOrders";
+import { GroupPlanCard } from "./GroupPlanCard";
 import { PooledLine } from "./PooledLine";
 
 /**
@@ -113,6 +114,7 @@ function LotDetail({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
           </p>
         </div>
         {lot.pooled_in ? <PooledLine pooled={lot.pooled_in} /> : null}
+        {lot.group_plan ? <GroupPlanCard plan={lot.group_plan} data={data} /> : null}
       </article>
 
       <section className="space-y-3">

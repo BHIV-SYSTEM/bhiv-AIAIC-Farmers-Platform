@@ -416,6 +416,33 @@ const POOLED_KEYS = [
 function pooledOf(x: unknown): Record<string, unknown> | null {
   return x && typeof x === "object" ? pick<Record<string, unknown>>(x, POOLED_KEYS) : null;
 }
+/** A group's sale plan with her lot (AIAIC section 26): where it would go, what it keeps, her answer. */
+const GROUP_PLAN_KEYS = [
+  "plan_id",
+  "price_day",
+  "crop",
+  "quantity_q",
+  "kept_rs",
+  "kept_basis",
+  "not_sent_q",
+  "with_farmers",
+  "group_farmers",
+  "group_lots",
+  "answer",
+  "answered_at",
+  "can_answer",
+  "sent_at",
+  "simulated",
+  "note",
+] as const;
+const GOES_TO_KEYS = ["mandi", "quantity_q", "gross_price", "km", "truckloads", "trip_rs"] as const;
+function groupPlanOf(x: unknown): Record<string, unknown> | null {
+  if (!x || typeof x !== "object") return null;
+  const out = pick<Record<string, unknown>>(x, GROUP_PLAN_KEYS);
+  const goes = (x as Record<string, unknown>)["goes_to"];
+  out["goes_to"] = Array.isArray(goes) ? goes.map((g) => pick(g, GOES_TO_KEYS)) : [];
+  return out;
+}
 const PAYMENT_KEYS = [
   "state",
   "link_made",
@@ -502,6 +529,7 @@ export function mineForBrowser(raw: unknown): AiaicMine {
       const offers = (l as Record<string, unknown>)["offers"];
       listing["offers"] = Array.isArray(offers) ? offers.map((o) => pick(o, OFFER_KEYS)) : [];
       listing["pooled_in"] = pooledOf((l as Record<string, unknown>)["pooled_in"]);
+      listing["group_plan"] = groupPlanOf((l as Record<string, unknown>)["group_plan"]);
       return listing as unknown as AiaicMine["listings"][number];
     }),
     orders: orders.map((o) => {
@@ -753,6 +781,20 @@ export async function stopSelling(key: string, listingId: string): Promise<Aiaic
     `/farmer/trade/listings/${encodeURIComponent(listingId)}/withdraw`,
     key,
     {},
+  );
+  return r.ok ? { ok: true, data: true } : r;
+}
+
+/** Her answer to a group's sale plan with her lot (AIAIC section 26): she joins, or not this time. */
+export async function answerGroupPlan(
+  key: string,
+  planId: string,
+  answer: "joined" | "declined",
+): Promise<AiaicResult<true>> {
+  const r = await write<unknown>(
+    `/farmer/trade/group-plans/${encodeURIComponent(planId)}/answer`,
+    key,
+    { answer },
   );
   return r.ok ? { ok: true, data: true } : r;
 }

@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
 import { BuyersLookingCard } from "./BuyersLookingCard";
+import { GroupPlanCard } from "./GroupPlanCard";
 import { PooledLine } from "./PooledLine";
 
 /** Her lots in AIAIC: what is left of each, at what price, how many open offers, and a way to stop selling one. */
@@ -171,6 +172,7 @@ function Lot({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
         </p>
       </div>
       {lot.pooled_in ? <PooledLine pooled={lot.pooled_in} /> : null}
+      {lot.group_plan ? <GroupPlanCard plan={lot.group_plan} data={data} /> : null}
 
       <Link
         to="/listing/$listingId"
