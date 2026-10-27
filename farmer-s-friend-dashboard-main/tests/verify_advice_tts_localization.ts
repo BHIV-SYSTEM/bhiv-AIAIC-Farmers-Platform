@@ -469,8 +469,13 @@ async function runTargetedVerification() {
     }
     assert(mrPlayerReady, "Marathi advice and audio player mounted");
 
-    const mrUiEval = await client.send("Runtime.evaluate", {
-      expression: `
+    // the player waits for the device's voices before it says "unavailable" (up to 1.5 s): read it until it says so
+    let mrUiEval = {
+      result: { value: { hasMarathiText: false, playerText: "", speechInvoked: false } },
+    };
+    for (let i = 0; i < 10; i++) {
+      mrUiEval = await client.send("Runtime.evaluate", {
+        expression: `
         (() => {
           const bodyText = document.body.innerText;
           const audioPlayer = document.getElementById('vaani-audio-player');
@@ -482,8 +487,11 @@ async function runTargetedVerification() {
           };
         })()
       `,
-      returnByValue: true,
-    });
+        returnByValue: true,
+      });
+      if (mrUiEval.result.value.playerText.includes("उपलब्ध नाही")) break;
+      await new Promise((r) => setTimeout(r, 400));
+    }
     console.log(
       "  Marathi player text captured:",
       JSON.stringify(mrUiEval.result.value.playerText),
