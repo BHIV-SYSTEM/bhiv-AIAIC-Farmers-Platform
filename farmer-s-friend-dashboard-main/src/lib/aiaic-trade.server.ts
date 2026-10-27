@@ -36,6 +36,7 @@ import {
   problem,
   type AiaicCrisis,
   type AiaicMine,
+  type AiaicPool,
   type AiaicPricing,
   type Json,
   type AiaicProblem,
@@ -349,6 +350,7 @@ const OFFER_KEYS = [
   "buyer_district",
   "buyer_name",
   "created_at",
+  "pool_id",
 ] as const;
 const LISTING_KEYS = [
   "listing_id",
@@ -402,8 +404,66 @@ const ORDER_KEYS = [
   "buyer_district",
   "next_steps",
   "her_next_step",
+  "pool_id",
 ] as const;
 const STEP_KEYS = ["event_id", "stage", "status", "simulated", "created_at"] as const;
+/**
+ * THE FACTS OF EACH STEP HER APP SHOWS (27 Oct 2026; the owner: "Pls let me know if farmer is able to see ... processing"),
+ * a closed list per stage: quantities, the grade, the place, the days. A note (free text), a certificate's or a vehicle's
+ * reference and the lots gathered with hers (other farmers') stay on AIAIC's side.
+ */
+const STEP_DETAIL_KEYS: Record<string, readonly string[]> = {
+  aggregation: ["collection_point", "quantity_q"],
+  quality_grading: ["grade", "weight_q", "rejected_q", "sampled", "tested_on", "tested_at_apmc"],
+  storage: ["facility", "facility_kind", "quantity_q", "stored_from", "stored_to"],
+  processing: ["process", "input_q", "output_q"],
+  pickup: ["quantity_q"],
+  in_transit: ["expected_on"],
+  delivered: ["received_q"],
+  delivery_exception: ["kind", "quantity_q"],
+  reconciliation: ["delivered_q", "accepted_q", "rejected_q"],
+};
+function stepOf(x: unknown): Record<string, unknown> {
+  const out = pick<Record<string, unknown>>(x, STEP_KEYS);
+  const src = x && typeof x === "object" ? (x as Record<string, unknown>) : {};
+  const keys = STEP_DETAIL_KEYS[String(src["stage"])] ?? [];
+  const detail =
+    src["detail"] && typeof src["detail"] === "object"
+      ? (src["detail"] as Record<string, unknown>)
+      : {};
+  const kept: Record<string, unknown> = {};
+  for (const k of keys) {
+    const v = detail[k];
+    if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") kept[k] = v;
+  }
+  out["detail"] = kept;
+  const loss = src["loss"];
+  out["loss"] = loss && typeof loss === "object" ? pick(loss, ["q", "pct"] as const) : null;
+  return out;
+}
+/** A group sale (AIAIC section 27): counts, the place, the price and the days; never another farmer, never the buyer's record. */
+const POOL_KEYS = [
+  "pool_id",
+  "crop",
+  "target_q",
+  "joined_q",
+  "joined_farmers",
+  "left_q",
+  "price_per_q",
+  "grade",
+  "collection_point",
+  "district",
+  "collect_on",
+  "valid_until",
+  "pay_within_days",
+  "status",
+  "simulated",
+  "km",
+  "her_crop",
+] as const;
+function poolOf(x: unknown): Record<string, unknown> | null {
+  return x && typeof x === "object" ? pick<Record<string, unknown>>(x, POOL_KEYS) : null;
+}
 /** A sale gathered with others (AIAIC section 25): counts and the place, never another farmer. */
 const POOLED_KEYS = [
   "collection_point",
@@ -527,7 +587,12 @@ export function mineForBrowser(raw: unknown): AiaicMine {
       const ref = (l as Record<string, unknown>)["reference_price"];
       listing["reference_price"] = ref ? pick(ref, REFERENCE_KEYS) : null;
       const offers = (l as Record<string, unknown>)["offers"];
-      listing["offers"] = Array.isArray(offers) ? offers.map((o) => pick(o, OFFER_KEYS)) : [];
+      listing["offers"] = Array.isArray(offers)
+        ? offers.map((o) => ({
+            ...pick<Record<string, unknown>>(o, OFFER_KEYS),
+            pool: poolOf((o as Record<string, unknown>)["pool"]),
+          }))
+        : [];
       listing["pooled_in"] = pooledOf((l as Record<string, unknown>)["pooled_in"]);
       listing["group_plan"] = groupPlanOf((l as Record<string, unknown>)["group_plan"]);
       return listing as unknown as AiaicMine["listings"][number];
@@ -536,10 +601,11 @@ export function mineForBrowser(raw: unknown): AiaicMine {
       const src = o as Record<string, unknown>;
       const order = pick<Record<string, unknown>>(o, ORDER_KEYS);
       order["fulfilment"] = Array.isArray(src["fulfilment"])
-        ? src["fulfilment"].map((s) => pick(s, STEP_KEYS))
+        ? src["fulfilment"].map((s) => stepOf(s))
         : [];
       order["payment"] = pick(src["payment"], PAYMENT_KEYS);
       order["pooled"] = pooledOf(src["pooled"]);
+      order["pool"] = poolOf(src["pool"]);
       if (src["money"] && typeof src["money"] === "object") {
         const money = pick<Record<string, unknown>>(src["money"], MONEY_KEYS);
         // AIAIC's commission on this sale (24 Oct 2026), field by field; an AIAIC not yet updated sends none.
@@ -693,6 +759,10 @@ export async function buyersLooking(lang: string): Promise<AiaicResult<BuyersLoo
   });
   const state = typeof src["state"] === "string" ? src["state"] : null;
   const district = typeof src["district"] === "string" ? src["district"] : null;
+  // group sales being gathered near her (AIAIC section 27; an AIAIC not yet updated sends none)
+  const pools = (Array.isArray(src["pools"]) ? src["pools"] : [])
+    .map((p) => poolOf(p))
+    .filter((p): p is Record<string, unknown> => p !== null) as unknown as AiaicPool[];
   const cropNames = district ? await cropNamesOf(estateKey(state), district, lang) : {};
   const districtNames: Record<string, string> = {
     ...(await districtNamesOf("mp", lang)),
@@ -700,7 +770,15 @@ export async function buyersLooking(lang: string): Promise<AiaicResult<BuyersLoo
   };
   return {
     ok: true,
-    data: { state, district, practice: src["practice"] === true, buyers, cropNames, districtNames },
+    data: {
+      state,
+      district,
+      practice: src["practice"] === true,
+      buyers,
+      pools,
+      cropNames,
+      districtNames,
+    },
   };
 }
 

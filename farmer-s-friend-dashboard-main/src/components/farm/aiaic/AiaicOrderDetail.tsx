@@ -32,7 +32,9 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
+import { GroupSaleCard } from "./GroupSaleCard";
 import { PooledLine } from "./PooledLine";
+import { SaleJourney } from "./SaleJourney";
 import { SaleStepper } from "./SaleStepper";
 import { TransportCostCard } from "./TransportCostCard";
 
@@ -157,6 +159,16 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
           ) : null}
         </div>
       </section>
+
+      {o.pool ? (
+        <GroupSaleCard
+          pool={o.pool}
+          cropLabel={crop}
+          districtNames={data.districtNames}
+          listing={view.listing}
+          mine={{ quantity_q: o.quantity_q, amount }}
+        />
+      ) : null}
 
       {problem ? <ProblemCard problem={problem} /> : null}
 
@@ -301,6 +313,18 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
           <p className="mt-3 text-sm font-bold text-foreground">{t(`aiaic.sale.next.${next}`)}</p>
         ) : null}
       </section>
+
+      {order.pool ? (
+        <GroupSaleCard
+          pool={order.pool}
+          cropLabel={crop}
+          districtNames={data.districtNames}
+          listing={listing}
+          mine={{ quantity_q: order.quantity_q, amount: order.amount_inr }}
+        />
+      ) : null}
+
+      <SaleJourney order={order} />
 
       <PaymentCard order={order} />
       <MoneyCard order={order} />

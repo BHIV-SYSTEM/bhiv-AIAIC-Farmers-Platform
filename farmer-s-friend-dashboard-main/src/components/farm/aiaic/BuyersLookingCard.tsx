@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Megaphone, PlusCircle } from "lucide-react";
+import { Layers, Megaphone, PlusCircle } from "lucide-react";
 
 import { useBuyersLooking } from "@/lib/aiaic-hooks";
 import {
@@ -8,7 +8,9 @@ import {
   dayOf,
   demandQuantity,
   districtName,
+  quintalWords,
   rupees,
+  type AiaicPool,
   type BuyerDemand,
   type BuyersLooking,
 } from "@/lib/aiaic-trade";
@@ -31,7 +33,8 @@ export function BuyersLookingCard() {
     return <ProblemCard problem={q.data.problem} onRetry={() => q.refetch()} />;
   }
   const data = q.data.data;
-  if (!data.buyers.length) return null;
+  const pools = data.pools ?? [];
+  if (!data.buyers.length && !pools.length) return null;
   return (
     <section
       aria-labelledby="aiaic-demand-heading"
@@ -53,6 +56,20 @@ export function BuyersLookingCard() {
           <Demand key={b.demand_id} demand={b} data={data} />
         ))}
       </ul>
+      {pools.length ? (
+        <div className="space-y-2" data-testid="aiaic-group-sales-near">
+          <h3 className="flex items-center gap-2 text-base font-extrabold text-foreground">
+            <Layers className="size-4 shrink-0 text-primary" aria-hidden />
+            {t("aiaic.group.near_title")}
+          </h3>
+          <ul className="space-y-2">
+            {pools.map((p) => (
+              <NearbyGroupSale key={p.pool_id} pool={p} data={data} />
+            ))}
+          </ul>
+          <p className="text-xs text-muted-foreground">{t("aiaic.group.near_how")}</p>
+        </div>
+      ) : null}
       <p className="text-xs text-muted-foreground">{t("aiaic.demand.not_offer")}</p>
     </section>
   );
@@ -101,6 +118,49 @@ function Demand({ demand: b, data }: { demand: BuyerDemand; data: BuyersLooking 
         {first
           ? t("aiaic.demand.sell", { crop: cropName(data.cropNames, first) })
           : t("aiaic.demand.sell_any")}
+      </Link>
+    </li>
+  );
+}
+
+/** A group sale being gathered near her: a buyer's request filled from many farmers' lots (AIAIC section 27). Its crop,
+ * what is still wanted of what, the price, where and when, how far, how fast the buyer pays; to join, her lot of that
+ * crop is listed and AIAIC's team invites it (she then says yes or no to her own offer). */
+function NearbyGroupSale({ pool: p, data }: { pool: AiaicPool; data: BuyersLooking }) {
+  const { t } = useI18n();
+  return (
+    <li
+      className="rounded-2xl border border-primary/30 bg-card p-3"
+      data-testid={`aiaic-group-near-${p.pool_id}`}
+    >
+      <div className="flex flex-wrap items-center gap-1.5">
+        <p className="text-base font-extrabold text-foreground">
+          {cropName(data.cropNames, p.crop)} ·{" "}
+          {t("aiaic.lots.price", { price: rupees(p.price_per_q) })}
+        </p>
+        {p.simulated ? <ModeChip kind="practice" /> : null}
+      </div>
+      <p className="text-sm text-foreground/85">
+        {t("aiaic.group.near_line", {
+          left: quintalWords(t, Number(p.left_q) || 0),
+          target: quintalWords(t, Number(p.target_q) || 0),
+          place: p.collection_point,
+          district: districtName(data.districtNames, p.district),
+        })}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {p.collect_on ? t("aiaic.group.when", { day: dayOf(p.collect_on) }) : null}
+        {typeof p.km === "number"
+          ? ` · ${t("aiaic.group.km", { km: String(Math.round(p.km)) })}`
+          : ""}
+      </p>
+      <Link
+        to="/listing/new"
+        search={{ crop: p.crop, region: data.district ?? undefined }}
+        className="mt-2 inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-primary px-3 text-sm font-bold text-primary-foreground"
+      >
+        <PlusCircle className="size-4" aria-hidden />
+        {t("aiaic.group.near_list", { crop: cropName(data.cropNames, p.crop) })}
       </Link>
     </li>
   );

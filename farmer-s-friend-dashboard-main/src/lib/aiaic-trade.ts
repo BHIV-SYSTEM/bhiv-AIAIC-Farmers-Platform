@@ -49,6 +49,35 @@ export type AiaicOffer = {
   buyer_district?: string | null | undefined;
   buyer_name?: string | null | undefined;
   created_at: string;
+  /** The group sale this offer is part of (AIAIC section 27, 27 Oct 2026); null when it is a single buyer's offer. */
+  pool_id?: string | null | undefined;
+  pool?: AiaicPool | null | undefined;
+};
+
+/**
+ * A GROUP SALE (AIAIC section 27): one buyer's request filled from many farmers' lots. What she is told: the crop,
+ * how much the buyer wants, how much has joined (farmers counted) and what is left, the price, where and when the lots
+ * are handed over, how fast the buyer said it pays. Never another farmer's name or lot, never the buyer's record.
+ */
+export type AiaicPool = {
+  pool_id: string;
+  crop: string;
+  target_q: number;
+  joined_q: number;
+  joined_farmers: number;
+  left_q: number;
+  price_per_q: number;
+  grade?: string | null | undefined;
+  collection_point: string;
+  district: string;
+  collect_on?: string | null | undefined;
+  valid_until?: string | null | undefined;
+  pay_within_days?: number | null | undefined;
+  status: string;
+  simulated?: boolean | undefined;
+  /** Group sales near her only: km to its collection district, and whether it is her crop. */
+  km?: number | null | undefined;
+  her_crop?: boolean | undefined;
 };
 
 export type AiaicListing = {
@@ -79,6 +108,10 @@ export type AiaicStep = {
   status: string;
   simulated?: boolean | undefined;
   created_at: string;
+  /** The step's facts she may read (her app's own list per stage, `STEP_DETAIL_KEYS`): weights, grade, place, days. */
+  detail?: Record<string, string | number | boolean> | null | undefined;
+  /** What a process lost (sorting, drying), as recorded: quintals and the share of what went in. */
+  loss?: { q: number; pct: number } | null | undefined;
 };
 
 export type AiaicPayment = {
@@ -266,6 +299,9 @@ export type AiaicOrder = {
   money?: AiaicMoney | undefined;
   /** Her sale gathered at a collection point with other farmers' produce (AIAIC, 27 Oct 2026); null when not. */
   pooled?: AiaicPooled | null | undefined;
+  /** The group sale her order is part of (AIAIC section 27); null when not. */
+  pool_id?: string | null | undefined;
+  pool?: AiaicPool | null | undefined;
 };
 
 export type PayoutAccountView = {
@@ -826,6 +862,8 @@ export type BuyersLooking = {
   district: string | null;
   practice: boolean;
   buyers: BuyerDemand[];
+  /** Group sales being gathered near her (AIAIC section 27): her crop first, then the nearest. */
+  pools: AiaicPool[];
   cropNames: Record<string, string>;
   districtNames: Record<string, string>;
 };
