@@ -32,6 +32,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
+import { PooledLine } from "./PooledLine";
 import { SaleStepper } from "./SaleStepper";
 import { TransportCostCard } from "./TransportCostCard";
 
@@ -295,6 +296,7 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
           </p>
         ) : null}
         <SaleStepper order={order} />
+        {order.pooled ? <PooledLine pooled={order.pooled} /> : null}
         {next && order.order_state !== "cancelled" ? (
           <p className="mt-3 text-sm font-bold text-foreground">{t(`aiaic.sale.next.${next}`)}</p>
         ) : null}

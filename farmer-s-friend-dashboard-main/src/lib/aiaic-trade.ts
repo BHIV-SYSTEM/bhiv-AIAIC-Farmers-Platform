@@ -67,6 +67,8 @@ export type AiaicListing = {
   updated_at?: string | undefined;
   reference_price?: ReferencePrice | null | undefined;
   offers: AiaicOffer[];
+  /** This lot gathered into another sale at a collection point (AIAIC, 27 Oct 2026); null when it was not. */
+  pooled_in?: AiaicPooled | null | undefined;
 };
 
 export type AiaicStep = {
@@ -260,6 +262,8 @@ export type AiaicOrder = {
   her_next_step?: string | null | undefined;
   payment: AiaicPayment;
   money?: AiaicMoney | undefined;
+  /** Her sale gathered at a collection point with other farmers' produce (AIAIC, 27 Oct 2026); null when not. */
+  pooled?: AiaicPooled | null | undefined;
 };
 
 export type PayoutAccountView = {
@@ -739,6 +743,73 @@ export function startDistrict(
 /** "1 quintal" or "{n} quintals", in her language. */
 export function quintalWords(t: Words, n: number): string {
   return n === 1 ? t("aiaic.sell.quintals.one") : t("aiaic.sell.quintals", { n: quintals(n) });
+}
+
+// ------------------------------------------------------ buyers looking for produce, and a sale gathered with others
+
+/** Her produce gathered at a collection point (AIAIC's aggregation step, 27 Oct 2026): counts and the place only. */
+export type AiaicPooled = {
+  collection_point: string | null;
+  lots: number;
+  farmers: number;
+  quantity_q: number | null;
+  recorded_at: string | null;
+  simulated: boolean;
+};
+
+/**
+ * "Gathered at Lasalgaon with produce from 2 other farmers · 30 quintals in all", in her language: the place as AIAIC's
+ * team wrote it, the other farmers counted (never named), the quantity only when the team recorded one.
+ */
+export function pooledLine(t: Words, p: AiaicPooled): string {
+  const others = Math.max((p.farmers || 0) - 1, 0);
+  const place = (p.collection_point ?? "").trim();
+  const many = others === 0 ? "" : others === 1 ? "_with_one" : "_with";
+  const key = place ? `aiaic.pooled.at${many}` : many ? `aiaic.pooled${many}` : "aiaic.pooled.only";
+  const head = t(key, { place, n: others });
+  return typeof p.quantity_q === "number"
+    ? `${head} · ${t("aiaic.pooled.total", { q: quintals(p.quantity_q) })}`
+    : head;
+}
+
+/** A buyer's demand AIAIC's team chose to show farmers (AIAIC, 27 Oct 2026): never its name, never an offer. */
+export type BuyerDemand = {
+  demand_id: string;
+  buyer_type: string | null;
+  buyer_district: string | null;
+  crops: string[];
+  min_q: number | null;
+  max_q: number | null;
+  room_q: number | null;
+  max_price_per_q: number | null;
+  needed_from: string | null;
+  needed_to: string | null;
+  grades: string[];
+  km: number | null;
+  synthetic: boolean;
+};
+
+/** The buyers looking near her, with the names of crops and districts in her language. */
+export type BuyersLooking = {
+  state: string | null;
+  district: string | null;
+  practice: boolean;
+  buyers: BuyerDemand[];
+  cropNames: Record<string, string>;
+  districtNames: Record<string, string>;
+};
+
+/** How much a buyer takes: "10 to 100 quintals", "Up to 100 quintals", "At least 10 quintals", or null. The most is
+ * the room it has left when that is less than its most per purchase. */
+export function demandQuantity(t: Words, d: BuyerDemand): string | null {
+  const lo = typeof d.min_q === "number" ? d.min_q : null;
+  const caps = [d.max_q, d.room_q].filter((x): x is number => typeof x === "number");
+  const hi = caps.length ? Math.min(...caps) : null;
+  if (lo !== null && hi !== null && hi >= lo)
+    return t("aiaic.demand.qty_range", { min: quintals(lo), max: quintals(hi) });
+  if (hi !== null) return t("aiaic.demand.qty_up_to", { max: quintals(hi) });
+  if (lo !== null) return t("aiaic.demand.qty_from", { min: quintals(lo) });
+  return null;
 }
 
 /** "Buyer: <name> · A wholesaler from Pune": a buyer of the kind `consumer` is a person and is never named (AIAIC

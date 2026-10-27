@@ -5,6 +5,7 @@ import {
   PRESS_KEY_RE,
   type AiaicPricing,
   type AiaicResult,
+  type BuyersLooking,
   type MineForScreen,
   type NearbyMandis,
   type ReferencePrice,
@@ -42,6 +43,14 @@ export const getMyTrade = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<AiaicResult<MineForScreen>> => {
     const { getMine } = await import("./aiaic-trade.server");
     return getMine(data.lang);
+  });
+
+/** Buyers looking for produce near her (AIAIC section 25): the demand AIAIC's team chose to show farmers. */
+export const getBuyersLooking = createServerFn({ method: "GET" })
+  .validator((d: unknown) => z.object({ lang }).parse(d))
+  .handler(async ({ data }): Promise<AiaicResult<BuyersLooking>> => {
+    const { buyersLooking } = await import("./aiaic-trade.server");
+    return buyersLooking(data.lang);
   });
 
 export const getSalePrice = createServerFn({ method: "GET" })

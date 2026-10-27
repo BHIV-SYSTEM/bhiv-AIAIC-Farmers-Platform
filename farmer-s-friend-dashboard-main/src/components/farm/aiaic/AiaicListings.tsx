@@ -21,6 +21,8 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
+import { BuyersLookingCard } from "./BuyersLookingCard";
+import { PooledLine } from "./PooledLine";
 
 /** Her lots in AIAIC: what is left of each, at what price, how many open offers, and a way to stop selling one. */
 export function AiaicListings() {
@@ -52,6 +54,8 @@ export function AiaicListings() {
           </Link>
         </div>
       </div>
+      {/* buyers looking for produce near her (AIAIC, 27 Oct 2026): "someone is looking for his yield at a rate" */}
+      <BuyersLookingCard />
       <WithMine>{(data) => <Lots data={data} />}</WithMine>
     </div>
   );
@@ -166,6 +170,7 @@ function Lot({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
           })}
         </p>
       </div>
+      {lot.pooled_in ? <PooledLine pooled={lot.pooled_in} /> : null}
 
       <Link
         to="/listing/$listingId"
