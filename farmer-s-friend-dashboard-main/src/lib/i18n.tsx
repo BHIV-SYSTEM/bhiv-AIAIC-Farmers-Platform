@@ -290,7 +290,13 @@ const en: Dict = {
   "tts.badgeDevice": "Device Voice",
   "tts.deviceVoiceMissing":
     "No suitable voice found on this device for this language. The written advice remains available above.",
-  "tts.browserSpeechUnavailable": "Speech synthesis is not supported on this device.",
+  "tts.browserSpeechUnavailable": "Reading aloud is not available on this device.",
+  "tts.unavailableTitle": "Audio unavailable",
+  "tts.voiceName": "BHIV Vaani voice",
+  "tts.badgeHindiOnly": "Hindi only",
+  "tts.badgeUnavailable": "Unavailable",
+  "tts.fellBackNote":
+    "Vaani's voice did not answer: the advice is read in this device's own voice.",
   "speak.pause": "Pause",
   "speak.resume": "Resume",
   "ask.state": "State",
@@ -758,7 +764,13 @@ const hi: Dict = {
   "tts.badgeDevice": "डिवाइस आवाज़",
   "tts.deviceVoiceMissing":
     "इस डिवाइस पर इस भाषा के लिए उपयुक्त आवाज़ नहीं मिली। ऊपर लिखी सलाह उपलब्ध है।",
-  "tts.browserSpeechUnavailable": "इस डिवाइस पर स्पीच सिंथेसिस समर्थित नहीं है।",
+  "tts.browserSpeechUnavailable": "इस डिवाइस पर पढ़कर सुनाने की सुविधा नहीं है।",
+  "tts.unavailableTitle": "ऑडियो उपलब्ध नहीं है",
+  "tts.voiceName": "BHIV वाणी आवाज़",
+  "tts.badgeHindiOnly": "केवल हिंदी",
+  "tts.badgeUnavailable": "उपलब्ध नहीं",
+  "tts.fellBackNote":
+    "वाणी की आवाज़ ने जवाब नहीं दिया: सलाह इस डिवाइस की अपनी आवाज़ में पढ़ी जा रही है।",
   "speak.pause": "रोकें",
   "speak.resume": "फिर शुरू करें",
   "ask.state": "राज्य",
@@ -1220,7 +1232,13 @@ const mr: Dict = {
   "tts.badgeDevice": "डिव्हाइस आवाज",
   "tts.deviceVoiceMissing":
     "या डिव्हाइसवर या भाषेसाठी योग्य आवाज उपलब्ध नाही. वरील लेखी सल्ला नेहमीप्रमाणे वाचता येईल.",
-  "tts.browserSpeechUnavailable": "या डिव्हाइसवर स्पीच सिंथेसिस समर्थित नाही.",
+  "tts.browserSpeechUnavailable": "या डिव्हाइसवर वाचून दाखवण्याची सुविधा नाही.",
+  "tts.unavailableTitle": "आवाज उपलब्ध नाही",
+  "tts.voiceName": "BHIV वाणी आवाज",
+  "tts.badgeHindiOnly": "फक्त हिंदी",
+  "tts.badgeUnavailable": "उपलब्ध नाही",
+  "tts.fellBackNote":
+    "वाणीच्या आवाजाने उत्तर दिले नाही: सल्ला या डिव्हाइसच्या स्वतःच्या आवाजात वाचला जात आहे.",
   "speak.pause": "थांबवा",
   "speak.resume": "पुन्हा ऐका",
   "ask.state": "राज्य",

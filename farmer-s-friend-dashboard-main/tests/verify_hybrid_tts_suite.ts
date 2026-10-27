@@ -13,6 +13,12 @@ import type { Lang } from "../src/lib/i18n";
 
 async function runHybridTtsTestSuite() {
   console.log("=== STARTING RELIABLE HYBRID VAANI TTS TEST SUITE ===");
+  // each check is counted as it passes, and the end says how many ran (it said 15 whatever ran)
+  let passed = 0;
+  const ok = (what: string) => {
+    passed++;
+    console.log(`✓ ${what}`);
+  };
 
   // -------------------------------------------------------------
   // Test 1: Language Capability & Server Allowlist Enforcement
@@ -43,6 +49,7 @@ async function runHybridTtsTestSuite() {
   const enRes = await synthesizeAdviceSpeech({
     text: "Tomato price is stable today.",
     language: "en",
+    voiceProfile: "vaani_teacher",
   });
   assert.strictEqual(enRes.ok, false, "English must be rejected by synthesizeAdviceSpeech");
   assert.strictEqual(enRes.status, 422, "English must return HTTP 422");
@@ -56,6 +63,7 @@ async function runHybridTtsTestSuite() {
   const mrRes = await synthesizeAdviceSpeech({
     text: "टोमॅटोचे दर स्थिर आहेत.",
     language: "mr",
+    voiceProfile: "vaani_teacher",
   });
   assert.strictEqual(mrRes.ok, false, "Marathi must be rejected by synthesizeAdviceSpeech");
   assert.strictEqual(mrRes.status, 422, "Marathi must return HTTP 422");
@@ -64,7 +72,7 @@ async function runHybridTtsTestSuite() {
     "UNSUPPORTED_LANGUAGE",
     "Marathi must return UNSUPPORTED_LANGUAGE code",
   );
-  console.log("✓ Server-side allowlist strictly rejects unverified languages with HTTP 422");
+  ok("Server-side allowlist strictly rejects unverified languages with HTTP 422");
 
   // -------------------------------------------------------------
   // Test 2: Browser Voice Selection & Strict Marathi Guardrail
@@ -130,21 +138,23 @@ async function runHybridTtsTestSuite() {
     false,
     "hasMatchingBrowserVoice('mr') must return false without Marathi voice",
   );
-  console.log("✓ Marathi voice guardrail strictly prevents English/unintelligible voice fallback");
+  ok("Marathi voice guardrail strictly prevents English/unintelligible voice fallback");
 
   // English fallback when en-IN is absent (uses en-US)
   const voicesWithOnlyUsEnglish = mockVoices.filter((v) => v.lang === "en-US");
   const enFallbackVoice = getMatchingBrowserVoice("en", voicesWithOnlyUsEnglish);
   assert.ok(enFallbackVoice, "English should fall back to another English voice");
   assert.strictEqual(enFallbackVoice?.lang, "en-US", "Fell back to en-US voice");
-  console.log("✓ English voice selection correctly resolves regional and intelligible fallbacks");
+  ok("English voice selection correctly resolves regional and intelligible fallbacks");
 
   // -------------------------------------------------------------
   // Test 3: Concurrency, Cancellation & Stale Response Handling
   // -------------------------------------------------------------
-  console.log("\n[Test 3] Hybrid Concurrency & State Machine Simulation");
+  console.log(
+    "\n[Test 3] A model of the player's request rules (it checks these rules, not the VaaniAudioPlayer component)",
+  );
 
-  // State machine simulation representing VaaniAudioPlayer lifecycle
+  // A model of the player's request rules (the component itself is not rendered here)
   class HybridPlayerSimulator {
     state: "idle" | "generating" | "playing" | "paused" | "unavailable" = "idle";
     activeEngine: "vaani" | "browser" | null = null;
@@ -241,49 +251,49 @@ async function runHybridTtsTestSuite() {
   assert.strictEqual(player.activeEngine, "vaani");
   assert.strictEqual(player.mockAudioPlaying, true);
   assert.strictEqual(player.mockSpeechSpeaking, false);
-  console.log("✓ Hindi uses Vaani service when successful");
+  ok("Hindi uses Vaani service when successful");
 
   // Case 3b: English directly uses browser speech (bypasses Vaani)
   await player.play("Hello farmer", "en", { behavior: "success", latencyMs: 0 });
   assert.strictEqual(player.state, "playing");
   assert.strictEqual(player.activeEngine, "browser");
   assert.strictEqual(player.spokenUtterance?.lang, "en-IN");
-  console.log("✓ English bypasses Vaani and plays via browser speech");
+  ok("English bypasses Vaani and plays via browser speech");
 
   // Case 3c: Marathi with voice uses browser speech
   await player.play("नमस्कार", "mr", { behavior: "success", latencyMs: 0 });
   assert.strictEqual(player.state, "playing");
   assert.strictEqual(player.activeEngine, "browser");
   assert.strictEqual(player.spokenUtterance?.lang, "mr-IN");
-  console.log("✓ Marathi with installed voice plays via browser speech");
+  ok("Marathi with installed voice plays via browser speech");
 
   // Case 3d: Marathi WITHOUT voice shows clear unavailable state
   await player.play("नमस्कार", "mr", { behavior: "success", latencyMs: 0 }, voicesWithoutMarathi);
   assert.strictEqual(player.state, "unavailable");
   assert.strictEqual(player.activeEngine, null);
   assert.ok(player.errorMessage?.includes("Marathi"));
-  console.log("✓ Marathi without installed voice shows truthful unavailable notification");
+  ok("Marathi without installed voice shows truthful unavailable notification");
 
   // Case 3e: Hindi Vaani network failure triggers browser fallback
   await player.play("नमस्ते", "hi", { behavior: "network_error", latencyMs: 5 });
   assert.strictEqual(player.state, "playing");
   assert.strictEqual(player.activeEngine, "browser");
   assert.strictEqual(player.spokenUtterance?.lang, "hi-IN");
-  console.log("✓ Vaani network error cleanly triggers browser speech fallback");
+  ok("Vaani network error cleanly triggers browser speech fallback");
 
   // Case 3f: Vaani HTTP 500 triggers browser fallback
   await player.play("नमस्ते", "hi", { behavior: "upstream_500", latencyMs: 5 });
   assert.strictEqual(player.state, "playing");
   assert.strictEqual(player.activeEngine, "browser");
   assert.strictEqual(player.spokenUtterance?.lang, "hi-IN");
-  console.log("✓ Vaani upstream HTTP 500 cleanly triggers browser speech fallback");
+  ok("Vaani upstream HTTP 500 cleanly triggers browser speech fallback");
 
   // Case 3g: Vaani timeout triggers browser fallback
   await player.play("नमस्ते", "hi", { behavior: "timeout", latencyMs: 5 });
   assert.strictEqual(player.state, "playing");
   assert.strictEqual(player.activeEngine, "browser");
   assert.strictEqual(player.spokenUtterance?.lang, "hi-IN");
-  console.log("✓ Vaani timeout cleanly triggers browser speech fallback");
+  ok("Vaani timeout cleanly triggers browser speech fallback");
 
   // Case 3h: User stops speech during synthesis
   const longPlayer = new HybridPlayerSimulator();
@@ -293,7 +303,7 @@ async function runHybridTtsTestSuite() {
   assert.strictEqual(longPlayer.state, "idle");
   assert.strictEqual(longPlayer.mockAudioPlaying, false);
   assert.strictEqual(longPlayer.mockSpeechSpeaking, false);
-  console.log("✓ Stop button halts synthesis and discards pending audio");
+  ok("Stop button halts synthesis and discards pending audio");
 
   // Case 3i: Language switch during synthesis
   const switchPlayer = new HybridPlayerSimulator();
@@ -302,7 +312,7 @@ async function runHybridTtsTestSuite() {
   await req1;
   assert.strictEqual(switchPlayer.activeEngine, "browser");
   assert.strictEqual(switchPlayer.spokenUtterance?.lang, "en-IN");
-  console.log("✓ Language switch supersedes prior pending synthesis without audio collision");
+  ok("Language switch supersedes prior pending synthesis without audio collision");
 
   // Case 3j: Repeated Play clicks do not create duplicate speech
   const rapidPlayer = new HybridPlayerSimulator();
@@ -311,10 +321,12 @@ async function runHybridTtsTestSuite() {
   await rapidPlayer.play("Three", "en", { behavior: "success", latencyMs: 0 });
   assert.strictEqual(rapidPlayer.spokenUtterance?.text, "Three");
   assert.strictEqual(rapidPlayer.state, "playing");
-  console.log("✓ Rapid play clicks cancel previous instances with zero duplicate playback");
+  ok(
+    "Plays started one after another: only the last one's words are spoken (a second tap on a playing card pauses it, which this model does not cover)",
+  );
 
   console.log("\n==================================================================");
-  console.log("✓ ALL 15 RELIABLE HYBRID TTS SCENARIOS PASSED WITH ZERO REGRESSIONS");
+  console.log(`✓ ${passed} checks passed (Test 3 checks a model of the player, not the component)`);
   console.log("==================================================================\n");
 }
 
