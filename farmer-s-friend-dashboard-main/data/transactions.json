@@ -68,7 +68,16 @@
         "decisionId": "dec_9c6f131f69d54bf1fde72b7b69ff6e54",
         "vajraAttestation": "PENDING_ANCHOR",
         "tantraExecution": "REGISTERED",
-        "escrowStatus": "FUNDS_HELD_DEMO_ESCROW"
+        "escrowStatus": "FUNDS_HELD_BHIV_CENTRAL_PAYMENT"
+      },
+      "paymentRecord": {
+        "status": "UNPAID",
+        "provider": "razorpay",
+        "currency": "INR",
+        "amountMinor": 12625000,
+        "idempotencyKey": "idemp_pay_ORD-20261021-9964_1792817511067",
+        "createdAt": "2026-10-24T05:18:36.703Z",
+        "verifiedAt": null
       }
     },
     {
@@ -105,5 +114,5 @@
       }
     }
   ],
-  "lastUpdated": "2026-10-21T18:06:46.795Z"
+  "lastUpdated": "2026-10-24T06:13:02.453Z"
 }

@@ -95,16 +95,17 @@ export async function synthesizeAdviceSpeech(input: TTSRequestInput): Promise<TT
 
   const { text, language, voiceProfile } = parsed.data;
 
-  // Marathi capability verification rule:
-  // If Marathi is requested, reject with explicit capability gap.
-  // Never send Marathi text as Hindi or English.
-  if (language === "mr") {
+  // Enforce language allowlist: only verified languages (currently 'hi') are sent to upstream Vaani service.
+  // Unverified languages ('en', 'mr', etc.) are rejected truthfully with HTTP 422 UNSUPPORTED_LANGUAGE.
+  if (!isVaaniLanguageSupported(language)) {
     return {
       ok: false,
       status: 422,
       code: "UNSUPPORTED_LANGUAGE",
       message:
-        "Marathi ('mr') text-to-speech is not currently supported by the deployed Vaani TTS service.",
+        language === "mr"
+          ? "Marathi ('mr') text-to-speech is not currently supported by the deployed Vaani TTS service."
+          : `Language '${language}' is not currently supported by the deployed Vaani TTS service.`,
     };
   }
 
