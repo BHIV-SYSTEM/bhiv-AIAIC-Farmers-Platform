@@ -46,7 +46,11 @@ async function runHybridTtsTestSuite() {
   });
   assert.strictEqual(enRes.ok, false, "English must be rejected by synthesizeAdviceSpeech");
   assert.strictEqual(enRes.status, 422, "English must return HTTP 422");
-  assert.strictEqual(enRes.code, "UNSUPPORTED_LANGUAGE", "English must return UNSUPPORTED_LANGUAGE code");
+  assert.strictEqual(
+    enRes.code,
+    "UNSUPPORTED_LANGUAGE",
+    "English must return UNSUPPORTED_LANGUAGE code",
+  );
 
   // Server rejection for Marathi
   const mrRes = await synthesizeAdviceSpeech({
@@ -55,7 +59,11 @@ async function runHybridTtsTestSuite() {
   });
   assert.strictEqual(mrRes.ok, false, "Marathi must be rejected by synthesizeAdviceSpeech");
   assert.strictEqual(mrRes.status, 422, "Marathi must return HTTP 422");
-  assert.strictEqual(mrRes.code, "UNSUPPORTED_LANGUAGE", "Marathi must return UNSUPPORTED_LANGUAGE code");
+  assert.strictEqual(
+    mrRes.code,
+    "UNSUPPORTED_LANGUAGE",
+    "Marathi must return UNSUPPORTED_LANGUAGE code",
+  );
   console.log("✓ Server-side allowlist strictly rejects unverified languages with HTTP 422");
 
   // -------------------------------------------------------------
@@ -208,19 +216,13 @@ async function runHybridTtsTestSuite() {
       this.triggerBrowserSpeech(text, lang, currentReq, availableVoices);
     }
 
-    triggerBrowserSpeech(
-      text: string,
-      lang: Lang,
-      reqId: number,
-      voices: SpeechSynthesisVoice[],
-    ) {
+    triggerBrowserSpeech(text: string, lang: Lang, reqId: number, voices: SpeechSynthesisVoice[]) {
       if (this.requestId !== reqId) return;
 
       const voice = getMatchingBrowserVoice(lang, voices);
       if (!voice) {
         this.state = "unavailable";
-        this.errorMessage =
-          lang === "mr" ? "Marathi audio unavailable" : "No device voice found";
+        this.errorMessage = lang === "mr" ? "Marathi audio unavailable" : "No device voice found";
         this.activeEngine = null;
         return;
       }
