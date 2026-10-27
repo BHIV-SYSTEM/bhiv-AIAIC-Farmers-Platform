@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
 import { OfferRow, SaleRow } from "./AiaicOrders";
+import { PooledLine } from "./PooledLine";
 
 /**
  * ONE OF HER LISTINGS, IN FULL (push 4; the owner: "in the listings the crops listed are static, can we make them
@@ -111,6 +112,7 @@ function LotDetail({ lot, data }: { lot: AiaicListing; data: MineForScreen }) {
             })}
           </p>
         </div>
+        {lot.pooled_in ? <PooledLine pooled={lot.pooled_in} /> : null}
       </article>
 
       <section className="space-y-3">

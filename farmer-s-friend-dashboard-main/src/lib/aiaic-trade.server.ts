@@ -40,6 +40,8 @@ import {
   type Json,
   type AiaicProblem,
   type AiaicResult,
+  type BuyerDemand,
+  type BuyersLooking,
   type MineForScreen,
   type NearbyMandis,
   type ReferencePrice,
@@ -402,6 +404,18 @@ const ORDER_KEYS = [
   "her_next_step",
 ] as const;
 const STEP_KEYS = ["event_id", "stage", "status", "simulated", "created_at"] as const;
+/** A sale gathered with others (AIAIC section 25): counts and the place, never another farmer. */
+const POOLED_KEYS = [
+  "collection_point",
+  "lots",
+  "farmers",
+  "quantity_q",
+  "recorded_at",
+  "simulated",
+] as const;
+function pooledOf(x: unknown): Record<string, unknown> | null {
+  return x && typeof x === "object" ? pick<Record<string, unknown>>(x, POOLED_KEYS) : null;
+}
 const PAYMENT_KEYS = [
   "state",
   "link_made",
@@ -487,6 +501,7 @@ export function mineForBrowser(raw: unknown): AiaicMine {
       listing["reference_price"] = ref ? pick(ref, REFERENCE_KEYS) : null;
       const offers = (l as Record<string, unknown>)["offers"];
       listing["offers"] = Array.isArray(offers) ? offers.map((o) => pick(o, OFFER_KEYS)) : [];
+      listing["pooled_in"] = pooledOf((l as Record<string, unknown>)["pooled_in"]);
       return listing as unknown as AiaicMine["listings"][number];
     }),
     orders: orders.map((o) => {
@@ -496,6 +511,7 @@ export function mineForBrowser(raw: unknown): AiaicMine {
         ? src["fulfilment"].map((s) => pick(s, STEP_KEYS))
         : [];
       order["payment"] = pick(src["payment"], PAYMENT_KEYS);
+      order["pooled"] = pooledOf(src["pooled"]);
       if (src["money"] && typeof src["money"] === "object") {
         const money = pick<Record<string, unknown>>(src["money"], MONEY_KEYS);
         // AIAIC's commission on this sale (24 Oct 2026), field by field; an AIAIC not yet updated sends none.
@@ -611,6 +627,53 @@ export async function getMine(lang: string): Promise<AiaicResult<MineForScreen>>
     ...(await districtNamesOf("mh", lang)),
   };
   return { ok: true, data: { mine, cropNames, districtNames } };
+}
+
+const DEMAND_KEYS = [
+  "demand_id",
+  "buyer_type",
+  "buyer_district",
+  "crops",
+  "min_q",
+  "max_q",
+  "room_q",
+  "max_price_per_q",
+  "needed_from",
+  "needed_to",
+  "grades",
+  "km",
+  "synthetic",
+] as const;
+
+/**
+ * GET /farmer/trade/buyers-looking (AIAIC section 25, 27 Oct 2026): the demand AIAIC's team chose to show farmers
+ * near her (her district, her kind of records), never a buyer's name, with the names of crops and districts in her
+ * language. A guest reads it as the server's practice account, so that account is checked first, as for her sales.
+ */
+export async function buyersLooking(lang: string): Promise<AiaicResult<BuyersLooking>> {
+  const refused = await practiceFirst();
+  if (refused) return { ok: false, problem: refused };
+  const r = await call<unknown>({ path: "/farmer/trade/buyers-looking", as: "trade" });
+  if (!r.ok) return r;
+  const src = r.data && typeof r.data === "object" ? (r.data as Record<string, unknown>) : {};
+  const list = Array.isArray(src["buyers"]) ? src["buyers"] : [];
+  const buyers = list.map((b) => {
+    const d = pick<Record<string, unknown>>(b, DEMAND_KEYS);
+    d["crops"] = Array.isArray(d["crops"]) ? d["crops"].map((c) => String(c)) : [];
+    d["grades"] = Array.isArray(d["grades"]) ? d["grades"].map((g) => String(g)) : [];
+    return d as unknown as BuyerDemand;
+  });
+  const state = typeof src["state"] === "string" ? src["state"] : null;
+  const district = typeof src["district"] === "string" ? src["district"] : null;
+  const cropNames = district ? await cropNamesOf(estateKey(state), district, lang) : {};
+  const districtNames: Record<string, string> = {
+    ...(await districtNamesOf("mp", lang)),
+    ...(await districtNamesOf("mh", lang)),
+  };
+  return {
+    ok: true,
+    data: { state, district, practice: src["practice"] === true, buyers, cropNames, districtNames },
+  };
 }
 
 /** Every write is made only for a practice account (read again every 10 minutes). */

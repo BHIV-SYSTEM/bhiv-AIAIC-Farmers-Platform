@@ -18,6 +18,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, WithMine } from "./AiaicBits";
+import { PooledLine } from "./PooledLine";
 import { SaleStepper } from "./SaleStepper";
 
 /** Offers on her lots first (the ones she can answer now on top), then her sales with their five steps. */
@@ -195,6 +196,7 @@ export function SaleRow({ order, data }: { order: AiaicOrder; data: MineForScree
         </div>
       </div>
       <SaleStepper order={order} />
+      {order.pooled ? <PooledLine pooled={order.pooled} /> : null}
     </Link>
   );
 }

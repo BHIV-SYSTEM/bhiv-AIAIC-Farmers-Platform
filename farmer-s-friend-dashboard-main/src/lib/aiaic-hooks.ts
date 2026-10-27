@@ -5,10 +5,16 @@ import type {
   AiaicPricing,
   AiaicProblem,
   AiaicResult,
+  BuyersLooking,
   MineForScreen,
   TradeMode,
 } from "./aiaic-trade";
-import { getAiaicPricing, getMyTrade, getTradeMode } from "./aiaic-trade.functions";
+import {
+  getAiaicPricing,
+  getBuyersLooking,
+  getMyTrade,
+  getTradeMode,
+} from "./aiaic-trade.functions";
 import { useI18n } from "./i18n";
 
 /** AIAIC's commission as its server holds it now (public GET /payments/pricing through this server). */
@@ -41,6 +47,18 @@ export function useMine(enabled = true) {
     queryFn: () => fn({ data: { lang } }),
     enabled,
     staleTime: 10_000,
+  });
+}
+
+/** Buyers looking for produce near her (AIAIC section 25, 27 Oct 2026). */
+export function useBuyersLooking(enabled = true) {
+  const { lang } = useI18n();
+  const fn = useServerFn(getBuyersLooking);
+  return useQuery<AiaicResult<BuyersLooking>>({
+    queryKey: ["aiaic-buyers-looking", lang],
+    queryFn: () => fn({ data: { lang } }),
+    enabled,
+    staleTime: 60_000,
   });
 }
 
