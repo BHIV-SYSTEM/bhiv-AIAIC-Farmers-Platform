@@ -27,6 +27,7 @@ const pressKey = z.string().regex(PRESS_KEY_RE);
 const offerId = z.string().regex(/^ofr_[0-9a-f]{20}$/);
 const listingId = z.string().regex(/^lst_[0-9a-f]{20}$/);
 const orderId = z.string().regex(/^ord_[0-9a-f]{20}$/);
+const planId = z.string().regex(/^gpl_[0-9a-f]{20}$/);
 const money = z.number().positive().max(1_000_000);
 const qty = z.number().positive().max(100_000);
 
@@ -97,6 +98,16 @@ export const stopSelling = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<AiaicResult<true>> => {
     const { stopSelling: stop } = await import("./aiaic-trade.server");
     return stop(data.key, data.listing_id);
+  });
+
+/** Her answer to a group's sale plan with her lot (AIAIC section 26). */
+export const answerGroupPlan = createServerFn({ method: "POST" })
+  .validator((d: unknown) =>
+    z.object({ key: pressKey, plan_id: planId, answer: z.enum(["joined", "declined"]) }).parse(d),
+  )
+  .handler(async ({ data }): Promise<AiaicResult<true>> => {
+    const { answerGroupPlan: answer } = await import("./aiaic-trade.server");
+    return answer(data.key, data.plan_id, data.answer);
   });
 
 export const givePayoutAccount = createServerFn({ method: "POST" })
