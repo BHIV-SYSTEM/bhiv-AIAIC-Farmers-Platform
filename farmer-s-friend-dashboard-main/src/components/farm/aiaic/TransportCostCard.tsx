@@ -250,13 +250,13 @@ export function TransportCostCard({
                 {mandis.length ? null : (
                   <option value="">{t("aiaic.transport.choose_mandi")}</option>
                 )}
-                {/* each mandi said in her language (AIAIC's names, else its label); its label is what is sent */}
+                {/* each mandi said in her language (AIAIC's names, else its label); its label is what is sent. No km
+                    in the list (27 Oct 2026, the owner: "two distances given why? make it only one"): its km was the
+                    straight line x 1.3 and disagreed with the trip's measured km above; the list keeps AIAIC's order,
+                    nearest first */}
                 {mandis.map((m) => (
                   <option key={`${m.state}:${m.mandi}`} value={m.mandi}>
-                    {placeShown(m.names, lang, m.mandi)} · ~
-                    {t("aiaic.transport.km", {
-                      km: Math.round(m.road_km_estimate ?? m.straight_km),
-                    })}
+                    {placeShown(m.names, lang, m.mandi)}
                   </option>
                 ))}
               </select>
