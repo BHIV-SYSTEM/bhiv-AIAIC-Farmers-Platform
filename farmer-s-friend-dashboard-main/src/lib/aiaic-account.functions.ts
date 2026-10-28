@@ -88,12 +88,13 @@ export const forgetThisPhone = createServerFn({ method: "POST" }).handler(
   },
 );
 
-export const getMyNotices = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Notice[]> => {
+/** The farmer's unread notices, a money notice's crop named in the reader's language (R5P-10). */
+export const getMyNotices = createServerFn({ method: "GET" })
+  .validator((d: unknown) => z.object({ lang }).parse(d))
+  .handler(async ({ data }): Promise<Notice[]> => {
     const { myNotices } = await import("./aiaic-account.server");
-    return myNotices();
-  },
-);
+    return myNotices(data.lang);
+  });
 
 export const markNoticeRead = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ id: z.number().int().positive() }).parse(d))

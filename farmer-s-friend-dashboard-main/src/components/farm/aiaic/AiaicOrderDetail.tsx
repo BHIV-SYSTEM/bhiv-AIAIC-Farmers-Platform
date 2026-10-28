@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import type { FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Banknote, CheckCircle2, Loader2, Wallet, XCircle } from "lucide-react";
@@ -32,8 +33,12 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
+import { GroupSaleCard } from "./GroupSaleCard";
 import { PooledLine } from "./PooledLine";
+import { SaleJourney } from "./SaleJourney";
 import { SaleStepper } from "./SaleStepper";
+import { FromAiaicCard } from "./FromAiaicCard";
+import { OfferCompareBox } from "./OfferCompareBox";
 import { TransportCostCard } from "./TransportCostCard";
 
 /** One offer (`ofr_…`) or one sale (`ord_…`) of hers, from AIAIC. */
@@ -48,7 +53,8 @@ export function AiaicOrderDetail({ id }: { id: string }) {
         <ArrowLeft className="size-5" aria-hidden />
         {t("nav.orders")}
       </Link>
-      <WithMine>
+      {/* the page that shows AIAIC's send of the farmer's money: read again every 5 s while it moves (R5P-09) */}
+      <WithMine pace="money">
         {(data) => {
           if (id.startsWith("ofr_")) {
             const view = findOffer(data.mine, id);
@@ -158,6 +164,16 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
         </div>
       </section>
 
+      {o.pool ? (
+        <GroupSaleCard
+          pool={o.pool}
+          cropLabel={crop}
+          districtNames={data.districtNames}
+          place={{ state: view.listing.state, district: view.listing.district }}
+          mine={{ quantity_q: o.quantity_q, amount }}
+        />
+      ) : null}
+
       {problem ? <ProblemCard problem={problem} /> : null}
 
       {order ? (
@@ -241,12 +257,15 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
         </p>
       ) : null}
 
+      {/* HER OFFER AGAINST THE MANDI, AFTER HER TRIP (28 Oct 2026): one press, AIAIC's figures */}
+      <OfferCompareBox offerId={o.offer_id} />
       <TransportCostCard
         crop={view.listing.crop}
         cropLabel={crop}
         quantityQ={o.quantity_q}
         fromState={view.listing.state}
         fromDistrict={view.listing.district}
+        fromTaluka={(view.listing as { taluka?: string | null }).taluka ?? null}
       />
     </>
   );
@@ -302,7 +321,29 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
         ) : null}
       </section>
 
+      {order.pool ? (
+        <GroupSaleCard
+          pool={order.pool}
+          cropLabel={crop}
+          districtNames={data.districtNames}
+          place={{
+            state: listing?.state ?? data.mine.profile_place.state,
+            district: listing?.district ?? data.mine.profile_place.district,
+          }}
+          mine={{ quantity_q: order.quantity_q, amount: order.amount_inr }}
+        />
+      ) : null}
+
+      <SaleJourney order={order} />
+
       <PaymentCard order={order} />
+      {/* WHAT SHE RECEIVES FROM AIAIC, BEFORE ANYTHING HAPPENS (28 Oct 2026), and where it goes */}
+      <FromAiaicCard
+        money={(order as { from_aiaic?: FromAiaic | null }).from_aiaic}
+        dest={(data.mine as { x_destination?: XDestination | null }).x_destination}
+        collectThenPay={(data.mine as { collect_then_pay?: boolean }).collect_then_pay === true}
+        notice={(data.mine as { x_notice?: XNotice | null }).x_notice}
+      />
       <MoneyCard order={order} />
 
       {listing ? (

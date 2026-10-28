@@ -49,6 +49,35 @@ export type AiaicOffer = {
   buyer_district?: string | null | undefined;
   buyer_name?: string | null | undefined;
   created_at: string;
+  /** The group sale this offer is part of (AIAIC section 27, 27 Oct 2026); null when it is a single buyer's offer. */
+  pool_id?: string | null | undefined;
+  pool?: AiaicPool | null | undefined;
+};
+
+/**
+ * A GROUP SALE (AIAIC section 27): one buyer's request filled from many farmers' lots. What she is told: the crop,
+ * how much the buyer wants, how much has joined (farmers counted) and what is left, the price, where and when the lots
+ * are handed over, how fast the buyer said it pays. Never another farmer's name or lot, never the buyer's record.
+ */
+export type AiaicPool = {
+  pool_id: string;
+  crop: string;
+  target_q: number;
+  joined_q: number;
+  joined_farmers: number;
+  left_q: number;
+  price_per_q: number;
+  grade?: string | null | undefined;
+  collection_point: string;
+  district: string;
+  collect_on?: string | null | undefined;
+  valid_until?: string | null | undefined;
+  pay_within_days?: number | null | undefined;
+  status: string;
+  simulated?: boolean | undefined;
+  /** Group sales near her only: km to its collection district, and whether it is her crop. */
+  km?: number | null | undefined;
+  her_crop?: boolean | undefined;
 };
 
 export type AiaicListing = {
@@ -79,6 +108,10 @@ export type AiaicStep = {
   status: string;
   simulated?: boolean | undefined;
   created_at: string;
+  /** The step's facts she may read (her app's own list per stage, `STEP_DETAIL_KEYS`): weights, grade, place, days. */
+  detail?: Record<string, string | number | boolean> | null | undefined;
+  /** What a process lost (sorting, drying), as recorded: quintals and the share of what went in. */
+  loss?: { q: number; pct: number } | null | undefined;
 };
 
 export type AiaicPayment = {
@@ -266,6 +299,9 @@ export type AiaicOrder = {
   money?: AiaicMoney | undefined;
   /** Her sale gathered at a collection point with other farmers' produce (AIAIC, 27 Oct 2026); null when not. */
   pooled?: AiaicPooled | null | undefined;
+  /** The group sale her order is part of (AIAIC section 27); null when not. */
+  pool_id?: string | null | undefined;
+  pool?: AiaicPool | null | undefined;
 };
 
 export type PayoutAccountView = {
@@ -385,6 +421,31 @@ export function newPressKey(): string {
   const bytes = new Uint8Array(12);
   globalThis.crypto.getRandomValues(bytes);
   return `ann-${Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Whether AIAIC's answer to a press landed (done, or a refusal AIAIC said): only then may the press's key go. A lost
+ * answer (none came back, or AIAIC failed) keeps it, so the same press goes again with the same key. */
+export function answerLanded(r: AiaicResult<unknown>): boolean {
+  return r.ok || (r.problem.status !== null && r.problem.status < 500);
+}
+
+/**
+ * A PRESS KEY KEPT OUTSIDE ITS FORM UNTIL AIAIC'S ANSWER LANDS (R5P-09, 28 Oct 2026): a form shown again while its
+ * press is on its way (the page opened again, the language changed) starts with the key in flight (`take`), so the same
+ * sale pressed again is the same press and AIAIC makes one record. `sent` holds the key; `answered` drops it once the
+ * answer landed (`answerLanded`).
+ */
+export function pressKeyHolder() {
+  let inFlight: string | null = null;
+  return {
+    take: (): string => inFlight ?? newPressKey(),
+    sent: (key: string): void => {
+      inFlight = key;
+    },
+    answered: (key: string, r: AiaicResult<unknown>): void => {
+      if (inFlight === key && answerLanded(r)) inFlight = null;
+    },
+  };
 }
 
 /**
@@ -525,17 +586,14 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
   ];
 }
 
-/** Whether her order's link carries her share to her (Razorpay Route): only then is "what reached you" AIAIC's to say. */
-export function moneyGoesThroughAiaic(order: AiaicOrder): boolean {
-  return order.money?.route === "razorpay_route";
-}
-
 /**
  * The payment line's key and values: a link that does not carry her share is said to reach AIAIC's payment account,
- * never hers (`payment.not_onward`, said only when a link was made and her share is not in it).
+ * never hers, ONLY where AIAIC says so for the order (`payment.not_onward`, the server's own sentence), and only once a
+ * link was made. Never worked out here: a collect order's money reaches her through AIAIC's own send (the re-check of 28
+ * Oct 2026, MONEY-06), which no rule of this app could tell from the link.
  */
 export function paymentLine(order: AiaicOrder): { key: string; state: string; notOnward: boolean } {
-  const notOnward = order.payment.link_made && !moneyGoesThroughAiaic(order);
+  const notOnward = order.payment.link_made && Boolean(order.payment.not_onward);
   if (!order.payment.link_made)
     return { key: "aiaic.pay.no_link", state: order.payment.state, notOnward };
   return { key: `aiaic.pay.state.${order.payment.state}`, state: order.payment.state, notOnward };
@@ -826,6 +884,8 @@ export type BuyersLooking = {
   district: string | null;
   practice: boolean;
   buyers: BuyerDemand[];
+  /** Group sales being gathered near her (AIAIC section 27): her crop first, then the nearest. */
+  pools: AiaicPool[];
   cropNames: Record<string, string>;
   districtNames: Record<string, string>;
 };
@@ -988,6 +1048,11 @@ export type TransportEstimate = {
     place_class?: string | null | undefined;
     /** Her district's names (contract section 20); absent from a server not yet updated. */
     names?: PlaceNames | null | undefined;
+    /** Her taluka, when her trip starts there (28 Oct 2026): its names in each language AIAIC holds */
+    taluka?:
+      | { taluka: string; names?: { en?: string; mr?: string; hi?: string } | null }
+      | null
+      | undefined;
   };
   to: {
     mandi: string;
@@ -1053,7 +1118,13 @@ export type TransportEstimate = {
   fare_per_trip: { low_rs: number; high_rs: number };
   cost: { low_rs: number; high_rs: number };
   per_quintal: { low_rs: number; high_rs: number };
-  notes: { code: string; text?: string | undefined; values?: Record<string, Json> | undefined }[];
+  notes: {
+    code: string;
+    text?: string | undefined;
+    values?: Record<string, Json> | undefined;
+    /** the page a figure in the note comes from (audit of 28 Oct 2026, HONESTY-11) */
+    source?: { name: string; date?: string | null; url?: string | null } | undefined;
+  }[];
   attribution: TransportAttribution[];
   information_only?: boolean | undefined;
 };
@@ -1134,6 +1205,38 @@ export function sourcesSaid(
       url: s.url,
     };
   });
+}
+
+/**
+ * Her trip's notes in her language, and the pages their figures come from, each named once (the audit of 28 Oct 2026,
+ * HONESTY-04, -11): her taluka by the name OpenStreetMap holds in her script (else its Latin name, a name); a note this
+ * app has no words for is said in English only, never inside Marathi or Hindi.
+ */
+export function noteLines(
+  t: Words,
+  est: TransportEstimate,
+  lang: "en" | "mr" | "hi",
+): {
+  notes: { code: string; text: string }[];
+  sources: { key: string; name: string; date?: string | null; url?: string | null }[];
+} {
+  const sources = new Map<string, { name: string; date?: string | null; url?: string | null }>();
+  for (const n of est.notes)
+    if (n.source?.name) sources.set(n.source.url ?? n.source.name, n.source);
+  const own = est.from.taluka?.names?.[lang];
+  const notes: { code: string; text: string }[] = [];
+  for (const n of est.notes) {
+    const key = `aiaic.transport.note.${n.code}`;
+    const values: Record<string, string | number> = {};
+    for (const [k, v] of Object.entries(n.values ?? {})) {
+      if (typeof v === "number" || typeof v === "string") values[k] = v;
+    }
+    if (values["taluka"] !== undefined && own) values["taluka"] = own;
+    const said = t(key, values);
+    if (said === key && lang !== "en") continue;
+    notes.push({ code: n.code, text: said === key ? (n.text ?? n.code) : said });
+  }
+  return { notes, sources: [...sources.entries()].map(([key, s]) => ({ key, ...s })) };
 }
 
 /** Every attribution the answer carries, OpenStreetMap's first, none dropped (OSM's and Geoapify's terms). */
@@ -1249,4 +1352,165 @@ export type StorageVerdict = {
   wdra_others: { text: string | null } | null;
   sources: { text: string | null }[];
   attribution: { text: string; url?: string }[];
+};
+
+// ------------------------------------------------------------------------------- 28 Oct 2026: AIAIC's new answers
+type Rs = { low_rs: number; high_rs: number };
+/** Her ways to move a load, priced from the same trip (AIAIC section 19, `ways`). */
+export type TripWays = {
+  alone: { cost: Rs; per_quintal: Rs; fill_pct: number; trips: number };
+  shared: {
+    when_full: { load_q: number; cost: Rs; per_quintal: Rs };
+    when_half_full: { load_q: number; cost: Rs; per_quintal: Rs };
+  } | null;
+  buyer_collects: { cost: Rs };
+  aiaic_arranges: { cost: Rs; shared_cost: Rs | null; on_request?: boolean };
+  /** the server's cheapest way: of all (marked), and on her own */
+  cheapest?: { on_her_own?: string; of_all?: string; then?: string } | null;
+};
+/** A taluka of her district (`GET /transport/talukas`). */
+export type TalukaRow = {
+  taluka: string;
+  taluka_key: string;
+  names?: { en?: string; mr?: string; hi?: string } | null;
+  placed?: boolean;
+  located_by?: string;
+};
+//: The states of AIAIC's send that are still moving (being asked, waiting, on its way).
+export const MONEY_MOVING = ["requesting", "queued", "pending", "processing"];
+
+/**
+ * The state a send is said in: its own, except one still "requesting" that AIAIC says stopped while it was being asked
+ * (`stale`), said as "no_answer" ("AIAIC is checking whether ... was sent"), never "Sending ..." (29 Oct 2026, NEW-2).
+ */
+export function sendingSaid(sending: FromAiaic["sending"] | null | undefined): string | null {
+  if (!sending) return null;
+  return sending.status === "requesting" && sending.stale === true ? "no_answer" : sending.status;
+}
+
+/** Whether AIAIC's send of the farmer's money is moving on any of their orders (their sale is then read every 5 s). */
+export function moneyMoving(got: AiaicResult<MineForScreen> | undefined): boolean {
+  if (!got || !got.ok) return false;
+  return got.data.mine.orders.some((o) => {
+    const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
+    const said = sendingSaid(fa?.sending);
+    return said !== null && MONEY_MOVING.includes(said);
+  });
+}
+
+/**
+ * How often a page reads the farmer's sale again by itself (R5P-09, 28 Oct 2026): `money` on the order page, which
+ * shows AIAIC's send of their money (every 5 s while it moves, else every 15 s); `live` on the pages of their lots,
+ * offers, sales and money (every 15 s); `opened` on the sell form, where nothing moves (only when the page is opened and
+ * when the farmer comes back to it).
+ */
+export type MinePace = "money" | "live" | "opened";
+
+/** Milliseconds until the page reads the farmer's sale again by itself (`MinePace`), or `false` for never. */
+export function mineReadEvery(
+  pace: MinePace,
+  got: AiaicResult<MineForScreen> | undefined,
+): number | false {
+  if (pace === "opened") return false;
+  return pace === "money" && moneyMoving(got) ? 5_000 : 15_000;
+}
+
+/** What a sale page shows from its read of the farmer's records (`mineShown`). */
+export type MineShown =
+  | { show: "loading" }
+  | { show: "problem"; problem: AiaicProblem }
+  | { show: "records"; data: MineForScreen; notRefreshed: AiaicProblem | null };
+
+/**
+ * WHAT A SALE PAGE SHOWS (R5P-09, 28 Oct 2026: the farmer never loses what they are typing). AIAIC's records once they
+ * came; after that, a read again that fails (AIAIC refused or did not answer, the phone lost its network) keeps the
+ * records last shown on the screen, with a quiet line saying they could not be refreshed (`notRefreshed`), so a form
+ * being filled in is never taken away. Only a first read that fails shows the problem; a crisis answer always does
+ * (it outranks everything).
+ */
+export function mineShown(
+  read: { data: AiaicResult<MineForScreen> | undefined; isError: boolean },
+  lastShown: MineForScreen | null,
+): MineShown {
+  const got = read.data;
+  if (got && !got.ok && got.problem.crisis) return { show: "problem", problem: got.problem };
+  const failed = got && !got.ok ? got.problem : read.isError ? problem("aiaic_unavailable") : null;
+  const records = got?.ok ? got.data : lastShown;
+  if (records) return { show: "records", data: records, notRefreshed: failed };
+  return failed ? { show: "problem", problem: failed } : { show: "loading" };
+}
+
+/** What AIAIC sends her for an order, and where its sending is (`from_aiaic`). */
+export type FromAiaic = {
+  fixed_by_link: boolean;
+  to_her_inr: number | null;
+  price_inr: number | null;
+  commission_inr: number | null;
+  gst_inr: number | null;
+  commission_percent: number | null;
+  gst_percent: number | null;
+  buyer_paid: boolean;
+  /** her amount is Rs 1,00,000 or more: a UPI ID cannot receive it in one payment (AIAIC says it per order) */
+  upi_one_lakh_or_more?: boolean;
+  sending: {
+    status: string;
+    rail: string;
+    amount_inr: number;
+    utr: string | null;
+    updated_at: string;
+    test_mode?: boolean;
+    /** a send still "requesting" past AIAIC's 90 s: stopped while it was being asked, its answer not known */
+    stale?: boolean;
+  } | null;
+  /** Her steps as AIAIC says them (a hand-recorded transfer is "sent", never "reached"). */
+  steps?: { buyer_paid: boolean; sent: boolean; reached: boolean } | null;
+};
+/** The notice she is shown before she gives her UPI ID or bank account (`x_notice`): its version and its paragraphs. */
+export type XNotice = { version: string; en: string[]; mr: string[]; hi: string[] };
+/** Where her money goes, as a masked hint (`x_destination`). */
+export type XDestination = {
+  kind: "upi_id" | "bank_account";
+  hint: string;
+  status: string;
+  ready: boolean;
+};
+/** Her offer weighed against the mandi (`GET /farmer/trade/offers/{id}/compare`). */
+/** Which side leaves her more, and by how much (the server's figures: never a sum or a sign worked out here). */
+type ForHer = { more: "offer" | "mandi"; per_q: Rs; total: Rs } | null;
+export type OfferCompare = {
+  verdict: string;
+  gap: { per_q: Rs; total: Rs; for_her?: ForHer } | null;
+  /** a small load weighed sharing a vehicle too (`depends_on_sharing` when the two disagree) */
+  gap_if_shared?: { per_q: Rs; total: Rs; for_her?: ForHer } | null;
+  verdict_if_shared?: string | null;
+  assumes?: string | null;
+  quantity_q?: number | null;
+  offer: {
+    price_per_q: number;
+    terms_code: string | null;
+    commission_per_q: number;
+    commission?: { gst_percent?: number | null; model?: string | null } | null;
+    net_per_q: Rs;
+    trip: {
+      measured: boolean;
+      least_counted?: boolean;
+      km?: number | null;
+      method?: string | null;
+      alone_per_q?: Rs | null;
+      shared_per_q?: Rs | null;
+    };
+  };
+  mandis: {
+    mandi: string;
+    names?: Record<string, string> | null;
+    modal_per_q: number;
+    price_day: string;
+    net_per_q: Rs;
+    net_per_q_shared?: Rs | null;
+    trip?: { least_counted?: boolean; km?: number | null } | null;
+  }[];
+  best_mandi: string | null;
+  price_day: string | null;
+  price_age_days: number | null;
+  trip_saved: { km_one_way: number | null; least_counted?: boolean } | null;
 };

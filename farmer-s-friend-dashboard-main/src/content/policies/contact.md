@@ -19,7 +19,7 @@ This app has no contact form: please write to the e-mail address above, or call 
 
 ## Sales and payments
 
-For a guest, selling in Annapoorna is practice only. A signed-in farmer's listings and orders are her own records on Krishi Sampada (AIAIC). No money is taken or paid through Annapoorna itself. Real sales and their payments are handled by Krishi Sampada (AIAIC) at [krishisampada.blackholeinfiverse.com](https://krishisampada.blackholeinfiverse.com/); its Contact Us page names who to write to.
+For a guest, selling in Annapoorna is practice only. A signed-in farmer's listings and orders are their own records on Krishi Sampada (AIAIC). No money is taken or paid through Annapoorna itself. Real sales and their payments are handled by Krishi Sampada (AIAIC) at [krishisampada.blackholeinfiverse.com](https://krishisampada.blackholeinfiverse.com/); its Contact Us page names who to write to.
 
 ## Help us help you
 

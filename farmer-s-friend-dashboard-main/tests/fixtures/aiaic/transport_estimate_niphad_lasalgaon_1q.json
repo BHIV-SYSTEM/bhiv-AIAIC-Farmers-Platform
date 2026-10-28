@@ -1,0 +1,375 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
+    "route": "GET /transport/estimate",
+    "at": "2026-10-28T22:23:31+00:00",
+    "status": 200,
+    "request": {
+      "params": {
+        "district": "Nashik",
+        "state": "mh",
+        "mandi": "Lasalgaon",
+        "quantity_q": 1,
+        "taluka": "Niphad"
+      }
+    },
+    "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Razorpay and RazorpayX stood in for on the recording machine, no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
+  },
+  "answer": {
+    "from": {
+      "state": "maharashtra",
+      "district_key": "nashik",
+      "district": "Nashik",
+      "lat": 20.07969,
+      "lon": 74.10711,
+      "approximate": null,
+      "place_class": "unknown",
+      "area": "unknown",
+      "settlement": "Niphad",
+      "taluka": {
+        "taluka": "Niphad",
+        "taluka_key": "niphad",
+        "names": {
+          "en": "Niphad",
+          "translated": {
+            "mr": true,
+            "hi": false
+          },
+          "mr": "निफाड",
+          "hi": "Niphad"
+        },
+        "lat": 20.07969,
+        "lon": 74.10711,
+        "located_by": "taluka_town",
+        "found_name": "Niphad",
+        "geocoder": "geoapify"
+      },
+      "trip_starts_at": "farm",
+      "end_area": "rural",
+      "names": {
+        "en": "Nashik",
+        "translated": {
+          "mr": true,
+          "hi": true
+        },
+        "mr": "नाशिक",
+        "hi": "नासिक"
+      }
+    },
+    "to": {
+      "mandi": "APMC Lasalgaon",
+      "also_named": [
+        "Lasalgaon",
+        "Lasalgaon APMC",
+        "Lasalgaon(Niphad)",
+        "Lasalgaon(Niphad) APMC",
+        "Lasalgaon(Vinchur)",
+        "Lasalgaon(Vinchur) APMC"
+      ],
+      "state": "maharashtra",
+      "district_key": "nashik",
+      "place": "Lasalgaon",
+      "lat": 20.14268,
+      "lon": 74.23775,
+      "located_by": "mandi_town",
+      "point_kind": "town",
+      "place_class": "village",
+      "area": "rural",
+      "geocoder": "nominatim",
+      "geocoded_on": "2026-10-23",
+      "district": "Nashik",
+      "names": {
+        "en": "APMC Lasalgaon",
+        "translated": {
+          "mr": false,
+          "hi": false
+        },
+        "mr": "Lasalgaon बाजार समिती",
+        "hi": "Lasalgaon मंडी"
+      }
+    },
+    "quantity_q": 1.0,
+    "route_type": {
+      "key": "rural_rural",
+      "from_area": "rural",
+      "to_area": "rural",
+      "possible": [
+        "rural_rural"
+      ],
+      "factor_low": 1.2,
+      "factor_high": 1.2,
+      "assumption": true,
+      "applied": true,
+      "factors": {
+        "urban_urban": 1.0,
+        "rural_urban": 1.1,
+        "rural_rural": 1.2
+      },
+      "why": "No source read separates rural and urban freight rates. Less-connected roads and the empty return cost more: 'Routes to hill areas or less-connected districts cost more, because the truck may wait days for a load back' (TruckGuru, 2026-10-10)."
+    },
+    "distance": {
+      "km": 19.9,
+      "method": "estimate",
+      "straight_km": 15.3,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+    },
+    "route": null,
+    "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+        "en": "ACE / DOST / PICKUP (1.5 TON)",
+        "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+        "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+    },
+    "trips": 1,
+    "loads_q": [
+      1.0
+    ],
+    "rate": {
+      "kind": "market",
+      "official": false,
+      "confirmed_current": false,
+      "n_sources": 2,
+      "rs_per_km_low": 27.0,
+      "rs_per_km_high": 32.0,
+      "basis": "the median of the published sources below (long trips); not a quote",
+      "sources": [
+        {
+          "key": "truckguru_2026_10",
+          "name": "TruckGuru blog: Truck Transportation Cost in India",
+          "url": "https://truckguru.co.in/blog/truck-transportation-cost-in-india/",
+          "page_date": "2026-10-10",
+          "read_on": "2026-10-23",
+          "says": "Indicative fares, checked October 2026; per km from an about 500 km trip fare; toll included; for comparison only (TruckGuru does not quote a fixed per-km tariff)",
+          "rows": [
+            {
+              "row": "Tata Ace",
+              "capacity": "up to 1,100 kg",
+              "rs_per_km_low": 26,
+              "rs_per_km_high": 29
+            },
+            {
+              "row": "Bada Dost / Mahindra Pickup",
+              "capacity": "up to 1.5 tonnes",
+              "rs_per_km_low": 26,
+              "rs_per_km_high": 29
+            }
+          ],
+          "rs_per_km_low": 26.0,
+          "rs_per_km_high": 29.0
+        },
+        {
+          "key": "mukund_2026_09",
+          "name": "Mukund Logistics: daily freight rates (Verified Tariff Matrix, Pan-India Hubs)",
+          "url": "https://mukundlogistic.com/daily-freight-rates/",
+          "page_date": "2026-09-09",
+          "read_on": "2026-10-23",
+          "says": "Outstation rate per km; a local trip fare (its distance not stated); toll not in the table; estimates",
+          "rows": [
+            {
+              "row": "Tata Ace / Chota Hathi",
+              "capacity": "1.0 Ton",
+              "rs_per_km_low": 28,
+              "rs_per_km_high": 35
+            }
+          ],
+          "rs_per_km_low": 28.0,
+          "rs_per_km_high": 35.0
+        }
+      ],
+      "distance_band": {
+        "up_to_km": 100,
+        "factor": 1.38,
+        "from": "Porter's two 66 km routes: Rs 32.39 a km, x1.38 its routes over 300 km (Rs 23.42 a km)"
+      },
+      "applied_per_km_low": 44.71,
+      "applied_per_km_high": 52.99,
+      "minimum_per_trip": {
+        "low_rs": 850,
+        "high_rs": 1200,
+        "from": [
+          "mukund_2026_09"
+        ]
+      },
+      "minimum_applied": true,
+      "return_in_high": false
+    },
+    "fare_per_trip": {
+      "low_rs": 889,
+      "high_rs": 1200
+    },
+    "cost": {
+      "low_rs": 889,
+      "high_rs": 1200
+    },
+    "per_quintal": {
+      "low_rs": 889,
+      "high_rs": 1200
+    },
+    "ways": {
+      "alone": {
+        "cost": {
+          "low_rs": 889,
+          "high_rs": 1200
+        },
+        "per_quintal": {
+          "low_rs": 889,
+          "high_rs": 1200
+        },
+        "fill_pct": 7,
+        "trips": 1
+      },
+      "shared": {
+        "when_full": {
+          "load_q": 15.0,
+          "cost": {
+            "low_rs": 59,
+            "high_rs": 80
+          },
+          "per_quintal": {
+            "low_rs": 59,
+            "high_rs": 80
+          }
+        },
+        "when_half_full": {
+          "load_q": 7.5,
+          "cost": {
+            "low_rs": 118,
+            "high_rs": 160
+          },
+          "per_quintal": {
+            "low_rs": 118,
+            "high_rs": 160
+          }
+        },
+        "saves_up_to": {
+          "low_rs": 830,
+          "high_rs": 1120
+        },
+        "needs": "other lots going the same way on the same day",
+        "how": [
+          "group_sale",
+          "aiaic_collection",
+          "transporter_partner"
+        ]
+      },
+      "buyer_collects": {
+        "cost": {
+          "low_rs": 0,
+          "high_rs": 0
+        },
+        "how": "the buyer's own vehicle collects at your farm, village or collection point"
+      },
+      "aiaic_arranges": {
+        "cost": {
+          "low_rs": 889,
+          "high_rs": 1200
+        },
+        "shared_cost": {
+          "low_rs": 59,
+          "high_rs": 80
+        },
+        "on_request": true,
+        "shared_only_when": "other lots go the same way on the same day",
+        "how": "on request: a transporter partner AIAIC works with; the shared price only when lots going the same way are put together"
+      },
+      "order": [
+        "alone",
+        "shared",
+        "buyer_collects",
+        "aiaic_arranges"
+      ],
+      "cheapest": {
+        "on_her_own": "alone",
+        "of_all": "buyer_collects",
+        "then": "shared"
+      }
+    },
+    "notes": [
+      {
+        "code": "from_taluka_town",
+        "text": "Measured from Niphad's main town, not from your farm.",
+        "values": {
+          "taluka": "Niphad"
+        }
+      },
+      {
+        "code": "to_mandi_town",
+        "text": "Measured to the mandi's town."
+      },
+      {
+        "code": "distance_estimate",
+        "text": "Straight line x 1.3: an estimate."
+      },
+      {
+        "code": "rates_averaged",
+        "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
+        "values": {
+          "n": 2
+        }
+      },
+      {
+        "code": "short_trip_band",
+        "text": "Trips up to 100 km cost more per km: x1.38.",
+        "values": {
+          "up_to_km": 100,
+          "factor": 1.38
+        }
+      },
+      {
+        "code": "route_type_assumption",
+        "text": "Route type rural_rural: x1.2, an assumption.",
+        "values": {
+          "route": "rural_rural",
+          "factor": 1.2
+        }
+      },
+      {
+        "code": "tolls_mixed",
+        "text": "Tolls are inside some sources' rates, not others'."
+      },
+      {
+        "code": "minimum_per_trip_applied",
+        "text": "The least a trip costs applies."
+      },
+      {
+        "code": "loading_not_counted",
+        "text": "Loading and unloading are not in these figures (ABC Express blog of 2026-05-12 puts them at Rs 500-2,000 a truck).",
+        "source": {
+          "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+          "date": "2026-05-12",
+          "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
+        }
+      },
+      {
+        "code": "season_not_counted",
+        "text": "In the monsoon and festival weeks trips can cost 20-30% more (ABC Express blog of 2026-05-12); not counted.",
+        "source": {
+          "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+          "date": "2026-05-12",
+          "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
+        }
+      },
+      {
+        "code": "shared_needs_others",
+        "text": "A shared vehicle costs this only when other lots go with yours: a group sale or AIAIC's collection makes that happen."
+      }
+    ],
+    "attribution": [
+      {
+        "text": "© OpenStreetMap contributors",
+        "url": "https://www.openstreetmap.org/copyright",
+        "licence": "ODbL 1.0"
+      }
+    ],
+    "information_only": true
+  }
+}

@@ -1,0 +1,341 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
+    "route": "GET /trade/offers/ofr_439186a6dda3d0bb43e9/compare",
+    "at": "2026-10-28T22:23:39+00:00",
+    "status": 200,
+    "request": {
+      "params": {
+        "tenant_id": "rec-trip"
+      }
+    },
+    "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Razorpay and RazorpayX stood in for on the recording machine, no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
+  },
+  "answer": {
+    "offer_id": "ofr_439186a6dda3d0bb43e9",
+    "crop": "onion",
+    "quantity_q": 1.0,
+    "from": {
+      "district_key": "nashik",
+      "district": {
+        "en": "Nashik",
+        "translated": {
+          "mr": true,
+          "hi": true
+        },
+        "mr": "नाशिक",
+        "hi": "नासिक"
+      },
+      "taluka": {
+        "taluka": "Niphad",
+        "names": {
+          "en": "Niphad",
+          "translated": {
+            "mr": true,
+            "hi": false
+          },
+          "mr": "निफाड",
+          "hi": "Niphad"
+        },
+        "located_by": "taluka_town"
+      }
+    },
+    "offer": {
+      "price_per_q": 3716.0,
+      "terms_code": "buyer_collects",
+      "trip": {
+        "measured": true,
+        "km": 0.0,
+        "method": "buyer_collects",
+        "alone": {
+          "low_rs": 0,
+          "high_rs": 0
+        },
+        "alone_per_q": {
+          "low_rs": 0,
+          "high_rs": 0
+        },
+        "shared_per_q": null,
+        "vehicle": null,
+        "minutes": null
+      },
+      "commission_per_q": 43.85,
+      "commission": {
+        "set": true,
+        "payer": "split",
+        "percent": 2.0,
+        "gst_percent": 18.0,
+        "model": "collect_then_pay"
+      },
+      "net_per_q": {
+        "low_rs": 3672,
+        "high_rs": 3673
+      },
+      "net_total": {
+        "low_rs": 3672,
+        "high_rs": 3673
+      }
+    },
+    "mandis": [
+      {
+        "mandi": "APMC Lasalgaon",
+        "names": {
+          "en": "APMC Lasalgaon",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Lasalgaon बाजार समिती",
+          "hi": "Lasalgaon मंडी"
+        },
+        "district_key": "nashik",
+        "modal_per_q": 4200.0,
+        "price_day": "2026-09-24",
+        "source_url": "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070",
+        "trip": {
+          "measured": true,
+          "km": 19.9,
+          "method": "estimate",
+          "minutes": null,
+          "vehicle": {
+            "key": "ace_dost_pickup",
+            "name": "ACE / DOST / PICKUP (1.5 TON)",
+            "names": {
+              "en": "ACE / DOST / PICKUP (1.5 TON)",
+              "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+              "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+            },
+            "capacity_kg": 1500,
+            "capacity_q": 15,
+            "routing_mode": "light_truck",
+            "rate": "market"
+          },
+          "alone": {
+            "low_rs": 889,
+            "high_rs": 1200
+          },
+          "alone_per_q": {
+            "low_rs": 889,
+            "high_rs": 1200
+          },
+          "shared_per_q": {
+            "low_rs": 59,
+            "high_rs": 80
+          }
+        },
+        "net_per_q": {
+          "low_rs": 3000,
+          "high_rs": 3311
+        },
+        "net_per_q_shared": {
+          "low_rs": 4120,
+          "high_rs": 4141
+        }
+      },
+      {
+        "mandi": "Lasalgaon(Niphad)",
+        "names": {
+          "en": "Lasalgaon(Niphad)",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Lasalgaon (Niphad) बाजार समिती",
+          "hi": "Lasalgaon (Niphad) मंडी"
+        },
+        "district_key": "nashik",
+        "modal_per_q": 4050.0,
+        "price_day": "2026-09-24",
+        "source_url": "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070",
+        "trip": {
+          "measured": true,
+          "km": 19.9,
+          "method": "estimate",
+          "minutes": null,
+          "vehicle": {
+            "key": "ace_dost_pickup",
+            "name": "ACE / DOST / PICKUP (1.5 TON)",
+            "names": {
+              "en": "ACE / DOST / PICKUP (1.5 TON)",
+              "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+              "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+            },
+            "capacity_kg": 1500,
+            "capacity_q": 15,
+            "routing_mode": "light_truck",
+            "rate": "market"
+          },
+          "alone": {
+            "low_rs": 889,
+            "high_rs": 1200
+          },
+          "alone_per_q": {
+            "low_rs": 889,
+            "high_rs": 1200
+          },
+          "shared_per_q": {
+            "low_rs": 59,
+            "high_rs": 80
+          }
+        },
+        "net_per_q": {
+          "low_rs": 2850,
+          "high_rs": 3161
+        },
+        "net_per_q_shared": {
+          "low_rs": 3970,
+          "high_rs": 3991
+        }
+      },
+      {
+        "mandi": "Lasalgaon(Vinchur)",
+        "names": {
+          "en": "Lasalgaon(Vinchur)",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Lasalgaon (Vinchur) बाजार समिती",
+          "hi": "Lasalgaon (Vinchur) मंडी"
+        },
+        "district_key": "nashik",
+        "modal_per_q": 4000.0,
+        "price_day": "2026-09-24",
+        "source_url": "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070",
+        "trip": {
+          "measured": true,
+          "km": 19.9,
+          "method": "estimate",
+          "minutes": null,
+          "vehicle": {
+            "key": "ace_dost_pickup",
+            "name": "ACE / DOST / PICKUP (1.5 TON)",
+            "names": {
+              "en": "ACE / DOST / PICKUP (1.5 TON)",
+              "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+              "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+            },
+            "capacity_kg": 1500,
+            "capacity_q": 15,
+            "routing_mode": "light_truck",
+            "rate": "market"
+          },
+          "alone": {
+            "low_rs": 889,
+            "high_rs": 1200
+          },
+          "alone_per_q": {
+            "low_rs": 889,
+            "high_rs": 1200
+          },
+          "shared_per_q": {
+            "low_rs": 59,
+            "high_rs": 80
+          }
+        },
+        "net_per_q": {
+          "low_rs": 2800,
+          "high_rs": 3111
+        },
+        "net_per_q_shared": {
+          "low_rs": 3920,
+          "high_rs": 3941
+        }
+      }
+    ],
+    "best_mandi": "APMC Lasalgaon",
+    "price_day": "2026-09-24",
+    "price_age_days": 5,
+    "gap": {
+      "per_q": {
+        "low_rs": 361,
+        "high_rs": 673
+      },
+      "total": {
+        "low_rs": 361,
+        "high_rs": 673
+      },
+      "for_her": {
+        "more": "offer",
+        "per_q": {
+          "low_rs": 361,
+          "high_rs": 673
+        },
+        "total": {
+          "low_rs": 361,
+          "high_rs": 673
+        }
+      }
+    },
+    "verdict": "depends_on_sharing",
+    "assumes": "hire_alone",
+    "gap_if_shared": {
+      "per_q": {
+        "low_rs": -469,
+        "high_rs": -447
+      },
+      "total": {
+        "low_rs": -469,
+        "high_rs": -447
+      },
+      "for_her": {
+        "more": "mandi",
+        "per_q": {
+          "low_rs": 447,
+          "high_rs": 469
+        },
+        "total": {
+          "low_rs": 447,
+          "high_rs": 469
+        }
+      }
+    },
+    "verdict_if_shared": "mandi_more",
+    "offer_net_per_q_if_shared": {
+      "low_rs": 3672,
+      "high_rs": 3673
+    },
+    "trip_saved": {
+      "km_one_way": 19.9,
+      "minutes_one_way": null,
+      "to": {
+        "en": "APMC Lasalgaon",
+        "translated": {
+          "mr": false,
+          "hi": false
+        },
+        "mr": "Lasalgaon बाजार समिती",
+        "hi": "Lasalgaon मंडी"
+      },
+      "trip_cost": {
+        "low_rs": 889,
+        "high_rs": 1200
+      },
+      "least_counted": false
+    },
+    "notes": [
+      {
+        "code": "mandi_charges_not_counted",
+        "text": "Mandi charges (hamali, weighing, commission where the farmer pays it) are not counted."
+      },
+      {
+        "code": "loading_not_counted",
+        "text": "Loading and unloading are not counted."
+      },
+      {
+        "code": "modal_not_a_quote",
+        "text": "A mandi's figure is the day's modal price it reported, not what the farmer will be paid."
+      },
+      {
+        "code": "shared_needs_others",
+        "text": "A shared vehicle costs this only when other lots go with the farmer's: a group sale or AIAIC's collection makes that happen."
+      },
+      {
+        "code": "depends_on_sharing",
+        "text": "Hiring a vehicle alone and sharing one give different answers for a load this small: both are said."
+      }
+    ],
+    "information_only": true,
+    "rule": "The offer's price less the farmer's trip by its terms and AIAIC's commission where they pay it (as their order's link would take it), against the nearest mandis' modal price on the newest comparable day less their trip there; the gap is the offer less the best mandi, as a range, hiring a vehicle alone, and for a small load also sharing one; when the two disagree the verdict is depends_on_sharing."
+  }
+}

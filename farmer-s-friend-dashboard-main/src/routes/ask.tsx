@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { TalukaSelect } from "@/components/farm/aiaic/TalukaSelect";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Check, Info, MapPin, WifiOff } from "lucide-react";
@@ -45,6 +46,8 @@ function AskPage() {
 
   const [state, setState] = useState<string>(search.state ?? "mh");
   const [region, setRegion] = useState(search.region ?? "");
+  // HER TALUKA, RIGHT AFTER HER DISTRICT (28 Oct 2026): only the distance and the transport change
+  const [taluka, setTaluka] = useState(search.taluka ?? "");
   const [crop, setCrop] = useState(search.crop ?? "");
   const [mandi, setMandi] = useState(search.mandi ?? "");
   const [land, setLand] = useState(search.land ?? "");
@@ -151,6 +154,7 @@ function AskPage() {
       to: "/result",
       search: {
         ...(region ? { region } : {}),
+        ...(region && taluka ? { taluka } : {}),
         ...(crop ? { crop } : {}),
         ...(marketChoice ? { mandi: marketChoice } : {}),
         ...(land ? { land } : {}),
@@ -229,8 +233,22 @@ function AskPage() {
           options={availableDistricts}
           display={formatDistrict}
           value={region}
-          onChange={setRegion}
+          onChange={(v: string) => {
+            setRegion(v);
+            setTaluka("");
+          }}
         />
+
+        {/* Taluka Selector: right after the district (28 Oct 2026) */}
+        {region ? (
+          <TalukaSelect
+            state={state}
+            district={region}
+            value={taluka}
+            onChange={setTaluka}
+            selectClassName="mt-2 block min-h-14 w-full rounded-2xl border-2 border-border bg-card px-4 text-lg font-bold"
+          />
+        ) : null}
 
         {/* Crop Selector */}
         <BigSelect

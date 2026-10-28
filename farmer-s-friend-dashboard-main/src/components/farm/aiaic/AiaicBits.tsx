@@ -1,9 +1,10 @@
+import { Link } from "@tanstack/react-router";
 import { AlertCircle, Database, FlaskConical, Loader2, RefreshCw } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useRaiseCrisis } from "@/lib/aiaic-crisis";
 import { useMine, useProblemText, useTradeMode } from "@/lib/aiaic-hooks";
-import { type AiaicProblem, type MineForScreen } from "@/lib/aiaic-trade";
+import { mineShown, type AiaicProblem, type MineForScreen, type MinePace } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +72,14 @@ export function ProblemCard({
         <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden />
         <p className="min-w-0 break-words text-sm font-bold text-foreground">{say(problem)}</p>
       </div>
+      {problem.code === "sign_in_to_sell" ? (
+        <Link
+          to="/signin"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground"
+        >
+          {t("aiaic.sign_in_to_sell.go")}
+        </Link>
+      ) : null}
       {onRetry ? (
         <button
           type="button"
@@ -95,29 +104,77 @@ export function Loading({ label }: { label?: string | undefined }) {
   );
 }
 
+/** A read refused because nobody is signed in now: said as AIAIC's sign-in problem, with Sign in. */
+const SIGN_IN_AGAIN = new Set(["sign_in_to_sell", "aiaic_signed_out"]);
+
+/** The quiet line over records that could not be read again just now (`mineShown`): what is on the page stays. */
+export function NotRefreshedLine({
+  problem,
+  onRetry,
+}: {
+  problem: AiaicProblem;
+  onRetry: () => void;
+}) {
+  const { t } = useI18n();
+  const say = useProblemText();
+  const signIn = SIGN_IN_AGAIN.has(problem.code);
+  return (
+    <p
+      role="status"
+      className="flex flex-wrap items-center gap-x-2 px-1 text-xs font-semibold text-muted-foreground"
+      data-testid="aiaic-not-refreshed"
+    >
+      <RefreshCw className="size-3.5 shrink-0" aria-hidden />
+      <span className="min-w-0 break-words">
+        {signIn ? say(problem) : t("aiaic.not_refreshed")}
+      </span>
+      {signIn ? (
+        <Link to="/signin" className="inline-flex min-h-9 items-center font-bold text-primary">
+          {t("aiaic.sign_in_to_sell.go")}
+        </Link>
+      ) : (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="inline-flex min-h-9 items-center font-bold text-primary"
+        >
+          {t("aiaic.retry")}
+        </button>
+      )}
+    </p>
+  );
+}
+
 /**
- * The page's gate in AIAIC mode: her records when AIAIC answered, else the problem (never the local store).
+ * The page's gate in AIAIC mode: the farmer's records when AIAIC answered, else the problem (never the local store).
+ * Once records were shown, a read again that fails keeps them, with a quiet line (`mineShown`, R5P-09): a form on the
+ * page is never taken away while the farmer fills it in. `pace`: how often the page reads them again by itself.
  */
-export function WithMine({ children }: { children: (data: MineForScreen) => React.ReactNode }) {
-  const q = useMine();
-  if (q.isPending) return <Loading />;
-  if (q.isError || !q.data) {
-    return (
-      <ProblemCard
-        problem={{
-          code: "aiaic_unavailable",
-          message: null,
-          status: null,
-          setting: null,
-          facts: null,
-          crisis: null,
-        }}
-        onRetry={() => q.refetch()}
-      />
-    );
-  }
-  if (!q.data.ok) return <ProblemCard problem={q.data.problem} onRetry={() => q.refetch()} />;
-  return <>{children(q.data.data)}</>;
+export function WithMine({
+  children,
+  pace = "live",
+}: {
+  children: (data: MineForScreen) => React.ReactNode;
+  pace?: MinePace;
+}) {
+  const q = useMine(true, pace);
+  const [lastShown, setLastShown] = useState<MineForScreen | null>(null);
+  const fresh = q.data?.ok ? q.data.data : null;
+  useEffect(() => {
+    if (fresh) setLastShown(fresh);
+  }, [fresh]);
+  const shown = mineShown({ data: q.data, isError: q.isError }, lastShown);
+  if (shown.show === "loading") return <Loading />;
+  if (shown.show === "problem")
+    return <ProblemCard problem={shown.problem} onRetry={() => q.refetch()} />;
+  return (
+    <>
+      {shown.notRefreshed ? (
+        <NotRefreshedLine problem={shown.notRefreshed} onRetry={() => q.refetch()} />
+      ) : null}
+      {children(shown.data)}
+    </>
+  );
 }
 
 /**
@@ -135,7 +192,9 @@ export function TradeSwitch({
   width?: string;
 }) {
   const mode = useTradeMode();
-  if (mode.isPending || mode.isError || !mode.data) {
+  // once the server said where sales live, a read again that fails keeps the page (R5P-09): only a first read that
+  // fails shows the problem
+  if (!mode.data) {
     return (
       <div className={cn("mx-auto w-full px-4 pt-6", width)}>
         {mode.isError ? (

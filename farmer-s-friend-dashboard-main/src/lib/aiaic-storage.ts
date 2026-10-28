@@ -41,17 +41,28 @@ export function useStorageVerdict({
   district,
   state,
   quantityQ,
+  taluka,
 }: {
   crop: string | null | undefined;
   district: string | null | undefined;
   state?: string | null | undefined;
   quantityQ?: number | undefined;
+  /** Her taluka (28 Oct 2026): the warehouses' trips start at its main town; the verdict stays the district's. */
+  taluka?: string | null | undefined;
 }): StorageVerdict | null {
   const { lang } = useI18n();
   const verdictFn = useServerFn(getStorageVerdict);
   const estate = estateOf(state);
   const q = useQuery({
-    queryKey: ["aiaic-storage-verdict", estate, district, crop, quantityQ ?? null, lang],
+    queryKey: [
+      "aiaic-storage-verdict",
+      estate,
+      district,
+      crop,
+      quantityQ ?? null,
+      lang,
+      taluka ?? null,
+    ],
     queryFn: () =>
       verdictFn({
         data: {
@@ -60,6 +71,7 @@ export function useStorageVerdict({
           state: estate,
           lang,
           ...(quantityQ && quantityQ > 0 ? { quantity_q: quantityQ } : {}),
+          ...(taluka ? { taluka } : {}),
         },
       }),
     enabled: Boolean(crop && district),

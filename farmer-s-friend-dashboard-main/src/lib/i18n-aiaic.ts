@@ -13,6 +13,221 @@
 type Dict = Record<string, string>;
 
 export const AIAIC_EN: Dict = {
+  // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
+  "aiaic.taluka.label": "Your taluka (for distance)",
+  "aiaic.taluka.whole_district": "Whole district",
+  "aiaic.taluka.help":
+    "Distance and transport start from your taluka's main town; the advice stays for your district.",
+  "aiaic.ways.title": "Your ways to move it",
+  "aiaic.ways.cheapest": "Cheapest",
+  "aiaic.ways.per_q": "{range} a quintal",
+  "aiaic.ways.alone": "Hire a vehicle alone",
+  "aiaic.ways.alone_tip": "Your load fills {pct}% of it.",
+  "aiaic.ways.shared": "Share a vehicle",
+  "aiaic.ways.shared_tip":
+    "Your share by weight when other farmers' produce fills the vehicle: join a group sale, or ask AIAIC to put your lot with others.",
+  "aiaic.ways.when_half": "If half full: {range}",
+  "aiaic.ways.buyer_collects": "The buyer collects",
+  "aiaic.ways.buyer_collects_tip":
+    "The buyer's vehicle collects at your farm or village: no trip for you to pay.",
+  "aiaic.ways.aiaic": "AIAIC arranges it (on request)",
+  "aiaic.ways.aiaic_tip":
+    "On request: a transporter AIAIC works with. The shared price holds only when other lots go the same way on the same day.",
+  "aiaic.compare.button": "Compare with the mandi",
+  "aiaic.compare.hide": "Hide the comparison",
+  "aiaic.compare.reading": "Working it out…",
+  "aiaic.compare.verdict.offer_more":
+    "After your trip, this offer gives you {low} – {high} a quintal MORE than the best mandi near you.",
+  "aiaic.compare.verdict.mandi_more":
+    "After your trip, the best mandi near you gives {low} – {high} a quintal more than this offer.",
+  "aiaic.compare.verdict.about_the_same":
+    "After your trip, about the same as the best mandi near you.",
+  "aiaic.compare.verdict.trip_not_measured":
+    "Your trip for this offer is not measured: compare knowing that.",
+  "aiaic.compare.verdict.no_mandi_price":
+    "No mandi near you reported this crop recently: nothing to compare with.",
+  "aiaic.compare.verdict.prices_too_old":
+    "The newest mandi prices near you are {days} days old: too old to compare. Ask the mandi for its current rate.",
+  "aiaic.compare.offer": "This offer, in your hand",
+  "aiaic.compare.mandi": "The best mandi near you",
+  "aiaic.compare.per_q": "a quintal, after your trip",
+  "aiaic.compare.modal": "Mandi price {rs} ({day})",
+  "aiaic.compare.trip.buyer_collects": "The buyer collects: no trip for you.",
+  "aiaic.compare.trip.she_delivers": "You deliver: {km} km.",
+  "aiaic.compare.trip.not_measured": "Your trip for this offer is not measured.",
+  "aiaic.compare.saved": "The buyer collecting saves you a {km} km trip.",
+  "aiaic.compare.saved_least":
+    "The buyer collecting saves you a trip from your farm (not measured).",
+  "aiaic.compare.mandi_least":
+    "Your trip there from your farm is not known: only the least a trip costs is counted.",
+  "aiaic.compare.commission": "AIAIC's commission you pay: {rs} a quintal",
+  "aiaic.compare.commission_gst": "AIAIC's commission and GST on it you pay: {rs} a quintal",
+  "aiaic.compare.verdict.depends_on_sharing":
+    "It depends on sharing a vehicle: hiring one alone and sharing one give different answers for your load. Both are below.",
+  "aiaic.compare.alone.offer_more":
+    "Hiring a vehicle alone: this offer leaves you {low} – {high} a quintal more.",
+  "aiaic.compare.alone.mandi_more":
+    "Hiring a vehicle alone: the best mandi leaves you {low} – {high} a quintal more.",
+  "aiaic.compare.alone.about_the_same": "Hiring a vehicle alone: about the same.",
+  "aiaic.compare.shared.offer_more":
+    "Sharing a vehicle: this offer leaves you {low} – {high} a quintal more.",
+  "aiaic.compare.shared.mandi_more":
+    "Sharing a vehicle: the best mandi leaves you {low} – {high} a quintal more.",
+  "aiaic.compare.shared.about_the_same": "Sharing a vehicle: about the same.",
+  "aiaic.compare.assumes_alone": "Worked out as if you hire a vehicle alone.",
+  "aiaic.compare.if_shared": "If your lot goes with others: {v} a quintal",
+  "aiaic.compare.trip.least_fare_only":
+    "Your trip from your farm is not known (start and end are one place): only the least a trip costs is counted.",
+  "aiaic.compare.for_her.offer": "For your {q} quintals, the offer leaves you {v} more.",
+  "aiaic.compare.for_her.mandi": "For your {q} quintals, the best mandi leaves you {v} more.",
+  "aiaic.ways.aiaic_shared": "If other lots go the same way that day: {range}",
+  "aiaic.compare.notes":
+    "Mandi charges and loading are not counted; a mandi's price is the day's reported price, not a promise.",
+  "aiaic.money.fixed": "Fixed for this sale once the buyer pays the link.",
+  "aiaic.money.now": "As AIAIC's charges stand today; the buyer's link fixes it.",
+  "aiaic.money.price": "Your agreed price",
+  "aiaic.money.commission": "AIAIC's commission ({pct}%)",
+  "aiaic.money.gst": "GST on the commission ({pct}%)",
+  "aiaic.money.to_you": "To you",
+  "aiaic.money.step.buyer_paid": "The buyer pays",
+  "aiaic.money.step.sending": "AIAIC sends your money",
+  "aiaic.money.step.reached": "It reaches your bank",
+  "aiaic.money.status.requesting": "Sending {rs}…",
+  "aiaic.money.status.queued": "{rs} is waiting to be sent.",
+  "aiaic.money.status.pending": "{rs} is waiting for approval.",
+  "aiaic.money.status.processing": "{rs} is on its way to you.",
+  "aiaic.money.status.processed": "{rs} reached your bank.",
+  "aiaic.money.status.reversed": "{rs} came back: AIAIC will send it again.",
+  "aiaic.money.status.failed": "Sending {rs} did not go through: AIAIC will send it again.",
+  "aiaic.money.status.rejected": "Sending {rs} did not go through: AIAIC will send it again.",
+  "aiaic.money.status.cancelled": "Sending {rs} was stopped.",
+  "aiaic.money.status.no_answer": "AIAIC is checking whether {rs} was sent.",
+  "aiaic.money.status.recorded": "AIAIC's team says it sent {rs} by bank transfer.",
+  "aiaic.money.status.other": "There is news about the money for your sale: open it to see.",
+  "aiaic.dest.title": "Where should AIAIC send your money?",
+  "aiaic.dest.kind.upi_id": "UPI ID",
+  "aiaic.dest.kind.bank_account": "Bank account",
+  "aiaic.dest.upi": "Your UPI ID (like name@bank)",
+  "aiaic.dest.upi_one_lakh":
+    "Your amount is ₹1,00,000 or more: a UPI ID cannot receive it in one payment. Give a bank account instead.",
+  "aiaic.dest.name": "Name as in the bank",
+  "aiaic.dest.account": "Account number",
+  "aiaic.dest.ifsc": "IFSC (11 letters and numbers)",
+  "aiaic.dest.agree": "I have read the notice above and I agree.",
+  "aiaic.dest.save": "Save where my money goes",
+  "aiaic.dest.change": "Change",
+  "aiaic.dest.remove": "Remove",
+  "aiaic.dest.remove_ask":
+    "Remove your UPI ID or bank account from AIAIC and RazorpayX? AIAIC sends nothing new to it after this.",
+  "aiaic.dest.remove_yes": "Yes, remove them",
+  "aiaic.dest.keep": "Keep them",
+  "aiaic.dest.removed": "Removed. RazorpayX has switched them off.",
+  "aiaic.dest.removed_pending":
+    "Removed here. A person from AIAIC will finish switching them off at RazorpayX.",
+  "aiaic.money.test": "Test only: no real money moved.",
+  "aiaic.problem.sign_in_to_sell":
+    "Sign in to sell: your sale and your money are yours, so selling needs your own account.",
+  "aiaic.sign_in_to_sell.go": "Sign in",
+  "aiaic.refused.upi_id_not_valid": "A UPI ID looks like name@bank.",
+  "aiaic.refused.account_name_not_valid": "Write the name as the bank holds it.",
+  "aiaic.refused.ifsc_not_valid": "An IFSC has 11 letters and numbers.",
+  "aiaic.refused.account_number_not_valid": "Check the account number.",
+  "aiaic.refused.destination_kind_not_valid": "Choose a UPI ID or a bank account.",
+  "aiaic.refused.destination_exists":
+    "Your details are already given: press Change to replace them.",
+  "aiaic.refused.razorpayx_not_configured":
+    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
+  "aiaic.refused.razorpayx_live_not_approved":
+    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
+  "aiaic.refused.test_keys_rehearsal_farmers_only":
+    "This system is in test mode: real payment details are not taken here.",
+  "aiaic.refused.razorpayx_refused":
+    "Razorpay did not accept these details: check them and try again.",
+  "aiaic.refused.razorpayx_no_answer": "Razorpay did not answer: try again in a little while.",
+  "aiaic.refused.razorpayx_ip_not_allowlisted":
+    "RazorpayX did not accept AIAIC's server just now (a setting AIAIC's team must change): your details were not taken. Try again later.",
+  "aiaic.refused.destination_being_made":
+    "Your details are being given to RazorpayX right now: try again in a minute.",
+  "aiaic.refused.destination_ended_while_asked":
+    "Your details were removed while RazorpayX was asked: they stay removed.",
+  "aiaic.refused.no_destination": "No UPI ID or bank account of yours is held.",
+  "aiaic.refused.taluka_not_known": "Choose your taluka from the list.",
+  // a group sale and her sale's journey (AIAIC sections 25 and 27, 27 Oct 2026)
+  "aiaic.refused.pool_full":
+    "The buyer now needs less than this offer: it can no longer be accepted. AIAIC's team may ask you for a smaller quantity.",
+  "aiaic.refused.pool_closed": "The group sale was closed: this offer can no longer be accepted.",
+  "aiaic.refused.pool_filled":
+    "Other farmers filled the buyer's request first: this offer can no longer be accepted.",
+  "aiaic.refused.pool_resized": "The group sale asked you for another quantity: see its new offer.",
+  "aiaic.group.chip": "Group sale",
+  "aiaic.group.status.closed": "Closed",
+  "aiaic.group.status.cancelled": "Called off",
+  "aiaic.group.title": "A buyer wants {qty} of {crop}, from many farmers together",
+  "aiaic.group.joined": "Joined so far: {joined} from {farmers} farmers · still wanted: {left}",
+  "aiaic.group.where": "Hand over at: {place}, {district}",
+  "aiaic.group.when": "Collection day: {day}",
+  "aiaic.group.pay_not_said": "The buyer has not said how fast it pays.",
+  "aiaic.group.pay_same_day": "The buyer says it pays the same day.",
+  "aiaic.group.pay_within": "The buyer says it pays within {days} days of delivery.",
+  "aiaic.group.buyer_price": "The buyer's price",
+  "aiaic.group.yours": "Your lot: {qty}, {amount} in all",
+  "aiaic.group.mandi_title": "Your district's mandi price",
+  "aiaic.group.mandi_line": "{low} to {high} on {day} ({source})",
+  "aiaic.group.mandi_none":
+    "No mandi of your district reported this crop recently enough to show here.",
+  "aiaic.group.mandi_middle": "the middle of {n} mandis that reported",
+  "aiaic.group.note":
+    "You decide for your own lot: say yes or no. Joining makes your own sale, paid to you. Your cost to bring the lot to the collection point is not in the buyer's price.",
+  "aiaic.group.near_title": "Group sales near you",
+  "aiaic.group.near_how":
+    "To join, list your produce of that crop: AIAIC's team can then invite your lot, and you say yes or no to its offer.",
+  "aiaic.group.near_line": "Still wanted: {left} of {target} · hand over at {place}, {district}",
+  "aiaic.group.km": "about {km} km away",
+  "aiaic.group.near_list": "List my {crop}",
+  "aiaic.journey.title": "Your sale, step by step",
+  "aiaic.journey.agreed": "Sale agreed",
+  "aiaic.journey.stage.aggregation": "Collected",
+  "aiaic.journey.stage.quality_grading": "Graded",
+  "aiaic.journey.stage.storage": "Stored",
+  "aiaic.journey.stage.processing": "Processed",
+  "aiaic.journey.stage.pickup": "Picked up",
+  "aiaic.journey.stage.in_transit": "On the road",
+  "aiaic.journey.stage.delivered": "Delivered",
+  "aiaic.journey.stage.delivery_exception": "A problem on delivery",
+  "aiaic.journey.stage.reconciliation": "Quantities settled",
+  "aiaic.journey.status.pending": "waiting",
+  "aiaic.journey.status.failed": "not done",
+  "aiaic.journey.practice": "practice",
+  "aiaic.journey.none_yet": "No step after the agreement is recorded yet.",
+  "aiaic.journey.f.collection_point": "at {v}",
+  "aiaic.journey.f.quantity_q": "{v}",
+  "aiaic.journey.f.grade": "grade {v}",
+  "aiaic.journey.f.weight_q": "{v} weighed",
+  "aiaic.journey.f.rejected_q": "{v} not taken",
+  "aiaic.journey.f.sampled": "a sample was tested",
+  "aiaic.journey.f.tested_on": "tested on {v}",
+  "aiaic.journey.f.tested_at_apmc": "tested at {v}",
+  "aiaic.journey.f.facility": "at {v}",
+  "aiaic.journey.f.stored_from": "from {v}",
+  "aiaic.journey.f.stored_to": "until {v}",
+  "aiaic.journey.f.process": "{v}",
+  "aiaic.journey.f.input_q": "{v} went in",
+  "aiaic.journey.f.output_q": "{v} came out",
+  "aiaic.journey.f.expected_on": "expected on {v}",
+  "aiaic.journey.f.received_q": "{v} received",
+  "aiaic.journey.f.delivered_q": "{v} delivered",
+  "aiaic.journey.f.accepted_q": "{v} accepted",
+  "aiaic.journey.f.loss": "{v} lost in processing ({pct}%)",
+  "aiaic.journey.facility_kind.warehouse": "a warehouse",
+  "aiaic.journey.facility_kind.cold_storage": "a cold store",
+  "aiaic.journey.facility_kind.farm_store": "a farm store",
+  "aiaic.journey.facility_kind.other": "another store",
+  "aiaic.journey.kind.delay": "a delay",
+  "aiaic.journey.kind.damage": "damage",
+  "aiaic.journey.kind.shortage": "a shortage",
+  "aiaic.journey.kind.quality_rejection": "rejected for quality",
+  "aiaic.journey.kind.dispute": "a dispute",
+  "aiaic.journey.kind.other": "another problem",
   "aiaic.chip.practice": "Practice",
   "aiaic.chip.test": "TEST",
   "aiaic.chip.local": "Demo store",
@@ -21,6 +236,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.loading": "Reading from AIAIC…",
   "aiaic.retry": "Try again",
   "aiaic.refresh": "Check for new offers",
+  "aiaic.not_refreshed": "Could not refresh just now: this is what AIAIC said last.",
   "aiaic.back": "Back",
   "aiaic.choose": "Choose…",
   // AIAIC's analysis on Get my advice (its farmer app's words: kit/CropSignals, kit/PriceBrief, kit/ActionCard)
@@ -505,9 +721,9 @@ export const AIAIC_EN: Dict = {
   "aiaic.farmer.money.direct.said_not_yet":
     "You told us the money has not come. This is on the AIAIC team's list.",
   "aiaic.farmer.money.direct.buyer_says":
-    "The buyer says he paid {amount}. Check your own bank's message or UPI app.",
+    "The buyer says they paid {amount}. Check your own bank's message or UPI app.",
   "aiaic.farmer.money.direct.buyer_says_any":
-    "The buyer says he paid. Check your own bank's message or UPI app.",
+    "The buyer says they paid. Check your own bank's message or UPI app.",
 
   "aiaic.payout.title": "Where your money goes",
   "aiaic.payout.not_offered": "Paying you through AIAIC is not switched on here.",
@@ -604,6 +820,23 @@ export const AIAIC_EN: Dict = {
   "aiaic.transport.note.from_district_centre":
     "Measured from your district's centre, not from your farm.",
   "aiaic.transport.note.to_mandi_town": "Measured to the mandi's town.",
+  "aiaic.transport.note.from_taluka_town":
+    "Measured from {taluka}'s main town, not from your farm.",
+  "aiaic.transport.note.from_taluka_area":
+    "Measured from the centre of {taluka} taluka, not from your farm.",
+  "aiaic.transport.note.taluka_not_placed":
+    "{taluka}'s town could not be placed: measured from your district's centre.",
+  "aiaic.transport.note.near_taluka_town":
+    "The mandi is near your taluka's start point: your trip from your farm may be longer.",
+  "aiaic.transport.note.near_taluka_town_warehouse":
+    "The warehouse is near your taluka's start point: your trip from your farm may be longer.",
+  "aiaic.transport.note.loading_not_counted":
+    "Loading and unloading are not in these figures (the page named below puts them at Rs 500-2,000 a truck).",
+  "aiaic.transport.note.season_not_counted":
+    "In the monsoon and festival weeks trips can cost 20-30% more (the page named below); not counted.",
+  "aiaic.transport.note.shared_needs_others":
+    "A shared vehicle costs this only when other lots go with yours: a group sale or AIAIC's collection makes that happen.",
+  "aiaic.transport.note.source": "Source:",
   "aiaic.transport.note.to_mandi_area":
     "Measured to the centre of the area the mandi is named after.",
   "aiaic.transport.note.to_district_centre":
@@ -630,6 +863,223 @@ export const AIAIC_EN: Dict = {
 };
 
 export const AIAIC_MR: Dict = {
+  // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
+  "aiaic.taluka.label": "तुमचा तालुका (अंतरासाठी)",
+  "aiaic.taluka.whole_district": "संपूर्ण जिल्हा",
+  "aiaic.taluka.help":
+    "अंतर आणि वाहतूक तुमच्या तालुक्याच्या मुख्य ठिकाणापासून मोजली जाते; सल्ला तुमच्या जिल्ह्याचाच राहतो.",
+  "aiaic.ways.title": "माल नेण्याचे तुमचे पर्याय",
+  "aiaic.ways.cheapest": "सर्वात स्वस्त",
+  "aiaic.ways.per_q": "क्विंटलला {range}",
+  "aiaic.ways.alone": "स्वतंत्र वाहन भाड्याने",
+  "aiaic.ways.alone_tip": "तुमचा माल त्यात {pct}% भरतो.",
+  "aiaic.ways.shared": "वाहन वाटून घ्या",
+  "aiaic.ways.shared_tip":
+    "इतर शेतकऱ्यांच्या मालाने वाहन भरल्यावर वजनानुसार तुमचा वाटा: गट विक्रीत सामील व्हा किंवा तुमचा माल इतरांसोबत पाठवायला AIAIC ला सांगा.",
+  "aiaic.ways.when_half": "अर्धे भरल्यास: {range}",
+  "aiaic.ways.buyer_collects": "खरेदीदार माल उचलतो",
+  "aiaic.ways.buyer_collects_tip":
+    "खरेदीदाराचे वाहन तुमच्या शेतातून किंवा गावातून माल नेते: तुम्हाला वाहतुकीचा खर्च नाही.",
+  "aiaic.ways.aiaic": "AIAIC व्यवस्था करते (विनंतीवर)",
+  "aiaic.ways.aiaic_tip":
+    "विनंतीवर: AIAIC सोबत काम करणारा वाहतूकदार. इतरांचा माल त्याच दिवशी त्याच मार्गाने गेला तरच वाटून घेतलेला दर लागू.",
+  "aiaic.compare.button": "बाजार समितीशी तुलना करा",
+  "aiaic.compare.hide": "तुलना लपवा",
+  "aiaic.compare.reading": "हिशोब करत आहे…",
+  "aiaic.compare.verdict.offer_more":
+    "तुमच्या प्रवासानंतर, जवळच्या सर्वोत्तम बाजार समितीपेक्षा ही ऑफर तुम्हाला क्विंटलला {low} – {high} जास्त देते.",
+  "aiaic.compare.verdict.mandi_more":
+    "तुमच्या प्रवासानंतर, जवळची सर्वोत्तम बाजार समिती या ऑफरपेक्षा क्विंटलला {low} – {high} जास्त देते.",
+  "aiaic.compare.verdict.about_the_same":
+    "तुमच्या प्रवासानंतर, जवळच्या सर्वोत्तम बाजार समितीइतकेच.",
+  "aiaic.compare.verdict.trip_not_measured":
+    "या ऑफरसाठी तुमचा प्रवास मोजलेला नाही: हे लक्षात घेऊन तुलना करा.",
+  "aiaic.compare.verdict.no_mandi_price":
+    "जवळच्या कोणत्याही बाजार समितीने अलीकडे या पिकाचा भाव दिला नाही: तुलना करण्यासारखे काही नाही.",
+  "aiaic.compare.verdict.prices_too_old":
+    "जवळच्या बाजार समित्यांचे नवीनतम भाव {days} दिवस जुने आहेत: तुलनेसाठी खूप जुने. बाजार समितीत चालू भाव विचारा.",
+  "aiaic.compare.offer": "ही ऑफर, तुमच्या हातात",
+  "aiaic.compare.mandi": "जवळची सर्वोत्तम बाजार समिती",
+  "aiaic.compare.per_q": "क्विंटलला, प्रवासानंतर",
+  "aiaic.compare.modal": "बाजार भाव {rs} ({day})",
+  "aiaic.compare.trip.buyer_collects": "खरेदीदार माल उचलतो: तुम्हाला प्रवास नाही.",
+  "aiaic.compare.trip.she_delivers": "तुम्ही पोहोचवता: {km} किमी.",
+  "aiaic.compare.trip.not_measured": "या ऑफरसाठी तुमचा प्रवास मोजलेला नाही.",
+  "aiaic.compare.saved": "खरेदीदार माल उचलल्याने तुमचा {km} किमी प्रवास वाचतो.",
+  "aiaic.compare.saved_least":
+    "खरेदीदार माल उचलल्यास तुमचा शेतापासूनचा प्रवास वाचतो (मोजलेला नाही).",
+  "aiaic.compare.mandi_least":
+    "तिथपर्यंतचा तुमचा शेतापासूनचा प्रवास माहीत नाही: फक्त किमान प्रवास खर्च धरला आहे.",
+  "aiaic.compare.commission": "तुम्ही भरायचे AIAIC चे कमिशन: क्विंटलला {rs}",
+  "aiaic.compare.commission_gst":
+    "तुम्ही भरायचे AIAIC चे कमिशन आणि त्यावरील जीएसटी: क्विंटलला {rs}",
+  "aiaic.compare.verdict.depends_on_sharing":
+    "हे वाहन वाटून घेण्यावर अवलंबून आहे: एकट्याने वाहन घेणे आणि वाटून घेणे यांची उत्तरे तुमच्या मालासाठी वेगळी येतात. दोन्ही खाली दिली आहेत.",
+  "aiaic.compare.alone.offer_more":
+    "एकट्याने वाहन घेतल्यास: ही ऑफर तुम्हाला क्विंटलला {low} – {high} जास्त देते.",
+  "aiaic.compare.alone.mandi_more":
+    "एकट्याने वाहन घेतल्यास: सर्वोत्तम बाजार समिती तुम्हाला क्विंटलला {low} – {high} जास्त देते.",
+  "aiaic.compare.alone.about_the_same": "एकट्याने वाहन घेतल्यास: जवळपास सारखेच.",
+  "aiaic.compare.shared.offer_more":
+    "वाहन वाटून घेतल्यास: ही ऑफर तुम्हाला क्विंटलला {low} – {high} जास्त देते.",
+  "aiaic.compare.shared.mandi_more":
+    "वाहन वाटून घेतल्यास: सर्वोत्तम बाजार समिती तुम्हाला क्विंटलला {low} – {high} जास्त देते.",
+  "aiaic.compare.shared.about_the_same": "वाहन वाटून घेतल्यास: जवळपास सारखेच.",
+  "aiaic.compare.assumes_alone": "तुम्ही एकट्याने वाहन घेतले असे धरून काढले.",
+  "aiaic.compare.if_shared": "तुमचा माल इतरांसोबत गेल्यास: क्विंटलला {v}",
+  "aiaic.compare.trip.least_fare_only":
+    "तुमच्या शेतापासूनचा प्रवास माहीत नाही (सुरुवात आणि शेवट एकच ठिकाण): फक्त किमान प्रवास खर्च धरला आहे.",
+  "aiaic.compare.for_her.offer": "तुमच्या {q} क्विंटलसाठी ही ऑफर तुम्हाला {v} जास्त देते.",
+  "aiaic.compare.for_her.mandi":
+    "तुमच्या {q} क्विंटलसाठी सर्वोत्तम बाजार समिती तुम्हाला {v} जास्त देते.",
+  "aiaic.ways.aiaic_shared": "इतर माल त्याच दिवशी त्याच मार्गाने गेल्यास: {range}",
+  "aiaic.compare.notes":
+    "बाजार समितीचे खर्च आणि माल चढवणे धरलेले नाही; बाजार भाव त्या दिवशी नोंदलेला भाव आहे, वचन नाही.",
+  "aiaic.money.fixed": "खरेदीदाराने लिंक भरल्यावर या विक्रीसाठी ठरलेले.",
+  "aiaic.money.now": "आजच्या AIAIC शुल्कानुसार; खरेदीदाराची लिंक ते ठरवते.",
+  "aiaic.money.price": "तुमची ठरलेली किंमत",
+  "aiaic.money.commission": "AIAIC चे कमिशन ({pct}%)",
+  "aiaic.money.gst": "कमिशनवर जीएसटी ({pct}%)",
+  "aiaic.money.to_you": "तुम्हाला",
+  "aiaic.money.step.buyer_paid": "खरेदीदार पैसे भरतो",
+  "aiaic.money.step.sending": "AIAIC तुमचे पैसे पाठवते",
+  "aiaic.money.step.reached": "ते तुमच्या बँकेत पोहोचतात",
+  "aiaic.money.status.requesting": "{rs} पाठवत आहे…",
+  "aiaic.money.status.queued": "{rs} पाठवण्याच्या रांगेत आहे.",
+  "aiaic.money.status.pending": "{rs} मंजुरीच्या प्रतीक्षेत आहे.",
+  "aiaic.money.status.processing": "{rs} तुमच्याकडे येत आहेत.",
+  "aiaic.money.status.processed": "{rs} तुमच्या बँकेत पोहोचले.",
+  "aiaic.money.status.reversed": "{rs} परत आले: AIAIC पुन्हा पाठवेल.",
+  "aiaic.money.status.failed": "{rs} पाठवणे झाले नाही: AIAIC पुन्हा पाठवेल.",
+  "aiaic.money.status.rejected": "{rs} पाठवणे झाले नाही: AIAIC पुन्हा पाठवेल.",
+  "aiaic.money.status.cancelled": "{rs} पाठवणे थांबवले.",
+  "aiaic.money.status.no_answer": "{rs} पाठवले का ते AIAIC तपासत आहे.",
+  "aiaic.money.status.recorded": "AIAIC च्या टीमनुसार {rs} बँक ट्रान्सफरने पाठवले.",
+  "aiaic.money.status.other": "तुमच्या विक्रीच्या पैशांबद्दल नवीन माहिती आहे: पाहण्यासाठी उघडा.",
+  "aiaic.dest.title": "AIAIC ने तुमचे पैसे कुठे पाठवावे?",
+  "aiaic.dest.kind.upi_id": "यूपीआय आयडी",
+  "aiaic.dest.kind.bank_account": "बँक खाते",
+  "aiaic.dest.upi": "तुमचा यूपीआय आयडी (उदा. नाव@बँक)",
+  "aiaic.dest.upi_one_lakh":
+    "तुमची रक्कम ₹1,00,000 किंवा जास्त आहे: यूपीआय आयडीवर ती एका पेमेंटमध्ये येऊ शकत नाही. त्याऐवजी बँक खाते द्या.",
+  "aiaic.dest.name": "बँकेतील नाव",
+  "aiaic.dest.account": "खाते क्रमांक",
+  "aiaic.dest.ifsc": "आयएफएससी (11 अक्षरे व अंक)",
+  "aiaic.dest.agree": "वरील सूचना मी वाचली आणि मला मान्य आहे.",
+  "aiaic.dest.save": "माझे पैसे कुठे जावे ते जतन करा",
+  "aiaic.dest.change": "बदला",
+  "aiaic.dest.remove": "काढा",
+  "aiaic.dest.remove_ask":
+    "तुमचा UPI आयडी किंवा बँक खाते AIAIC आणि RazorpayX मधून काढायचे? यानंतर AIAIC तिथे नवे पैसे पाठवत नाही.",
+  "aiaic.dest.remove_yes": "होय, काढा",
+  "aiaic.dest.keep": "ठेवा",
+  "aiaic.dest.removed": "काढले. RazorpayX ने ते बंद केले.",
+  "aiaic.dest.removed_pending":
+    "इथून काढले. AIAIC ची व्यक्ती RazorpayX वर ते बंद करण्याचे काम पूर्ण करेल.",
+  "aiaic.money.test": "फक्त चाचणी: खरे पैसे पाठवले गेले नाहीत.",
+  "aiaic.problem.sign_in_to_sell":
+    "विक्रीसाठी साइन इन करा: तुमची विक्री आणि तुमचे पैसे तुमचे आहेत, म्हणून विक्रीसाठी तुमचे स्वतःचे खाते लागते.",
+  "aiaic.sign_in_to_sell.go": "साइन इन करा",
+  "aiaic.refused.upi_id_not_valid": "यूपीआय आयडी नाव@बँक असा असतो.",
+  "aiaic.refused.account_name_not_valid": "बँकेत आहे तसे नाव लिहा.",
+  "aiaic.refused.ifsc_not_valid": "आयएफएससी 11 अक्षरे व अंकांचा असतो.",
+  "aiaic.refused.account_number_not_valid": "खाते क्रमांक तपासा.",
+  "aiaic.refused.destination_kind_not_valid": "यूपीआय आयडी किंवा बँक खाते निवडा.",
+  "aiaic.refused.destination_exists": "तुमचे तपशील आधीच दिले आहेत: बदलण्यासाठी 'बदला' दाबा.",
+  "aiaic.refused.razorpayx_not_configured":
+    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
+  "aiaic.refused.razorpayx_live_not_approved":
+    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
+  "aiaic.refused.test_keys_rehearsal_farmers_only":
+    "ही प्रणाली चाचणी स्थितीत आहे: इथे खरे पेमेंट तपशील घेतले जात नाहीत.",
+  "aiaic.refused.razorpayx_refused":
+    "Razorpay ने हे तपशील स्वीकारले नाहीत: तपासून पुन्हा प्रयत्न करा.",
+  "aiaic.refused.razorpayx_no_answer":
+    "Razorpay ने उत्तर दिले नाही: थोड्या वेळाने पुन्हा प्रयत्न करा.",
+  "aiaic.refused.razorpayx_ip_not_allowlisted":
+    "RazorpayX ने आत्ता AIAIC चा सर्व्हर स्वीकारला नाही (AIAIC च्या टीमला बदलायची एक सेटिंग): तुमचे तपशील घेतले गेले नाहीत. नंतर पुन्हा प्रयत्न करा.",
+  "aiaic.refused.destination_being_made":
+    "तुमचे तपशील आत्ता RazorpayX ला दिले जात आहेत: एका मिनिटाने पुन्हा प्रयत्न करा.",
+  "aiaic.refused.destination_ended_while_asked":
+    "RazorpayX ला विचारत असतानाच तुमचे तपशील काढले गेले: ते काढलेलेच राहतील.",
+  "aiaic.refused.no_destination": "तुमचा कोणताही UPI आयडी किंवा बँक खाते ठेवलेले नाही.",
+  "aiaic.refused.taluka_not_known": "यादीतून तुमचा तालुका निवडा.",
+  // a group sale and her sale's journey (AIAIC sections 25 and 27, 27 Oct 2026)
+  "aiaic.refused.pool_full":
+    "खरेदीदाराला आता या ऑफरपेक्षा कमी हवे आहे: ती आता स्वीकारता येत नाही. AIAIC ची टीम तुमच्याकडे कमी प्रमाण मागू शकते.",
+  "aiaic.refused.pool_closed": "गट विक्री बंद झाली: ही ऑफर आता स्वीकारता येत नाही.",
+  "aiaic.refused.pool_filled":
+    "इतर शेतकऱ्यांनी खरेदीदाराची मागणी आधी भरली: ही ऑफर आता स्वीकारता येत नाही.",
+  "aiaic.refused.pool_resized": "गट विक्रीने तुमच्याकडे दुसरे प्रमाण मागितले: तिची नवी ऑफर पहा.",
+  "aiaic.group.chip": "गट विक्री",
+  "aiaic.group.status.closed": "बंद",
+  "aiaic.group.status.cancelled": "रद्द",
+  "aiaic.group.title": "एका खरेदीदाराला {crop} {qty} हवा आहे, अनेक शेतकऱ्यांकडून मिळून",
+  "aiaic.group.joined": "आतापर्यंत सामील: {farmers} शेतकऱ्यांकडून {joined} · अजून हवे: {left}",
+  "aiaic.group.where": "माल येथे द्यायचा: {place}, {district}",
+  "aiaic.group.when": "संकलनाचा दिवस: {day}",
+  "aiaic.group.pay_not_said": "खरेदीदाराने किती लवकर पैसे देणार हे सांगितलेले नाही.",
+  "aiaic.group.pay_same_day": "खरेदीदार म्हणतो की तो त्याच दिवशी पैसे देतो.",
+  "aiaic.group.pay_within": "खरेदीदार म्हणतो की माल पोहोचल्यावर {days} दिवसांत पैसे देतो.",
+  "aiaic.group.buyer_price": "खरेदीदाराचा दर",
+  "aiaic.group.yours": "तुमचा लॉट: {qty}, एकूण {amount}",
+  "aiaic.group.mandi_title": "तुमच्या जिल्ह्याचा बाजार भाव",
+  "aiaic.group.mandi_line": "{day} रोजी {low} ते {high} ({source})",
+  "aiaic.group.mandi_none":
+    "तुमच्या जिल्ह्यातील कोणत्याही बाजार समितीने या पिकाचा भाव अलीकडे कळवलेला नाही.",
+  "aiaic.group.mandi_middle": "भाव कळवलेल्या {n} बाजार समित्यांचा मधला भाव",
+  "aiaic.group.note":
+    "तुमच्या लॉटचा निर्णय तुमचा: होय किंवा नाही म्हणा. सामील झाल्यावर ती तुमची स्वतःची विक्री होते, पैसे तुम्हालाच मिळतात. संकलन ठिकाणापर्यंत लॉट आणण्याचा तुमचा खर्च खरेदीदाराच्या दरात नाही.",
+  "aiaic.group.near_title": "तुमच्या जवळच्या गट विक्री",
+  "aiaic.group.near_how":
+    "सामील होण्यासाठी त्या पिकाचा तुमचा माल विक्रीसाठी नोंदवा: मग AIAIC ची टीम तुमच्या लॉटला आमंत्रण देऊ शकते, आणि तुम्ही त्याच्या ऑफरला होय किंवा नाही म्हणता.",
+  "aiaic.group.near_line": "अजून हवे: {target} पैकी {left} · माल येथे द्यायचा: {place}, {district}",
+  "aiaic.group.km": "सुमारे {km} किमी दूर",
+  "aiaic.group.near_list": "माझा {crop} विक्रीसाठी नोंदवा",
+  "aiaic.journey.title": "तुमची विक्री, पायरीपायरीने",
+  "aiaic.journey.agreed": "विक्री ठरली",
+  "aiaic.journey.stage.aggregation": "संकलन झाले",
+  "aiaic.journey.stage.quality_grading": "प्रतवारी झाली",
+  "aiaic.journey.stage.storage": "साठवले",
+  "aiaic.journey.stage.processing": "प्रक्रिया झाली",
+  "aiaic.journey.stage.pickup": "माल उचलला",
+  "aiaic.journey.stage.in_transit": "प्रवासात",
+  "aiaic.journey.stage.delivered": "पोहोचला",
+  "aiaic.journey.stage.delivery_exception": "पोहोचवताना अडचण",
+  "aiaic.journey.stage.reconciliation": "प्रमाण निश्चित झाले",
+  "aiaic.journey.status.pending": "वाट पाहत आहे",
+  "aiaic.journey.status.failed": "झाले नाही",
+  "aiaic.journey.practice": "सराव",
+  "aiaic.journey.none_yet": "विक्री ठरल्यानंतरची एकही पायरी अजून नोंदलेली नाही.",
+  "aiaic.journey.f.collection_point": "{v} येथे",
+  "aiaic.journey.f.quantity_q": "{v}",
+  "aiaic.journey.f.grade": "प्रत {v}",
+  "aiaic.journey.f.weight_q": "वजन {v}",
+  "aiaic.journey.f.rejected_q": "{v} घेतले नाही",
+  "aiaic.journey.f.sampled": "नमुना तपासला",
+  "aiaic.journey.f.tested_on": "{v} रोजी तपासले",
+  "aiaic.journey.f.tested_at_apmc": "{v} येथे तपासले",
+  "aiaic.journey.f.facility": "{v} येथे",
+  "aiaic.journey.f.stored_from": "{v} पासून",
+  "aiaic.journey.f.stored_to": "{v} पर्यंत",
+  "aiaic.journey.f.process": "{v}",
+  "aiaic.journey.f.input_q": "{v} आत गेले",
+  "aiaic.journey.f.output_q": "{v} बाहेर आले",
+  "aiaic.journey.f.expected_on": "{v} रोजी अपेक्षित",
+  "aiaic.journey.f.received_q": "{v} मिळाले",
+  "aiaic.journey.f.delivered_q": "{v} पोहोचले",
+  "aiaic.journey.f.accepted_q": "{v} स्वीकारले",
+  "aiaic.journey.f.loss": "प्रक्रियेत {v} घट ({pct}%)",
+  "aiaic.journey.facility_kind.warehouse": "गोदाम",
+  "aiaic.journey.facility_kind.cold_storage": "शीतगृह",
+  "aiaic.journey.facility_kind.farm_store": "शेतावरील साठवण",
+  "aiaic.journey.facility_kind.other": "इतर साठवण",
+  "aiaic.journey.kind.delay": "उशीर",
+  "aiaic.journey.kind.damage": "नुकसान",
+  "aiaic.journey.kind.shortage": "माल कमी",
+  "aiaic.journey.kind.quality_rejection": "गुणवत्तेमुळे नाकारले",
+  "aiaic.journey.kind.dispute": "वाद",
+  "aiaic.journey.kind.other": "इतर अडचण",
   "aiaic.chip.practice": "सराव",
   "aiaic.chip.test": "चाचणी",
   "aiaic.chip.local": "नमुना साठा",
@@ -639,6 +1089,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.loading": "AIAIC कडून वाचत आहे…",
   "aiaic.retry": "पुन्हा प्रयत्न करा",
   "aiaic.refresh": "नवीन ऑफर पाहा",
+  "aiaic.not_refreshed": "आत्ता नवीन माहिती आणता आली नाही: AIAIC ने शेवटी सांगितलेलेच दिसत आहे.",
   "aiaic.back": "मागे",
   "aiaic.choose": "निवडा…",
   // AIAIC's analysis on Get my advice (its farmer app's words)
@@ -1121,9 +1572,9 @@ export const AIAIC_MR: Dict = {
   "aiaic.farmer.money.direct.said_not_yet":
     "तुम्ही सांगितले की पैसे आलेले नाहीत. हे AIAIC च्या लोकांच्या यादीत आहे.",
   "aiaic.farmer.money.direct.buyer_says":
-    "खरेदीदार म्हणतो की त्याने {amount} भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
+    "खरेदीदार म्हणतात की त्यांनी {amount} भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
   "aiaic.farmer.money.direct.buyer_says_any":
-    "खरेदीदार म्हणतो की त्याने पैसे भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
+    "खरेदीदार म्हणतात की त्यांनी पैसे भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
 
   "aiaic.payout.title": "तुमचे पैसे कुठे जातात",
   "aiaic.payout.not_offered": "AIAIC मार्फत तुम्हाला पैसे देणे इथे सुरू नाही.",
@@ -1220,6 +1671,23 @@ export const AIAIC_MR: Dict = {
   "aiaic.transport.note.from_district_centre":
     "तुमच्या शेतापासून नाही, तुमच्या जिल्ह्याच्या मध्यापासून मोजले.",
   "aiaic.transport.note.to_mandi_town": "मंडीच्या गावापर्यंत मोजले.",
+  "aiaic.transport.note.from_taluka_town":
+    "{taluka} च्या मुख्य गावापासून मोजले, तुमच्या शेतापासून नाही.",
+  "aiaic.transport.note.from_taluka_area":
+    "{taluka} तालुक्याच्या मध्यापासून मोजले, तुमच्या शेतापासून नाही.",
+  "aiaic.transport.note.taluka_not_placed":
+    "{taluka} चे गाव ठरवता आले नाही: जिल्ह्याच्या मध्यापासून मोजले.",
+  "aiaic.transport.note.near_taluka_town":
+    "बाजार समिती तुमच्या तालुक्याच्या सुरुवातीच्या ठिकाणाजवळ आहे: तुमच्या शेतापासूनचा प्रवास जास्त असू शकतो.",
+  "aiaic.transport.note.near_taluka_town_warehouse":
+    "गोदाम तुमच्या तालुक्याच्या सुरुवातीच्या ठिकाणाजवळ आहे: तुमच्या शेतापासूनचा प्रवास जास्त असू शकतो.",
+  "aiaic.transport.note.loading_not_counted":
+    "चढवणे आणि उतरवणे या आकड्यांत धरलेले नाही (खाली दिलेल्या पानानुसार प्रति ट्रक ₹500 ते 2,000).",
+  "aiaic.transport.note.season_not_counted":
+    "पावसाळ्यात आणि सणांच्या आठवड्यांत प्रवास 20-30% महाग पडू शकतो (खाली दिलेल्या पानानुसार); धरलेले नाही.",
+  "aiaic.transport.note.shared_needs_others":
+    "इतरांचा माल तुमच्या मालासोबत गेला तरच शेअर केलेल्या वाहनाचा खर्च इतका येतो: गट विक्री किंवा AIAIC चे संकलन हे घडवून आणते.",
+  "aiaic.transport.note.source": "स्रोत:",
   "aiaic.transport.note.to_mandi_area":
     "मंडीला ज्या भागाचे नाव आहे त्या भागाच्या मध्यापर्यंत मोजले.",
   "aiaic.transport.note.to_district_centre":
@@ -1248,6 +1716,219 @@ export const AIAIC_MR: Dict = {
 };
 
 export const AIAIC_HI: Dict = {
+  // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
+  "aiaic.taluka.label": "आपका तालुका (दूरी के लिए)",
+  "aiaic.taluka.whole_district": "पूरा ज़िला",
+  "aiaic.taluka.help":
+    "दूरी और ढुलाई आपके तालुका के मुख्य स्थान से नापी जाती है; सलाह आपके ज़िले की ही रहती है।",
+  "aiaic.ways.title": "माल ले जाने के आपके तरीके",
+  "aiaic.ways.cheapest": "सबसे सस्ता",
+  "aiaic.ways.per_q": "प्रति क्विंटल {range}",
+  "aiaic.ways.alone": "अकेले गाड़ी किराए पर",
+  "aiaic.ways.alone_tip": "आपका माल उसमें {pct}% भरता है।",
+  "aiaic.ways.shared": "गाड़ी साझा करें",
+  "aiaic.ways.shared_tip":
+    "दूसरे किसानों के माल से गाड़ी भरने पर वज़न के हिसाब से आपका हिस्सा: समूह बिक्री में जुड़ें या AIAIC से अपना माल दूसरों के साथ भेजने को कहें।",
+  "aiaic.ways.when_half": "आधी भरी हो तो: {range}",
+  "aiaic.ways.buyer_collects": "खरीदार माल उठाता है",
+  "aiaic.ways.buyer_collects_tip":
+    "खरीदार की गाड़ी आपके खेत या गाँव से माल ले जाती है: आपको ढुलाई का खर्च नहीं।",
+  "aiaic.ways.aiaic": "AIAIC इंतज़ाम करता है (अनुरोध पर)",
+  "aiaic.ways.aiaic_tip":
+    "अनुरोध पर: AIAIC के साथ काम करने वाला ट्रांसपोर्टर। साझा दर तभी लागू है जब दूसरा माल उसी दिन उसी रास्ते जाए।",
+  "aiaic.compare.button": "मंडी से तुलना करें",
+  "aiaic.compare.hide": "तुलना छिपाएँ",
+  "aiaic.compare.reading": "हिसाब लगा रहे हैं…",
+  "aiaic.compare.verdict.offer_more":
+    "आपकी यात्रा के बाद, पास की सबसे अच्छी मंडी से यह ऑफ़र आपको प्रति क्विंटल {low} – {high} ज़्यादा देता है।",
+  "aiaic.compare.verdict.mandi_more":
+    "आपकी यात्रा के बाद, पास की सबसे अच्छी मंडी इस ऑफ़र से प्रति क्विंटल {low} – {high} ज़्यादा देती है।",
+  "aiaic.compare.verdict.about_the_same": "आपकी यात्रा के बाद, पास की सबसे अच्छी मंडी जितना ही।",
+  "aiaic.compare.verdict.trip_not_measured":
+    "इस ऑफ़र के लिए आपकी यात्रा नापी नहीं गई: यह ध्यान में रखकर तुलना करें।",
+  "aiaic.compare.verdict.no_mandi_price":
+    "पास की किसी मंडी ने हाल में इस फ़सल का भाव नहीं दिया: तुलना के लिए कुछ नहीं।",
+  "aiaic.compare.verdict.prices_too_old":
+    "पास की मंडियों के नए भाव {days} दिन पुराने हैं: तुलना के लिए बहुत पुराने। मंडी से मौजूदा भाव पूछें।",
+  "aiaic.compare.offer": "यह ऑफ़र, आपके हाथ में",
+  "aiaic.compare.mandi": "पास की सबसे अच्छी मंडी",
+  "aiaic.compare.per_q": "प्रति क्विंटल, यात्रा के बाद",
+  "aiaic.compare.modal": "मंडी भाव {rs} ({day})",
+  "aiaic.compare.trip.buyer_collects": "खरीदार माल उठाता है: आपको यात्रा नहीं।",
+  "aiaic.compare.trip.she_delivers": "आप पहुँचाते हैं: {km} किमी।",
+  "aiaic.compare.trip.not_measured": "इस ऑफ़र के लिए आपकी यात्रा नापी नहीं गई।",
+  "aiaic.compare.saved": "खरीदार के माल उठाने से आपकी {km} किमी यात्रा बचती है।",
+  "aiaic.compare.saved_least": "खरीदार के माल उठाने से आपके खेत से यात्रा बचती है (नापी नहीं)।",
+  "aiaic.compare.mandi_least":
+    "वहाँ तक आपके खेत से सफ़र पता नहीं: केवल कम से कम सफ़र खर्च जोड़ा गया है।",
+  "aiaic.compare.commission": "आपको देना AIAIC का कमीशन: प्रति क्विंटल {rs}",
+  "aiaic.compare.commission_gst": "आपको देना AIAIC का कमीशन और उस पर जीएसटी: प्रति क्विंटल {rs}",
+  "aiaic.compare.verdict.depends_on_sharing":
+    "यह गाड़ी साझा करने पर निर्भर है: अकेले गाड़ी लेने और साझा करने के जवाब आपके माल के लिए अलग आते हैं। दोनों नीचे दिए हैं।",
+  "aiaic.compare.alone.offer_more":
+    "अकेले गाड़ी लेने पर: यह ऑफ़र आपको प्रति क्विंटल {low} – {high} ज़्यादा देता है।",
+  "aiaic.compare.alone.mandi_more":
+    "अकेले गाड़ी लेने पर: सबसे अच्छी मंडी आपको प्रति क्विंटल {low} – {high} ज़्यादा देती है।",
+  "aiaic.compare.alone.about_the_same": "अकेले गाड़ी लेने पर: लगभग बराबर।",
+  "aiaic.compare.shared.offer_more":
+    "गाड़ी साझा करने पर: यह ऑफ़र आपको प्रति क्विंटल {low} – {high} ज़्यादा देता है।",
+  "aiaic.compare.shared.mandi_more":
+    "गाड़ी साझा करने पर: सबसे अच्छी मंडी आपको प्रति क्विंटल {low} – {high} ज़्यादा देती है।",
+  "aiaic.compare.shared.about_the_same": "गाड़ी साझा करने पर: लगभग बराबर।",
+  "aiaic.compare.assumes_alone": "यह मानकर निकाला कि आप अकेले गाड़ी लेते हैं।",
+  "aiaic.compare.if_shared": "आपका माल दूसरों के साथ जाए तो: प्रति क्विंटल {v}",
+  "aiaic.compare.trip.least_fare_only":
+    "आपके खेत से सफ़र पता नहीं (शुरुआत और अंत एक ही जगह): केवल कम से कम सफ़र खर्च जोड़ा गया है।",
+  "aiaic.compare.for_her.offer": "आपके {q} क्विंटल के लिए यह ऑफ़र आपको {v} ज़्यादा देता है।",
+  "aiaic.compare.for_her.mandi":
+    "आपके {q} क्विंटल के लिए सबसे अच्छी मंडी आपको {v} ज़्यादा देती है।",
+  "aiaic.ways.aiaic_shared": "दूसरा माल उसी दिन उसी रास्ते जाए तो: {range}",
+  "aiaic.compare.notes":
+    "मंडी के खर्च और माल चढ़ाना नहीं जोड़ा गया; मंडी भाव उस दिन का दर्ज भाव है, वादा नहीं।",
+  "aiaic.money.fixed": "खरीदार के लिंक भरने पर इस बिक्री के लिए तय।",
+  "aiaic.money.now": "आज के AIAIC शुल्क के अनुसार; खरीदार का लिंक इसे तय करता है।",
+  "aiaic.money.price": "आपकी तय कीमत",
+  "aiaic.money.commission": "AIAIC का कमीशन ({pct}%)",
+  "aiaic.money.gst": "कमीशन पर जीएसटी ({pct}%)",
+  "aiaic.money.to_you": "आपको",
+  "aiaic.money.step.buyer_paid": "खरीदार पैसे भरता है",
+  "aiaic.money.step.sending": "AIAIC आपके पैसे भेजता है",
+  "aiaic.money.step.reached": "वे आपके बैंक में पहुँचते हैं",
+  "aiaic.money.status.requesting": "{rs} भेज रहे हैं…",
+  "aiaic.money.status.queued": "{rs} भेजे जाने की प्रतीक्षा में है।",
+  "aiaic.money.status.pending": "{rs} मंज़ूरी की प्रतीक्षा में है।",
+  "aiaic.money.status.processing": "{rs} आपकी ओर आ रहे हैं।",
+  "aiaic.money.status.processed": "{rs} आपके बैंक में पहुँचे।",
+  "aiaic.money.status.reversed": "{rs} वापस आए: AIAIC फिर से भेजेगा।",
+  "aiaic.money.status.failed": "{rs} भेजना नहीं हुआ: AIAIC फिर से भेजेगा।",
+  "aiaic.money.status.rejected": "{rs} भेजना नहीं हुआ: AIAIC फिर से भेजेगा।",
+  "aiaic.money.status.cancelled": "{rs} भेजना रोका गया।",
+  "aiaic.money.status.no_answer": "{rs} भेजे गए या नहीं, AIAIC जाँच रहा है।",
+  "aiaic.money.status.recorded": "AIAIC की टीम के अनुसार {rs} बैंक ट्रांसफ़र से भेजे गए।",
+  "aiaic.money.status.other": "आपकी बिक्री के पैसे के बारे में नई जानकारी है: देखने के लिए खोलें।",
+  "aiaic.dest.title": "AIAIC आपके पैसे कहाँ भेजे?",
+  "aiaic.dest.kind.upi_id": "यूपीआई आईडी",
+  "aiaic.dest.kind.bank_account": "बैंक खाता",
+  "aiaic.dest.upi": "आपकी यूपीआई आईडी (जैसे नाम@बैंक)",
+  "aiaic.dest.upi_one_lakh":
+    "आपकी राशि ₹1,00,000 या ज़्यादा है: यूपीआई आईडी पर यह एक भुगतान में नहीं आ सकती। इसके बजाय बैंक खाता दें।",
+  "aiaic.dest.name": "बैंक में दर्ज नाम",
+  "aiaic.dest.account": "खाता संख्या",
+  "aiaic.dest.ifsc": "आईएफ़एससी (11 अक्षर और अंक)",
+  "aiaic.dest.agree": "ऊपर की सूचना मैंने पढ़ी और मुझे मंज़ूर है।",
+  "aiaic.dest.save": "मेरे पैसे कहाँ जाएँ, सहेजें",
+  "aiaic.dest.change": "बदलें",
+  "aiaic.dest.remove": "हटाएँ",
+  "aiaic.dest.remove_ask":
+    "अपनी UPI आईडी या बैंक खाता AIAIC और RazorpayX से हटाएँ? इसके बाद AIAIC वहाँ नया पैसा नहीं भेजता।",
+  "aiaic.dest.remove_yes": "हाँ, हटाएँ",
+  "aiaic.dest.keep": "रहने दें",
+  "aiaic.dest.removed": "हटा दिया। RazorpayX ने इन्हें बंद कर दिया।",
+  "aiaic.dest.removed_pending":
+    "यहाँ से हटा दिया। AIAIC का व्यक्ति RazorpayX पर इन्हें बंद करने का काम पूरा करेगा।",
+  "aiaic.money.test": "सिर्फ़ जाँच: असली पैसा नहीं भेजा गया।",
+  "aiaic.problem.sign_in_to_sell":
+    "बेचने के लिए साइन इन करें: आपकी बिक्री और आपके पैसे आपके हैं, इसलिए बेचने के लिए अपना खाता चाहिए।",
+  "aiaic.sign_in_to_sell.go": "साइन इन करें",
+  "aiaic.refused.upi_id_not_valid": "यूपीआई आईडी नाम@बैंक जैसी होती है।",
+  "aiaic.refused.account_name_not_valid": "बैंक में जैसा है वैसा नाम लिखें।",
+  "aiaic.refused.ifsc_not_valid": "आईएफ़एससी 11 अक्षर और अंकों का होता है।",
+  "aiaic.refused.account_number_not_valid": "खाता संख्या जाँचें।",
+  "aiaic.refused.destination_kind_not_valid": "यूपीआई आईडी या बैंक खाता चुनें।",
+  "aiaic.refused.destination_exists": "आपका विवरण पहले से दिया है: बदलने के लिए 'बदलें' दबाएँ।",
+  "aiaic.refused.razorpayx_not_configured":
+    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
+  "aiaic.refused.razorpayx_live_not_approved":
+    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
+  "aiaic.refused.test_keys_rehearsal_farmers_only":
+    "यह प्रणाली परीक्षण मोड में है: यहाँ असली पेमेंट विवरण नहीं लिया जाता।",
+  "aiaic.refused.razorpayx_refused":
+    "Razorpay ने यह विवरण स्वीकार नहीं किया: जाँचकर फिर कोशिश करें।",
+  "aiaic.refused.razorpayx_no_answer": "Razorpay ने जवाब नहीं दिया: थोड़ी देर बाद फिर कोशिश करें।",
+  "aiaic.refused.razorpayx_ip_not_allowlisted":
+    "RazorpayX ने अभी AIAIC का सर्वर स्वीकार नहीं किया (AIAIC की टीम को बदलनी एक सेटिंग): आपकी जानकारी नहीं ली गई। बाद में फिर कोशिश करें।",
+  "aiaic.refused.destination_being_made":
+    "आपकी जानकारी अभी RazorpayX को दी जा रही है: एक मिनट बाद फिर कोशिश करें।",
+  "aiaic.refused.destination_ended_while_asked":
+    "RazorpayX से पूछते समय ही आपकी जानकारी हटा दी गई: वह हटी ही रहेगी।",
+  "aiaic.refused.no_destination": "आपकी कोई UPI आईडी या बैंक खाता रखा नहीं है।",
+  "aiaic.refused.taluka_not_known": "सूची से अपना तालुका चुनें।",
+  // a group sale and her sale's journey (AIAIC sections 25 and 27, 27 Oct 2026)
+  "aiaic.refused.pool_full":
+    "खरीदार को अब इस ऑफ़र से कम चाहिए: यह अब स्वीकार नहीं हो सकता। AIAIC की टीम आपसे कम मात्रा माँग सकती है।",
+  "aiaic.refused.pool_closed": "समूह बिक्री बंद हो गई: यह ऑफ़र अब स्वीकार नहीं हो सकता।",
+  "aiaic.refused.pool_filled":
+    "दूसरे किसानों ने खरीदार की माँग पहले भर दी: यह ऑफ़र अब स्वीकार नहीं हो सकता।",
+  "aiaic.refused.pool_resized": "समूह बिक्री ने आपसे दूसरी मात्रा माँगी: उसका नया ऑफ़र देखें।",
+  "aiaic.group.chip": "समूह बिक्री",
+  "aiaic.group.status.closed": "बंद",
+  "aiaic.group.status.cancelled": "रद्द",
+  "aiaic.group.title": "एक खरीदार को {crop} {qty} चाहिए, कई किसानों से मिलकर",
+  "aiaic.group.joined": "अब तक जुड़ा: {farmers} किसानों से {joined} · अभी चाहिए: {left}",
+  "aiaic.group.where": "उपज यहाँ सौंपनी है: {place}, {district}",
+  "aiaic.group.when": "संग्रह का दिन: {day}",
+  "aiaic.group.pay_not_said": "खरीदार ने नहीं बताया कि वह कितनी जल्दी भुगतान करेगा।",
+  "aiaic.group.pay_same_day": "खरीदार कहता है कि वह उसी दिन भुगतान करता है।",
+  "aiaic.group.pay_within": "खरीदार कहता है कि उपज पहुँचने के {days} दिनों में भुगतान करता है।",
+  "aiaic.group.buyer_price": "खरीदार का दाम",
+  "aiaic.group.yours": "आपका लॉट: {qty}, कुल {amount}",
+  "aiaic.group.mandi_title": "आपके ज़िले का मंडी भाव",
+  "aiaic.group.mandi_line": "{day} को {low} से {high} ({source})",
+  "aiaic.group.mandi_none": "आपके ज़िले की किसी मंडी ने इस फ़सल का भाव हाल में नहीं बताया।",
+  "aiaic.group.mandi_middle": "भाव बताने वाली {n} मंडियों का बीच का भाव",
+  "aiaic.group.note":
+    "अपने लॉट का फ़ैसला आपका: हाँ या ना कहें। जुड़ने पर यह आपकी अपनी बिक्री बनती है, भुगतान आपको ही मिलता है। संग्रह स्थल तक लॉट लाने का आपका खर्च खरीदार के दाम में नहीं है।",
+  "aiaic.group.near_title": "आपके पास की समूह बिक्री",
+  "aiaic.group.near_how":
+    "जुड़ने के लिए उस फ़सल की अपनी उपज बिक्री के लिए दर्ज करें: फिर AIAIC की टीम आपके लॉट को न्योता दे सकती है, और आप उसके ऑफ़र को हाँ या ना कहते हैं।",
+  "aiaic.group.near_line":
+    "अभी चाहिए: {target} में से {left} · उपज यहाँ सौंपनी है: {place}, {district}",
+  "aiaic.group.km": "लगभग {km} किमी दूर",
+  "aiaic.group.near_list": "मेरा {crop} बिक्री के लिए दर्ज करें",
+  "aiaic.journey.title": "आपकी बिक्री, कदम दर कदम",
+  "aiaic.journey.agreed": "बिक्री तय हुई",
+  "aiaic.journey.stage.aggregation": "संग्रह हुआ",
+  "aiaic.journey.stage.quality_grading": "श्रेणी तय हुई",
+  "aiaic.journey.stage.storage": "भंडारण हुआ",
+  "aiaic.journey.stage.processing": "प्रसंस्करण हुआ",
+  "aiaic.journey.stage.pickup": "उपज उठाई गई",
+  "aiaic.journey.stage.in_transit": "रास्ते में",
+  "aiaic.journey.stage.delivered": "पहुँच गई",
+  "aiaic.journey.stage.delivery_exception": "पहुँचाने में समस्या",
+  "aiaic.journey.stage.reconciliation": "मात्रा तय हुई",
+  "aiaic.journey.status.pending": "इंतज़ार में",
+  "aiaic.journey.status.failed": "नहीं हुआ",
+  "aiaic.journey.practice": "अभ्यास",
+  "aiaic.journey.none_yet": "बिक्री तय होने के बाद का कोई कदम अभी दर्ज नहीं है।",
+  "aiaic.journey.f.collection_point": "{v} पर",
+  "aiaic.journey.f.quantity_q": "{v}",
+  "aiaic.journey.f.grade": "श्रेणी {v}",
+  "aiaic.journey.f.weight_q": "तौल {v}",
+  "aiaic.journey.f.rejected_q": "{v} नहीं लिया गया",
+  "aiaic.journey.f.sampled": "नमूना जाँचा गया",
+  "aiaic.journey.f.tested_on": "{v} को जाँचा गया",
+  "aiaic.journey.f.tested_at_apmc": "{v} पर जाँचा गया",
+  "aiaic.journey.f.facility": "{v} पर",
+  "aiaic.journey.f.stored_from": "{v} से",
+  "aiaic.journey.f.stored_to": "{v} तक",
+  "aiaic.journey.f.process": "{v}",
+  "aiaic.journey.f.input_q": "{v} अंदर गया",
+  "aiaic.journey.f.output_q": "{v} बाहर आया",
+  "aiaic.journey.f.expected_on": "{v} को अपेक्षित",
+  "aiaic.journey.f.received_q": "{v} मिला",
+  "aiaic.journey.f.delivered_q": "{v} पहुँचा",
+  "aiaic.journey.f.accepted_q": "{v} स्वीकार",
+  "aiaic.journey.f.loss": "प्रसंस्करण में {v} कमी ({pct}%)",
+  "aiaic.journey.facility_kind.warehouse": "गोदाम",
+  "aiaic.journey.facility_kind.cold_storage": "शीतगृह",
+  "aiaic.journey.facility_kind.farm_store": "खेत का भंडार",
+  "aiaic.journey.facility_kind.other": "दूसरा भंडार",
+  "aiaic.journey.kind.delay": "देरी",
+  "aiaic.journey.kind.damage": "नुकसान",
+  "aiaic.journey.kind.shortage": "कमी",
+  "aiaic.journey.kind.quality_rejection": "गुणवत्ता के कारण नामंज़ूर",
+  "aiaic.journey.kind.dispute": "विवाद",
+  "aiaic.journey.kind.other": "दूसरी समस्या",
   "aiaic.chip.practice": "अभ्यास",
   "aiaic.chip.test": "परीक्षण",
   "aiaic.chip.local": "नमूना भंडार",
@@ -1256,6 +1937,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.loading": "AIAIC से पढ़ रहे हैं…",
   "aiaic.retry": "फिर से कोशिश करें",
   "aiaic.refresh": "नए ऑफ़र देखें",
+  "aiaic.not_refreshed": "अभी नई जानकारी नहीं आ सकी: AIAIC ने आख़िरी बार जो बताया, वही दिख रहा है।",
   "aiaic.back": "वापस",
   "aiaic.choose": "चुनें…",
   // AIAIC's analysis on Get my advice (its farmer app's words)
@@ -1555,7 +2237,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.sell.see_offers": "ऑफ़र देखें",
   "aiaic.sell.another": "और माल दर्ज करें",
 
-  "aiaic.lots.title": "मैं क्या बेच रहा/रही हूँ",
+  "aiaic.lots.title": "बिक्री के लिए मेरी उपज",
   "aiaic.lots.empty": "अभी कुछ भी दर्ज नहीं।",
   "aiaic.lots.left": "{qty} में से {left} क्विंटल बचा",
   "aiaic.lots.offers": "खुले ऑफ़र: {n}",
@@ -1734,9 +2416,9 @@ export const AIAIC_HI: Dict = {
   "aiaic.farmer.money.direct.said_not_yet":
     "आपने बताया कि पैसा नहीं आया। यह AIAIC के लोगों की सूची में है।",
   "aiaic.farmer.money.direct.buyer_says":
-    "खरीदार कहता है कि उसने {amount} दिए। अपने बैंक का संदेश या UPI ऐप देखें।",
+    "खरीदार कहते हैं कि उन्होंने {amount} दिए। अपने बैंक का संदेश या UPI ऐप देखें।",
   "aiaic.farmer.money.direct.buyer_says_any":
-    "खरीदार कहता है कि उसने पैसा दिया। अपने बैंक का संदेश या UPI ऐप देखें।",
+    "खरीदार कहते हैं कि उन्होंने पैसा दिया। अपने बैंक का संदेश या UPI ऐप देखें।",
 
   "aiaic.payout.title": "आपका पैसा कहाँ जाता है",
   "aiaic.payout.not_offered": "AIAIC के ज़रिए आपको भुगतान यहाँ चालू नहीं है।",
@@ -1833,6 +2515,21 @@ export const AIAIC_HI: Dict = {
   "aiaic.routemap.km_estimate": "लगभग {km} कि.मी. (अनुमान)",
   "aiaic.transport.note.from_district_centre": "आपके खेत से नहीं, आपके ज़िले के बीच से नापा गया।",
   "aiaic.transport.note.to_mandi_town": "मंडी के कस्बे तक नापा गया।",
+  "aiaic.transport.note.from_taluka_town": "{taluka} के मुख्य कस्बे से मापा गया, आपके खेत से नहीं।",
+  "aiaic.transport.note.from_taluka_area": "{taluka} तालुका के बीच से मापा गया, आपके खेत से नहीं।",
+  "aiaic.transport.note.taluka_not_placed":
+    "{taluka} का कस्बा तय नहीं हो सका: ज़िले के बीच से मापा गया।",
+  "aiaic.transport.note.near_taluka_town":
+    "मंडी आपके तालुका के शुरुआती स्थान के पास है: आपके खेत से सफ़र लंबा हो सकता है।",
+  "aiaic.transport.note.near_taluka_town_warehouse":
+    "गोदाम आपके तालुका के शुरुआती स्थान के पास है: आपके खेत से सफ़र लंबा हो सकता है।",
+  "aiaic.transport.note.loading_not_counted":
+    "चढ़ाई और उतराई इन आँकड़ों में नहीं है (नीचे दिए पन्ने के अनुसार प्रति ट्रक ₹500 से 2,000)।",
+  "aiaic.transport.note.season_not_counted":
+    "बारिश और त्योहारों के हफ़्तों में सफ़र 20-30% महँगा हो सकता है (नीचे दिए पन्ने के अनुसार); जोड़ा नहीं गया।",
+  "aiaic.transport.note.shared_needs_others":
+    "साझा गाड़ी का खर्च इतना तभी होता है जब दूसरों का माल आपके माल के साथ जाए: समूह बिक्री या AIAIC का संग्रह ऐसा करवाता है।",
+  "aiaic.transport.note.source": "स्रोत:",
   "aiaic.transport.note.to_mandi_area": "मंडी जिस इलाके के नाम पर है उसके बीच तक नापा गया।",
   "aiaic.transport.note.to_district_centre":
     "इस मंडी की अपनी जगह मालूम नहीं: उसके ज़िले के बीच तक नापा गया।",

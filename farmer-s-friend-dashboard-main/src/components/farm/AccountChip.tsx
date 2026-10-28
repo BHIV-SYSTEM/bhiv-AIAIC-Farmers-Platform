@@ -1,17 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CircleCheck, LogIn, LogOut, MessageCircleReply, Trash2, UserRound } from "lucide-react";
+import {
+  CircleCheck,
+  IndianRupee,
+  LogIn,
+  LogOut,
+  MessageCircleReply,
+  Trash2,
+  UserRound,
+} from "lucide-react";
 import { useState } from "react";
 
-import { accountWords } from "@/lib/aiaic-account";
+import { accountWords, moneyNoticeLine, type Notice } from "@/lib/aiaic-account";
 import {
   eraseMyAccount,
   getMyNotices,
   markNoticeRead,
   signOutFarmer,
 } from "@/lib/aiaic-account.functions";
+import { forgetPersonalReads } from "@/lib/aiaic-hooks";
 import { useMe } from "@/lib/aiaic-me";
+import { type MineForScreen, type AiaicResult } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 
 /**
@@ -34,6 +44,7 @@ export function AccountChip() {
       if (!r.ok) return;
       setOpen(false);
       setEraseAsked(false);
+      forgetPersonalReads(qc);
       await qc.invalidateQueries();
       void navigate({ to: "/" });
     },
@@ -42,6 +53,7 @@ export function AccountChip() {
     mutationFn: () => outFn(),
     onSuccess: async () => {
       setOpen(false);
+      forgetPersonalReads(qc);
       await qc.invalidateQueries();
       void navigate({ to: "/" });
     },
@@ -152,24 +164,32 @@ export function AccountChip() {
  * for a guest whose session ended, that she was signed out. Marked read when she presses OK or opens it.
  */
 export function AccountNotices() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const me = useMe();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const noticesFn = useServerFn(getMyNotices);
   const readFn = useServerFn(markNoticeRead);
   const notices = useQuery({
-    queryKey: ["aiaic-notices"],
-    queryFn: () => noticesFn(),
+    // the language is part of the read: a money notice names its crop in the reader's language (R5P-10)
+    queryKey: ["aiaic-notices", lang],
+    queryFn: () => noticesFn({ data: { lang } }),
     enabled: Boolean(me.data?.signedIn),
     staleTime: 60_000,
+    // the farmer's money notices reach them on any page (the payment buttons of 28 Oct 2026): read again every 30 s
+    refetchInterval: 30_000,
     retry: 0,
   });
+  // a crop the notice could not name: the farmer's sale page's names, when this app has read them (AIAIC's names too)
+  const mine = qc.getQueryData<AiaicResult<MineForScreen>>(["aiaic-mine", lang]);
+  const crops = mine && mine.ok ? mine.data.cropNames : {};
+  const moneyLine = (m: NonNullable<Notice["money"]>) => moneyNoticeLine(t, m, crops);
   const [gone, setGone] = useState<number[]>([]);
   const [noteSeen, setNoteSeen] = useState(false);
-  const done = async (id: number) => {
-    setGone((g) => [...g, id]);
-    await readFn({ data: { id } }).catch(() => undefined);
+  const done = async (n: Notice) => {
+    const ids = [n.id, ...(n.alsoIds ?? [])];
+    setGone((g) => [...g, ...ids]);
+    for (const id of ids) await readFn({ data: { id } }).catch(() => undefined);
     void qc.invalidateQueries({ queryKey: ["aiaic-notices"] });
   };
   const shown = (notices.data ?? []).filter((n) => !gone.includes(n.id));
@@ -208,21 +228,40 @@ export function AccountNotices() {
           <span className="flex items-center gap-2">
             {n.kind === "account_approved" ? (
               <CircleCheck className="size-5 text-primary" aria-hidden />
+            ) : n.kind === "trade_farmer_paid" ? (
+              <IndianRupee className="size-5 text-primary" aria-hidden />
             ) : (
               <MessageCircleReply className="size-5 text-primary" aria-hidden />
             )}
-            {t(
-              n.kind === "account_approved"
-                ? "aiaic.account.approved_notice"
-                : "aiaic.account.reply_notice",
-            )}
+            {n.kind === "trade_farmer_paid" && n.money
+              ? moneyLine(n.money)
+              : t(
+                  n.kind === "account_approved"
+                    ? "aiaic.account.approved_notice"
+                    : "aiaic.account.reply_notice",
+                )}
           </span>
-          {n.kind === "query_answered" && n.queryId ? (
+          {n.kind === "trade_farmer_paid" && n.money ? (
             <button
               type="button"
               className="rounded-xl bg-primary px-3 py-1.5 font-bold text-primary-foreground"
               onClick={() => {
-                void done(n.id);
+                void done(n);
+                void navigate({
+                  to: "/orders/$orderId",
+                  params: { orderId: (n.money as NonNullable<Notice["money"]>).orderId },
+                });
+              }}
+              data-testid="notice-money-open"
+            >
+              {t("aiaic.account.open")}
+            </button>
+          ) : n.kind === "query_answered" && n.queryId ? (
+            <button
+              type="button"
+              className="rounded-xl bg-primary px-3 py-1.5 font-bold text-primary-foreground"
+              onClick={() => {
+                void done(n);
                 void navigate({ to: "/help/$queryId", params: { queryId: n.queryId as string } });
               }}
             >
@@ -232,7 +271,7 @@ export function AccountNotices() {
             <button
               type="button"
               className="rounded-xl px-3 py-1.5 font-bold hover:bg-muted"
-              onClick={() => void done(n.id)}
+              onClick={() => void done(n)}
             >
               {t("aiaic.account.dismiss")}
             </button>

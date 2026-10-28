@@ -115,6 +115,11 @@ export function OfferRow({ view, data }: { view: OfferView; data: MineForScreen 
             >
               {t(`aiaic.offer.chip.${view.chip}`)}
             </span>
+            {o.pool_id ? (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-extrabold text-primary-foreground">
+                {t("aiaic.group.chip")}
+              </span>
+            ) : null}
             {o.synthetic ? <ModeChip kind="practice" /> : null}
           </div>
           <p className="mt-1 break-words text-lg font-extrabold text-foreground">

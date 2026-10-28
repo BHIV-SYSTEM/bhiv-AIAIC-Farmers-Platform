@@ -45,6 +45,7 @@ import {
   takeNote,
   tokenExpiry,
 } from "./aiaic-identity.server";
+import { everyCropName } from "./aiaic-trade.server";
 
 const TIMEOUT_MS = 15_000;
 
@@ -251,8 +252,9 @@ export async function register(q: {
 
 // ------------------------------------------------------------------------------------------------ her notices
 
-/** Her unread notices this app says (her approval, a reply from the team); none for a guest. */
-export async function myNotices(): Promise<Notice[]> {
+/** The farmer's unread notices this app says (their approval, a reply from the team, AIAIC's send of their money, its
+ * crop named in the reader's language `lang`); none for a guest. */
+export async function myNotices(lang = "en"): Promise<Notice[]> {
   const her = herSession();
   if (!her) return [];
   const a = await ask("/notifications", { headers: { authorization: `Bearer ${her.token}` } });
@@ -267,16 +269,49 @@ export async function myNotices(): Promise<Notice[]> {
   for (const r of rows) {
     if (!r || typeof r !== "object") continue;
     const n = r as Record<string, unknown>;
-    if (n["read_at"] || (n["kind"] !== "account_approved" && n["kind"] !== "query_answered"))
+    if (
+      n["read_at"] ||
+      (n["kind"] !== "account_approved" &&
+        n["kind"] !== "query_answered" &&
+        n["kind"] !== "trade_farmer_paid")
+    )
       continue;
     const body =
       n["body"] && typeof n["body"] === "object" ? (n["body"] as Record<string, unknown>) : {};
+    // AIAIC's send of her money moved (the payment buttons of 28 Oct 2026): its facts, field by field; a notice
+    // without its order or state is not shown
+    const money =
+      n["kind"] === "trade_farmer_paid"
+        ? typeof body["order_id"] === "string" && typeof body["status"] === "string"
+          ? {
+              orderId: body["order_id"],
+              crop: typeof body["crop"] === "string" ? body["crop"] : null,
+              status: body["status"],
+              amountInr: typeof body["amount_inr"] === "number" ? body["amount_inr"] : null,
+              utr: typeof body["utr"] === "string" ? body["utr"] : null,
+              testMode: body["test_mode"] === true,
+            }
+          : undefined
+        : null;
+    if (money === undefined) continue;
+    // one notice per sale's money: the newest (AIAIC lists the newest first); an older one is read with it
+    const newer = money ? out.find((o) => o.money?.orderId === money.orderId) : undefined;
+    if (newer) {
+      newer.alsoIds = [...(newer.alsoIds ?? []), Number(n["notification_id"])];
+      continue;
+    }
     out.push({
       id: Number(n["notification_id"]),
       kind: n["kind"] as Notice["kind"],
       queryId: typeof body["query_id"] === "string" ? body["query_id"] : null,
       at: String(n["created_at"] ?? ""),
+      money,
     });
+  }
+  // THE CROP BY AIAIC'S NAME IN THE READER'S LANGUAGE (R5P-10, 28 Oct 2026), asked only when a money notice names one
+  if (out.some((o) => o.money?.crop)) {
+    const names = await everyCropName(lang);
+    for (const o of out) if (o.money?.crop) o.money.cropName = names[o.money.crop] ?? null;
   }
   return out;
 }

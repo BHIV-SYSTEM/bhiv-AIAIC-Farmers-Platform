@@ -2,6 +2,7 @@
  * HER ACCOUNT AND HER HELP QUERIES, the shapes the screens read (push 4b, 25 Oct 2026; AIAIC_BACKEND_CONTRACT.md
  * sections 22 and 24). Shared by the server (`aiaic-account.server.ts`) and the screens; nothing secret is in here.
  */
+import { rupees } from "./aiaic-trade";
 
 /** The registration notice's version this app shows (AIAIC refuses another with `notice_changed`). Tied to the
  * notice's words: `tests/aiaic_account_suite.ts` checks `NOTICE_WORDS_SHA256` against the three languages' text, so the
@@ -99,12 +100,43 @@ export type QueryResult =
 /** A notice AIAIC keeps for her (only the kinds this app says): her approval, a reply from the team. */
 export type Notice = {
   id: number;
-  kind: "account_approved" | "query_answered";
+  kind: "account_approved" | "query_answered" | "trade_farmer_paid";
   queryId: string | null;
   at: string;
+  /** AIAIC's send of her money moved (the payment buttons of 28 Oct 2026): the sale, its crop, the state, the amount. */
+  money?: {
+    orderId: string;
+    crop: string | null;
+    /** The crop's name in the reader's language, AIAIC's own (its catalogue's `crop_names`), or null: never its code. */
+    cropName?: string | null;
+    status: string;
+    amountInr: number | null;
+    utr: string | null;
+    testMode: boolean;
+  } | null;
+  /** Older notices of the same sale's money, folded into this one and read with it. */
+  alsoIds?: number[];
 };
 
 type Words = (key: string, vars?: Record<string, string | number>) => string;
+
+/**
+ * THE FARMER'S MONEY NOTICE IN ONE LINE (R5P-10, 28 Oct 2026): the crop by AIAIC's name in the reader's language (the
+ * notice's own, else the farmer's sale page's names, `crops`), never its code; the state in this app's words for it
+ * (`cancelled` included); TEST when no real money moved. A state this app has no words for is said as news to open,
+ * never as its code. No name held: the line names no crop.
+ */
+export function moneyNoticeLine(
+  t: Words,
+  m: NonNullable<Notice["money"]>,
+  crops: Record<string, string> = {},
+): string {
+  const crop = m.cropName || (m.crop ? crops[m.crop] : null) || null;
+  const key = `aiaic.money.status.${m.status}`;
+  const said = t(key, { rs: rupees(m.amountInr) });
+  const line = said && said !== key ? said : t("aiaic.money.status.other");
+  return `${crop ? `${crop}: ` : ""}${line}${m.testMode ? ` ${t("aiaic.money.test")}` : ""}`;
+}
 
 /** The words for an outcome's code, AIAIC's or this app's, from a family of keys (a code with no words: the family's
  * general sentence). */

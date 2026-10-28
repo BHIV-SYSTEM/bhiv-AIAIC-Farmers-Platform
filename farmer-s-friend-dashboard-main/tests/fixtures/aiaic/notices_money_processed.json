@@ -1,0 +1,140 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
+    "route": "GET /notifications",
+    "at": "2026-10-28T22:23:38+00:00",
+    "status": 200,
+    "request": {
+      "params": {}
+    },
+    "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Razorpay and RazorpayX stood in for on the recording machine, no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
+  },
+  "answer": {
+    "unread": 5,
+    "notifications": [
+      {
+        "notification_id": 2560,
+        "rule_id": null,
+        "kind": "trade_farmer_paid",
+        "body": {
+          "utr": "UTRX0000TEST01",
+          "crop": "onion",
+          "rail": "razorpayx",
+          "status": "processed",
+          "order_id": "ord_16e609c629657f40c7ec",
+          "farmer_id": "frm_13201bab7ec4f321134a",
+          "test_mode": true,
+          "amount_inr": 9882.0
+        },
+        "created_at": "2026-10-28T22:23:37.867243+00:00",
+        "read_at": null,
+        "deliveries": [
+          {
+            "channel": "in_app",
+            "status": "delivered",
+            "detail": "Shown in the app's notification list."
+          }
+        ]
+      },
+      {
+        "notification_id": 2559,
+        "rule_id": null,
+        "kind": "trade_farmer_paid",
+        "body": {
+          "utr": null,
+          "crop": "onion",
+          "rail": "razorpayx",
+          "status": "processing",
+          "order_id": "ord_16e609c629657f40c7ec",
+          "farmer_id": "frm_13201bab7ec4f321134a",
+          "test_mode": true,
+          "amount_inr": 9882.0
+        },
+        "created_at": "2026-10-28T22:23:37.776638+00:00",
+        "read_at": null,
+        "deliveries": [
+          {
+            "channel": "in_app",
+            "status": "delivered",
+            "detail": "Shown in the app's notification list."
+          }
+        ]
+      },
+      {
+        "notification_id": 2558,
+        "rule_id": null,
+        "kind": "trade_order_step",
+        "body": {
+          "crop": "onion",
+          "stage": "pickup",
+          "status": "done",
+          "event_id": "ful_3f2b4e9656838553328b",
+          "order_id": "ord_16e609c629657f40c7ec",
+          "farmer_id": "frm_13201bab7ec4f321134a",
+          "simulated": true,
+          "listing_id": "lst_6e1b355eff5e0408624c",
+          "order_state": "in_fulfilment"
+        },
+        "created_at": "2026-10-28T22:23:37.598156+00:00",
+        "read_at": null,
+        "deliveries": [
+          {
+            "channel": "in_app",
+            "status": "delivered",
+            "detail": "Shown in the app's notification list."
+          }
+        ]
+      },
+      {
+        "notification_id": 2557,
+        "rule_id": null,
+        "kind": "trade_offer",
+        "body": {
+          "crop": "onion",
+          "offer_id": "ofr_b599c8d75d515c5ee36d",
+          "farmer_id": "frm_13201bab7ec4f321134a",
+          "buyer_type": "wholesaler",
+          "listing_id": "lst_6e1b355eff5e0408624c",
+          "quantity_q": 4.0,
+          "price_per_q": 2500.0,
+          "valid_until": null,
+          "buyer_district": "Pune"
+        },
+        "created_at": "2026-10-28T22:23:37.237531+00:00",
+        "read_at": null,
+        "deliveries": [
+          {
+            "channel": "in_app",
+            "status": "delivered",
+            "detail": "Shown in the app's notification list."
+          }
+        ]
+      },
+      {
+        "notification_id": 2556,
+        "rule_id": null,
+        "kind": "trade_offer",
+        "body": {
+          "crop": "onion",
+          "offer_id": "ofr_a5f153886da2ed43f1c6",
+          "farmer_id": "frm_13201bab7ec4f321134a",
+          "buyer_type": "wholesaler",
+          "listing_id": "lst_6e1b355eff5e0408624c",
+          "quantity_q": 4.0,
+          "price_per_q": 2500.0,
+          "valid_until": null,
+          "buyer_district": "Pune"
+        },
+        "created_at": "2026-10-28T22:23:37.128558+00:00",
+        "read_at": null,
+        "deliveries": [
+          {
+            "channel": "in_app",
+            "status": "delivered",
+            "detail": "Shown in the app's notification list."
+          }
+        ]
+      }
+    ]
+  }
+}
