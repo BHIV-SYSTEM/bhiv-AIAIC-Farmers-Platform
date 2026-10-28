@@ -111,9 +111,9 @@ export function commissionSentence(read: PricingRead): string {
   if (rate === null) return NOT_READ;
   const base = `AIAIC's commission is ${rate} of the agreed price (rounded down to the paisa)`;
   if (c.payer === "buyer")
-    return `${base}, paid by the buyer on top of the price, so the farmer receives her full agreed price.`;
+    return `${base}, paid by the buyer on top of the price, so the farmer receives their full agreed price.`;
   if (c.payer === "farmer")
-    return `${base}, taken out of the farmer's share: she receives the agreed price less the commission.`;
+    return `${base}, taken out of the farmer's share: they receive the agreed price less the commission.`;
   if (c.payer === "split")
     return `${base}, shared between the buyer and the farmer: half is added to what the buyer pays and half is taken out of the farmer's share.`;
   return `${base}. Who pays it is shown on the Pricing Details page of Krishi Sampada (AIAIC).`;

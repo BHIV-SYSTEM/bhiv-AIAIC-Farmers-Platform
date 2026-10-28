@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type QueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
 import type {
@@ -6,9 +6,11 @@ import type {
   AiaicProblem,
   AiaicResult,
   BuyersLooking,
+  MinePace,
   MineForScreen,
   TradeMode,
 } from "./aiaic-trade";
+import { mineReadEvery } from "./aiaic-trade";
 import {
   getAiaicPricing,
   getBuyersLooking,
@@ -38,8 +40,9 @@ export function useTradeMode() {
   });
 }
 
-/** Her AIAIC sale records (GET /farmer/trade through this server), with names in her language. */
-export function useMine(enabled = true) {
+/** The farmer's AIAIC sale records (GET /farmer/trade through this server), with names in their language, read again
+ * at the page's pace (`MinePace`). */
+export function useMine(enabled = true, pace: MinePace = "live") {
   const { lang } = useI18n();
   const fn = useServerFn(getMyTrade);
   return useQuery<AiaicResult<MineForScreen>>({
@@ -47,7 +50,30 @@ export function useMine(enabled = true) {
     queryFn: () => fn({ data: { lang } }),
     enabled,
     staleTime: 10_000,
+    // THE FARMER'S SALE, READ AGAIN BY ITSELF (28 Oct 2026; the owner: "the farmer is also having the updates ...
+    // instant updates"; the payment buttons: "instant updation in the app ... with regards to every transaction"), at
+    // the page's pace (`mineReadEvery`): every 5 seconds only on the order page while AIAIC's send of their money moves,
+    // never under the sell form (R5P-09); and when the farmer comes back to the page
+    refetchInterval: (query) => mineReadEvery(pace, query.state.data),
+    refetchOnWindowFocus: true,
   });
+}
+
+/** The reads that belong to ONE person: their sale, their notices, their help questions, the buyers near them, an
+ * offer of theirs weighed. */
+export const PERSONAL_READS = [
+  "aiaic-mine",
+  "aiaic-notices",
+  "aiaic-buyers-looking",
+  "aiaic-help",
+  "aiaic-offer-compare",
+] as const;
+
+/** Who is signed in changed (signed in, signed out, account erased): one person's reads are dropped, so the next person
+ * on this phone is never shown them, not even while their own are read (a page keeps its last records on a failed read
+ * again: `mineShown`). */
+export function forgetPersonalReads(qc: QueryClient): void {
+  for (const key of PERSONAL_READS) qc.removeQueries({ queryKey: [key] });
 }
 
 /** Buyers looking for produce near her (AIAIC section 25, 27 Oct 2026). */

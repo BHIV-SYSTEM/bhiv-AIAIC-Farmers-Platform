@@ -11,11 +11,13 @@ import {
   quintals,
   rupeeRange,
   rupees,
+  noteLines,
   sourcesSaid,
   startDistrict,
   vehicleName,
   type TransportEstimate,
 } from "@/lib/aiaic-trade";
+import type { TripWays } from "@/lib/aiaic-trade";
 import { getNearbyMandis, getTransportEstimate } from "@/lib/aiaic-trade.functions";
 import { estateOf, mandiKey, type Estate } from "@/lib/aiaic-trip";
 import { useI18n } from "@/lib/i18n";
@@ -23,6 +25,7 @@ import { getPlacesDistricts } from "@/lib/places.functions";
 import { cn } from "@/lib/utils";
 
 import { ProblemCard } from "./AiaicBits";
+import { TripWaysTiles } from "./TripWaysTiles";
 import { RouteMap } from "./RouteMap";
 import { routeMapOf } from "./route-map";
 
@@ -45,6 +48,7 @@ export function TransportCostCard({
   fromDistrict,
   fromText,
   toMandi,
+  fromTaluka,
   className = "",
 }: {
   crop: string;
@@ -58,6 +62,8 @@ export function TransportCostCard({
   /** The mandi an answer named (the advice's own mandi): chosen first when AIAIC's nearby list holds it, else the
    * card's own default; she can always choose another. */
   toMandi?: string | null | undefined;
+  /** Her taluka (28 Oct 2026): her trip starts at its main town; only the distance and the cost change. */
+  fromTaluka?: string | null | undefined;
   className?: string;
 }) {
   const { t, lang } = useI18n();
@@ -91,8 +97,16 @@ export function TransportCostCard({
   // A wider list when an answer named a mandi, so that mandi is more likely held in it.
   const nearbyLimit = toMandi ? 40 : 15;
   const nearby = useQuery({
-    queryKey: ["aiaic-nearby", estate, district, nearbyLimit],
-    queryFn: () => nearbyFn({ data: { district, state: estate, limit: nearbyLimit } }),
+    queryKey: ["aiaic-nearby", estate, district, nearbyLimit, fromTaluka ?? null],
+    queryFn: () =>
+      nearbyFn({
+        data: {
+          district,
+          state: estate,
+          limit: nearbyLimit,
+          ...(fromTaluka ? { taluka: fromTaluka } : {}),
+        },
+      }),
     enabled: Boolean(district),
     staleTime: 30 * 60_000,
   });
@@ -111,7 +125,7 @@ export function TransportCostCard({
   const mandiRow = mandis.find((m) => m.mandi === mandi);
 
   const estimate = useQuery({
-    queryKey: ["aiaic-transport", estate, district, mandi, weight],
+    queryKey: ["aiaic-transport", estate, district, mandi, weight, fromTaluka ?? null],
     queryFn: () =>
       estimateFn({
         data: {
@@ -122,6 +136,7 @@ export function TransportCostCard({
           mandi_state: estateOf(mandiRow?.state),
           ...(mandiRow?.district_key ? { mandi_district: mandiRow.district_key } : {}),
           from_place: "farm",
+          ...(fromTaluka ? { taluka: fromTaluka } : {}),
         },
       }),
     enabled: Boolean(district && mandi && weight > 0),
@@ -303,7 +318,11 @@ export function TransportCostCard({
       ) : estimate.data && !estimate.data.ok ? (
         <ProblemCard problem={estimate.data.problem} onRetry={() => estimate.refetch()} />
       ) : est ? (
-        <VehicleCard est={est} lang={lang} />
+        <>
+          <VehicleCard est={est} lang={lang} />
+          {/* HER WAYS, priced from the same trip (28 Oct 2026): alone, shared, the buyer collecting, AIAIC arranging */}
+          <TripWaysTiles ways={(est as TransportEstimate & { ways?: TripWays | null }).ways} />
+        </>
       ) : null}
 
       {est ? (
@@ -443,21 +462,36 @@ function SourcesLine({ est }: { est: TransportEstimate }) {
 }
 
 function Notes({ est }: { est: TransportEstimate }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  // her notes in her language and the pages their figures come from, each once (HONESTY-04, -11; `noteLines`)
+  const { notes, sources } = noteLines(t, est, lang);
   return (
     <ul className="list-disc space-y-1 rounded-2xl bg-muted/60 p-3 pl-6 text-xs text-foreground/85">
-      {est.notes.map((n) => {
-        const key = `aiaic.transport.note.${n.code}`;
-        const values: Record<string, string | number> = {};
-        for (const [k, v] of Object.entries(n.values ?? {})) {
-          if (typeof v === "number" || typeof v === "string") values[k] = v;
-        }
-        const said = t(key, values);
-        return <li key={n.code}>{said === key ? (n.text ?? n.code) : said}</li>;
-      })}
+      {notes.map((n) => (
+        <li key={n.code}>{n.text}</li>
+      ))}
       <li>
         {rupees(est.fare_per_trip.low_rs)} – {rupees(est.fare_per_trip.high_rs)} × {est.trips}
       </li>
+      {sources.map((s) => (
+        <li key={s.key}>
+          {t("aiaic.transport.note.source")}{" "}
+          {s.url ? (
+            <a
+              href={s.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+              data-name=""
+            >
+              {s.name}
+            </a>
+          ) : (
+            <span data-name="">{s.name}</span>
+          )}
+          {s.date ? <span data-name="">, {s.date}</span> : null}
+        </li>
+      ))}
     </ul>
   );
 }

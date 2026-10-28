@@ -6,6 +6,7 @@ import { SERVICES, isService, type Service } from "./aiaic-types";
 
 export const farmSearchSchema = z.object({
   region: z.string().optional(),
+  taluka: z.string().optional(),
   crop: z.string().optional(),
   mandi: z.string().optional(),
   land: z.string().optional(),

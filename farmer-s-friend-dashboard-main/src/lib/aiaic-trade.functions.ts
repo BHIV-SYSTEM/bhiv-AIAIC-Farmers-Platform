@@ -75,6 +75,7 @@ export const sellProduce = createServerFn({ method: "POST" })
         ask_price_per_q: money.optional(),
         grade: z.enum(["A", "B", "C"]).nullable().optional(),
         price_confirmed: z.boolean().optional(),
+        taluka: z.string().trim().max(80).optional(),
       })
       .parse(d),
   )
@@ -170,6 +171,7 @@ export const getTransportEstimate = createServerFn({ method: "GET" })
         mandi_state: state.optional(),
         mandi_district: z.string().trim().max(64).optional(),
         from_place: z.enum(["farm", "district_centre"]).default("farm"),
+        taluka: z.string().trim().max(80).optional(),
       })
       .parse(d),
   )
@@ -188,6 +190,7 @@ export const getStorageVerdict = createServerFn({ method: "GET" })
         state,
         quantity_q: qty.optional(),
         lang,
+        taluka: z.string().trim().max(80).optional(),
       })
       .parse(d),
   )
@@ -198,9 +201,65 @@ export const getStorageVerdict = createServerFn({ method: "GET" })
 
 export const getNearbyMandis = createServerFn({ method: "GET" })
   .validator((d: unknown) =>
-    z.object({ district, state, limit: z.number().int().min(1).max(50).default(15) }).parse(d),
+    z
+      .object({
+        district,
+        state,
+        limit: z.number().int().min(1).max(50).default(15),
+        taluka: z.string().trim().max(80).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }): Promise<AiaicResult<NearbyMandis>> => {
     const { nearbyMandis } = await import("./aiaic-trade.server");
     return nearbyMandis(data);
+  });
+
+// ------------------------------------------------------------------------- 28 Oct 2026: talukas, her offer, her money
+/** The talukas of a district (AIAIC's official list), for the dropdown right after the district. */
+export const getTripTalukas = createServerFn({ method: "GET" })
+  .validator((d: unknown) => z.object({ state, district }).parse(d))
+  .handler(async ({ data }) => {
+    const { tripTalukas } = await import("./aiaic-trade.server");
+    return tripTalukas(data);
+  });
+
+/** HER offer weighed against the mandi, after her trip. */
+export const compareMyOffer = createServerFn({ method: "GET" })
+  .validator((d: unknown) => z.object({ offer_id: offerId }).parse(d))
+  .handler(async ({ data }) => {
+    const { compareOffer } = await import("./aiaic-trade.server");
+    return compareOffer(data.offer_id);
+  });
+
+/** Where AIAIC sends her money: her UPI ID or bank account, by her own press. */
+export const giveMyDestination = createServerFn({ method: "POST" })
+  .validator((d: unknown) =>
+    z
+      .object({
+        key: pressKey,
+        kind: z.enum(["upi_id", "bank_account"]),
+        upi_id: z.string().trim().max(300).optional(),
+        name: z.string().trim().max(120).optional(),
+        account_number: z.string().trim().max(40).optional(),
+        ifsc: z.string().trim().max(20).optional(),
+        agreed: z.literal(true),
+        replace: z.boolean().optional(),
+        notice_version: z.string().trim().min(3).max(40),
+        read_in: z.enum(["en", "mr", "hi"]),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { giveDestination } = await import("./aiaic-trade.server");
+    const { key, ...rest } = data;
+    return giveDestination(key, rest);
+  });
+
+/** She removes her UPI ID or bank account by her own press (audit of 28 Oct 2026, PRIVACY-04). */
+export const endMyDestination = createServerFn({ method: "POST" })
+  .validator((d: unknown) => z.object({ key: pressKey }).parse(d))
+  .handler(async ({ data }) => {
+    const { endDestination } = await import("./aiaic-trade.server");
+    return endDestination(data.key);
   });

@@ -20,7 +20,9 @@ import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 
+import { NotRefreshedLine } from "../src/components/farm/aiaic/AiaicBits";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
+import { CompareBody } from "../src/components/farm/aiaic/OfferCompareBody";
 import { NEARBY_DOTS, nameBelow, routeMapOf } from "../src/components/farm/aiaic/route-map";
 import { priceCompareOf, rowShown } from "../src/lib/aiaic-analysis";
 import {
@@ -48,6 +50,7 @@ import {
   rupees,
   saleSteps,
   sayKey,
+  noteLines,
   sourcesSaid,
   startDistrict,
   vehicleName,
@@ -57,10 +60,21 @@ import {
   type AiaicResult,
   type AiaicSay,
   type DistrictRow,
+  type OfferCompare,
   type TransportEstimate,
+  type FromAiaic,
+  moneyMoving,
+  sendingSaid,
+  answerLanded,
+  mineReadEvery,
+  mineShown,
+  pressKeyHolder,
 } from "../src/lib/aiaic-trade";
+import { moneyNoticeLine } from "../src/lib/aiaic-account";
+import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
 import * as client from "../src/lib/aiaic-trade.server";
+import * as identity from "../src/lib/aiaic-identity.server";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -114,6 +128,11 @@ test("A1 only what the screens show leaves the server (no contact path, no ids o
     "orders",
     "payout_account",
     "payout_notice",
+    // 28 Oct 2026: where her money goes (a masked hint) and whether AIAIC collects, then pays her
+    "x_destination",
+    "collect_then_pay",
+    // the notice she is shown before she gives her UPI ID or bank account (the audit's PRIVACY-03)
+    "x_notice",
   ]);
   for (const name of MINE_FIXTURES) {
     const raw = answer<Record<string, unknown>>(name);
@@ -204,6 +223,24 @@ test("A3 a link that does not carry her share is said to pay AIAIC's account, ne
     state: noLink.payment.state,
     notOnward: false,
   });
+});
+
+test("A28 a collect order's line never says the link does not send her money on: AIAIC's not_onward decides (MONEY-06)", () => {
+  // AIAIC's real answer (recorded by its reports/handover_tools/record_trip_and_payout_answers.py): her paid collect order
+  const collect = mineOf("collect_mine_paid").orders.find((o) => o.from_aiaic) as AiaicOrder;
+  assert.ok(collect, "the recording holds a collect order");
+  assert.ok(
+    collect.payment.link_made && !collect.payment.not_onward,
+    "paid by a collect link; AIAIC says nothing else",
+  );
+  assert.equal(paymentLine(collect).notOnward, false);
+  // AIAIC's per-order fact for a UPI ID passes through this server as AIAIC said it (round 4, R3-MONEY-C)
+  assert.equal(collect.from_aiaic?.upi_one_lakh_or_more, false);
+  // a plain link's order still says it, as AIAIC does (A3's recording)
+  const plain = mineOf("payout_mine_settled").orders.find(
+    (o) => o.payment.link_made && o.payment.not_onward,
+  ) as AiaicOrder;
+  assert.equal(paymentLine(plain).notOnward, true);
 });
 
 test("A4 her money's sentence is AIAIC's key, with rupees and India's day filled in", () => {
@@ -402,6 +439,7 @@ test("A10 every transport note and refusal AIAIC sends is worded in en, mr and h
 const LATIN_ALLOWED = new Set([
   "AIAIC",
   "Razorpay",
+  "RazorpayX",
   "Geoapify",
   "OpenStreetMap",
   "MSRTC",
@@ -676,6 +714,45 @@ test("A18 ANN-2 the transport card starts from the district her pickup names; no
     assert.ok(!src.includes("districtList[0]"), `${file} falls back to the list's first district`);
     assert.ok(src.includes("startDistrict("), `${file} does not start from startDistrict`);
   }
+});
+
+test("A27 her trip's notes from a REAL 1 q estimate: every note said in mr and hi, no English word, each source once", () => {
+  // recorded by AIAIC's reports/handover_tools/record_trip_and_payout_answers.py (from her taluka, Niphad, to Lasalgaon)
+  const e = est("transport_estimate_niphad_lasalgaon_1q");
+  assert.ok(
+    e.notes.length >= 5 && e.notes.some((n) => n.source?.name),
+    "the recording holds its notes and a source",
+  );
+  const named = [
+    ...new Set(e.notes.filter((n) => n.source?.name).map((n) => n.source?.name ?? "")),
+  ];
+  for (const lang of LANGS) {
+    const { notes, sources } = noteLines(wordsIn(lang), e, lang);
+    assert.deepEqual(
+      notes.map((n) => n.code),
+      e.notes.map((n) => n.code),
+      `${lang}: a note left unsaid`,
+    );
+    assert.deepEqual(
+      sources.map((s) => s.name),
+      named,
+      `${lang}: each source named once`,
+    );
+    if (lang === "en") continue;
+    // her taluka by the name held in her script; where none is held, its Latin name is a name, not an English word
+    const own = e.from.taluka?.names?.[lang] ?? "";
+    for (const n of notes) {
+      const words = (own ? n.text.replaceAll(own, "") : n.text).match(/[A-Za-z]+/g) ?? [];
+      for (const w of words)
+        assert.ok(LATIN_ALLOWED.has(w), `${lang} ${n.code}: English word "${w}" in "${n.text}"`);
+      assert.ok(!HOLE.test(n.text), `${lang} ${n.code}: a blank left in "${n.text}"`);
+    }
+  }
+  const mr = noteLines(wordsIn("mr"), e, "mr").notes.find((n) => n.code === "from_taluka_town");
+  assert.ok(
+    mr?.text.includes(e.from.taluka?.names?.mr ?? "?"),
+    `her taluka in Marathi: "${mr?.text}"`,
+  );
 });
 
 test("A19 ANN-3 MSRTC's official chart is said in her language; its full English name only in the link's title", () => {
@@ -1014,6 +1091,258 @@ test("A24 the mandis an advice compared: AIAIC's rows[].mandi_shown, the key kep
   }
 });
 
+test("A25 a group sale on her offer and her sale: only its listed facts pass; never the buyer's record or another farmer", () => {
+  // AIAIC section 27 (27 Oct 2026): `pool` on her offers and orders, read from AIAIC's own recorded answers
+  const POOL_KEYS = [
+    "pool_id",
+    "crop",
+    "target_q",
+    "joined_q",
+    "joined_farmers",
+    "left_q",
+    "price_per_q",
+    "grade",
+    "collection_point",
+    "district",
+    "collect_on",
+    "valid_until",
+    "pay_within_days",
+    "status",
+    "simulated",
+    "km",
+    "her_crop",
+  ];
+  const raw = answer<{
+    listings: { offers: { pool?: Record<string, unknown>; pool_id?: string }[] }[];
+  }>("connected_farmer_mine_pool_offer");
+  const rawPool = raw.listings.flatMap((l) => l.offers).find((o) => o.pool)?.pool;
+  assert.ok(rawPool, "the recording holds a group sale's offer");
+  // planted: a field AIAIC might add later, and another farmer's lot, must stay on the server
+  const planted = JSON.parse(JSON.stringify(raw)) as typeof raw;
+  for (const o of planted.listings.flatMap((l) => l.offers)) {
+    if (o.pool)
+      Object.assign(o.pool, {
+        buyer_id: "byr_planted",
+        other_farmer: "planted name",
+        lots: ["lot_x"],
+      });
+  }
+  const mine = client.mineForBrowser(planted);
+  const offer = mine.listings.flatMap((l) => l.offers).find((o) => o.pool_id);
+  assert.ok(offer && offer.pool, "her offer keeps its group sale");
+  for (const k of Object.keys(offer.pool)) assert.ok(POOL_KEYS.includes(k), `${k} left the server`);
+  assert.equal(offer.pool.collection_point, rawPool["collection_point"]);
+  assert.equal(offer.pool.target_q, rawPool["target_q"]);
+  const text = JSON.stringify(mine);
+  for (const never of ["byr_planted", "planted name", "lot_x"])
+    assert.ok(!text.includes(never), `${never} reached her`);
+  const sale = mineOf("connected_farmer_mine_journey").orders.find((o) => o.pool_id);
+  assert.ok(sale && sale.pool && sale.pool.joined_farmers >= 1, "her sale says what the group is");
+});
+
+test("A26 her sale step by step: each stage passes only its listed facts; a note, a reference or other lots never", () => {
+  const SHOWN: Record<string, string[]> = {
+    aggregation: ["collection_point", "quantity_q"],
+    quality_grading: ["grade", "weight_q", "rejected_q", "sampled", "tested_on", "tested_at_apmc"],
+    storage: ["facility", "facility_kind", "quantity_q", "stored_from", "stored_to"],
+    processing: ["process", "input_q", "output_q"],
+    pickup: ["quantity_q"],
+    in_transit: ["expected_on"],
+    delivered: ["received_q"],
+    delivery_exception: ["kind", "quantity_q"],
+    reconciliation: ["delivered_q", "accepted_q", "rejected_q"],
+  };
+  const raw = answer<{
+    orders: { fulfilment: { stage: string; detail?: Record<string, unknown> }[] }[];
+  }>("connected_farmer_mine_journey");
+  const planted = JSON.parse(JSON.stringify(raw)) as typeof raw;
+  const steps = planted.orders.flatMap((o) => o.fulfilment);
+  assert.ok(
+    steps.some((st) => st.stage === "aggregation") &&
+      steps.some((st) => st.stage === "quality_grading"),
+    "the recording holds her collection and her grading",
+  );
+  for (const st of steps) {
+    st.detail = {
+      ...(st.detail ?? {}),
+      note: "planted team note",
+      lots: ["lot_planted"],
+      certificate_ref: "CERT-1",
+    };
+    Object.assign(st, { reference: "slip-planted", recorded_by: "user-planted" });
+  }
+  const mine = client.mineForBrowser(planted);
+  for (const o of mine.orders) {
+    for (const st of o.fulfilment) {
+      for (const k of Object.keys(st.detail ?? {})) {
+        assert.ok((SHOWN[st.stage] ?? []).includes(k), `${st.stage}.${k} reached her`);
+      }
+    }
+  }
+  const text = JSON.stringify(mine);
+  for (const never of [
+    "planted team note",
+    "lot_planted",
+    "CERT-1",
+    "slip-planted",
+    "user-planted",
+  ]) {
+    assert.ok(!text.includes(never), `${never} reached her`);
+  }
+  const graded = mine.orders
+    .flatMap((o) => o.fulfilment)
+    .find((st) => st.stage === "quality_grading");
+  assert.equal(graded?.detail?.["grade"], "A", "her grade is said");
+});
+
+/** One read of the farmer's sale as the page gets it, from AIAIC's recorded GET /farmer/trade. */
+const readOf = (name: string) =>
+  ({ ok: true, data: { mine: mineOf(name), cropNames: {}, districtNames: {} } }) as const;
+
+test("A29 R5P-09 a read again that fails keeps the page and what is typed on it: only a first read shows the problem; a crisis always does", () => {
+  const good = readOf("collect_mine_processing");
+  const newer = readOf("collect_mine_paid");
+  const outage = { ok: false, problem: problem("aiaic_unavailable", { status: 503 }) } as const;
+  // the first read: a loader, then the records; a first read that fails shows the problem
+  assert.deepEqual(mineShown({ data: undefined, isError: false }, null), { show: "loading" });
+  assert.deepEqual(mineShown({ data: good, isError: false }, null), {
+    show: "records",
+    data: good.data,
+    notRefreshed: null,
+  });
+  assert.deepEqual(mineShown({ data: outage, isError: false }, null), {
+    show: "problem",
+    problem: outage.problem,
+  });
+  const lost = mineShown({ data: undefined, isError: true }, null);
+  assert.equal(lost.show === "problem" ? lost.problem.code : lost.show, "aiaic_unavailable");
+  // once shown: AIAIC refusing a read again (a restart, a 503, too many reads) keeps the records, with the reason
+  assert.deepEqual(mineShown({ data: outage, isError: false }, good.data), {
+    show: "records",
+    data: good.data,
+    notRefreshed: outage.problem,
+  });
+  // the phone's network lost: the query library keeps the old answer and says error; the records stay
+  const offline = mineShown({ data: good, isError: true }, good.data);
+  assert.equal(offline.show, "records");
+  assert.equal(offline.show === "records" ? offline.notRefreshed?.code : "", "aiaic_unavailable");
+  // a newer answer replaces the records, and the line goes
+  assert.deepEqual(mineShown({ data: newer, isError: false }, good.data), {
+    show: "records",
+    data: newer.data,
+    notRefreshed: null,
+  });
+  // the language changed: the new read on its way keeps the records (no loader in place of a form)
+  assert.deepEqual(mineShown({ data: undefined, isError: false }, good.data), {
+    show: "records",
+    data: good.data,
+    notRefreshed: null,
+  });
+  // the session ended: the records stay, with the reason (the line then offers to sign in)
+  const out = { ok: false, problem: problem("aiaic_signed_out") } as const;
+  const ended = mineShown({ data: out, isError: false }, good.data);
+  assert.equal(
+    ended.show === "records" ? ended.notRefreshed?.code : ended.show,
+    "aiaic_signed_out",
+  );
+  // a crisis answer outranks everything: shown alone, even over records
+  const crisis = {
+    ok: false,
+    problem: problem("crisis", { crisis: { answer: null, message: null, helplines: [] } }),
+  } as const;
+  assert.deepEqual(mineShown({ data: crisis, isError: false }, good.data), {
+    show: "problem",
+    problem: crisis.problem,
+  });
+  // the quiet line: a status, in the reader's words, offering to try again (nothing is taken off the page)
+  const html = renderToString(
+    createElement(I18nProvider, {
+      children: createElement(NotRefreshedLine, {
+        problem: outage.problem,
+        onRetry: () => undefined,
+      }),
+    }),
+  );
+  assert.ok(html.includes('role="status"'), html);
+  assert.ok(html.includes(DICTS.en["aiaic.not_refreshed"] ?? "?"), html);
+  assert.ok(html.includes(DICTS.en["aiaic.retry"] ?? "?"), html);
+  for (const lang of LANGS) assert.ok(DICTS[lang]["aiaic.not_refreshed"], lang);
+  // the page's gate and the trade switch decide by this rule (never the problem card on a failed read again)
+  const bits = fs.readFileSync(
+    path.join(APP, "src", "components", "farm", "aiaic", "AiaicBits.tsx"),
+    "utf-8",
+  );
+  const gate = bits.slice(
+    bits.indexOf("export function WithMine"),
+    bits.indexOf("export function TradeSwitch"),
+  );
+  assert.ok(gate.includes("mineShown(") && !gate.includes("isError ||"), "WithMine decides");
+  const sw = bits.slice(bits.indexOf("export function TradeSwitch"));
+  assert.ok(sw.includes("if (!mode.data)") && !sw.includes("isError ||"), "TradeSwitch keeps");
+});
+
+test("A30 R5P-09 only the order page reads every 5 s while money moves, the sell form never by itself; a sale's press key waits for its answer", () => {
+  const moving = readOf("collect_mine_processing");
+  const still = readOf("collect_mine_paid");
+  assert.equal(mineReadEvery("money", moving), 5_000, "the order page, while the money moves");
+  assert.equal(mineReadEvery("money", still), 15_000);
+  assert.equal(mineReadEvery("money", undefined), 15_000);
+  assert.equal(mineReadEvery("live", moving), 15_000, "a page of lots, offers or money: 15 s");
+  assert.equal(mineReadEvery("opened", moving), false, "the sell form: never by itself");
+  // each page's pace, as the pages pass it (no pace: live)
+  const dir = path.join(APP, "src", "components", "farm", "aiaic");
+  const paces: Record<string, string> = {};
+  for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".tsx"))) {
+    const src = fs.readFileSync(path.join(dir, file), "utf-8");
+    for (const m of src.matchAll(/<WithMine(?:\s+pace="([a-z]+)")?\s*>/g))
+      paces[file] = m[1] ?? "live";
+    assert.ok(!/useMine\([^)]*"money"/.test(src), `${file} reads every 5 s outside the order page`);
+  }
+  assert.deepEqual(paces, {
+    "AiaicListingDetail.tsx": "live",
+    "AiaicListings.tsx": "live",
+    "AiaicOrderDetail.tsx": "money",
+    "AiaicOrders.tsx": "live",
+    "AiaicPayments.tsx": "live",
+    "AiaicSellForm.tsx": "opened",
+  });
+  // AIAIC's answer landed (done, or a refusal it said): only then may a press's key go
+  const after = (status: number | null) =>
+    status === 201
+      ? ({ ok: true, data: null } as const)
+      : ({ ok: false, problem: problem("x", { status }) } as const);
+  assert.deepEqual(
+    [201, 409, 422, 429, 500, 503, null].map((st) => answerLanded(after(st))),
+    [true, true, true, true, false, false, false],
+  );
+  // "List it for sale": its key held from the press until the answer lands; a form shown again starts with it
+  const hold = pressKeyHolder();
+  const k = hold.take();
+  assert.match(k, PRESS_KEY_RE);
+  assert.notEqual(hold.take(), k, "nothing in flight: a new key");
+  hold.sent(k);
+  assert.equal(hold.take(), k, "in flight: a form shown again starts with the same key");
+  hold.answered(k, after(null));
+  assert.equal(hold.take(), k, "no answer came: kept, the same press goes again");
+  hold.answered(k, after(503));
+  assert.equal(hold.take(), k, "AIAIC failed: kept");
+  hold.answered("ann-another-press-key", after(201));
+  assert.equal(hold.take(), k, "another press's answer does not drop it");
+  hold.answered(k, after(422));
+  assert.notEqual(hold.take(), k, "AIAIC answered: dropped");
+  const k2 = hold.take();
+  hold.sent(k2);
+  hold.answered(k2, after(201));
+  assert.notEqual(hold.take(), k2, "listed: dropped");
+  // the sell form starts from the holder and holds its key from the press until the answer
+  const form = fs.readFileSync(path.join(dir, "AiaicSellForm.tsx"), "utf-8");
+  const sent = form.indexOf("SELL_PRESS.sent(pressKey)");
+  const asked = form.indexOf("sellFn({", sent);
+  const answered = form.indexOf("SELL_PRESS.answered(pressKey, r)", asked);
+  assert.ok(form.includes("useState(SELL_PRESS.take)"), "the form starts from the held key");
+  assert.ok(sent > 0 && asked > sent && answered > asked, "held from the press to the answer");
+});
+
 // --------------------------------------------------------- B. the server client against a stand-in AIAIC
 
 const USER = "standin-practice-farmer";
@@ -1035,6 +1364,10 @@ type StandIn = {
   mine: string | null;
   /** The fixture GET /transport/nearby-mandis answers with. */
   nearby: string;
+  /** The fixture GET /farmer/trade/offers/{id}/compare answers with. */
+  compare: string;
+  /** What GET /notifications answers with, when set (else AIAIC's recorded answer). */
+  notices: unknown;
   close: () => Promise<void>;
 };
 
@@ -1052,6 +1385,8 @@ async function standIn(): Promise<StandIn> {
     distressOnWrite: false,
     mine: null,
     nearby: "transport_nearby_nashik",
+    compare: "offer_compare_depends_on_sharing",
+    notices: null,
     close: async () => {},
   };
   const valid = () => `standin-token-${s.tokenNo}`;
@@ -1080,8 +1415,18 @@ async function standIn(): Promise<StandIn> {
           username: USER,
         });
       }
-      if (u.pathname.startsWith("/places/") || u.pathname.startsWith("/transport/")) {
+      if (
+        u.pathname.startsWith("/places/") ||
+        u.pathname.startsWith("/transport/") ||
+        u.pathname === "/catalog"
+      ) {
         s.gets.push({ path: u.pathname, query: u.searchParams });
+        if (u.pathname === "/catalog") {
+          // AIAIC's recorded catalogue (Maharashtra, in Marathi); this stand-in holds no other
+          if (u.searchParams.get("state") === "mh" && u.searchParams.get("lang") === "mr")
+            return send(200, answer("catalog_mh_mr"));
+          return send(404, { detail: { reason_code: "not_found", message: "stand-in: not held" } });
+        }
         if (u.pathname === "/places/crops")
           return send(200, { crops: [{ crop: "onion", name: "कांदा" }] });
         if (u.pathname === "/places/districts")
@@ -1108,6 +1453,10 @@ async function standIn(): Promise<StandIn> {
             ),
           );
         if (u.pathname === "/farmer/trade/price") return send(200, answer("practice_price"));
+        if (u.pathname === "/notifications")
+          return send(200, s.notices ?? answer("notices_money_processed"));
+        if (/^\/farmer\/trade\/offers\/[^/]+\/compare$/.test(u.pathname))
+          return send(200, answer(s.compare));
       }
       if (req.method === "POST") {
         const key = req.headers["idempotency-key"];
@@ -1162,6 +1511,20 @@ async function captured<T>(run: () => Promise<T>): Promise<{ value: T; said: str
   }
 }
 
+/** Act as HER, signed in (28 Oct 2026: a sale is hers only): the stand-in's own valid token for her session. */
+function asHer(s?: StandIn): void {
+  identity.sessionForTests({
+    token: `standin-token-${s ? s.tokenNo : 0}`,
+    username: USER,
+    displayName: null,
+    expiresAt: Date.now() + 60 * 60_000,
+  } as unknown as Parameters<typeof identity.sessionForTests>[0]);
+}
+
+function asGuest(): void {
+  identity.sessionForTests(null);
+}
+
 function settings(base: string | null, user: string | null, password: string | null) {
   const set = (k: string, v: string | null) => {
     if (v === null) delete process.env[k];
@@ -1171,6 +1534,7 @@ function settings(base: string | null, user: string | null, password: string | n
   set("AIAIC_FARMER_USERNAME", user);
   set("AIAIC_FARMER_PASSWORD", password);
   client.resetForTests();
+  asGuest();
 }
 
 test("B1 no farmer setting: the app's own store; one setting: said by name; a public http address: refused", () => {
@@ -1210,17 +1574,22 @@ test("B2 the password goes only over https or to this machine and its private ne
   for (const u of no) assert.equal(client.signInAllowed(u), false, u);
 });
 
-test("B3 one sign-in serves many calls; the token and password never reach the browser or the console", async () => {
+test("B3 her own reads and her sale go as her: no shared account ever signs in; no token or password reaches the browser or the console", async () => {
   const s = await standIn();
   try {
     settings(s.url, USER, PASSWORD);
+    asHer(s);
     const { value, said } = await captured(async () => {
-      const a = await client.getMine("mr");
-      const b = await client.getMine("en");
-      const c = await client.getPrice({ crop: "onion", state: "mh", district: "nashik" });
-      return [a, b, c];
+      const a = await client.getPrice({ crop: "onion", state: "mh", district: "nashik" });
+      const b = await client.getPrice({ crop: "onion", state: "mh", district: "pune" });
+      const mine = await client.getMine("mr");
+      return [a, b, mine];
     });
-    assert.equal(s.logins, 1, "signed in once");
+    assert.equal(
+      s.logins,
+      0,
+      "the server's farmer account never signed in (the audit's PRIVACY-09)",
+    );
     for (const r of value) assert.equal(r.ok, true);
     const text = JSON.stringify(value);
     assert.ok(
@@ -1231,75 +1600,58 @@ test("B3 one sign-in serves many calls; the token and password never reach the b
       !said.includes(PASSWORD) && !said.includes("standin-token"),
       "no password or token logged",
     );
-    const first = value[0];
-    assert.ok(first?.ok);
-    if (first?.ok && "mine" in first.data) {
+    const mine = value[2];
+    if (mine.ok && "cropNames" in mine.data) {
       assert.equal(
-        first.data.cropNames["onion"],
+        mine.data.cropNames["onion"],
         "कांदा",
         "her crop in her language, from AIAIC's list",
       );
-      assert.equal(first.data.districtNames["Nashik"], "नाशिक");
+      assert.equal(mine.data.districtNames["Nashik"], "नाशिक");
     }
   } finally {
     await s.close();
   }
 });
 
-test("B4 a token AIAIC no longer takes is replaced once, and the same press goes again with its same key", async () => {
+test("B4 a guest's sale price is refused by name: no call goes as the server's farmer account (PRIVACY-09)", async () => {
   const s = await standIn();
   try {
     settings(s.url, USER, PASSWORD);
-    assert.equal((await client.getMine("en")).ok, true);
+    client.resetForTests();
+    asGuest();
+    const r = await client.getPrice({ crop: "onion", state: "mh", district: "nashik" });
+    assert.equal(!r.ok ? r.problem.code : "", "sign_in_to_sell");
+    assert.equal(s.logins, 0, "nothing signed in");
+    assert.equal(s.gets.length, 0, "nothing was asked of AIAIC");
+  } finally {
+    await s.close();
+  }
+});
+
+test("B5 her token AIAIC no longer takes: she is asked to sign in again; nothing is sent as anyone else", async () => {
+  const s = await standIn();
+  try {
+    settings(s.url, USER, PASSWORD);
+    asHer(s);
     s.expireNext = true;
-    const key = newPressKey();
-    const r = await client.answerOffer(key, "ofr_dcef2ffada3bd1744a7c", "accept");
-    assert.equal(r.ok, true);
-    assert.equal(s.logins, 2, "signed in again once");
-    const accepts = s.posts.filter((p) => p.path.endsWith("/accept"));
-    assert.equal(accepts.length, 1);
-    assert.equal(accepts[0]?.key, key, "the press's own key reached AIAIC");
-  } finally {
-    await s.close();
-  }
-});
-
-test("B5 a refused sign-in is said and not tried again for a while (AIAIC locks out repeated failures)", async () => {
-  const s = await standIn();
-  try {
-    settings(s.url, USER, "a-wrong-password");
-    const a = await client.getMine("en");
-    const b = await client.getMine("en");
-    assert.equal(a.ok, false);
-    assert.equal(!a.ok ? a.problem.code : "", "aiaic_sign_in_refused");
-    assert.equal(!b.ok ? b.problem.code : "", "aiaic_sign_in_refused");
-    assert.equal(s.logins, 1, "the second call did not try the password again");
-  } finally {
-    await s.close();
-  }
-});
-
-test("B6 an account that is not a farmer's is refused", async () => {
-  const s = await standIn();
-  try {
-    s.role = "admin";
-    settings(s.url, USER, PASSWORD);
     const r = await client.getMine("en");
-    assert.equal(!r.ok ? r.problem.code : "", "aiaic_account_not_a_farmer");
+    assert.equal(!r.ok ? r.problem.code : "", "aiaic_signed_out");
+    assert.equal(s.logins, 0, "no other account signed in instead");
   } finally {
     await s.close();
   }
 });
 
-test("B7 a real farmer's account is refused: nothing of hers is shown, nothing is written", async () => {
+test("B7 a guest is asked to sign in to sell: no shared account's sale is read or written (28 Oct 2026)", async () => {
   const s = await standIn();
   try {
-    s.practice = false;
     settings(s.url, USER, PASSWORD);
     const r = await client.getMine("en");
     assert.equal(r.ok, false);
-    assert.equal(!r.ok ? r.problem.code : "", "aiaic_account_not_practice");
-    assert.ok(!JSON.stringify(r).includes("lst_"), "none of her listings reached the browser");
+    assert.equal(!r.ok ? r.problem.code : "", "sign_in_to_sell");
+    assert.ok(!JSON.stringify(r).includes("lst_"), "no listing reached the browser");
+    assert.equal(s.logins, 0, "the server's account was not even signed in");
     client.resetForTests();
     const w = await client.sell(newPressKey(), {
       state: "mh",
@@ -1308,7 +1660,7 @@ test("B7 a real farmer's account is refused: nothing of hers is shown, nothing i
       quantity_q: 10,
       ask_price_per_q: 3900,
     });
-    assert.equal(!w.ok ? w.problem.code : "", "aiaic_account_not_practice");
+    assert.equal(!w.ok ? w.problem.code : "", "sign_in_to_sell");
     assert.equal(s.posts.length, 0, "no write reached AIAIC");
   } finally {
     await s.close();
@@ -1319,6 +1671,7 @@ test("B8 a price far from the mandis is asked back; confirmed, the SAME press go
   const s = await standIn();
   try {
     settings(s.url, USER, PASSWORD);
+    asHer(s);
     const key = newPressKey();
     const sale = {
       state: "mh",
@@ -1349,6 +1702,7 @@ test("B9 her payout details pass through to AIAIC and are never said back or log
   const s = await standIn();
   try {
     settings(s.url, USER, PASSWORD);
+    asHer(s);
     const { value, said } = await captured(() =>
       client.givePayoutAccount(newPressKey(), {
         notice_version: "pn-0b66a47d1399",
@@ -1379,6 +1733,7 @@ test("B10 AIAIC's crisis card outranks everything: the helplines come back, noth
   const s = await standIn();
   try {
     settings(s.url, USER, PASSWORD);
+    asHer(s);
     s.distressOnWrite = true;
     const r = await client.sell(newPressKey(), {
       state: "mh",
@@ -1444,6 +1799,7 @@ test("B12 AIAIC not answering is said as such; nothing of the app's own store is
   const url = s.url;
   await s.close();
   settings(url, USER, PASSWORD);
+  asHer();
   const r = await client.getMine("en");
   assert.equal(r.ok, false);
   assert.equal(!r.ok ? r.problem.code : "", "aiaic_unavailable");
@@ -1454,6 +1810,7 @@ test("B13 ANN-1 her 'I got the money' goes with no amount, and AIAIC's answer to
   const s = await standIn();
   try {
     settings(s.url, USER, PASSWORD);
+    asHer(s);
     const order = "ord_6e5c6a9c56d2cb56fce7";
     assert.equal((await client.reportPayment(newPressKey(), order, "received")).ok, true);
     const sent = s.posts.find((p) => p.path === `/farmer/trade/orders/${order}/payment-report`);
@@ -1496,6 +1853,202 @@ test("B14 push 2n: the nearby mandis' names pass through this server; nothing el
     );
     assert.equal(s.logins, 0, "no sign-in for a public read");
   } finally {
+    await s.close();
+  }
+});
+
+test("B15 a small load whose answer depends on sharing: both ways said, never a hiring-alone total on its own (HONESTY-R1)", async () => {
+  // AIAIC's real answers (recorded by its reports/handover_tools/record_trip_and_payout_answers.py: 1 q from Niphad,
+  // priced between the mandi less a hired vehicle and less a shared one; and a 4 q offer), through the real server pick
+  const s = await standIn();
+  const body = (a: OfferCompare) =>
+    renderToString(createElement(I18nProvider, { children: createElement(CompareBody, { a }) }));
+  try {
+    settings(s.url, null, null);
+    asHer(s);
+    const r = await client.compareOffer("ofr_0123456789abcdef0123");
+    assert.ok(r.ok, JSON.stringify(r).slice(0, 300));
+    assert.equal(r.data.verdict, "depends_on_sharing");
+    const html = body(r.data);
+    assert.ok(html.includes('data-testid="aiaic-compare-both-ways"'), "both ways are said");
+    assert.ok(
+      !html.includes('data-testid="aiaic-compare-for-her"'),
+      "no hiring-alone total on its own",
+    );
+    assert.ok(
+      !html.includes(DICTS.en["aiaic.compare.assumes_alone"] ?? "?"),
+      "not said as hiring alone",
+    );
+    // the check is not vacuous: an answer that does not depend on sharing keeps its total
+    s.compare = "offer_compare_buyer_collects";
+    const plain = await client.compareOffer("ofr_0123456789abcdef0124");
+    assert.ok(plain.ok && plain.data.verdict !== "depends_on_sharing" && plain.data.gap?.for_her);
+    assert.ok(
+      body(plain.data).includes('data-testid="aiaic-compare-for-her"'),
+      "a plain answer keeps its total",
+    );
+  } finally {
+    await s.close();
+  }
+});
+
+test("B18 a send that stopped while AIAIC asked is said as not known, never 'Sending', and is not read every 5 s (NEW-2)", () => {
+  // AIAIC's real answer (recorded by its reports/handover_tools/record_trip_and_payout_answers.py): the farmer's sale while
+  // a send stays stopped (still "requesting" past AIAIC's 90 s)
+  const mine = mineOf("collect_mine_stale");
+  const stopped = mine.orders.find(
+    (o) => (o as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending?.stale === true,
+  );
+  assert.ok(stopped, "the recording holds the stopped send");
+  const sending = (stopped as { from_aiaic: FromAiaic }).from_aiaic.sending;
+  assert.equal(sending?.status, "requesting");
+  assert.equal(sendingSaid(sending), "no_answer", "said as not known");
+  for (const lang of ["en", "mr", "hi"] as const) {
+    assert.ok(DICTS[lang]["aiaic.money.status.no_answer"], `the words exist in ${lang}`);
+  }
+  const only = {
+    ok: true,
+    data: { mine: { ...mine, orders: [stopped] }, cropNames: {}, districtNames: {} },
+  } as const;
+  assert.equal(moneyMoving(only as never), false, "a stopped send is no reason to read every 5 s");
+  // the check is not vacuous: the same send, not stale, is moving and is said as being sent
+  const fresh = { ...sending, stale: false } as FromAiaic["sending"];
+  assert.equal(sendingSaid(fresh), "requesting");
+  const moving = {
+    ok: true,
+    data: {
+      mine: {
+        ...mine,
+        orders: [
+          {
+            ...stopped,
+            from_aiaic: { ...(stopped as { from_aiaic: FromAiaic }).from_aiaic, sending: fresh },
+          },
+        ],
+      },
+      cropNames: {},
+      districtNames: {},
+    },
+  } as const;
+  assert.equal(moneyMoving(moving as never), true);
+});
+
+test("B16 the farmer's money: one notice per sale (the newest, with its amount, crop and TEST); read every 5 s while it moves", async () => {
+  // AIAIC's real answers (recorded by its reports/handover_tools/record_trip_and_payout_answers.py: the farmer's
+  // notifications after the send reached them; their sale while it was on its way, and once the buyer paid)
+  const s = await standIn();
+  type Row = { notification_id: number; kind: string; body: Record<string, unknown> };
+  const rows = answer<{ notifications: Row[] }>("notices_money_processed").notifications.filter(
+    (n) => n.kind === "trade_farmer_paid",
+  );
+  try {
+    settings(s.url, null, null);
+    asHer(s);
+    assert.ok(rows.length >= 2, "the recording holds the send on its way and reached");
+    const money = (await account.myNotices()).filter((n) => n.kind === "trade_farmer_paid");
+    assert.equal(money.length, 1, "one notice for the sale's money");
+    const m = money[0];
+    assert.equal(m.id, rows[0].notification_id, "the newest is said");
+    assert.deepEqual(
+      [m.money?.status, m.money?.amountInr, m.money?.crop, m.money?.testMode, m.money?.orderId],
+      [
+        rows[0].body["status"],
+        rows[0].body["amount_inr"],
+        rows[0].body["crop"],
+        true,
+        rows[0].body["order_id"],
+      ],
+    );
+    assert.deepEqual(
+      [...(m.alsoIds ?? [])].sort(),
+      rows
+        .slice(1)
+        .map((r) => r.notification_id)
+        .sort(),
+      "the older notice is read with it",
+    );
+    // her sale is read every 5 s while AIAIC's send is moving, else every 15 s
+    const asRead = (name: string) =>
+      ({ ok: true, data: { mine: mineOf(name), cropNames: {}, districtNames: {} } }) as const;
+    assert.equal(moneyMoving(asRead("collect_mine_processing")), true, "on its way: moving");
+    assert.equal(
+      moneyMoving(asRead("collect_mine_paid")),
+      false,
+      "paid, nothing sent yet: not moving",
+    );
+    assert.equal(moneyMoving(undefined), false);
+  } finally {
+    await s.close();
+  }
+});
+
+test("B17 the money notice names its crop by AIAIC's name in the reader's language, says a stopped send, never a code (R5P-10, N-R5-8)", async () => {
+  // AIAIC's real answers: the farmer's notifications (record_trip_and_payout_answers.py) and its catalogue of
+  // Maharashtra's crops in Marathi (GET /catalog?state=mh&lang=mr, record_plan_answers.py, copied from AIAIC)
+  type Row = { notification_id: number; kind: string; body: Record<string, unknown> };
+  const recorded = answer<{ unread: number; notifications: Row[] }>("notices_money_processed");
+  const names = answer<{ crop_names: Record<string, string> }>("catalog_mh_mr").crop_names;
+  const onion = names["onion"] ?? "";
+  const s = await standIn();
+  const moneyOf = async (lang: (typeof LANGS)[number]) => {
+    const n = (await account.myNotices(lang)).find((x) => x.kind === "trade_farmer_paid");
+    assert.ok(n?.money, `${lang}: the money notice is read`);
+    return n.money;
+  };
+  try {
+    settings(s.url, null, null);
+    asHer(s);
+    assert.ok(onion && !LATIN.test(onion), "the recording names onion in Marathi");
+    const mr = await moneyOf("mr");
+    assert.equal(mr.crop, "onion");
+    assert.equal(mr.cropName, onion, "AIAIC's own name, from its catalogue");
+    assert.ok(
+      s.gets.some(
+        (g) =>
+          g.path === "/catalog" && g.query.get("state") === "mh" && g.query.get("lang") === "mr",
+      ),
+      "AIAIC's names asked in the reader's language",
+    );
+    const said = moneyNoticeLine(wordsIn("mr"), mr);
+    const reached = wordsIn("mr")("aiaic.money.status.processed", { rs: rupees(mr.amountInr) });
+    assert.equal(said, `${onion}: ${reached} ${DICTS.mr["aiaic.money.test"]}`);
+    for (const w of said.match(/[A-Za-z]+/g) ?? [])
+      assert.ok(LATIN_ALLOWED.has(w), `English word "${w}" in "${said}"`);
+    // no name held in the reader's language (this stand-in holds no Hindi catalogue): the line names no crop, never
+    // its code; the sale page's names, when this app has read them, name it
+    const hi = await moneyOf("hi");
+    assert.equal(hi.cropName, null);
+    const hiSaid = moneyNoticeLine(wordsIn("hi"), hi);
+    assert.ok(!/onion/i.test(hiSaid), hiSaid);
+    assert.ok(
+      hiSaid.startsWith(
+        wordsIn("hi")("aiaic.money.status.processed", { rs: rupees(hi.amountInr) }),
+      ),
+      hiSaid,
+    );
+    assert.ok(moneyNoticeLine(wordsIn("mr"), hi, names).startsWith(`${onion}: `));
+    // a send RazorpayX stopped is said with its own words, and a state this app has no words for as news to open:
+    // DERIVED in memory from the recording (the newest notice of the sale with another state), never written to a file
+    for (const [status, key] of [
+      ["cancelled", "aiaic.money.status.cancelled"],
+      ["a_state_not_known_here", "aiaic.money.status.other"],
+    ] as const) {
+      const derived = JSON.parse(JSON.stringify(recorded)) as typeof recorded;
+      const newest = derived.notifications[0];
+      assert.ok(newest && newest.kind === "trade_farmer_paid", "the newest is the money notice");
+      newest.body["status"] = status;
+      s.notices = derived;
+      for (const lang of LANGS) {
+        const m = await moneyOf(lang);
+        assert.equal(m.status, status);
+        const line = moneyNoticeLine(wordsIn(lang), m);
+        const words = wordsIn(lang)(key, { rs: rupees(m.amountInr) });
+        assert.ok(DICTS[lang][key] && line.includes(words), `${lang} ${status}: "${line}"`);
+        assert.ok(!line.includes("aiaic.") && !HOLE.test(line), `${lang}: "${line}"`);
+      }
+    }
+  } finally {
+    s.notices = null;
     await s.close();
   }
 });

@@ -349,6 +349,7 @@ function ResultPage() {
                 quantityQ={10}
                 fromState={search.state}
                 fromDistrict={search.region}
+                fromTaluka={search.taluka}
                 toMandi={advisedMandi}
               />
             ) : null}
@@ -360,6 +361,7 @@ function ResultPage() {
                 crop={search.crop}
                 district={search.region}
                 state={search.state}
+                taluka={search.taluka}
               />
             ) : null}
 

@@ -40,6 +40,15 @@ const QTY = new Set([
   "accepted_q",
 ]);
 const DAYS = new Set(["tested_on", "stored_from", "stored_to", "expected_on"]);
+/** The payment states her app has words for (`aiaic.pay.state.*`). */
+const PAYMENT_STATES = [
+  "not_connected",
+  "link_created",
+  "partially_paid",
+  "paid",
+  "link_expired",
+  "link_cancelled",
+];
 const LISTS = new Set(["facility_kind", "kind"]);
 
 /** One fact of a step, in her words: "12 quintals weighed", "Grade A", "expected 30/10/2026". */
@@ -135,9 +144,13 @@ export function SaleJourney({ order }: { order: AiaicOrder }) {
           >
             <Banknote className="size-3.5" aria-hidden />
           </span>
+          {/* the payment's own state, in the payment card's words (CT-11: a part payment, an expired or a cancelled
+              link were all said as "a link sent") */}
           <p className="text-sm font-bold text-foreground">
             {t(
-              `aiaic.journey.payment.${paid ? "paid" : order.payment.link_made ? "link" : "none"}`,
+              PAYMENT_STATES.includes(order.payment_state)
+                ? `aiaic.pay.state.${order.payment_state}`
+                : "aiaic.pay.state.not_connected",
             )}
           </p>
         </li>

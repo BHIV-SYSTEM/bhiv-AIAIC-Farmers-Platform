@@ -7,8 +7,10 @@ import { useEffect, useMemo, useState } from "react";
 import { usePress } from "@/lib/aiaic-crisis";
 import {
   QUANTITY_CHOICES,
+  answerLanded,
   dayOf,
   newPressKey,
+  pressKeyHolder,
   quintalWords,
   quintals,
   rupees,
@@ -23,6 +25,7 @@ import { getPlacesCrops, getPlacesDistricts } from "@/lib/places.functions";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
+import { TalukaSelect } from "./TalukaSelect";
 import { TransportCostCard } from "./TransportCostCard";
 
 type Estate = "mh" | "mp";
@@ -35,7 +38,13 @@ function estateOf(state: string | null | undefined): Estate {
   return s === "mp" || s.includes("madhya") ? "mp" : "mh";
 }
 
-/** Her sale, listed in AIAIC: few inputs, each a dropdown, and her price beside her district's mandi prices. */
+// the key of a "List it for sale" press until AIAIC's answer lands, kept outside the form (R5P-09): a form shown again
+// while the press is on its way sends the same sale with the same key, and AIAIC lists it once
+const SELL_PRESS = pressKeyHolder();
+
+/** The farmer's sale, listed in AIAIC: few inputs, each a dropdown, and their price beside their district's mandi
+ * prices. The page reads their records only when opened (nothing on it moves): never again by itself under the form
+ * (R5P-09). */
 export function AiaicSellForm({
   initialCrop,
   initialDistrict,
@@ -44,7 +53,7 @@ export function AiaicSellForm({
   initialDistrict?: string | undefined;
 }) {
   return (
-    <WithMine>
+    <WithMine pace="opened">
       {(data) => (
         <SellForm data={data} initialCrop={initialCrop} initialDistrict={initialDistrict} />
       )}
@@ -73,13 +82,15 @@ function SellForm({
   const place = data.mine.profile_place;
   const [estate, setEstate] = useState<Estate>(estateOf(place.state));
   const [district, setDistrict] = useState("");
+  // her taluka (28 Oct 2026): her lot's trips start at its main town
+  const [taluka, setTaluka] = useState("");
   const [crop, setCrop] = useState("");
   const [qtyChoice, setQtyChoice] = useState<string>("10");
   const [qtyOther, setQtyOther] = useState("");
   const [grade, setGrade] = useState<"" | "A" | "B" | "C">("");
   const [price, setPrice] = useState("");
   const [priceTouched, setPriceTouched] = useState(false);
-  const [pressKey, setPressKey] = useState(newPressKey);
+  const [pressKey, setPressKey] = useState(SELL_PRESS.take);
   const [sending, setSending] = useState(false);
   const [problem, setProblem] = useState<AiaicProblem | null>(null);
   const [askBack, setAskBack] = useState<Record<string, unknown> | null>(null);
@@ -147,6 +158,7 @@ function SellForm({
     if (!district || !crop || !qtyOk || !priceOk) return;
     setSending(true);
     setProblem(null);
+    SELL_PRESS.sent(pressKey);
     const r = await press(() =>
       sellFn({
         data: {
@@ -158,9 +170,11 @@ function SellForm({
           ask_price_per_q: Math.round(priceNum * 100) / 100,
           grade: grade || null,
           ...(confirmed ? { price_confirmed: true } : {}),
+          ...(taluka ? { taluka } : {}),
         },
       }),
     );
+    SELL_PRESS.answered(pressKey, r);
     if (r.ok) {
       setListed(r.data.listing_id);
       setAskBack(null);
@@ -171,7 +185,7 @@ function SellForm({
       setAskBack(range && typeof range === "object" && !Array.isArray(range) ? range : {});
     } else {
       setProblem(r.problem);
-      if (r.problem.status !== null && r.problem.status < 500) setPressKey(newPressKey());
+      if (answerLanded(r)) setPressKey(newPressKey());
     }
     setSending(false);
     if (r.ok) await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
@@ -251,6 +265,7 @@ function SellForm({
               value={district}
               onChange={(e) => {
                 setDistrict(e.target.value);
+                setTaluka("");
                 setCrop("");
                 setPriceTouched(false);
               }}
@@ -265,6 +280,15 @@ function SellForm({
             </select>
           </label>
         </div>
+        {district ? (
+          <TalukaSelect
+            state={estate}
+            district={district}
+            value={taluka}
+            onChange={setTaluka}
+            selectClassName={SELECT}
+          />
+        ) : null}
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="block">
@@ -435,6 +459,7 @@ function SellForm({
               quantityQ={qty}
               fromState={estate}
               fromDistrict={district}
+              fromTaluka={taluka || null}
             />
           ) : null}
         </div>

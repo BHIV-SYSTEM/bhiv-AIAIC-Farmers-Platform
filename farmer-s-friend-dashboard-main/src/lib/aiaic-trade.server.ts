@@ -3,14 +3,13 @@
  *
  * - A FARMER SIGNED IN to this app (push 4b, `aiaic-identity.server.ts`) reads and writes HER OWN sale record
  *   (`/farmer/trade/*`, AIAIC's contract sections 17b and 17d) with her own AIAIC token. AIAIC's own rules govern it.
- * - A GUEST's sale screens are read and written as ONE AIAIC farmer account, signed in from the server settings
- *   AIAIC_FARMER_USERNAME and AIAIC_FARMER_PASSWORD (read here by name; never logged, never sent to the browser). The
- *   token AIAIC gives is kept in this process's memory until shortly before it expires, and asked for again once when
- *   AIAIC says it is no longer valid. Every guest acts as that one account, so it may be only AIAIC's PRACTICE farmer
- *   (her records are rehearsal data and no real money moves); a real farmer's account set there is refused before
- *   anything of it is shown or written (`aiaic_account_not_practice`).
- * - A password, and a token AIAIC gave for one, cross the network only over https, or to an address on this machine or
- *   its private network (`signInAllowed`; `aiaic_sign_in_needs_https` otherwise).
+ * - A GUEST is asked to sign in to sell (`sign_in_to_sell`): no sale, offer, order, payment or sale price is read or
+ *   written for a guest, and NO CALL IS EVER MADE AS ANOTHER ACCOUNT (28 Oct 2026; the audit's PRIVACY-09: a shared
+ *   farmer account had been the fallback). The settings AIAIC_FARMER_USERNAME and AIAIC_FARMER_PASSWORD now only say
+ *   that this app is connected to AIAIC's sale service (`tradeMode`); the password is read for its presence and sent
+ *   nowhere.
+ * - Her token crosses the network only over https, or to an address on this machine or its private network
+ *   (`signInAllowed`; `aiaic_sign_in_needs_https` otherwise).
  * - Transport and storage (`/transport/*`, `/storage/verdict`, sections 19 and 21) need no sign-in: public reads, sent
  *   with who asked (her token, else this device's id: AIAIC keeps a look), and kept here for 30 minutes so the road
  *   routes AIAIC asks Geoapify for are not spent twice on the same trip (a look served from here is not re-recorded).
@@ -49,19 +48,16 @@ import {
   type StorageVerdict,
   type TradeMode,
   type TransportEstimate,
+  type TalukaRow,
+  type OfferCompare,
+  type XDestination,
 } from "./aiaic-trade";
 
 export const USERNAME_ENV = "AIAIC_FARMER_USERNAME";
 export const PASSWORD_ENV = "AIAIC_FARMER_PASSWORD";
 
-const SIGN_IN_TIMEOUT_MS = 15_000;
 const CALL_TIMEOUT_MS = 20_000;
-/** A sign-in AIAIC refused is not tried again for this long (AIAIC locks an address out after repeated failures). */
-const REFUSED_PAUSE_MS = 5 * 60_000;
-/** A token is used until this long before AIAIC's own expiry. */
-const TOKEN_MARGIN_MS = 5 * 60_000;
-/** Whether the account is a practice one is read again after this long. */
-const PRACTICE_RECHECK_MS = 10 * 60_000;
+/** A transport or storage answer is kept this long (the road routes AIAIC asks Geoapify for are not spent twice). */
 const TRANSPORT_KEEP_MS = 30 * 60_000;
 const NAMES_KEEP_MS = 30 * 60_000;
 
@@ -95,88 +91,13 @@ export function tradeModeNow(): TradeMode {
   return herSession() ? { mode: "aiaic", problem: null } : tradeMode();
 }
 
-// ------------------------------------------------------------------------------------------------ the session
+// ------------------------------------------------------------------------------------------------ what is kept
 
-type Session = { token: string; expiresAt: number };
-
-let session: Session | null = null;
-let signingIn: Promise<Session | AiaicProblem> | null = null;
-let refusal: { problem: AiaicProblem; until: number } | null = null;
-let practice: { is: boolean; at: number } | null = null;
-
-/** For the tests only: forget the session, a refusal and the practice reading. */
+/** For the tests only: forget what was kept. */
 export function resetForTests(): void {
-  session = null;
-  signingIn = null;
-  refusal = null;
-  practice = null;
   transportKept.clear();
   namesKept.clear();
   pricingKept = null;
-}
-
-function isProblem(x: Session | AiaicProblem): x is AiaicProblem {
-  return (x as AiaicProblem).code !== undefined;
-}
-
-async function signIn(baseUrl: string): Promise<Session | AiaicProblem> {
-  if (refusal && Date.now() < refusal.until) return refusal.problem;
-  if (signingIn) return signingIn;
-  signingIn = (async (): Promise<Session | AiaicProblem> => {
-    let res: Response;
-    try {
-      res = await fetch(`${baseUrl}/auth/login`, {
-        method: "POST",
-        headers: { ...aiaicHeaders(), "content-type": "application/json" },
-        body: JSON.stringify({
-          username: (process.env[USERNAME_ENV] ?? "").trim(),
-          password: process.env[PASSWORD_ENV] ?? "",
-        }),
-        signal: AbortSignal.timeout(SIGN_IN_TIMEOUT_MS),
-      });
-    } catch {
-      return problem("aiaic_unavailable");
-    }
-    const text = await res.text();
-    if (isTunnelErrorBody(text)) return problem("aiaic_unavailable", { status: res.status });
-    const refuse = (code: string): AiaicProblem => {
-      const p = problem(code, { status: res.status, setting: USERNAME_ENV });
-      refusal = { problem: p, until: Date.now() + REFUSED_PAUSE_MS };
-      return p;
-    };
-    if (res.status === 401 || res.status === 422) return refuse("aiaic_sign_in_refused");
-    if (res.status === 429) return refuse("aiaic_sign_in_locked");
-    if (!res.ok) return problem("aiaic_unavailable", { status: res.status });
-    let body: Record<string, unknown>;
-    try {
-      body = JSON.parse(text) as Record<string, unknown>;
-    } catch {
-      return problem("aiaic_answer_unreadable", { status: res.status });
-    }
-    const token = body["access_token"];
-    if (typeof token !== "string" || !token) {
-      // AIAIC's crisis card is answered to a username that reads as distress: it is not a sign-in.
-      return problem("aiaic_answer_unreadable", { status: res.status });
-    }
-    if (body["role"] !== "farmer") return refuse("aiaic_account_not_a_farmer");
-    const expires = Date.parse(String(body["expires_at"] ?? ""));
-    const made: Session = {
-      token,
-      expiresAt: Number.isNaN(expires) ? Date.now() + 60 * 60_000 : expires,
-    };
-    session = made;
-    refusal = null;
-    return made;
-  })().finally(() => {
-    signingIn = null;
-  });
-  return signingIn;
-}
-
-async function currentSession(baseUrl: string): Promise<Session | AiaicProblem> {
-  if (session && session.expiresAt - TOKEN_MARGIN_MS > Date.now()) return session;
-  session = null;
-  return signIn(baseUrl);
 }
 
 // ------------------------------------------------------------------------------------------------ one call
@@ -241,12 +162,9 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
   const { baseUrl } = resolveBaseUrl();
   // her own session, for her sale and her looks (none outside a request, or once AIAIC refused her token)
   let her: HerSession | null = opts.as === "none" ? null : herSession();
-  if (opts.as === "trade" && !her) {
-    const mode = tradeMode();
-    if (mode.mode !== "aiaic")
-      return { ok: false, problem: problem("aiaic_setting_missing", { setting: USERNAME_ENV }) };
-    if (mode.problem) return { ok: false, problem: mode.problem };
-  }
+  // A SALE CALL IS HERS OR NONE (audit of 28 Oct 2026, PRIVACY-09): it never falls back to a shared account, so her
+  // payment details or her sale can never go under another account's record
+  if (opts.as === "trade" && !her) return { ok: false, problem: problem("sign_in_to_sell") };
   const url = new URL(`${baseUrl}${opts.path}`);
   for (const [k, v] of Object.entries(opts.query ?? {})) {
     if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
@@ -255,10 +173,6 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
     const headers: Record<string, string> = aiaicHeaders();
     if (her) {
       Object.assign(headers, askerHeaders({ kind: "her", session: her }));
-    } else if (opts.as === "trade") {
-      const s = await currentSession(baseUrl);
-      if (isProblem(s)) return { ok: false, problem: s };
-      headers["authorization"] = `Bearer ${s.token}`;
     } else if (opts.as === "person") {
       const id = deviceId();
       if (id) Object.assign(headers, askerHeaders({ kind: "device", id }));
@@ -288,12 +202,6 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
       if (opts.as === "person" && attempt === 0) continue;
       return { ok: false, problem: problem("aiaic_signed_out") };
     }
-    if (res.status === 401 && opts.as === "trade" && attempt === 0) {
-      // The token is no longer good (expired early, or AIAIC's signing key changed): sign in again, once. A 401 wrote
-      // nothing, so the same press goes again with its same key.
-      session = null;
-      continue;
-    }
     let json: unknown = null;
     if (text) {
       try {
@@ -319,7 +227,7 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
     if (!res.ok) return { ok: false, problem: refusalOf(res.status, json) };
     return { ok: true, data: json as T };
   }
-  return { ok: false, problem: problem("aiaic_sign_in_refused", { setting: USERNAME_ENV }) };
+  return { ok: false, problem: problem("aiaic_unavailable") };
 }
 
 // ------------------------------------------------------------------------------------- her records, kept small
@@ -354,6 +262,7 @@ const OFFER_KEYS = [
 ] as const;
 const LISTING_KEYS = [
   "listing_id",
+  "taluka",
   "crop",
   "variety",
   "grade",
@@ -554,6 +463,52 @@ const PAYOUT_KEYS = [
  * Only what this app shows leaves the server: the answer is copied field by field (the contact path's blocks, ids of
  * other systems and every later field AIAIC may add stay here).
  */
+const FROM_AIAIC_KEYS = [
+  "fixed_by_link",
+  "to_her_inr",
+  "price_inr",
+  "commission_inr",
+  "gst_inr",
+  "commission_percent",
+  "gst_percent",
+  "buyer_paid",
+  "upi_one_lakh_or_more",
+] as const;
+const SENDING_KEYS = [
+  "status",
+  "rail",
+  "amount_inr",
+  "utr",
+  "updated_at",
+  "test_mode",
+  "stale",
+] as const;
+
+/** Her steps as AIAIC says them (audit of 28 Oct 2026, MONEY-11): three facts, never worked out here. */
+function stepsOf(raw: unknown): { buyer_paid: boolean; sent: boolean; reached: boolean } | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  return {
+    buyer_paid: r["buyer_paid"] === true,
+    sent: r["sent"] === true,
+    reached: r["reached"] === true,
+  };
+}
+
+/** The notice she is shown before she gives her UPI ID or bank account (PRIVACY-03): its version and its paragraphs
+ * in each language, strings only. */
+function noticeOf(
+  raw: unknown,
+): { version: string; en: string[]; mr: string[]; hi: string[] } | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const lines = (v: unknown) =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, 12) : [];
+  if (typeof r["version"] !== "string") return null;
+  return { version: r["version"], en: lines(r["en"]), mr: lines(r["mr"]), hi: lines(r["hi"]) };
+}
+const X_DEST_KEYS = ["kind", "hint", "status", "ready"] as const;
+
 export function mineForBrowser(raw: unknown): AiaicMine {
   const r = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const listings = Array.isArray(r["listings"]) ? r["listings"] : [];
@@ -606,6 +561,15 @@ export function mineForBrowser(raw: unknown): AiaicMine {
       order["payment"] = pick(src["payment"], PAYMENT_KEYS);
       order["pooled"] = pooledOf(src["pooled"]);
       order["pool"] = poolOf(src["pool"]);
+      // WHAT AIAIC SENDS HER, AND WHERE IT IS (28 Oct 2026): AIAIC's own figures, field by field
+      const fa = src["from_aiaic"];
+      if (fa && typeof fa === "object") {
+        const m = pick<Record<string, unknown>>(fa, FROM_AIAIC_KEYS);
+        const s = (fa as Record<string, unknown>)["sending"];
+        m["sending"] = s && typeof s === "object" ? pick(s, SENDING_KEYS) : null;
+        m["steps"] = stepsOf((fa as Record<string, unknown>)["steps"]);
+        order["from_aiaic"] = m;
+      }
       if (src["money"] && typeof src["money"] === "object") {
         const money = pick<Record<string, unknown>>(src["money"], MONEY_KEYS);
         // AIAIC's commission on this sale (24 Oct 2026), field by field; an AIAIC not yet updated sends none.
@@ -616,6 +580,12 @@ export function mineForBrowser(raw: unknown): AiaicMine {
       return order as unknown as AiaicMine["orders"][number];
     }),
   };
+  const xd = r["x_destination"];
+  Object.assign(mine, {
+    x_destination: xd && typeof xd === "object" ? pick(xd, X_DEST_KEYS) : null,
+    collect_then_pay: r["collect_then_pay"] === true,
+    x_notice: noticeOf(r["x_notice"]),
+  });
   if (payout) {
     const block = pick<Record<string, unknown>>(payout, PAYOUT_KEYS);
     block["account"] =
@@ -687,24 +657,42 @@ async function districtNamesOf(state: string, lang: string) {
   });
 }
 
-// ------------------------------------------------------------------------------------------------ her sale
-
-/** Notes whether the account is a practice one; a real farmer's account is refused (`aiaic_account_not_practice`). */
-function notePractice(mine: AiaicMine): AiaicProblem | null {
-  practice = { is: mine.practice, at: Date.now() };
-  return mine.practice ? null : problem("aiaic_account_not_practice", { setting: USERNAME_ENV });
+/**
+ * EVERY CROP'S NAME IN THE READER'S LANGUAGE, from AIAIC's own catalogue of each state (public `GET /catalog`, its
+ * `crop_names`: the names `/places/crops` gives a district's crops), for a line that names a crop with no district
+ * beside it: the farmer's money notice (R5P-10, 28 Oct 2026). Kept 30 minutes; a name AIAIC does not send is not made
+ * up here (the line then names no crop).
+ */
+export async function everyCropName(lang: string): Promise<Record<string, string>> {
+  const names: Record<string, string> = {};
+  for (const state of ["mp", "mh"] as const) {
+    const held = await keptNames(`catalog:${state}:${lang}`, async () => {
+      const r = await call<{ crop_names?: Record<string, unknown> }>({
+        path: "/catalog",
+        query: { state, lang },
+        as: "none",
+      });
+      const out: Record<string, string> = {};
+      if (r.ok)
+        for (const [crop, name] of Object.entries(r.data?.crop_names ?? {}))
+          if (typeof name === "string" && name) out[crop] = name;
+      return out;
+    });
+    Object.assign(names, held);
+  }
+  return names;
 }
+
+// ------------------------------------------------------------------------------------------------ her sale
 
 /** GET /farmer/trade, kept small, with the names of her crops and districts in her language. A real farmer's
  * account is refused here, before anything of hers leaves this server. */
 export async function getMine(lang: string): Promise<AiaicResult<MineForScreen>> {
-  const signedIn = Boolean(herSession());
+  // HER OWN SALE ONLY (28 Oct 2026; real payments): a guest is asked to sign in, never shown a shared account's records
+  if (!herSession()) return { ok: false, problem: problem("sign_in_to_sell") };
   const r = await call<unknown>({ path: "/farmer/trade", as: "trade" });
   if (!r.ok) return r;
   const mine = mineForBrowser(r.data);
-  // the practice gate is the server's own account's (every guest acts as it); a signed-in farmer's record is her own
-  const refused = signedIn ? null : notePractice(mine);
-  if (refused) return { ok: false, problem: refused };
   const places = new Map<string, { state: string; district: string }>();
   const add = (state: string | null | undefined, district: string | null | undefined) => {
     if (!district) return;
@@ -782,15 +770,9 @@ export async function buyersLooking(lang: string): Promise<AiaicResult<BuyersLoo
   };
 }
 
-/** Every write is made only for a practice account (read again every 10 minutes). */
+/** Every sale write is HERS, signed in (28 Oct 2026: real payments; no guest writes through a shared account). */
 async function practiceFirst(): Promise<AiaicProblem | null> {
-  if (herSession()) return null; // her own account: AIAIC's own rules govern her writes
-  if (practice && Date.now() - practice.at < PRACTICE_RECHECK_MS) {
-    return practice.is ? null : problem("aiaic_account_not_practice", { setting: USERNAME_ENV });
-  }
-  const r = await call<unknown>({ path: "/farmer/trade", as: "trade" });
-  if (!r.ok) return r.problem;
-  return notePractice(mineForBrowser(r.data));
+  return herSession() ? null : problem("sign_in_to_sell");
 }
 
 export async function getPrice(q: {
@@ -798,6 +780,8 @@ export async function getPrice(q: {
   state: string;
   district: string;
 }): Promise<AiaicResult<ReferencePrice>> {
+  const refused = await practiceFirst();
+  if (refused) return { ok: false, problem: refused };
   const r = await call<unknown>({ path: "/farmer/trade/price", query: q, as: "trade" });
   if (!r.ok) return r;
   return { ok: true, data: pick<ReferencePrice>(r.data, REFERENCE_KEYS) };
@@ -817,6 +801,7 @@ export type SellInput = {
   ask_price_per_q?: number | undefined;
   grade?: string | null | undefined;
   price_confirmed?: boolean | undefined;
+  taluka?: string | undefined;
 };
 
 export async function sell(
@@ -830,6 +815,7 @@ export async function sell(
     district: d.district,
   };
   if (typeof d.ask_price_per_q === "number") body["ask_price_per_q"] = d.ask_price_per_q;
+  if (d.taluka) body["taluka"] = d.taluka;
   if (d.grade) body["grade"] = d.grade;
   if (d.price_confirmed) body["price_confirmed"] = true;
   const r = await write<Record<string, unknown>>("/farmer/trade/listings", key, body);
@@ -986,6 +972,7 @@ export type EstimateInput = {
   mandi_state?: string | undefined;
   mandi_district?: string | undefined;
   from_place: "farm" | "district_centre";
+  taluka?: string | undefined;
 };
 
 /** GET /transport/estimate: a dated, sourced range (contract section 19); only its declared parameters are sent. */
@@ -997,6 +984,7 @@ export async function transportEstimate(q: EstimateInput): Promise<AiaicResult<T
     state: q.state,
     mandi_state: q.mandi_state,
     mandi_district: q.mandi_district,
+    taluka: q.taluka,
     from_place: q.from_place,
   };
   return keptTransport(`estimate:${JSON.stringify(query)}`, () =>
@@ -1013,6 +1001,7 @@ export async function storageVerdict(q: {
   district: string;
   state: string;
   quantity_q?: number | undefined;
+  taluka?: string | undefined;
   lang: string;
 }): Promise<AiaicResult<StorageVerdict>> {
   const query: Query = {
@@ -1020,6 +1009,7 @@ export async function storageVerdict(q: {
     district: q.district,
     state: q.state,
     quantity_q: q.quantity_q,
+    taluka: q.taluka,
     lang: q.lang,
   };
   return keptTransport(`storage:${JSON.stringify(query)}`, () =>
@@ -1061,8 +1051,9 @@ export async function nearbyMandis(q: {
   district: string;
   state: string;
   limit: number;
+  taluka?: string | undefined;
 }): Promise<AiaicResult<NearbyMandis>> {
-  const query: Query = { district: q.district, state: q.state, limit: q.limit };
+  const query: Query = { district: q.district, state: q.state, limit: q.limit, taluka: q.taluka };
   return keptTransport(`nearby:${JSON.stringify(query)}`, async () => {
     const r = await call<Record<string, unknown>>({
       path: "/transport/nearby-mandis",
@@ -1072,4 +1063,154 @@ export async function nearbyMandis(q: {
     if (!r.ok) return r;
     return { ok: true as const, data: nearbyForBrowser(r.data) };
   });
+}
+
+// ------------------------------------------------------------------------- 28 Oct 2026: talukas, her offer, her money
+const TALUKA_KEYS = ["taluka", "taluka_key", "names", "placed", "located_by"] as const;
+
+/** GET /transport/talukas: the talukas of her district, each named in every language. A place list: no sign-in. */
+export async function tripTalukas(q: {
+  state: string;
+  district: string;
+}): Promise<AiaicResult<{ talukas: TalukaRow[]; count: number }>> {
+  const r = await call<Record<string, unknown>>({
+    path: "/transport/talukas",
+    query: { state: q.state, district: q.district },
+    as: "none",
+  });
+  if (!r.ok) return r;
+  const rows = Array.isArray(r.data["talukas"]) ? (r.data["talukas"] as unknown[]) : [];
+  return {
+    ok: true,
+    data: { talukas: rows.map((x) => pick<TalukaRow>(x, TALUKA_KEYS)), count: rows.length },
+  };
+}
+
+const CMP_OFFER_KEYS = [
+  "price_per_q",
+  "terms_code",
+  "commission_per_q",
+  "commission",
+  "net_per_q",
+] as const;
+const CMP_TRIP_KEYS = [
+  "measured",
+  "least_counted",
+  "km",
+  "method",
+  "alone_per_q",
+  "shared_per_q",
+] as const;
+const CMP_MANDI_KEYS = [
+  "mandi",
+  "names",
+  "modal_per_q",
+  "price_day",
+  "net_per_q",
+  "net_per_q_shared",
+] as const;
+const CMP_GAP_KEYS = ["per_q", "total", "for_her"] as const;
+
+/** GET /farmer/trade/offers/{id}/compare: HER offer weighed against the mandi after her trip (her own offer only). */
+export async function compareOffer(offerId: string): Promise<AiaicResult<OfferCompare>> {
+  if (!herSession()) return { ok: false, problem: problem("sign_in_to_sell") };
+  const r = await call<Record<string, unknown>>({
+    path: `/farmer/trade/offers/${encodeURIComponent(offerId)}/compare`,
+    as: "trade",
+  });
+  if (!r.ok) return r;
+  const d = r.data;
+  const rawOffer = (d["offer"] && typeof d["offer"] === "object" ? d["offer"] : {}) as Record<
+    string,
+    unknown
+  >;
+  const offer = pick<Record<string, unknown>>(rawOffer, CMP_OFFER_KEYS);
+  offer["trip"] = pick(rawOffer["trip"], CMP_TRIP_KEYS);
+  const mandis = Array.isArray(d["mandis"])
+    ? (d["mandis"] as unknown[]).map((m) => {
+        const row = pick<Record<string, unknown>>(m, CMP_MANDI_KEYS);
+        // whether her trip there is only the least a trip costs (not measured from her farm)
+        const trip = (m as Record<string, unknown>)["trip"];
+        row["trip"] =
+          trip && typeof trip === "object" ? pick(trip, ["least_counted", "km"] as const) : null;
+        return row;
+      })
+    : [];
+  const gap = d["gap"] && typeof d["gap"] === "object" ? pick(d["gap"], CMP_GAP_KEYS) : null;
+  const gapShared =
+    d["gap_if_shared"] && typeof d["gap_if_shared"] === "object"
+      ? pick(d["gap_if_shared"], CMP_GAP_KEYS)
+      : null;
+  const saved =
+    d["trip_saved"] && typeof d["trip_saved"] === "object"
+      ? pick(d["trip_saved"], ["km_one_way", "least_counted"] as const)
+      : null;
+  return {
+    ok: true,
+    data: {
+      verdict: String(d["verdict"] ?? ""),
+      gap,
+      gap_if_shared: gapShared,
+      quantity_q: typeof d["quantity_q"] === "number" ? d["quantity_q"] : null,
+      verdict_if_shared: typeof d["verdict_if_shared"] === "string" ? d["verdict_if_shared"] : null,
+      assumes: typeof d["assumes"] === "string" ? d["assumes"] : null,
+      offer,
+      mandis,
+      best_mandi: typeof d["best_mandi"] === "string" ? d["best_mandi"] : null,
+      price_day: typeof d["price_day"] === "string" ? d["price_day"] : null,
+      price_age_days: typeof d["price_age_days"] === "number" ? d["price_age_days"] : null,
+      trip_saved: saved,
+    } as unknown as OfferCompare,
+  };
+}
+
+/** POST /farmer/trade/payout-destination: where AIAIC sends HER money, by her own press. Her details go to AIAIC once,
+ * over this server's own call; nothing of them is kept here or sent back to the browser but the masked hint. */
+export async function giveDestination(
+  key: string,
+  d: {
+    kind: "upi_id" | "bank_account";
+    upi_id?: string | undefined;
+    name?: string | undefined;
+    account_number?: string | undefined;
+    ifsc?: string | undefined;
+    agreed: boolean;
+    replace?: boolean | undefined;
+    notice_version: string;
+    read_in: "en" | "mr" | "hi";
+  },
+): Promise<AiaicResult<{ destination: XDestination | null }>> {
+  if (!herSession()) return { ok: false, problem: problem("sign_in_to_sell") };
+  // her consent as she gave it (PRIVACY-03): the notice's version she was shown and its language
+  const body: Record<string, unknown> = {
+    kind: d.kind,
+    agreed: d.agreed === true,
+    replace: d.replace === true,
+    notice_version: d.notice_version,
+    read_in: d.read_in,
+  };
+  if (d.kind === "upi_id") body["upi_id"] = d.upi_id;
+  else Object.assign(body, { name: d.name, account_number: d.account_number, ifsc: d.ifsc });
+  const r = await write<Record<string, unknown>>("/farmer/trade/payout-destination", key, body);
+  if (!r.ok) return r;
+  const dest = r.data["destination"];
+  return {
+    ok: true,
+    data: {
+      destination: dest && typeof dest === "object" ? pick<XDestination>(dest, X_DEST_KEYS) : null,
+    },
+  };
+}
+
+/** POST /farmer/trade/payout-destination/end: she removes her UPI ID or bank account by her own press (audit of 28 Oct
+ * 2026, PRIVACY-04); AIAIC asks RazorpayX to switch them off. `closure`: `done` once RazorpayX said so, else
+ * `to_be_asked` (a person finishes it). */
+export async function endDestination(
+  key: string,
+): Promise<AiaicResult<{ closure: string | null }>> {
+  if (!herSession()) return { ok: false, problem: problem("sign_in_to_sell") };
+  const r = await write<Record<string, unknown>>("/farmer/trade/payout-destination/end", key, {});
+  if (!r.ok) return r;
+  const closure = r.data["closure"];
+  return { ok: true, data: { closure: typeof closure === "string" ? closure : null } };
 }

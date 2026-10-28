@@ -1,13 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { CalendarDays, MapPin, Timer, Users } from "lucide-react";
 
-import {
-  dayOf,
-  districtName,
-  quintalWords,
-  rupees,
-  type AiaicListing,
-  type AiaicPool,
-} from "@/lib/aiaic-trade";
+import { estateOf } from "@/lib/aiaic-analysis";
+import { dayOf, districtName, quintalWords, rupees, type AiaicPool } from "@/lib/aiaic-trade";
+import { getSalePrice } from "@/lib/aiaic-trade.functions";
 import { useI18n } from "@/lib/i18n";
 
 import { ModeChip } from "./AiaicBits";
@@ -16,20 +13,23 @@ import { ModeChip } from "./AiaicBits";
  * A GROUP SALE, AS SHE IS TOLD IT (AIAIC section 27, 27 Oct 2026; the owner: "That someone is looking for his yield at a
  * certain rate"): one buyer wants more than one farmer has, and its request is filled from many farmers' lots. On her
  * offer (or her sale): how much the buyer wants, how much has joined from how many farmers, what is still wanted, where
- * and when the lots are handed over, how fast the buyer said it pays, and HER DISTRICT'S OWN MANDI PRICES beside the
- * buyer's price (Agmarknet, with their day), so she compares before she says yes. Never another farmer's name or lot.
+ * and when the lots are handed over, how fast the buyer said it pays, and HER DISTRICT'S MANDI PRICES AS AIAIC HOLDS
+ * THEM NOW beside the buyer's price (the middle of the mandis that reported, their range, the day and its age; the
+ * audit of 27 Oct 2026, CT-10: the listing's own snapshot could be weeks old), so she compares before she says yes.
+ * Never another farmer's name or lot.
  */
 export function GroupSaleCard({
   pool,
   cropLabel,
   districtNames,
-  listing,
+  place,
   mine,
 }: {
   pool: AiaicPool;
   cropLabel: string;
   districtNames: Record<string, string>;
-  listing?: AiaicListing | null | undefined;
+  /** Her lot's place (else her profile's): whose district's mandi prices are read. */
+  place: { state?: string | null | undefined; district?: string | null | undefined };
   /** Her own lot in it: quintals and the offer's amount (an offer, or her sale). */
   mine?: { quantity_q: number; amount: number } | null | undefined;
 }) {
@@ -37,8 +37,19 @@ export function GroupSaleCard({
   const target = Number(pool.target_q) || 0;
   const joined = Number(pool.joined_q) || 0;
   const pct = target ? Math.min(100, Math.round((100 * joined) / target)) : 0;
-  const ref = listing?.reference_price;
+  const priceFn = useServerFn(getSalePrice);
+  const estate = estateOf(place.state);
+  const district = place.district ?? "";
+  // the same question (and cache) as the sell form's price line
+  const reference = useQuery({
+    queryKey: ["aiaic-sale-price", estate, district, pool.crop],
+    queryFn: () => priceFn({ data: { crop: pool.crop, state: estate, district } }),
+    enabled: Boolean(district && pool.crop),
+    staleTime: 10 * 60_000,
+  });
+  const ref = reference.data?.ok ? reference.data.data : null;
   const mandi = ref && ref.held ? ref : null;
+  const age = typeof mandi?.age_days === "number" ? mandi.age_days : null;
   return (
     <section
       className="space-y-3 rounded-3xl border-2 border-primary/40 bg-primary/5 p-4 sm:p-5"
@@ -119,10 +130,15 @@ export function GroupSaleCard({
           <p className="text-[11px] font-bold text-muted-foreground">
             {t("aiaic.group.mandi_title")}
           </p>
-          {mandi ? (
+          {reference.isFetching && !ref ? (
+            <p className="text-sm text-muted-foreground">{t("aiaic.sell.price.reading")}</p>
+          ) : mandi ? (
             <>
               <p className="text-xl font-black text-foreground">
                 {t("aiaic.lots.price", { price: rupees(mandi.middle_of_all_per_q ?? null) })}
+              </p>
+              <p className="text-xs font-semibold text-foreground">
+                {t("aiaic.group.mandi_middle", { n: String(mandi.mandis_reporting ?? "?") })}
               </p>
               <p className="text-xs text-muted-foreground">
                 {t("aiaic.group.mandi_line", {
@@ -131,6 +147,9 @@ export function GroupSaleCard({
                   day: dayOf(mandi.price_day ?? null),
                   source: mandi.source_name ?? "Agmarknet",
                 })}
+                {age !== null
+                  ? ` · ${t(age === 1 ? "aiaic.price.newest.one" : "aiaic.price.newest", { day: dayOf(mandi.price_day ?? null), n: age })}`
+                  : ""}
               </p>
             </>
           ) : (

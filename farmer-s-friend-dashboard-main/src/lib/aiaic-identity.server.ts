@@ -188,8 +188,20 @@ export function tokenExpiry(expiresAt: unknown): number {
   return Number.isNaN(t) ? Date.now() + UNDATED_TOKEN_MS : t;
 }
 
+/** A session set by the tests only (`sessionForTests`); never set by the app. */
+let testSession: HerSession | null | undefined;
+
+/** FOR THE TESTS ONLY: act as a signed-in farmer (`null`: a guest; `undefined`: read the request's cookie again). */
+export function sessionForTests(s: HerSession | null | undefined): void {
+  // never in a production build (audit of 28 Oct 2026, PRIVACY-12): it would make every request act as one farmer
+  if (process.env["NODE_ENV"] === "production")
+    throw new Error("sessionForTests is for the tests only");
+  testSession = s;
+}
+
 /** Her session when she is signed in and her token may be sent to AIAIC's address (`signInAllowed`), else null. */
 export function herSession(): HerSession | null {
+  if (testSession !== undefined) return testSession;
   const req = thisRequest();
   if (req && droppedIn.has(req)) return null;
   const raw = read(SESSION_COOKIE);

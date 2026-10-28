@@ -14,7 +14,10 @@ export const Route = createFileRoute("/help/$queryId")({
   head: () => ({
     meta: [
       { title: "My question — AIAIC Kisan" },
-      { name: "description", content: "Her question to AIAIC's team, with the team's answers." },
+      {
+        name: "description",
+        content: "The farmer's question to AIAIC's team, with the team's answers.",
+      },
     ],
   }),
   component: QueryPage,

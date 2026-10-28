@@ -68,17 +68,19 @@ export function StorageVerdictCard({
   district,
   state,
   quantityQ,
+  taluka,
   className = "",
 }: {
   crop: string;
   district: string;
   state?: string | null | undefined;
   quantityQ?: number | undefined;
+  taluka?: string | null | undefined;
   className?: string;
 }) {
   const { t } = useI18n();
   const [more, setMore] = useState(false);
-  const card = useStorageVerdict({ crop, district, state, quantityQ });
+  const card = useStorageVerdict({ crop, district, state, quantityQ, taluka });
   const v = card?.verdict;
   if (!card || !v?.text) return null;
   const w = v.warehouse;

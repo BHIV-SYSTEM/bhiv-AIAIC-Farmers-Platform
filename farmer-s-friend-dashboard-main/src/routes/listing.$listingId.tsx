@@ -12,7 +12,10 @@ export const Route = createFileRoute("/listing/$listingId")({
   head: () => ({
     meta: [
       { title: "My listing — AIAIC Kisan" },
-      { name: "description", content: "One of her listings: its offers and the sales it became." },
+      {
+        name: "description",
+        content: "One of the farmer's listings: its offers and the sales it became.",
+      },
     ],
   }),
   component: ListingDetailPage,
