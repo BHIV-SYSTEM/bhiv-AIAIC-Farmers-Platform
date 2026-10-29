@@ -72,23 +72,17 @@ function factOf(
  * sale agreed, then every step AIAIC holds on her order in the order it was recorded (collected and weighed, graded,
  * stored, processed with what it lost, picked up, on the road, delivered, a problem on the way, the quantities settled),
  * each with its own facts and day, then the buyer's payment as Razorpay last said it. A step recorded as not done says
- * so; a practice sale's steps say they are practice. Only what AIAIC holds is shown: nothing is assumed.
+ * so; a practice sale's steps say they are practice. Only what AIAIC holds is shown: nothing is assumed. `bare`: the
+ * list alone, no frame or title (a group sale's order keeps it behind one press under its own steps).
  */
-export function SaleJourney({ order }: { order: AiaicOrder }) {
+export function SaleJourney({ order, bare = false }: { order: AiaicOrder; bare?: boolean }) {
   const { t } = useI18n();
   const steps: AiaicStep[] = [...(order.fulfilment ?? [])].sort((a, b) =>
     String(a.created_at).localeCompare(String(b.created_at)),
   );
   const paid = order.payment_state === "paid";
-  return (
-    <section
-      aria-labelledby="aiaic-journey-heading"
-      className="space-y-3 rounded-3xl border-2 border-border bg-card p-4 shadow-sm sm:p-5"
-      data-testid="aiaic-sale-journey"
-    >
-      <h2 id="aiaic-journey-heading" className="text-lg font-extrabold text-foreground">
-        {t("aiaic.journey.title")}
-      </h2>
+  const list = (
+    <>
       <ol className="relative space-y-3 border-l-2 border-primary/30 pl-5">
         <li className="relative">
           <span className="absolute -left-[29px] flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -145,7 +139,7 @@ export function SaleJourney({ order }: { order: AiaicOrder }) {
             <Banknote className="size-3.5" aria-hidden />
           </span>
           {/* the payment's own state, in the payment card's words (CT-11: a part payment, an expired or a cancelled
-              link were all said as "a link sent") */}
+                link were all said as "a link sent") */}
           <p className="text-sm font-bold text-foreground">
             {t(
               PAYMENT_STATES.includes(order.payment_state)
@@ -158,6 +152,19 @@ export function SaleJourney({ order }: { order: AiaicOrder }) {
       {!steps.length ? (
         <p className="text-xs text-muted-foreground">{t("aiaic.journey.none_yet")}</p>
       ) : null}
+    </>
+  );
+  if (bare) return <div data-testid="aiaic-sale-journey">{list}</div>;
+  return (
+    <section
+      aria-labelledby="aiaic-journey-heading"
+      className="space-y-3 rounded-3xl border-2 border-border bg-card p-4 shadow-sm sm:p-5"
+      data-testid="aiaic-sale-journey"
+    >
+      <h2 id="aiaic-journey-heading" className="text-lg font-extrabold text-foreground">
+        {t("aiaic.journey.title")}
+      </h2>
+      {list}
     </section>
   );
 }

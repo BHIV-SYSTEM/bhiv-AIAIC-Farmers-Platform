@@ -10,6 +10,9 @@ import {
   declineProduceOrder,
 } from "../src/lib/transactions.server";
 
+// the app's store, as src/lib/transactions.server.ts finds it (from the working directory)
+const STORE_FILE = path.resolve(process.cwd(), "data", "transactions.json");
+
 async function runLifecycleTestSuite() {
   console.log("=== STARTING TRANSACTION LIFECYCLE AUTOMATED TEST SUITE ===");
 
@@ -177,10 +180,9 @@ async function runLifecycleTestSuite() {
   );
   console.log("✓ Offer declined, reason stored, and listing reverted to ACTIVE");
 
-  // 6. Test Persistence and Isolated Cleanup
-  console.log("\n[Test 6] Verification of Disk Persistence & Isolated Test Record Cleanup");
-  const DB_FILE = path.resolve(process.cwd(), "data", "transactions.json");
-  const rawDiskData = JSON.parse(await fs.readFile(DB_FILE, "utf-8"));
+  // 6. Test Persistence (the store file is then put back byte for byte by main(), below)
+  console.log("\n[Test 6] Verification of Disk Persistence");
+  const rawDiskData = JSON.parse(await fs.readFile(STORE_FILE, "utf-8"));
 
   // Verify disk holds the records
   assert.ok(
@@ -193,20 +195,45 @@ async function runLifecycleTestSuite() {
   );
   console.log("✓ Confirmed transactions.json accurately holds mutated records on disk");
 
-  // Clean up ONLY the test records created in this test run
-  rawDiskData.listings = rawDiskData.listings.filter(
-    (l: { id: string }) => l.id !== listing.id && l.id !== listingToDecline.id,
-  );
-  rawDiskData.orders = rawDiskData.orders.filter(
-    (o: { id: string }) => o.id !== matchedOrder!.id && o.id !== orderToDecline!.id,
-  );
-  await fs.writeFile(DB_FILE, JSON.stringify(rawDiskData, null, 2), "utf-8");
-  console.log("✓ Cleaned up isolated test records; existing demo/user data preserved intact");
-
   console.log("\n=== ALL TRANSACTION LIFECYCLE TESTS PASSED SUCCESSFULLY ===");
 }
 
-runLifecycleTestSuite().catch((err) => {
+// The suite writes through the app's own store, data/transactions.json, a TRACKED file. Its old cleanup rebuilt the
+// file without the test records but with a new lastUpdated and other line endings, so every run changed the file
+// (found 29 Oct). Now the file's bytes from before the run are put back after it, passed or failed, and checked.
+async function readBytes(file: string): Promise<Buffer | null> {
+  try {
+    return await fs.readFile(file);
+  } catch {
+    return null;
+  }
+}
+
+async function main() {
+  const before = await readBytes(STORE_FILE);
+  let failure: unknown = null;
+  try {
+    await runLifecycleTestSuite();
+  } catch (err) {
+    failure = err;
+  }
+  // a store the run created is removed; one that was there gets its own bytes back
+  if (before === null) await fs.rm(STORE_FILE, { force: true });
+  else await fs.writeFile(STORE_FILE, before);
+  const after = await readBytes(STORE_FILE);
+  const restored = before === null ? after === null : after !== null && before.equals(after);
+  if (failure) console.error("Test Suite Failed:", failure);
+  if (restored) {
+    console.log("✓ data/transactions.json is back to its exact bytes from before the run");
+  } else {
+    console.error(
+      "Test Suite Failed: data/transactions.json is not back to its bytes from before the run",
+    );
+  }
+  if (failure || !restored) process.exit(1);
+}
+
+main().catch((err) => {
   console.error("Test Suite Failed:", err);
   process.exit(1);
 });

@@ -11,10 +11,15 @@ import type {
   TradeMode,
 } from "./aiaic-trade";
 import { mineReadEvery } from "./aiaic-trade";
+import type { Notice } from "./aiaic-account";
+import { getMyNotices } from "./aiaic-account.functions";
+import { useMe } from "./aiaic-me";
+import { estateOf } from "./aiaic-analysis";
 import {
   getAiaicPricing,
   getBuyersLooking,
   getMyTrade,
+  getSalePrice,
   getTradeMode,
 } from "./aiaic-trade.functions";
 import { useI18n } from "./i18n";
@@ -59,6 +64,27 @@ export function useMine(enabled = true, pace: MinePace = "live") {
   });
 }
 
+/**
+ * HER NOTICES FROM AIAIC (GET /notifications through this server), read only while AIAIC knows who she is (signed in):
+ * the news strip shows the unread ones on every page, and her offer's step bar reads the same answer for "more time
+ * given". Read again every 30 s and when she comes back to the page (`staleTime` 15 s: a quick return asks nothing).
+ */
+export function useMyNotices() {
+  const { lang } = useI18n();
+  const me = useMe();
+  const fn = useServerFn(getMyNotices);
+  return useQuery<Notice[]>({
+    // the language is part of the read: a notice names its crop in the reader's language (R5P-10)
+    queryKey: ["aiaic-notices", lang],
+    queryFn: () => fn({ data: { lang } }),
+    enabled: Boolean(me.data?.signedIn),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
+    retry: 0,
+  });
+}
+
 /** The reads that belong to ONE person: their sale, their notices, their help questions, the buyers near them, an
  * offer of theirs weighed. */
 export const PERSONAL_READS = [
@@ -86,6 +112,32 @@ export function useBuyersLooking(enabled = true) {
     enabled,
     staleTime: 60_000,
   });
+}
+
+/**
+ * HER DISTRICT'S MANDI PRICES AS AIAIC HOLDS THEM NOW (GET /farmer/trade/price through this server; the sell form's
+ * own question and cache): a group sale's offer and sale show them beside the buyer's price, so she compares before
+ * she says yes. `mandi` is null while they are read (`reading`) and when AIAIC holds none recent enough.
+ */
+export function useDistrictPrice(
+  place: { state?: string | null | undefined; district?: string | null | undefined },
+  crop: string,
+  enabled = true,
+) {
+  const fn = useServerFn(getSalePrice);
+  const estate = estateOf(place.state);
+  const district = place.district ?? "";
+  const read = useQuery({
+    queryKey: ["aiaic-sale-price", estate, district, crop],
+    queryFn: () => fn({ data: { crop, state: estate, district } }),
+    enabled: enabled && Boolean(district && crop),
+    staleTime: 10 * 60_000,
+  });
+  const got = read.data?.ok ? read.data.data : null;
+  return {
+    mandi: got && got.held ? got : null,
+    reading: read.isFetching && !got,
+  };
 }
 
 /** One sentence for a problem, in her language: this app's own words for its codes and AIAIC's, else the code. */

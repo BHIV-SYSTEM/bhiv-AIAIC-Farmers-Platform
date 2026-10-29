@@ -31,7 +31,10 @@ import {
   type Notice,
   type QueriesResult,
   type QueryResult,
+  type TradeNoticeKind,
   REGISTRATION_NOTICE_VERSION,
+  TRADE_NOTICE_KINDS,
+  tradeFactsOf,
   wordsToScan,
 } from "./aiaic-account";
 import {
@@ -252,8 +255,9 @@ export async function register(q: {
 
 // ------------------------------------------------------------------------------------------------ her notices
 
-/** The farmer's unread notices this app says (their approval, a reply from the team, AIAIC's send of their money, its
- * crop named in the reader's language `lang`); none for a guest. */
+/** The farmer's unread notices this app says (their approval, a reply from the team, AIAIC's send of their money, their
+ * sale's news; a crop named in the reader's language `lang`), then the READ notices that said an offer was given more
+ * time (`read: true`, never shown as news); none for a guest. */
 export async function myNotices(lang = "en"): Promise<Notice[]> {
   const her = herSession();
   if (!her) return [];
@@ -266,18 +270,60 @@ export async function myNotices(lang = "en"): Promise<Notice[]> {
     ? (a.body?.["notifications"] as unknown[])
     : [];
   const out: Notice[] = [];
+  const kept: Notice[] = [];
   for (const r of rows) {
     if (!r || typeof r !== "object") continue;
     const n = r as Record<string, unknown>;
+    const kind = String(n["kind"] ?? "");
+    const trade = (TRADE_NOTICE_KINDS as readonly string[]).includes(kind);
     if (
-      n["read_at"] ||
-      (n["kind"] !== "account_approved" &&
-        n["kind"] !== "query_answered" &&
-        n["kind"] !== "trade_farmer_paid")
+      kind !== "account_approved" &&
+      kind !== "query_answered" &&
+      kind !== "trade_farmer_paid" &&
+      !trade
     )
       continue;
     const body =
       n["body"] && typeof n["body"] === "object" ? (n["body"] as Record<string, unknown>) : {};
+    // HER SALE'S NEWS (30 Oct 2026): an offer on her lot or more time to answer it, a step on her order, her order called
+    // off; facts field by field (`tradeFactsOf`). A READ notice is kept only when it says an offer was given more time
+    // (her step bar says so beside the offer's own last day); it is never shown as news again.
+    if (trade) {
+      const facts = tradeFactsOf(kind, body);
+      if (!facts) continue;
+      if (n["read_at"]) {
+        if (kind === "trade_offer" && facts.moreTime)
+          kept.push({
+            id: Number(n["notification_id"]),
+            kind: kind as TradeNoticeKind,
+            queryId: null,
+            at: String(n["created_at"] ?? ""),
+            trade: facts,
+            read: true,
+          });
+        continue;
+      }
+      // one notice per offer or per order: the newest (AIAIC lists the newest first); an older one is read with it
+      const subject = facts.offerId ? `offer:${facts.offerId}` : `order:${facts.orderId}`;
+      const newerNews = out.find(
+        (o) =>
+          o.trade &&
+          (o.trade.offerId ? `offer:${o.trade.offerId}` : `order:${o.trade.orderId}`) === subject,
+      );
+      if (newerNews) {
+        newerNews.alsoIds = [...(newerNews.alsoIds ?? []), Number(n["notification_id"])];
+        continue;
+      }
+      out.push({
+        id: Number(n["notification_id"]),
+        kind: kind as TradeNoticeKind,
+        queryId: null,
+        at: String(n["created_at"] ?? ""),
+        trade: facts,
+      });
+      continue;
+    }
+    if (n["read_at"]) continue;
     // AIAIC's send of her money moved (the payment buttons of 28 Oct 2026): its facts, field by field; a notice
     // without its order or state is not shown
     const money =
@@ -308,12 +354,15 @@ export async function myNotices(lang = "en"): Promise<Notice[]> {
       money,
     });
   }
-  // THE CROP BY AIAIC'S NAME IN THE READER'S LANGUAGE (R5P-10, 28 Oct 2026), asked only when a money notice names one
-  if (out.some((o) => o.money?.crop)) {
+  // THE CROP BY AIAIC'S NAME IN THE READER'S LANGUAGE (R5P-10, 28 Oct 2026), asked only when a notice shown names one
+  if (out.some((o) => o.money?.crop || o.trade?.crop)) {
     const names = await everyCropName(lang);
-    for (const o of out) if (o.money?.crop) o.money.cropName = names[o.money.crop] ?? null;
+    for (const o of out) {
+      if (o.money?.crop) o.money.cropName = names[o.money.crop] ?? null;
+      if (o.trade?.crop) o.trade.cropName = names[o.trade.crop] ?? null;
+    }
   }
-  return out;
+  return [...out, ...kept];
 }
 
 export async function noticeRead(id: number): Promise<void> {
