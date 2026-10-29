@@ -1,12 +1,18 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, RefreshCw, ShoppingBag, Wallet } from "lucide-react";
+import { Ban, ChevronRight, RefreshCw, ShoppingBag, Wallet } from "lucide-react";
 
-import { useMine } from "@/lib/aiaic-hooks";
+import { useMine, useMyNotices } from "@/lib/aiaic-hooks";
 import {
+  askDiffPct,
   buyerLine,
+  closedReasonKey,
   cropName,
   dayOf,
+  groupPaidWords,
+  groupView,
+  moreTimeGiven,
   offerViews,
+  orderOfOffer,
   quintalWords,
   quintals,
   rupees,
@@ -18,6 +24,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, WithMine } from "./AiaicBits";
+import { GroupStepsLine } from "./GroupSteps";
 import { PooledLine } from "./PooledLine";
 import { SaleStepper } from "./SaleStepper";
 
@@ -58,22 +65,41 @@ export function AiaicOrders() {
 
 function OffersAndSales({ data }: { data: MineForScreen }) {
   const { t } = useI18n();
-  const offers = offerViews(data.mine)
+  const notices = useMyNotices();
+  const all = offerViews(data.mine);
+  const offers = all
     .filter((v) => v.chip === "open" || v.chip === "expired")
     .sort((a, b) => Number(b.canAnswer) - Number(a.canAnswer));
+  // CLOSED BEFORE SHE ANSWERED (30 Oct 2026): an offer AIAIC closed stays in sight with why, in plain words; the newest 5
+  const closed = all.filter((v) => v.chip === "withdrawn").slice(0, 5);
   const sales = [...data.mine.orders].sort((a, b) => b.created_at.localeCompare(a.created_at));
   return (
     <>
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-foreground">{t("aiaic.offers.title")}</h2>
         {offers.length ? (
-          offers.map((v) => <OfferRow key={v.offer.offer_id} view={v} data={data} />)
+          offers.map((v) => (
+            <OfferRow
+              key={v.offer.offer_id}
+              view={v}
+              data={data}
+              moreTime={moreTimeGiven(notices.data, v.offer.offer_id)}
+            />
+          ))
         ) : (
           <p className="rounded-2xl border-2 border-dashed border-border bg-card p-5 text-center text-sm font-semibold text-muted-foreground">
             {t("aiaic.offers.empty")}
           </p>
         )}
       </section>
+      {closed.length ? (
+        <section className="space-y-3" data-testid="aiaic-offers-closed">
+          <h2 className="text-lg font-bold text-foreground">{t("aiaic.offers.closed_title")}</h2>
+          {closed.map((v) => (
+            <OfferRow key={v.offer.offer_id} view={v} data={data} />
+          ))}
+        </section>
+      ) : null}
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-foreground">{t("aiaic.sales.title")}</h2>
         {sales.length ? (
@@ -88,11 +114,28 @@ function OffersAndSales({ data }: { data: MineForScreen }) {
   );
 }
 
-export function OfferRow({ view, data }: { view: OfferView; data: MineForScreen }) {
+export function OfferRow({
+  view,
+  data,
+  moreTime = false,
+}: {
+  view: OfferView;
+  data: MineForScreen;
+  /** AIAIC's notice said this offer was given more time (`moreTimeGiven`). */
+  moreTime?: boolean;
+}) {
   const { t } = useI18n();
   const o = view.offer;
   const ask = view.listing.ask_price_per_q;
-  const diff = ask ? Math.round(((o.price_per_q - ask) / ask) * 1000) / 10 : null;
+  const diff = askDiffPct(o.price_per_q, ask);
+  // a group sale's invitation: its steps on one line (30 Oct 2026)
+  const group = o.pool
+    ? groupView(o.pool, o, orderOfOffer(data.mine, o.offer_id), {
+        moreTime,
+        districtNames: data.districtNames,
+      })
+    : null;
+  const closedWhy = closedReasonKey(o);
   return (
     <Link
       to="/orders/$orderId"
@@ -128,7 +171,7 @@ export function OfferRow({ view, data }: { view: OfferView; data: MineForScreen 
           <p className="break-words text-xs text-muted-foreground">
             {buyerLine(t, data.districtNames, o.buyer_type, o.buyer_district, o.buyer_name)}
           </p>
-          {o.valid_until ? (
+          {o.valid_until && !group && !closedWhy ? (
             <p className="text-xs text-muted-foreground">
               {t("aiaic.offer.open_until", { day: dayOf(o.valid_until) })}
             </p>
@@ -154,7 +197,18 @@ export function OfferRow({ view, data }: { view: OfferView; data: MineForScreen 
           ) : null}
         </div>
       </div>
-      <p className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-primary">
+      {closedWhy ? (
+        <p
+          className="mt-2 flex items-start gap-1.5 rounded-xl bg-muted p-2 text-sm font-semibold text-foreground"
+          data-testid="aiaic-offer-closed-why"
+        >
+          <Ban className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
+          {t(closedWhy)}
+        </p>
+      ) : group ? (
+        <GroupStepsLine view={group} />
+      ) : null}
+      <p className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-primary">
         {t("aiaic.offer.see")}
         <ChevronRight className="size-4" aria-hidden />
       </p>
@@ -200,7 +254,15 @@ export function SaleRow({ order, data }: { order: AiaicOrder; data: MineForScree
           </p>
         </div>
       </div>
-      <SaleStepper order={order} />
+      {/* a group sale's order: her group steps on one line (30 Oct 2026); any other sale: its own five steps */}
+      {order.pool ? (
+        <GroupStepsLine
+          view={groupView(order.pool, null, order, { districtNames: data.districtNames })}
+          paidWords={groupPaidWords(t, order)}
+        />
+      ) : (
+        <SaleStepper order={order} />
+      )}
       {order.pooled ? <PooledLine pooled={order.pooled} /> : null}
     </Link>
   );

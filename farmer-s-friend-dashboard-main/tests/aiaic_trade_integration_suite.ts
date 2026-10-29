@@ -22,6 +22,12 @@ import { renderToString } from "react-dom/server";
 
 import { NotRefreshedLine } from "../src/components/farm/aiaic/AiaicBits";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
+import { GroupOfferSteps, GroupSaleSteps } from "../src/components/farm/aiaic/GroupPages";
+import {
+  GroupStepsLine,
+  GroupSteps,
+  type GroupPrices,
+} from "../src/components/farm/aiaic/GroupSteps";
 import { CompareBody } from "../src/components/farm/aiaic/OfferCompareBody";
 import { NEARBY_DOTS, nameBelow, routeMapOf } from "../src/components/farm/aiaic/route-map";
 import { priceCompareOf, rowShown } from "../src/lib/aiaic-analysis";
@@ -70,7 +76,32 @@ import {
   mineShown,
   pressKeyHolder,
 } from "../src/lib/aiaic-trade";
-import { moneyNoticeLine } from "../src/lib/aiaic-account";
+import {
+  GROUP_STEPS,
+  OFFER_CLOSED_REASONS,
+  askDiffPct,
+  closedReasonKey,
+  findOffer,
+  groupFactsMissing,
+  groupPaidWords,
+  groupSaid,
+  groupView,
+  moreTimeGiven,
+  needsDestination,
+  orderOfOffer,
+  type AiaicOffer,
+  type AiaicPool,
+  type OfferView,
+  type ReferencePrice,
+} from "../src/lib/aiaic-trade";
+import {
+  moneyNoticeLine,
+  newsShown,
+  tradeFactsOf,
+  tradeNoticeLine,
+  type Notice,
+  type TradeNoticeKind,
+} from "../src/lib/aiaic-account";
 import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
 import * as client from "../src/lib/aiaic-trade.server";
@@ -2047,6 +2078,787 @@ test("B17 the money notice names its crop by AIAIC's name in the reader's langua
         assert.ok(!line.includes("aiaic.") && !HOLE.test(line), `${lang}: "${line}"`);
       }
     }
+  } finally {
+    s.notices = null;
+    await s.close();
+  }
+});
+
+// ---------------------------------------- A, her group sale step by step (30 Oct 2026; the owner of 29 Oct: "clear button
+// in UI a farmer ... can follow step by step with clear visibility and key indication with good UX")
+
+/** Every sentence of her steps, in each language: whole (no blank left, never a key), and mr/hi with no English word
+ * of this app's (a place AIAIC's team typed, "FPO collection centre", or a district AIAIC names in its own list, is
+ * said as AIAIC holds it: the page names a district in her language from AIAIC's names). */
+function saidWhole(steps: ReturnType<typeof groupView>["steps"]) {
+  for (const lang of LANGS) {
+    for (const s of steps) {
+      if (!s.say) continue;
+      const said = groupSaid(wordsIn(lang), s.say);
+      assert.ok(said && !said.startsWith("aiaic."), `${lang} ${s.key}: no words for ${s.say.key}`);
+      assert.ok(!HOLE.test(said), `${lang} ${s.key}: a blank left in "${said}"`);
+      const ours = Object.values(s.say.values)
+        .filter((v): v is string => typeof v === "string" && v.length > 0)
+        .reduce((acc, v) => acc.replaceAll(v, ""), said);
+      if (lang !== "en")
+        for (const w of ours.match(/[A-Za-z]+/g) ?? [])
+          assert.ok(LATIN_ALLOWED.has(w), `${lang} ${s.key}: English word "${w}" in "${said}"`);
+    }
+  }
+}
+const stateOf = (g: ReturnType<typeof groupView>) => g.steps.map((s) => `${s.key}:${s.state}`);
+
+test("A36 a group sale's invitation, from AIAIC's recorded answer: invited, her answer NOW (Accept), the group's numbers", () => {
+  // AIAIC's real answer: her offer of a group sale nobody has joined yet (connected_farmer_mine_pool_offer)
+  const mine = mineOf("connected_farmer_mine_pool_offer");
+  const v = offerViews(mine).find((x) => x.offer.pool);
+  assert.ok(v?.offer.pool, "the recording holds a group sale's offer with its facts");
+  const pool = v.offer.pool;
+  const g = groupView(pool, v.offer, orderOfOffer(mine, v.offer.offer_id));
+  assert.deepEqual(stateOf(g), [
+    "invited:done",
+    "answered:now",
+    "finalized:todo",
+    "collection:todo",
+    "paid:todo",
+  ]);
+  assert.deepEqual(
+    g.steps.map((s) => s.key),
+    [...GROUP_STEPS],
+  );
+  assert.equal(g.current, "answered", "her answer is the step marked now");
+  assert.equal(g.action, "answer", "her one thing to do: Accept or Decline");
+  assert.deepEqual(g.steps[0]?.say, {
+    key: "aiaic.gs.invited.until",
+    values: { day: dayOf(v.offer.valid_until) },
+  });
+  assert.equal(g.steps[1]?.say?.values["day"], dayOf(v.offer.valid_until));
+  // the key numbers are AIAIC's own: what the buyer wants, what has joined, what is left
+  assert.deepEqual(
+    [g.gathered.target_q, g.gathered.joined_q, g.gathered.left_q, g.gathered.farmers],
+    [
+      Number(pool.target_q),
+      Number(pool.joined_q),
+      Number(pool.left_q),
+      Number(pool.joined_farmers),
+    ],
+  );
+  assert.equal(g.gathered.pct, 0);
+  // where and when, from the group's own place and day
+  const plan = g.steps[3]?.say;
+  assert.equal(plan?.key, "aiaic.gs.collection.plan");
+  assert.equal(plan?.values["place"], pool.collection_point);
+  assert.equal(plan?.values["day"], dayOf(pool.collect_on));
+  saidWhole(g.steps);
+  // an AIAIC that sends the group's id without its facts is said, never broken
+  assert.equal(groupFactsMissing({ pool_id: v.offer.pool_id, pool: null }), true);
+  assert.equal(groupFactsMissing(v.offer), false);
+});
+
+test("A37 her yes moves the steps (AIAIC's recorded answer): her sale, the group still gathering waited for, her lot collected and weighed", () => {
+  // AIAIC's real answer after her yes and the group's collection and grading (connected_farmer_mine_journey)
+  const mine = mineOf("connected_farmer_mine_journey");
+  const order = mine.orders.find((o) => o.pool);
+  assert.ok(order?.pool, "the recording holds her order of a group sale");
+  const offer = findOffer(mine, order.offer_id)?.offer ?? null;
+  const g = groupView(order.pool, offer, order);
+  assert.deepEqual(stateOf(g), [
+    "invited:done",
+    "answered:done",
+    "finalized:now",
+    "collection:done",
+    "paid:todo",
+  ]);
+  assert.equal(g.current, "finalized");
+  assert.equal(g.action, "wait", "nothing to do: AIAIC's team finalizes the group");
+  assert.deepEqual(g.steps[1]?.say, {
+    key: "aiaic.gs.answered.yes",
+    values: { qty: order.quantity_q },
+  });
+  const collected = order.fulfilment.find((s) => s.stage === "aggregation");
+  assert.equal(g.steps[3]?.say?.key, "aiaic.gs.collection.done_qty");
+  assert.equal(g.steps[3]?.say?.values["place"], collected?.detail?.["collection_point"]);
+  assert.equal(g.steps[3]?.say?.values["qty"], collected?.detail?.["quantity_q"]);
+  saidWhole(g.steps);
+  // DERIVED from that answer, and said so: the group finalized (AIAIC's `closed`) moves her to the payment
+  const closed = groupView({ ...order.pool, status: "closed" }, offer, order);
+  assert.deepEqual(stateOf(closed).slice(2), ["finalized:done", "collection:done", "paid:todo"]);
+  assert.equal(closed.current, "paid");
+  // DERIVED: finalized before her lot was collected: bring it, where and when
+  const before = groupView({ ...order.pool, status: "closed" }, offer, {
+    ...order,
+    fulfilment: [],
+  });
+  assert.equal(before.current, "collection");
+  assert.equal(before.action, "bring");
+  assert.equal(before.steps[3]?.say?.key, "aiaic.gs.collection.bring");
+  // DERIVED: called off after her yes: said kindly, her own sale stays (AIAIC keeps a group's orders as sales), so the
+  // group's decision is behind her and her sale goes on (her lot already collected: her money next)
+  const off = groupView({ ...order.pool, status: "cancelled" }, offer, order);
+  assert.equal(off.steps[2]?.state, "done");
+  assert.equal(off.steps[2]?.say?.key, "aiaic.gs.finalized.called_off_yours");
+  assert.equal(off.current, "paid");
+  saidWhole([...closed.steps, ...before.steps, ...off.steps]);
+});
+
+test("A38 an invitation AIAIC will not take a yes for (recorded: pool_full) says why and offers no button", () => {
+  const mine = mineOf("connected_farmer_mine_pool_full");
+  const v = offerViews(mine).find((x) => x.offer.pool);
+  assert.ok(
+    v?.offer.pool && v.offer.why_not_accept?.code === "pool_full",
+    "the recording's refusal",
+  );
+  const g = groupView(v.offer.pool, v.offer, null);
+  assert.equal(g.steps[1]?.state, "stopped");
+  assert.equal(g.steps[1]?.say?.key, "aiaic.refused.pool_full");
+  assert.equal(g.action, "none", "no Accept where AIAIC refuses it");
+  assert.equal(g.current, "answered");
+  saidWhole(g.steps);
+});
+
+test("A39 every closing AIAIC holds is said in plain words (finalized and called off apart), never as its code", () => {
+  // DERIVED from a recorded open offer, and said so: only its status, reason and the group's state are set
+  const mine = mineOf("connected_farmer_mine_pool_offer");
+  const v = offerViews(mine).find((x) => x.offer.pool);
+  assert.ok(v?.offer.pool);
+  const closedAs = (reason: string | null, poolStatus: string): AiaicOffer => ({
+    ...v.offer,
+    status: "withdrawn",
+    closed_reason: reason,
+    can_accept: false,
+    pool: { ...(v.offer.pool as AiaicPool), status: poolStatus },
+  });
+  const keys = new Set<string>();
+  for (const reason of OFFER_CLOSED_REASONS) {
+    for (const poolStatus of ["open", "closed", "cancelled"]) {
+      const o = closedAs(reason, poolStatus);
+      const key = closedReasonKey(o);
+      assert.ok(key, `${reason}: said`);
+      keys.add(key);
+      const g = groupView(o.pool as AiaicPool, o, null);
+      assert.deepEqual(stateOf(g), [
+        "invited:done",
+        "answered:stopped",
+        "finalized:none",
+        "collection:none",
+        "paid:none",
+      ]);
+      assert.equal(g.steps[1]?.say?.key, key);
+      assert.equal(g.action, "none");
+    }
+  }
+  assert.equal(
+    closedReasonKey(closedAs("pool_closed", "closed")),
+    "aiaic.offer.closed.pool_finalized",
+  );
+  assert.equal(
+    closedReasonKey(closedAs("pool_closed", "cancelled")),
+    "aiaic.offer.closed.pool_called_off",
+  );
+  assert.equal(closedReasonKey(closedAs("a_reason_not_held", "open")), "aiaic.offer.closed.other");
+  assert.equal(closedReasonKey(closedAs(null, "open")), "aiaic.offer.closed.other");
+  assert.equal(closedReasonKey(v.offer), null, "an open offer is not closed");
+  keys.add("aiaic.offer.closed.other");
+  for (const key of keys)
+    for (const lang of LANGS) assert.ok(DICTS[lang][key], `${lang} has no words for ${key}`);
+  // her no: the rest is not hers
+  const no = groupView(v.offer.pool, { ...v.offer, status: "rejected", can_accept: false }, null);
+  assert.deepEqual(stateOf(no).slice(1), [
+    "answered:done",
+    "finalized:none",
+    "collection:none",
+    "paid:none",
+  ]);
+  assert.equal(no.steps[1]?.say?.key, "aiaic.gs.answered.no");
+});
+
+test("A40 MORE TIME (AIAIC's recorded notice and answer): said with the offer's own new last day; her news, once per open offer, no id of another", () => {
+  // AIAIC's real answers after its team gave more time (record_buyer_portal_answers.py): her notifications and her sale
+  type Row = {
+    notification_id: number;
+    kind: string;
+    created_at: string;
+    read_at: string | null;
+    body: Record<string, unknown>;
+  };
+  const rows = answer<{ notifications: Row[] }>("buyer_farmer_notices_more_time").notifications;
+  const mine = mineOf("buyer_farmer_mine_more_time");
+  const moved = rows.find((r) => r.body["more_time"] === true);
+  assert.ok(moved, "the recording holds the more-time notice");
+  const notices: Notice[] = rows.map((r) => ({
+    id: r.notification_id,
+    kind: r.kind as Notice["kind"],
+    queryId: null,
+    at: r.created_at,
+    trade: tradeFactsOf(r.kind, r.body),
+  }));
+  for (const n of notices) {
+    assert.ok(n.trade, "every trade notice keeps its facts");
+    assert.ok(!("farmer_id" in n.trade), "the farmer's record id stays on AIAIC's side");
+  }
+  const offerId = String(moved.body["offer_id"]);
+  const v = findOffer(mine, offerId);
+  assert.ok(v?.offer.pool && v.chip === "open", "the offer given more time is open again");
+  assert.equal(dayOf(v.offer.valid_until), dayOf(String(moved.body["valid_until"])));
+  assert.equal(moreTimeGiven(notices, offerId), true);
+  const other = offerViews(mine).find((x) => x.offer.offer_id !== offerId);
+  assert.ok(other);
+  assert.equal(moreTimeGiven(notices, other.offer.offer_id), false);
+  const g = groupView(v.offer.pool, v.offer, null, { moreTime: true });
+  assert.deepEqual(g.steps[0]?.say, {
+    key: "aiaic.gs.invited.more_time",
+    values: { day: dayOf(v.offer.valid_until) },
+  });
+  // said where she answers too (the step now, on the first screen)
+  assert.deepEqual(g.steps[1]?.say, {
+    key: "aiaic.gs.answered.more_time",
+    values: { day: dayOf(v.offer.valid_until) },
+  });
+  assert.equal(g.action, "answer");
+  // the live AIAIC before its buyer branch sends no such notice: the step still says the offer's own last day
+  assert.equal(groupView(v.offer.pool, v.offer, null).steps[0]?.say?.key, "aiaic.gs.invited.until");
+  saidWhole(g.steps);
+  // her news strip: open offers only (an offer she answered is no news to act on)
+  const open = new Set(
+    offerViews(mine)
+      .filter((x) => x.chip === "open")
+      .map((x) => x.offer.offer_id),
+  );
+  const shown = newsShown(notices, open).map((n) => n.trade?.offerId);
+  assert.ok(shown.length > 0 && shown.every((id) => id && open.has(id)));
+  assert.ok(shown.length < notices.length, "news of answered offers is not shown");
+  assert.deepEqual(
+    newsShown([{ ...notices[0], read: true } as Notice], null),
+    [],
+    "read: never news",
+  );
+  // the line in each language: the crop by name, the quantity, the price, the NEW day; mr/hi no English word (the
+  // crop's names here stand in for AIAIC's catalogue, which this app asks in the reader's language)
+  const onion = { en: "Onion", mr: "कांदा", hi: "प्याज" } as const;
+  for (const lang of LANGS) {
+    const line = tradeNoticeLine(
+      wordsIn(lang),
+      "trade_offer",
+      tradeFactsOf("trade_offer", moved.body) as NonNullable<Notice["trade"]>,
+      { onion: onion[lang] },
+    );
+    assert.ok(line.startsWith(`${onion[lang]}: `), `${lang}: the crop by its name`);
+    assert.ok(line.includes(dayOf(String(moved.body["valid_until"]))), `${lang}: the new day`);
+    assert.ok(line.includes(rupees(Number(moved.body["price_per_q"]))), `${lang}: the price`);
+    assert.ok(!HOLE.test(line), `${lang}: a blank left in "${line}"`);
+    if (lang !== "en")
+      for (const w of line.match(/[A-Za-z]+/g) ?? [])
+        assert.ok(LATIN_ALLOWED.has(w), `${lang}: English word "${w}" in "${line}"`);
+  }
+});
+
+test("A41 her sale's other news (a step, a call-off) is said whole in each language; a code not held is never shown", () => {
+  const kinds: [TradeNoticeKind, Record<string, unknown>][] = [
+    [
+      "trade_order_step",
+      { order_id: "ord_x", crop: "onion", stage: "aggregation", status: "done" },
+    ],
+    [
+      "trade_order_step",
+      { order_id: "ord_x", crop: "onion", stage: "a_stage_not_held", status: "odd" },
+    ],
+    [
+      "trade_order_step",
+      {
+        order_id: "ord_x",
+        stage: "delivery_exception",
+        status: "done",
+        problem_kind: "shortage",
+        simulated: true,
+      },
+    ],
+    [
+      "trade_order_cancelled",
+      { order_id: "ord_x", quantity_q: 4, reason_code: "buyer_called_off", listing_status: "open" },
+    ],
+    ["trade_order_cancelled", { order_id: "ord_x", reason_code: "a_code_not_held" }],
+    ["trade_offer", { offer_id: "ofr_x", quantity_q: 1, price_per_q: 2500 }],
+  ];
+  for (const lang of LANGS) {
+    for (const [kind, body] of kinds) {
+      const facts = tradeFactsOf(kind, body);
+      assert.ok(facts);
+      const line = tradeNoticeLine(wordsIn(lang), kind, facts);
+      assert.ok(line && !line.includes("aiaic.") && !HOLE.test(line), `${lang} ${kind}: "${line}"`);
+      assert.ok(!line.includes("a_code_not_held") && !line.includes("a_stage_not_held"));
+      if (lang !== "en")
+        for (const w of line.match(/[A-Za-z]+/g) ?? [])
+          assert.ok(LATIN_ALLOWED.has(w), `${lang}: English word "${w}" in "${line}"`);
+    }
+  }
+  assert.equal(tradeFactsOf("trade_offer", { crop: "onion" }), null, "no offer id: not shown");
+  assert.equal(
+    tradeFactsOf("trade_order_step", { stage: "pickup" }),
+    null,
+    "no order id: not shown",
+  );
+});
+
+test("A42 the step bar on a phone: the step now is marked, each state has its icon AND its word, Accept says what happens next", () => {
+  const mine = mineOf("connected_farmer_mine_pool_offer");
+  const v = offerViews(mine).find((x) => x.offer.pool);
+  assert.ok(v?.offer.pool);
+  const g = groupView(v.offer.pool, v.offer, null);
+  const html = renderToString(
+    createElement(I18nProvider, {
+      children: createElement(GroupSteps, {
+        view: g,
+        prices: {
+          pricePerQ: v.offer.price_per_q,
+          amount: v.offer.amount_inr ?? v.offer.price_per_q * v.offer.quantity_q,
+          ask: null,
+          mandi: null,
+          reading: false,
+        },
+        children: createElement("button", null, "Accept"),
+      }),
+    }),
+  );
+  assert.equal((html.match(/aria-current="step"/g) ?? []).length, 1, "one step marked now");
+  assert.ok(html.includes('data-step="answered"'));
+  assert.ok(/aria-current="step"[^>]*data-state="now"[^>]*data-step="answered"/.test(html));
+  for (const s of g.steps) {
+    const word =
+      s.state === "none"
+        ? DICTS.en["aiaic.gs.state.none"]
+        : DICTS.en[`aiaic.step.state.${s.state}`];
+    assert.ok(word && html.includes(`>${word}<`), `${s.key}: its state said in words`);
+  }
+  assert.ok(html.includes(DICTS.en["aiaic.gs.now"] ?? "?"), "the step now is said as now");
+  assert.ok(
+    html.includes('role="progressbar"'),
+    "the group's gathered share as a bar with its numbers",
+  );
+  assert.ok(html.includes(">Accept<"), "her one thing to do sits in the step now");
+});
+
+// ------------------------------------- A, the audit of 30 Oct 2026 (AUD-1 to AUD-9): her group sale, each fix checked
+
+/** React's own escaping of a text (its server render), so a sentence is found in the page as it is written there. */
+const escHtml = (s: string) =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+/** A part of a page rendered on the server, its texts joined (React marks two texts side by side with an empty
+ * comment), in English. */
+const rendered = (el: ReturnType<typeof createElement>) =>
+  renderToString(createElement(I18nProvider, { children: el })).replaceAll("<!-- -->", "");
+/** A sentence of this app in English, escaped as the page writes it. */
+const enSaid = (key: string, vars?: Record<string, string | number>) =>
+  escHtml(wordsIn("en")(key, vars));
+const noPress = {
+  setAsking: () => undefined,
+  busy: false,
+  onAnswer: () => undefined,
+};
+
+test("A43 AUD-1 a group offer: her price (with the difference) and her district's mandi middle (its day, its source) come BEFORE Accept, and the accept confirm says them again", () => {
+  // AIAIC's real answers: her open group offer (connected_farmer_mine_pool_offer, onion in Nashik) and Nashik's onion
+  // prices as AIAIC held them (practice_price, GET /farmer/trade/price)
+  const mine = mineOf("connected_farmer_mine_pool_offer");
+  const v = offerViews(mine).find((x) => x.offer.pool);
+  assert.ok(v?.offer.pool && v.canAnswer, "the recording holds a group offer she can answer");
+  const mandi = answer<ReferencePrice>("practice_price");
+  assert.ok(
+    mandi.held && typeof mandi.middle_of_all_per_q === "number" && mandi.price_day,
+    "the recording holds a mandi middle and its day",
+  );
+  // DERIVED in memory, and said so: her asking price set to the price answer's own suggestion (the recorded lot has none)
+  const ask = Number(mandi.suggested_ask_per_q);
+  const view: OfferView = { ...v, listing: { ...v.listing, ask_price_per_q: ask } };
+  const o = v.offer;
+  const group = groupView(o.pool as AiaicPool, o, null);
+  assert.equal(group.action, "answer");
+  const prices: GroupPrices = {
+    pricePerQ: o.price_per_q,
+    amount: o.amount_inr ?? o.price_per_q * o.quantity_q,
+    ask,
+    mandi,
+    reading: false,
+  };
+  const page = (asking: "accept" | "reject" | null, p: GroupPrices) =>
+    rendered(
+      createElement(GroupOfferSteps, {
+        view,
+        group,
+        crop: "Onion",
+        buyer: "A buyer",
+        chip: null,
+        order: null,
+        prices: p,
+        press: { ...noPress, asking },
+      }),
+    );
+  const html = page(null, prices);
+  const accept = html.indexOf('data-testid="aiaic-gs-accept"');
+  assert.ok(
+    accept > 0 && html.indexOf('data-testid="aiaic-gs-decline"') > accept,
+    "Accept, then Decline",
+  );
+  const diff = askDiffPct(o.price_per_q, ask);
+  assert.ok(diff !== null && diff < 0, "the buyer offers less than she asked");
+  const hers = enSaid("aiaic.offer.your_price", { price: rupees(ask) });
+  const middle = enSaid("aiaic.lots.price", { price: rupees(mandi.middle_of_all_per_q ?? null) });
+  const dayAndSource = enSaid("aiaic.group.mandi_line", {
+    low: rupees(mandi.lowest_per_q ?? null),
+    high: rupees(mandi.highest_per_q ?? null),
+    day: dayOf(mandi.price_day ?? null),
+    source: mandi.source_name ?? "",
+  });
+  for (const [what, said] of [
+    ["her price", hers],
+    ["the difference", `${diff}%`],
+    ["the mandi middle", middle],
+    ["the mandi's day and source", dayAndSource],
+  ] as const) {
+    const i = html.indexOf(said);
+    assert.ok(i > 0 && i < accept, `${what} ("${said}") is said before Accept`);
+  }
+  // the step she is at stays first: her answer, then the prices, then the buttons
+  const now = html.indexOf('data-testid="aiaic-gs-now"');
+  assert.ok(now > 0 && now < html.indexOf(hers), "the step now comes first");
+  // the accept confirm says them again, before its yes
+  const confirm = page("accept", prices);
+  const yes = confirm.indexOf('data-testid="aiaic-gs-confirm-accept-yes"');
+  for (const said of [
+    hers,
+    `${diff}%`,
+    rupees(mandi.middle_of_all_per_q ?? null),
+    dayOf(mandi.price_day ?? null),
+  ]) {
+    const i = confirm.indexOf(said);
+    assert.ok(i > 0 && i < yes, `the accept confirm says "${said}" before its yes`);
+  }
+  // the lot as AIAIC recorded it (no asking price): no "Your price"; the mandi still before Accept
+  const none = page(null, { ...prices, ask: null });
+  assert.ok(
+    !none.includes(escHtml((DICTS.en["aiaic.offer.your_price"] ?? "?").split("{")[0] ?? "?")),
+    "no price of hers when she named none",
+  );
+  assert.ok(
+    none.indexOf(middle) > 0 &&
+      none.indexOf(middle) < none.indexOf('data-testid="aiaic-gs-accept"'),
+    "the mandi middle before Accept, with no price of hers",
+  );
+  // the mandi prices being read, or none held: said so before Accept, never a blank
+  for (const reading of [true, false]) {
+    const h = page(null, { ...prices, mandi: null, reading });
+    const said = enSaid(reading ? "aiaic.sell.price.reading" : "aiaic.group.mandi_none");
+    assert.ok(
+      h.indexOf(said) > 0 && h.indexOf(said) < h.indexOf('data-testid="aiaic-gs-accept"'),
+      `${reading ? "reading" : "none held"}: said before Accept`,
+    );
+  }
+  // her news strip: the news of the page she is on waits while she reads it (its Open would open this page, and it
+  // pushed her button below the first screen in the walk); elsewhere it is shown (AIAIC's recorded notices)
+  type Row = {
+    notification_id: number;
+    kind: string;
+    created_at: string;
+    body: Record<string, unknown>;
+  };
+  const rows = answer<{ notifications: Row[] }>("buyer_farmer_notices_more_time").notifications;
+  const notices: Notice[] = rows.map((r) => ({
+    id: r.notification_id,
+    kind: r.kind as Notice["kind"],
+    queryId: null,
+    at: r.created_at,
+    trade: tradeFactsOf(r.kind, r.body),
+  }));
+  const offerId = notices.find((n) => n.kind === "trade_offer" && n.trade?.offerId)?.trade?.offerId;
+  assert.ok(offerId, "the recording holds an offer's news");
+  assert.ok(
+    newsShown(notices, null).some((n) => n.trade?.offerId === offerId),
+    "an offer's news is shown on other pages",
+  );
+  assert.ok(
+    !newsShown(notices, null, offerId).some((n) => n.trade?.offerId === offerId),
+    "it waits on the offer's own page",
+  );
+});
+
+test("A44 AUD-2 her own sale's state first: a sale called off is never 'still gathering' or 'your own sale stays', never asked for a payout account; a call-off with her sale standing says bring", () => {
+  // AIAIC's real answer: her order of a group sale, the group open, her lot collected (connected_farmer_mine_journey)
+  const mine = mineOf("connected_farmer_mine_journey");
+  const order = mine.orders.find((x) => x.pool);
+  assert.ok(order?.pool && order.order_state !== "cancelled", "her group order, standing");
+  const offer = findOffer(mine, order.offer_id)?.offer ?? null;
+  const pool = (status: string): AiaicPool => ({ ...(order.pool as AiaicPool), status });
+  // DERIVED in memory, and said so: what AIAIC's cancel_order changes (the state and its reason code), before her lot
+  // was collected
+  const cancelled: AiaicOrder = {
+    ...order,
+    order_state: "cancelled",
+    cancel_reason_code: "buyer_called_off",
+    fulfilment: [],
+  };
+  const reason = DICTS.en["aiaic.sale.cancel_reason.buyer_called_off"] ?? "?";
+  const never = [
+    "aiaic.gs.finalized.waiting",
+    "aiaic.gs.finalized.todo",
+    "aiaic.gs.finalized.called_off_yours",
+  ];
+  // (a) her sale called off while the group gathers; (b) the group called off too; and the group finalized first
+  for (const status of ["open", "cancelled", "closed"]) {
+    const g = groupView(pool(status), offer, cancelled);
+    const all = g.steps.map((s) => groupSaid(wordsIn("en"), s.say)).join(" | ");
+    for (const s of g.steps)
+      assert.ok(!never.includes(s.say?.key ?? ""), `${status}: ${s.key} says ${s.say?.key}`);
+    assert.equal(g.action, "none", `${status}: nothing for her to do`);
+    assert.ok(!g.steps.some((s) => s.state === "now"), `${status}: no step is hers now: ${all}`);
+    const at = g.steps.find((s) => s.key === g.current);
+    assert.equal(at?.state, "stopped", `${status}: the step she is at is where her sale stopped`);
+    assert.ok(
+      groupSaid(wordsIn("en"), at.say).includes(reason),
+      `${status}: AIAIC's reason is said there: ${all}`,
+    );
+    saidWhole(g.steps);
+    // her sales list says the same
+    const line = rendered(createElement(GroupStepsLine, { view: g }));
+    assert.ok(line.includes(escHtml(reason)), `${status}: the list line says why`);
+  }
+  // (c) the group called off while her sale stands (AIAIC keeps it as a sale, pools.close; its decision rule puts the
+  // collection now): before her lot is collected, bring it
+  const standing = groupView(pool("cancelled"), offer, { ...order, fulfilment: [] });
+  assert.equal(standing.steps[2]?.say?.key, "aiaic.gs.finalized.called_off_yours");
+  assert.notEqual(standing.steps[2]?.state, "stopped", "her sale did not stop");
+  assert.equal(standing.current, "collection");
+  assert.equal(standing.steps[3]?.state, "now");
+  assert.equal(standing.action, "bring");
+  saidWhole(standing.steps);
+  // (d) AIAIC attaches her money's facts whatever the order's state (farmer_payout.her_money): AIAIC's real answer where
+  // it collects, then pays her, and holds no UPI ID or bank account of hers (collect_mine_paid)
+  const paid = mineOf("collect_mine_paid");
+  const real = paid.orders[0];
+  const fa = (real as { from_aiaic?: FromAiaic | null } | undefined)?.from_aiaic;
+  assert.ok(real && fa, "the recording holds AIAIC's facts of her money");
+  assert.equal(needsDestination(real, paid), true, "her one thing to do while her sale stands");
+  assert.equal(
+    needsDestination({ ...real, order_state: "cancelled" }, paid),
+    false,
+    "never on a sale called off",
+  );
+  // the group's page: DERIVED, her group order with those facts attached, called off (none asked) and standing (asked)
+  const prices: GroupPrices = {
+    pricePerQ: order.price_per_q,
+    amount: order.amount_inr,
+    ask: null,
+    mandi: null,
+    reading: false,
+  };
+  const pageOf = (o: AiaicOrder, status: string) =>
+    rendered(
+      createElement(GroupSaleSteps, {
+        order: o,
+        data: { mine: { ...paid, orders: [o] }, cropNames: {}, districtNames: {} },
+        group: groupView(pool(status), offer, o),
+        crop: "Onion",
+        buyer: "A buyer",
+        prices,
+      }),
+    );
+  const asked = 'data-testid="aiaic-gs-give-destination"';
+  assert.ok(
+    !pageOf({ ...cancelled, from_aiaic: fa } as AiaicOrder, "open").includes(asked),
+    "never asked on a sale called off",
+  );
+  assert.ok(
+    pageOf({ ...order, from_aiaic: fa } as AiaicOrder, "closed").includes(asked),
+    "asked while it stands",
+  );
+});
+
+test("A45 AUD-3 her lot collected: the group order page never says 'Next: you hand it over at the collection point' under a done collection", () => {
+  // AIAIC's real answer: her lot collected and graded, and its her_next_step still naming the handover
+  const mine = mineOf("connected_farmer_mine_journey");
+  const order = mine.orders.find((x) => x.pool);
+  assert.ok(order?.pool, "her group order");
+  assert.equal(order.her_next_step, "collection_point", "AIAIC's answer names the handover next");
+  assert.ok(
+    order.fulfilment.some((s) => s.stage === "aggregation" && s.status === "done"),
+    "her lot collected",
+  );
+  const offer = findOffer(mine, order.offer_id)?.offer ?? null;
+  const handOver = enSaid("aiaic.sale.next.collection_point");
+  // the recording as it is (the group open), and DERIVED: the group finalized
+  for (const status of ["open", "closed"]) {
+    const html = rendered(
+      createElement(GroupSaleSteps, {
+        order,
+        data: { mine, cropNames: {}, districtNames: {} },
+        group: groupView({ ...(order.pool as AiaicPool), status }, offer, order),
+        crop: "Onion",
+        buyer: "A buyer",
+        prices: {
+          pricePerQ: order.price_per_q,
+          amount: order.amount_inr,
+          ask: null,
+          mandi: null,
+          reading: false,
+        },
+      }),
+    );
+    assert.ok(/data-state="done" data-step="collection"/.test(html), `${status}: collection done`);
+    assert.ok(
+      !html.includes(handOver),
+      `${status}: no "Next: you hand it over" under a done collection`,
+    );
+  }
+});
+
+test("A46 AUD-4..AUD-9 her steps' words and page: stages, the team decides, a no ends kindly, the list says AIAIC's sending words, joined apart from gathered, one step list", () => {
+  // AUD-4: beside NOW a step's name is a stage, never a state that has not happened (English: "Group finalized", "Paid")
+  assert.ok(
+    !(DICTS.en["aiaic.gs.step.finalized"] ?? "?").toLowerCase().includes("finalized"),
+    `the group step is named as a stage: "${DICTS.en["aiaic.gs.step.finalized"]}"`,
+  );
+  assert.notEqual(DICTS.en["aiaic.gs.step.paid"], "Paid", "the money step is named as a stage");
+  // AUD-5: while answers come in, AIAIC's team decides (finalize, more time, more farmers or call off), never "finalizes it"
+  const claims = { en: "finalizes", mr: "अंतिम करते", hi: "तय करती" } as const;
+  for (const lang of LANGS)
+    for (const key of ["aiaic.gs.finalized.waiting", "aiaic.gs.finalized.todo"]) {
+      const said = DICTS[lang][key] ?? "?";
+      assert.ok(!said.includes(claims[lang]), `${lang} ${key}: "${said}"`);
+    }
+  // AUD-6: she said no (DERIVED from the recorded open offer: only its status): the end is said, never "All steps done"
+  const open = mineOf("connected_farmer_mine_pool_offer");
+  const v = offerViews(open).find((x) => x.offer.pool);
+  assert.ok(v?.offer.pool, "an open group offer");
+  const no = groupView(v.offer.pool, { ...v.offer, status: "rejected", can_accept: false }, null);
+  const prices: GroupPrices = {
+    pricePerQ: v.offer.price_per_q,
+    amount: v.offer.price_per_q * v.offer.quantity_q,
+    ask: null,
+    mandi: null,
+    reading: false,
+  };
+  const noHtml = rendered(createElement(GroupSteps, { view: no, prices }));
+  assert.ok(!noHtml.includes(enSaid("aiaic.gs.all_done")), "a no is not 'all steps done'");
+  assert.ok(noHtml.includes(enSaid("aiaic.gs.said_no_end")), "a no ends with nothing more to do");
+  // AUD-7: her sales list says AIAIC's own words for its send (queued, pending, processing are not "sent"): AIAIC's real
+  // send on its way (collect_mine_processing), DERIVED onto her collected group order (connected_farmer_mine_journey)
+  const sending = mineOf("collect_mine_processing").orders[0];
+  const fa = (sending as { from_aiaic?: FromAiaic | null } | undefined)?.from_aiaic;
+  assert.ok(
+    fa?.sending && fa.steps?.sent === true && fa.steps.reached !== true,
+    "the recording holds a send on its way",
+  );
+  const mine = mineOf("connected_farmer_mine_journey");
+  const order = mine.orders.find((x) => x.pool);
+  assert.ok(order?.pool, "her group order");
+  const moving = { ...order, from_aiaic: fa } as AiaicOrder;
+  const g = groupView({ ...order.pool, status: "closed" }, null, moving);
+  assert.equal(g.current, "paid");
+  const words = groupPaidWords(wordsIn("en"), moving);
+  assert.equal(
+    words,
+    wordsIn("en")("aiaic.money.status.processing", { rs: rupees(fa.sending.amount_inr) }),
+  );
+  const line = rendered(createElement(GroupStepsLine, { view: g, paidWords: words }));
+  assert.ok(line.includes(escHtml(words ?? "?")), "the list line says AIAIC's sending words");
+  assert.ok(
+    !(DICTS.en["aiaic.gs.paid.sent"] ?? "?").includes("sent your money"),
+    "a send on its way is never said as done",
+  );
+  // AUD-9: one step list on her order's page (the older journey folded behind one press), the pooled line inside the
+  // collection step, one bar; the agreed quantity "joined", the weighed one "gathered"
+  const page = rendered(
+    createElement(GroupSaleSteps, {
+      order,
+      data: { mine, cropNames: {}, districtNames: {} },
+      group: groupView({ ...order.pool, status: "closed" }, null, order),
+      crop: "Onion",
+      buyer: "A buyer",
+      prices: {
+        pricePerQ: order.price_per_q,
+        amount: order.amount_inr,
+        ask: null,
+        mandi: null,
+        reading: false,
+      },
+    }),
+  );
+  assert.ok(!page.includes(enSaid("aiaic.journey.title")), "no second 'step by step' list");
+  assert.ok(page.includes("<details"), "every recorded step kept, behind one press");
+  assert.equal(page.split('role="progressbar"').length - 1, 1, "one bar");
+  const c = page.indexOf('data-step="collection"');
+  const p = page.indexOf('data-testid="aiaic-pooled"');
+  assert.ok(
+    c > 0 && p > c && p < page.indexOf('data-step="paid"'),
+    "the pooled line sits in the collection step",
+  );
+  const finalized = groupSaid(
+    wordsIn("en"),
+    groupView({ ...order.pool, status: "closed" }, null, order).steps[2]?.say ?? null,
+  );
+  assert.ok(finalized.includes("joined") && !finalized.includes("gathered"), `"${finalized}"`);
+  assert.ok(
+    (DICTS.en["aiaic.gs.joined_title"] ?? "").includes("Joined"),
+    "the bar names the agreed quantity joined",
+  );
+});
+
+test("B19 her sale's news through this server: one per offer (the newest, more time), the older read with it; a READ more-time notice only says more time; no farmer id", async () => {
+  // AIAIC's real answer of GET /notifications after its team gave more time (record_buyer_portal_answers.py)
+  type Row = {
+    notification_id: number;
+    kind: string;
+    read_at: string | null;
+    body: Record<string, unknown>;
+  };
+  const recordedNotices = answer<{ unread: number; notifications: Row[] }>(
+    "buyer_farmer_notices_more_time",
+  );
+  const rows = recordedNotices.notifications;
+  const moved = rows.find((r) => r.body["more_time"] === true);
+  assert.ok(moved, "the recording holds the more-time notice");
+  const sameOffer = rows.filter((r) => r.body["offer_id"] === moved.body["offer_id"]);
+  assert.ok(sameOffer.length >= 2, "the offer's first notice and its more-time notice");
+  const s = await standIn();
+  try {
+    settings(s.url, null, null);
+    asHer(s);
+    s.notices = recordedNotices;
+    const all = await account.myNotices("en");
+    const offers = all.filter((n) => n.kind === "trade_offer");
+    const ids = new Set(rows.map((r) => r.body["offer_id"]));
+    assert.equal(offers.length, ids.size, "one notice per offer");
+    const n = offers.find((x) => x.trade?.offerId === moved.body["offer_id"]);
+    assert.ok(n?.trade?.moreTime, "the newest of that offer: more time");
+    assert.equal(n.id, moved.notification_id);
+    assert.equal(n.trade.validUntil, moved.body["valid_until"]);
+    assert.deepEqual(
+      n.alsoIds,
+      sameOffer.filter((r) => r !== moved).map((r) => r.notification_id),
+      "its older notice is read with it",
+    );
+    assert.ok(!JSON.stringify(all).includes("frm_"), "no farmer's record id leaves this server");
+    // DERIVED in memory from the recording, never written: the more-time notice READ elsewhere (her other phone)
+    const derived = JSON.parse(JSON.stringify(recordedNotices)) as typeof recordedNotices;
+    const read = derived.notifications.find((r) => r.notification_id === moved.notification_id);
+    assert.ok(read);
+    read.read_at = "2026-10-29T18:06:00+00:00";
+    s.notices = derived;
+    const after = await account.myNotices("en");
+    const kept = after.filter((x) => x.read);
+    assert.deepEqual(
+      kept.map((x) => [x.id, x.trade?.moreTime]),
+      [[moved.notification_id, true]],
+      "kept only to say more time",
+    );
+    assert.equal(moreTimeGiven(after, String(moved.body["offer_id"])), true);
+    assert.ok(
+      newsShown(after, null).every((x) => !x.read),
+      "never shown as news again",
+    );
   } finally {
     s.notices = null;
     await s.close();

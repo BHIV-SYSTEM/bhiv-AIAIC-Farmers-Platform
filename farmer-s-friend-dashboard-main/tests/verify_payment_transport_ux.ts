@@ -176,7 +176,17 @@ async function runPaymentTransportUXTests() {
   const bottomNavContent = fs.readFileSync(bottomNavPath, "utf-8");
 
   assert.ok(bottomNavContent.includes('to="/payments"'), "BottomNav must link to /payments");
-  assert.ok(bottomNavContent.includes("grid-cols-4"), "BottomNav must use 4-column mobile layout");
+  // One column per tab, so no tab wraps to a second row on a phone. The bar had 4 tabs when this test was written
+  // and 5 since Help joined it (25 Oct); the count is read from the bar itself, so a new tab without its column fails.
+  const tabCount = (bottomNavContent.match(/<Link\b/g) || []).length;
+  const columns = bottomNavContent.match(/\bgrid-cols-(\d+)\b/);
+  assert.ok(tabCount >= 4, `BottomNav must hold its tabs (found ${tabCount})`);
+  assert.ok(columns, "BottomNav must lay its tabs out on a grid");
+  assert.strictEqual(
+    Number(columns[1]),
+    tabCount,
+    `BottomNav must use one column per tab (${tabCount} tabs, grid-cols-${columns[1]})`,
+  );
 
   const paymentsRoutePath = path.resolve(__dirname, "../src/routes/payments.tsx");
   assert.ok(fs.existsSync(paymentsRoutePath), "src/routes/payments.tsx must exist");
@@ -189,7 +199,9 @@ async function runPaymentTransportUXTests() {
     paymentsContent.includes("getOrders"),
     "Payments route must load existing orders data via getOrders",
   );
-  console.log("✓ Payments route and 4-tab mobile navigation verified");
+  console.log(
+    `✓ Payments route and ${tabCount}-tab mobile navigation (one column per tab) verified`,
+  );
 
   // -------------------------------------------------------------------------
   // Test 8: Comprehensive Localization Parity (EN, HI, MR)

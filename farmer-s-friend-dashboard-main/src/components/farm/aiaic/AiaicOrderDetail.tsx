@@ -2,10 +2,21 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Banknote, CheckCircle2, Loader2, Wallet, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Banknote,
+  CheckCircle2,
+  ChevronRight,
+  Hourglass,
+  Landmark,
+  Loader2,
+  Wallet,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
 
 import { usePress } from "@/lib/aiaic-crisis";
+import { useDistrictPrice, useMyNotices } from "@/lib/aiaic-hooks";
 import {
   buyerLine,
   commissionFromHer,
@@ -14,14 +25,17 @@ import {
   dayOf,
   findOffer,
   findOrder,
+  groupView,
   listingOfOrder,
   moneyCard,
+  moreTimeGiven,
   newPressKey,
   orderOfOffer,
   paymentLine,
   quintalWords,
   quintals,
   rupees,
+  sendingSaid,
   type AiaicCommission,
   type AiaicOrder,
   type AiaicProblem,
@@ -33,7 +47,8 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
-import { GroupSaleCard } from "./GroupSaleCard";
+import { GroupOfferSteps, GroupSaleSteps, type AnswerPress } from "./GroupPages";
+import { GroupAnswer, type GroupPrices } from "./GroupSteps";
 import { PooledLine } from "./PooledLine";
 import { SaleJourney } from "./SaleJourney";
 import { SaleStepper } from "./SaleStepper";
@@ -93,6 +108,44 @@ function TermsLine({ code, words }: { code: string | null; words?: string | null
   );
 }
 
+/** An offer's state as a chip: open in the colour of a thing to do, any other state quiet. Always its word. */
+function OfferChip({ chip }: { chip: OfferView["chip"] }) {
+  const { t } = useI18n();
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2.5 py-0.5 text-xs font-extrabold",
+        chip === "open"
+          ? "bg-warning-soft text-warning-foreground"
+          : "bg-muted text-muted-foreground",
+      )}
+    >
+      {t(`aiaic.offer.chip.${chip}`)}
+    </span>
+  );
+}
+
+/** A group sale's offer whose group facts AIAIC did not send, its head: its state, the crop and her quantity, the
+ * buyer (with the facts, the steps' own head says them). */
+function OfferHead({ view, data, crop }: { view: OfferView; data: MineForScreen; crop: string }) {
+  const { t } = useI18n();
+  const o = view.offer;
+  return (
+    <section className="rounded-3xl border-2 border-border bg-card p-4 shadow-sm sm:p-5">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <OfferChip chip={view.chip} />
+        {o.synthetic ? <ModeChip kind="practice" /> : null}
+      </div>
+      <h1 className="mt-2 break-words text-2xl font-extrabold text-foreground">
+        {crop} · {quintalWords(t, o.quantity_q)}
+      </h1>
+      <p className="break-words text-sm text-muted-foreground">
+        {buyerLine(t, data.districtNames, o.buyer_type, o.buyer_district, o.buyer_name)}
+      </p>
+    </section>
+  );
+}
+
 function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
   const { t } = useI18n();
   const navigate = useNavigate();
@@ -103,10 +156,18 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
   const [pressKey, setPressKey] = useState(newPressKey);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<AiaicProblem | null>(null);
+  // her notices (read only while AIAIC knows who she is): one may say this offer was given more time
+  const notices = useMyNotices();
   const o = view.offer;
   const crop = cropName(data.cropNames, view.listing.crop);
   const order = orderOfOffer(data.mine, o.offer_id);
   const amount = o.amount_inr ?? o.price_per_q * o.quantity_q;
+  // her district's mandi prices, beside the buyer's price on a group sale's offer (read only there)
+  const district = useDistrictPrice(
+    { state: view.listing.state, district: view.listing.district },
+    view.listing.crop,
+    Boolean(o.pool || o.pool_id),
+  );
 
   const answer = async (which: "accept" | "reject") => {
     setBusy(true);
@@ -124,6 +185,90 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
     setBusy(false);
     setAsking(null);
   };
+
+  // A GROUP SALE'S INVITATION (30 Oct 2026): her steps first, with her one thing to do now
+  if (o.pool || o.pool_id) {
+    const group = o.pool
+      ? groupView(o.pool, o, order, {
+          moreTime: moreTimeGiven(notices.data, o.offer_id),
+          districtNames: data.districtNames,
+        })
+      : null;
+    const prices: GroupPrices = {
+      pricePerQ: o.price_per_q,
+      amount,
+      ask: view.listing.ask_price_per_q,
+      mandi: district.mandi,
+      reading: district.reading,
+    };
+    const answerPress: AnswerPress = {
+      asking,
+      setAsking,
+      busy,
+      onAnswer: (which) => void answer(which),
+    };
+    return (
+      <>
+        {group ? (
+          <GroupOfferSteps
+            view={view}
+            group={group}
+            crop={crop}
+            buyer={buyerLine(t, data.districtNames, o.buyer_type, o.buyer_district, o.buyer_name)}
+            chip={<OfferChip chip={view.chip} />}
+            order={order}
+            prices={prices}
+            press={answerPress}
+            problem={problem ? <ProblemCard problem={problem} /> : null}
+          />
+        ) : (
+          <>
+            <OfferHead view={view} data={data} crop={crop} />
+            {/* AIAIC sent this offer's group id without its facts (an AIAIC that does not send them): said, never
+                broken */}
+            <p
+              role="status"
+              className="rounded-2xl border-2 border-border bg-muted p-3 text-sm font-semibold text-foreground"
+              data-testid="aiaic-gs-no-facts"
+            >
+              {t("aiaic.gs.no_facts")}
+            </p>
+            {problem ? <ProblemCard problem={problem} /> : null}
+            {!order && view.canAnswer ? (
+              <GroupAnswer
+                asking={asking}
+                setAsking={setAsking}
+                busy={busy}
+                onAnswer={(which) => void answer(which)}
+                qty={o.quantity_q}
+                crop={crop}
+                prices={prices}
+                practice={o.synthetic}
+                place=""
+                day=""
+              />
+            ) : !order && o.why_not_accept ? (
+              <p className="rounded-2xl border border-border bg-muted p-3 text-sm font-semibold text-foreground">
+                {t(`aiaic.refused.${o.why_not_accept.code}`)}
+              </p>
+            ) : null}
+          </>
+        )}
+        <section className="space-y-1 rounded-3xl border-2 border-border bg-card p-4">
+          <TermsLine code={o.terms_code} words={o.delivery_terms} />
+        </section>
+        <OfferCompareBox offerId={o.offer_id} />
+        <TransportCostCard
+          crop={view.listing.crop}
+          cropLabel={crop}
+          quantityQ={o.quantity_q}
+          fromState={view.listing.state}
+          fromDistrict={view.listing.district}
+          fromTaluka={(view.listing as { taluka?: string | null }).taluka ?? null}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -163,16 +308,6 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
           ) : null}
         </div>
       </section>
-
-      {o.pool ? (
-        <GroupSaleCard
-          pool={o.pool}
-          cropLabel={crop}
-          districtNames={data.districtNames}
-          place={{ state: view.listing.state, district: view.listing.district }}
-          mine={{ quantity_q: o.quantity_q, amount }}
-        />
-      ) : null}
 
       {problem ? <ProblemCard problem={problem} /> : null}
 
@@ -276,6 +411,71 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
   const listing = listingOfOrder(data.mine, order);
   const crop = cropName(data.cropNames, order.crop);
   const next = order.her_next_step;
+  const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
+  const dest = (data.mine as { x_destination?: XDestination | null }).x_destination ?? null;
+  const collectThenPay = (data.mine as { collect_then_pay?: boolean }).collect_then_pay === true;
+  // her district's mandi prices, beside the buyer's price on a group sale's order (read only there)
+  const district = useDistrictPrice(
+    {
+      state: listing?.state ?? data.mine.profile_place.state,
+      district: listing?.district ?? data.mine.profile_place.district,
+    },
+    order.crop,
+    Boolean(order.pool),
+  );
+  // A GROUP SALE'S ORDER (30 Oct 2026): her steps first, the order's own five steps folded into them
+  const group = order.pool
+    ? groupView(order.pool, findOffer(data.mine, order.offer_id)?.offer ?? null, order, {
+        districtNames: data.districtNames,
+      })
+    : null;
+  if (group)
+    return (
+      <>
+        <GroupSaleSteps
+          order={order}
+          data={data}
+          group={group}
+          crop={crop}
+          buyer={buyerLine(
+            t,
+            data.districtNames,
+            order.buyer_type,
+            order.buyer_district,
+            order.buyer_name,
+          )}
+          prices={{
+            pricePerQ: order.price_per_q,
+            amount: order.amount_inr,
+            ask: listing?.ask_price_per_q ?? null,
+            mandi: district.mandi,
+            reading: district.reading,
+          }}
+        />
+        <section className="rounded-3xl border-2 border-border bg-card p-4">
+          <TermsLine code={order.terms_code} words={order.delivery_terms} />
+        </section>
+        {/* the buyer's payment once a link exists; before it, her money step says how fast the buyer pays (the card's
+            no-link line, "before you hand over", is false once a group's lot is collected) */}
+        {order.payment.link_made ? <PaymentCard order={order} /> : null}
+        <FromAiaicCard
+          money={fa}
+          dest={dest}
+          collectThenPay={collectThenPay}
+          notice={(data.mine as { x_notice?: XNotice | null }).x_notice}
+        />
+        <MoneyCard order={order} />
+        {listing ? (
+          <TransportCostCard
+            crop={order.crop}
+            cropLabel={crop}
+            quantityQ={order.quantity_q}
+            fromState={listing.state}
+            fromDistrict={listing.district}
+          />
+        ) : null}
+      </>
+    );
   return (
     <>
       <section className="rounded-3xl border-2 border-border bg-card p-4 shadow-sm sm:p-5">
@@ -320,19 +520,6 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
           <p className="mt-3 text-sm font-bold text-foreground">{t(`aiaic.sale.next.${next}`)}</p>
         ) : null}
       </section>
-
-      {order.pool ? (
-        <GroupSaleCard
-          pool={order.pool}
-          cropLabel={crop}
-          districtNames={data.districtNames}
-          place={{
-            state: listing?.state ?? data.mine.profile_place.state,
-            district: listing?.district ?? data.mine.profile_place.district,
-          }}
-          mine={{ quantity_q: order.quantity_q, amount: order.amount_inr }}
-        />
-      ) : null}
 
       <SaleJourney order={order} />
 

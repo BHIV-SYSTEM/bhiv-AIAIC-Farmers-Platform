@@ -330,7 +330,8 @@ export function FromAiaicCard({
   ];
   return (
     <section
-      className="rounded-3xl border-2 border-primary bg-card p-4"
+      id="aiaic-from-aiaic"
+      className="scroll-mt-24 rounded-3xl border-2 border-primary bg-card p-4"
       data-testid="aiaic-from-aiaic"
     >
       <p className="flex items-center gap-2 text-base font-extrabold text-foreground">

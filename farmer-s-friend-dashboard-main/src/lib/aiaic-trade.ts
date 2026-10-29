@@ -1514,3 +1514,398 @@ export type OfferCompare = {
   price_age_days: number | null;
   trip_saved: { km_one_way: number | null; least_counted?: boolean } | null;
 };
+
+// ------------------------------------------------------------------- her group sale, step by step (30 Oct 2026)
+
+/**
+ * WHY AN OFFER CLOSED, as AIAIC holds it (`trade_offer.closed_reason`, its closed list in AIAIC's migration 017): her lot
+ * sold to another offer, her lot taken off sale, a group sale filled by other farmers, a group sale closed (finalized or
+ * called off), or a group sale that asked her for another quantity. Each is said in plain words (`aiaic.offer.closed.*`);
+ * a code this app does not hold is said as "closed", never as its code.
+ */
+export const OFFER_CLOSED_REASONS = [
+  "lot_sold",
+  "listing_withdrawn",
+  "pool_filled",
+  "pool_closed",
+  "pool_resized",
+] as const;
+
+/** The words an offer's closing is said with, or null while it is not closed (`status` other than `withdrawn`). A group
+ * sale's `pool_closed` says which of AIAIC's two closings it was: finalized (`closed`) or called off (`cancelled`). */
+export function closedReasonKey(
+  offer: Pick<AiaicOffer, "status" | "closed_reason" | "pool">,
+): string | null {
+  if (offer.status !== "withdrawn") return null;
+  const reason = offer.closed_reason ?? "";
+  if (reason === "pool_closed" && offer.pool?.status === "cancelled")
+    return "aiaic.offer.closed.pool_called_off";
+  if (reason === "pool_closed" && offer.pool?.status === "closed")
+    return "aiaic.offer.closed.pool_finalized";
+  return (OFFER_CLOSED_REASONS as readonly string[]).includes(reason)
+    ? `aiaic.offer.closed.${reason}`
+    : "aiaic.offer.closed.other";
+}
+
+/** Her group sale's five steps, in the order she lives them (AIAIC's own steps of a group sale, said from her side). */
+export const GROUP_STEPS = ["invited", "answered", "finalized", "collection", "paid"] as const;
+export type GroupStepKey = (typeof GROUP_STEPS)[number];
+/** A group step's state: as a sale's step (`StepState`), and `none`: not part of her sale (she said no, it closed first). */
+export type GroupStepState = StepState | "none";
+/** What a step says: a key of this app's words and its blanks. A blank named in `GROUP_QTY_SLOTS` is a quantity in
+ * quintals (the page says it "1 quintal" or "{n} quintals"); every other blank is said as given. */
+export type GroupSay = { key: string; values: Record<string, string | number> };
+export type GroupStep = { key: GroupStepKey; state: GroupStepState; say: GroupSay | null };
+export const GROUP_QTY_SLOTS: ReadonlySet<string> = new Set(["qty", "joined", "target", "left"]);
+/** A blank whose value is a key of this app's words (her sale's reason for a call-off), said in her language. */
+export const GROUP_KEY_SLOTS: ReadonlySet<string> = new Set(["reason"]);
+/** The reasons AIAIC calls a sale off with (its `CANCEL_REASONS`, kept on the order as `cancel_reason_code`), each with
+ * words here (`aiaic.sale.cancel_reason.*`); another code is said without a reason, never as its code. */
+export const CANCEL_REASON_CODES = [
+  "buyer_called_off",
+  "sold_elsewhere",
+  "no_transport",
+  "quality_did_not_match",
+] as const;
+
+/**
+ * Her one clear thing to do now: `answer` (Accept or Decline, each with a second press), `wait` (she said yes; AIAIC's
+ * team finalizes the group), `bring` (the group is finalized: bring her produce to the collection point on its day),
+ * `none` (nothing of hers is waited for). The offer page adds its own: an offer that became her sale leads to the sale.
+ */
+export type GroupAction = "answer" | "wait" | "bring" | "none";
+
+export type GroupView = {
+  pool: AiaicPool;
+  steps: GroupStep[];
+  /** The step marked as hers now: the first `now`, else where it stopped, else the next to come; null when all done. */
+  current: GroupStepKey | null;
+  action: GroupAction;
+  /** The key numbers: what the buyer wants, what has joined (from how many farmers), what is left, the share joined. */
+  gathered: { joined_q: number; target_q: number; left_q: number; farmers: number; pct: number };
+  /** She said no: nothing more is hers to do (the page says so, never "all steps done"). */
+  declined: boolean;
+};
+
+const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+/**
+ * HER GROUP SALE, STEP BY STEP (the owner, 29 Oct 2026: "clear button in UI a farmer ... can follow step by step with
+ * clear visibility and key indication"), read ONLY from what AIAIC sends her (`GET /farmer/trade`: her offer and its
+ * `pool`, her order and its steps and money), never assumed:
+ * 1. INVITED: the buyer's offer for her lot; while it waits, the last day to answer (`valid_until`), said as "more time
+ *    given" when AIAIC's notice said so (`moreTime`, its `trade_offer` notice with `more_time: true`).
+ * 2. HER ANSWER: yes (her order), no (`rejected`); closed before she answered, in plain words (`closedReasonKey`); her
+ *    last day passed (`expired`); or why AIAIC will not take a yes now (`why_not_accept`, its own rule).
+ * 3. THE GROUP'S DECISION by AIAIC's team (`pool.status`): finalized (`closed`), or called off (`cancelled`): her own
+ *    sale then stays, as AIAIC keeps a group's orders as sales (`pools.close`), and her collection comes next (AIAIC's
+ *    own decision rule, `pools.decision`).
+ * 4. THE COLLECTION: where and when (`pool.collection_point`, `collect_on`), done when AIAIC recorded her lot collected
+ *    (`aggregation` done) or handed over.
+ * HER OWN SALE IS READ FIRST (the audit of 30 Oct 2026, AUD-2): AIAIC calls one order of a group off on its own
+ * (`cancel_order`), so a sale called off is said once, on the step where her sale stood, with AIAIC's reason
+ * (`cancel_reason_code`); it is never "still gathering" or "your own sale stays", and it asks nothing of her.
+ * 5. PAID: her money as AIAIC says it (`from_aiaic.steps`: reached; else Razorpay's word: settled), now while the buyer
+ *    paid and her money moves; the page adds AIAIC's own sentence for her money.
+ */
+export function groupView(
+  pool: AiaicPool,
+  offer: AiaicOffer | null,
+  order: AiaicOrder | null,
+  opts: { moreTime?: boolean; districtNames?: Record<string, string> } = {},
+): GroupView {
+  const target = num(pool.target_q);
+  const joined = num(pool.joined_q);
+  const gathered = {
+    joined_q: joined,
+    target_q: target,
+    left_q: num(pool.left_q),
+    farmers: num(pool.joined_farmers),
+    pct: target > 0 ? Math.min(100, Math.round((100 * joined) / target)) : 0,
+  };
+  const yes = order !== null || offer?.status === "accepted";
+  const no = !yes && offer?.status === "rejected";
+  const closedFirst = !yes && offer?.status === "withdrawn";
+  const open = !yes && !no && !closedFirst && offer?.status === "open";
+  const expired = open && offer?.expired === true;
+  const canAnswer = open && !expired && offer?.can_accept === true;
+  const out = !yes && !open; // she said no, or the invitation closed first: the rest is not hers
+  const lastDay = dayOf(offer?.valid_until ?? pool.valid_until ?? null);
+  const place = (pool.collection_point ?? "").trim();
+  const district = districtName(opts.districtNames ?? {}, pool.district);
+  const collectDay = dayOf(pool.collect_on ?? null);
+  const where = { place: place || district, district, day: collectDay };
+  const cancelledSale = order?.order_state === "cancelled";
+
+  const say = (key: string, values: Record<string, string | number> = {}): GroupSay => ({
+    key,
+    values,
+  });
+  // her sale called off, with AIAIC's reason when this app has words for it (`groupToo`: the group was called off too)
+  const code = order?.cancel_reason_code ?? "";
+  const reason = (CANCEL_REASON_CODES as readonly string[]).includes(code)
+    ? `aiaic.sale.cancel_reason.${code}`
+    : null;
+  const herCallOff = (groupToo: boolean): GroupSay =>
+    reason
+      ? say(groupToo ? "aiaic.gs.called_off_group" : "aiaic.gs.called_off", { reason })
+      : say(groupToo ? "aiaic.gs.called_off_group_plain" : "aiaic.gs.called_off_plain");
+  const none: Omit<GroupStep, "key"> = { state: "none", say: null };
+
+  // 1. invited
+  const invited: Omit<GroupStep, "key"> = {
+    state: "done",
+    say:
+      open && !expired && lastDay
+        ? say(opts.moreTime ? "aiaic.gs.invited.more_time" : "aiaic.gs.invited.until", {
+            day: lastDay,
+          })
+        : say("aiaic.gs.invited.done"),
+  };
+
+  // 2. her answer
+  let answered: Omit<GroupStep, "key">;
+  if (yes)
+    answered = {
+      state: "done",
+      say: say("aiaic.gs.answered.yes", { qty: num(order?.quantity_q ?? offer?.quantity_q) }),
+    };
+  else if (no) answered = { state: "done", say: say("aiaic.gs.answered.no") };
+  else if (closedFirst)
+    answered = {
+      state: "stopped",
+      say: say(closedReasonKey(offer as AiaicOffer) ?? "aiaic.offer.closed.other"),
+    };
+  else if (expired)
+    answered = { state: "stopped", say: say("aiaic.gs.answered.expired", { day: lastDay }) };
+  else if (canAnswer)
+    answered = {
+      state: "now",
+      // more time given is said where she answers too (the first screen), with the new last day
+      say: say(
+        !lastDay
+          ? "aiaic.gs.answered.waiting"
+          : opts.moreTime
+            ? "aiaic.gs.answered.more_time"
+            : "aiaic.gs.answered.waiting_until",
+        { day: lastDay },
+      ),
+    };
+  else
+    answered = {
+      state: "stopped",
+      say: say(
+        offer?.why_not_accept
+          ? `aiaic.refused.${offer.why_not_accept.code}`
+          : "aiaic.offer.closed.other",
+      ),
+    };
+
+  // 3. the group's decision
+  const counts = { joined, target, farmers: gathered.farmers };
+  let finalized: Omit<GroupStep, "key">;
+  if (out || expired) finalized = none;
+  // her sale called off before the group was finalized: said here, once, with AIAIC's reason
+  else if (cancelledSale && pool.status !== "closed")
+    finalized = { state: "stopped", say: herCallOff(pool.status === "cancelled") };
+  else if (pool.status === "closed")
+    finalized = { state: "done", say: say("aiaic.gs.finalized.done", counts) };
+  // the group called off while her sale stands: decided, and her sale goes on (AIAIC's pools.close)
+  else if (pool.status === "cancelled")
+    finalized = yes
+      ? { state: "done", say: say("aiaic.gs.finalized.called_off_yours") }
+      : { state: "stopped", say: say("aiaic.gs.finalized.called_off") };
+  else if (yes) finalized = { state: "now", say: say("aiaic.gs.finalized.waiting", counts) };
+  else finalized = { state: "todo", say: say("aiaic.gs.finalized.todo", counts) };
+
+  // 4. the collection
+  const steps = order?.fulfilment ?? [];
+  const lastOf = (stage: string) =>
+    [...steps]
+      .filter((s) => s.stage === stage)
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
+  const collected = lastOf("aggregation");
+  const plan = say(
+    collectDay ? "aiaic.gs.collection.plan" : "aiaic.gs.collection.plan_no_day",
+    where,
+  );
+  let collection: Omit<GroupStep, "key">;
+  if (out || expired) collection = none;
+  else if (collected?.status === "done") {
+    const at =
+      typeof collected.detail?.["collection_point"] === "string"
+        ? String(collected.detail["collection_point"])
+        : where.place;
+    const q = collected.detail?.["quantity_q"];
+    collection = {
+      state: "done",
+      say:
+        typeof q === "number"
+          ? say("aiaic.gs.collection.done_qty", { place: at, qty: q })
+          : say("aiaic.gs.collection.done", { place: at }),
+    };
+  } else if (order && handedOver(order))
+    collection = { state: "done", say: say("aiaic.gs.collection.handed_over") };
+  // her sale called off: where it stood (the group finalized first), else no collection
+  else if (cancelledSale)
+    collection = {
+      state: "stopped",
+      say: finalized.state === "stopped" ? say("aiaic.gs.collection.not_now") : herCallOff(false),
+    };
+  else if (collected?.status === "failed")
+    collection = { state: "stopped", say: say("aiaic.gs.collection.not_done") };
+  // the group decided (finalized, or called off with her sale standing): bring her lot (AIAIC's decision rule)
+  else if (yes && pool.status !== "open")
+    collection = {
+      state: "now",
+      say: say(
+        collectDay ? "aiaic.gs.collection.bring" : "aiaic.gs.collection.bring_no_day",
+        where,
+      ),
+    };
+  else collection = { state: "todo", say: plan };
+
+  // 5. paid: her money
+  let paid: Omit<GroupStep, "key">;
+  if (out || expired) paid = none;
+  else if (!order) {
+    const days = pool.pay_within_days;
+    paid = {
+      state: "todo",
+      say:
+        days === null || days === undefined
+          ? say("aiaic.group.pay_not_said")
+          : days === 0
+            ? say("aiaic.group.pay_same_day")
+            : say("aiaic.group.pay_within", { days: String(days) }),
+    };
+  } else {
+    const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
+    const sale = saleSteps(order);
+    const buyerPaid =
+      sale[1]?.state === "done" || fa?.buyer_paid === true || fa?.steps?.buyer_paid === true;
+    const money = sale[4]?.state ?? "todo";
+    const days = pool.pay_within_days;
+    if (fa?.steps?.reached === true) paid = { state: "done", say: say("aiaic.gs.paid.reached") };
+    else if (money === "done") paid = { state: "done", say: say("aiaic.gs.paid.settled") };
+    // her sale called off: where it stood (her lot collected first), else no payment
+    else if (cancelledSale)
+      paid = {
+        state: "stopped",
+        say:
+          finalized.state === "stopped" || collection.state === "stopped"
+            ? say("aiaic.gs.paid.cancelled")
+            : herCallOff(false),
+      };
+    else if (fa?.steps?.sent === true) paid = { state: "now", say: say("aiaic.gs.paid.sent") };
+    else if (buyerPaid)
+      paid = {
+        state: money === "stopped" ? "stopped" : "now",
+        say: say("aiaic.gs.paid.buyer_paid"),
+      };
+    // awaited: with how fast the buyer said it pays, when it said so
+    else
+      paid = {
+        state: "todo",
+        say:
+          days === null || days === undefined
+            ? say("aiaic.gs.paid.waiting")
+            : days === 0
+              ? say("aiaic.group.pay_same_day")
+              : say("aiaic.group.pay_within", { days: String(days) }),
+      };
+  }
+
+  const all: GroupStep[] = [
+    { key: "invited", ...invited },
+    { key: "answered", ...answered },
+    { key: "finalized", ...finalized },
+    { key: "collection", ...collection },
+    { key: "paid", ...paid },
+  ];
+  const current =
+    all.find((s) => s.state === "now")?.key ??
+    all.find((s) => s.state === "stopped")?.key ??
+    all.find((s) => s.state === "todo")?.key ??
+    null;
+  const action: GroupAction = canAnswer
+    ? "answer"
+    : cancelledSale
+      ? "none"
+      : yes && pool.status === "open"
+        ? "wait"
+        : yes && collection.state === "now"
+          ? "bring"
+          : "none";
+  return { pool, steps: all, current, action, gathered, declined: no };
+}
+
+/** A step's sentence in her words: a quantity blank (`GROUP_QTY_SLOTS`) said "1 quintal" or "{n} quintals", a key blank
+ * (`GROUP_KEY_SLOTS`) in her language, every other blank as given. */
+export function groupSaid(t: Words, say: GroupSay | null): string {
+  if (!say) return "";
+  const values: Record<string, string | number> = {};
+  for (const [k, v] of Object.entries(say.values))
+    values[k] =
+      GROUP_QTY_SLOTS.has(k) && typeof v === "number"
+        ? quintalWords(t, v)
+        : GROUP_KEY_SLOTS.has(k) && typeof v === "string"
+          ? t(v)
+          : v;
+  return t(say.key, values);
+}
+
+/** Whether AIAIC's notices said this offer was given more time (a `trade_offer` notice with `more_time: true`, read or
+ * not): the step bar then says "more time given" beside the offer's own last day. */
+export function moreTimeGiven(
+  notices:
+    readonly { trade?: { offerId: string | null; moreTime: boolean } | null }[] | null | undefined,
+  offerId: string,
+): boolean {
+  return (notices ?? []).some((n) => n.trade?.moreTime === true && n.trade.offerId === offerId);
+}
+
+/** An offer of a group sale whose answer holds no group facts (`pool_id` without `pool`: an AIAIC that does not send
+ * them): the page says so instead of a step bar it cannot fill. */
+export function groupFactsMissing(o: {
+  pool_id?: string | null;
+  pool?: AiaicPool | null;
+}): boolean {
+  return Boolean(o.pool_id) && !o.pool;
+}
+
+/** Her asking price against the buyer's price: the difference in percent, to one decimal (what her offers list says
+ * beside "Your price"), or null when she named no price. */
+export function askDiffPct(price: number, ask: number | null | undefined): number | null {
+  return ask ? Math.round(((price - ask) / ask) * 1000) / 10 : null;
+}
+
+/**
+ * Whether her one thing to do on a group sale's order is to give AIAIC her UPI ID or bank account: her sale stands
+ * (AIAIC attaches her money's facts whatever the order's state, `farmer_payout.her_money`, so a sale called off is
+ * never asked; the audit of 30 Oct 2026, AUD-2), AIAIC sends her money (it collects, then pays her; or the link's fee
+ * is fixed), it holds no destination of hers, and her money has not reached her.
+ */
+export function needsDestination(order: AiaicOrder, mine: AiaicMine): boolean {
+  if (order.order_state === "cancelled") return false;
+  const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
+  const dest = (mine as { x_destination?: XDestination | null }).x_destination ?? null;
+  const collectThenPay = (mine as { collect_then_pay?: boolean }).collect_then_pay === true;
+  return Boolean(fa && (collectThenPay || fa.fixed_by_link) && !dest && fa.steps?.reached !== true);
+}
+
+/**
+ * HER MONEY ON A GROUP SALE'S ORDER, IN AIAIC'S OWN WORDS (one sentence for her order page and her sales list): AIAIC's
+ * send while it moves, said in the send's own state; else AIAIC's sentence for her money; else the buyer's payment once
+ * a link was made (the line for no link speaks of a handover to come, and a group's lots are handed over first). Null
+ * when AIAIC says nothing yet: the step's own words are said then.
+ */
+export function groupPaidWords(t: Words, order: AiaicOrder): string | null {
+  const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
+  if (fa?.sending) {
+    // a state this app has no words for: the step's own words, never a key
+    const key = `aiaic.money.status.${sendingSaid(fa.sending)}`;
+    return t(key) === key ? null : t(key, { rs: rupees(fa.sending.amount_inr) });
+  }
+  return moneyCard(t, order)?.line ?? (order.payment.link_made ? t(paymentLine(order).key) : null);
+}
