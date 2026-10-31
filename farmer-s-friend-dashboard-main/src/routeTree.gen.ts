@@ -22,6 +22,7 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as StorageRouteImport } from './routes/storage'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdviceServiceRouteImport } from './routes/advice.$service'
 import { Route as HelpIndexRouteImport } from './routes/help.index'
@@ -96,6 +97,11 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StorageRoute = StorageRouteImport.update({
+  id: '/storage',
+  path: '/storage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/signin': typeof SigninRoute
+  '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/help/$queryId': typeof HelpQueryIdRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/signin': typeof SigninRoute
+  '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/help/$queryId': typeof HelpQueryIdRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
   '/signin': typeof SigninRoute
+  '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/help/$queryId': typeof HelpQueryIdRoute
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/result'
     | '/review'
     | '/signin'
+    | '/storage'
     | '/terms'
     | '/advice/$service'
     | '/help/$queryId'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/result'
     | '/review'
     | '/signin'
+    | '/storage'
     | '/terms'
     | '/advice/$service'
     | '/help/$queryId'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/result'
     | '/review'
     | '/signin'
+    | '/storage'
     | '/terms'
     | '/advice/$service'
     | '/help/$queryId'
@@ -293,6 +305,7 @@ export interface RootRouteChildren {
   ResultRoute: typeof ResultRoute
   ReviewRoute: typeof ReviewRoute
   SigninRoute: typeof SigninRoute
+  StorageRoute: typeof StorageRoute
   TermsRoute: typeof TermsRoute
   AdviceServiceRoute: typeof AdviceServiceRoute
   HelpQueryIdRoute: typeof HelpQueryIdRoute
@@ -396,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/storage': {
+      id: '/storage'
+      path: '/storage'
+      fullPath: '/storage'
+      preLoaderRoute: typeof StorageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -469,6 +489,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResultRoute: ResultRoute,
   ReviewRoute: ReviewRoute,
   SigninRoute: SigninRoute,
+  StorageRoute: StorageRoute,
   TermsRoute: TermsRoute,
   AdviceServiceRoute: AdviceServiceRoute,
   HelpQueryIdRoute: HelpQueryIdRoute,

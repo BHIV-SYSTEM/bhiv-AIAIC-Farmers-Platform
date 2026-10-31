@@ -17,6 +17,7 @@ import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   Clock,
   FileWarning,
   Info,
@@ -25,6 +26,7 @@ import {
   SearchX,
   ShieldAlert,
   Tag,
+  Warehouse,
 } from "lucide-react";
 
 import { AdviceActions } from "@/components/farm/AdviceActions";
@@ -384,6 +386,24 @@ function ItemDetail({
             answers) */}
         {service === "storage" && farm.crop && farm.region && !distress ? (
           <StorageVerdictCard crop={farm.crop} district={farm.region} state={farm.state} />
+        ) : null}
+
+        {/* The storage page, step by step: prices by month and year, warehouses, wastage and cold stores */}
+        {service === "storage" && !distress ? (
+          <Link
+            to="/storage"
+            search={{
+              ...(farm.region ? { region: farm.region } : {}),
+              ...(farm.crop ? { crop: farm.crop } : {}),
+              ...(farm.state ? { state: farm.state } : {}),
+            }}
+            className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-primary bg-card px-4 py-2 text-center text-lg font-extrabold text-primary transition-colors hover:bg-secondary"
+            data-testid="advice-storage-link"
+          >
+            <Warehouse aria-hidden className="size-5 shrink-0" />
+            <span className="min-w-0 break-words">{t("aiaic.store.open")}</span>
+            <ArrowRight aria-hidden className="size-5 shrink-0" />
+          </Link>
         ) : null}
 
         {/* Official Groundwater / Soil Caveat (for water & crop services) */}

@@ -271,6 +271,7 @@ function ResultPage() {
                   crop={search.crop}
                   district={search.region}
                   state={search.state}
+                  taluka={search.taluka}
                   compare={marketCompare}
                   toMandi={advisedMandi}
                 />

@@ -2,7 +2,6 @@ import {
   BadgeCheck,
   ChevronDown,
   ChevronUp,
-  CircleHelp,
   IndianRupee,
   MapPin,
   Truck,
@@ -15,9 +14,10 @@ import {
   away,
   sameWarehouse as same,
   useStorageVerdict,
+  verdictMark,
   warehousePlaces,
 } from "@/lib/aiaic-storage";
-import type { StorageWarehouse } from "@/lib/aiaic-trade";
+import type { StorageVerdict, StorageWarehouse } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +29,8 @@ import { RouteMap } from "./RouteMap";
  * rebate, the trip there and what storing comes to after storage, loss and the trip, with its WDRA badge and "under
  * half full" where AIAIC says so. EVERY SENTENCE IS AIAIC'S OWN, in her language; this card adds only its frame's few
  * words. The other warehouses, the rule and the sources sit behind one tap. Nothing is shown until AIAIC answers (an
- * AIAIC server without the route, or any refusal, shows nothing: the rest of the page is the answer).
+ * AIAIC server without the route, or any refusal, shows nothing: the rest of the page is the answer). `StorageCardBody`
+ * is the card itself, for a page that already holds the answer (the storage page, from its plan).
  */
 const TONE = {
   store: "border-primary bg-primary/10 text-primary",
@@ -78,17 +79,33 @@ export function StorageVerdictCard({
   taluka?: string | null | undefined;
   className?: string;
 }) {
+  const card = useStorageVerdict({ crop, district, state, quantityQ, taluka });
+  if (!card?.verdict?.text) return null;
+  return <StorageCardBody card={card} className={className} />;
+}
+
+/**
+ * The card, from an answer already read. `unfolded` (the storage page, 31 Oct 2026): the page holds this card behind its own
+ * one Details and draws the map itself, so the details are open here and no second map is drawn.
+ */
+export function StorageCardBody({
+  card,
+  className = "",
+  unfolded = false,
+}: {
+  card: StorageVerdict;
+  className?: string;
+  unfolded?: boolean;
+}) {
   const { t } = useI18n();
   const [more, setMore] = useState(false);
-  const card = useStorageVerdict({ crop, district, state, quantityQ, taluka });
-  const v = card?.verdict;
-  if (!card || !v?.text) return null;
+  const v = card.verdict;
   const w = v.warehouse;
   const km = away(w);
   const places = warehousePlaces(card);
   const assumed = (v.assumptions ?? []).filter((a) => a.text);
   const keyAssumed = assumed.filter((a) => KEY_ASSUMED.includes(a.code));
-  const Mark = v.code === "store" ? Warehouse : v.code === "sell_now" ? IndianRupee : CircleHelp;
+  const Mark = verdictMark(v.code);
   return (
     <section
       className={cn("space-y-3 rounded-2xl border-2 border-border bg-card p-4", className)}
@@ -182,7 +199,7 @@ export function StorageVerdictCard({
       ) : null}
       {/* THE WAREHOUSES ON A MAP (push 4, the owner: "can we add map there as well with the locations of those"): the
           one the verdict names in orange, the others violet; each where AIAIC places it */}
-      {places.length ? (
+      {places.length && !unfolded ? (
         <RouteMap
           places={places}
           height={220}
@@ -193,20 +210,22 @@ export function StorageVerdictCard({
       {v.uncalibrated ? (
         <p className="text-xs font-semibold text-amber-800">{v.uncalibrated}</p>
       ) : null}
-      <button
-        type="button"
-        onClick={() => setMore((m) => !m)}
-        aria-expanded={more}
-        className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border-2 border-border bg-background px-3 text-sm font-semibold text-foreground"
-      >
-        {t("aiaic.storage.details")}
-        {more ? (
-          <ChevronUp className="size-4" aria-hidden="true" />
-        ) : (
-          <ChevronDown className="size-4" aria-hidden="true" />
-        )}
-      </button>
-      {more ? (
+      {unfolded ? null : (
+        <button
+          type="button"
+          onClick={() => setMore((m) => !m)}
+          aria-expanded={more}
+          className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border-2 border-border bg-background px-3 text-sm font-semibold text-foreground"
+        >
+          {t("aiaic.storage.details")}
+          {more ? (
+            <ChevronUp className="size-4" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="size-4" aria-hidden="true" />
+          )}
+        </button>
+      )}
+      {more || unfolded ? (
         <div className="space-y-3 text-xs text-muted-foreground">
           {card.warehouses.length ? (
             <ul className="space-y-2">

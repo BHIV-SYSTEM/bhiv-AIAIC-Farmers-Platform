@@ -1,0 +1,2905 @@
+{
+ "_recorded": {
+  "by": "reports/handover_tools/record_plan_answers.py",
+  "route": "GET /places/crops",
+  "at": "2026-10-21T22:43:18+00:00",
+  "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
+  "request": {
+   "state": "mh",
+   "lang": "mr",
+   "district": "Nashik"
+  },
+  "note": "A real answer of the real route on the committed evidence. Never edited by hand."
+ },
+ "answer": {
+  "district": "नाशिक",
+  "crops": [
+   {
+    "crop": "bajra",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Lasalgaon",
+       "APMC Malegaon",
+       "APMC Nandgaon",
+       "APMC Satana",
+       "APMC Sinner",
+       "Lasalgaon(Niphad)"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 7 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "बाजरी",
+    "name_translated": true,
+    "name_en": "Bajra"
+   },
+   {
+    "crop": "black gram(urd beans)(whole)",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Malegaon",
+       "Lasalgaon(Niphad)"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 3 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "उडीद",
+    "name_translated": true,
+    "name_en": "Black gram (urad)"
+   },
+   {
+    "crop": "cotton",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "assessed_only",
+    "evidence": [],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "कापूस",
+    "name_translated": true,
+    "name_en": "Cotton"
+   },
+   {
+    "crop": "green gram(moong)(whole)",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Malegaon",
+       "APMC Nandgaon",
+       "APMC Sinner",
+       "Lasalgaon(Niphad)"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 5 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "मूग",
+    "name_translated": true,
+    "name_en": "Green gram (moong)"
+   },
+   {
+    "crop": "groundnut",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Malegaon"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "DES state crop statistics 2024-25",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "भुईमूग",
+    "name_translated": true,
+    "name_en": "Groundnut"
+   },
+   {
+    "crop": "jowar",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Malegaon"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 2 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "ज्वारी",
+    "name_translated": true,
+    "name_en": "Jowar"
+   },
+   {
+    "crop": "maize",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Lasalgaon",
+       "APMC Malegaon",
+       "APMC Satana",
+       "APMC Sinner",
+       "Lasalgaon(Niphad)"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 6 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "मका",
+    "name_translated": true,
+    "name_en": "Maize"
+   },
+   {
+    "crop": "paddy(common)",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "भात",
+    "name_translated": true,
+    "name_en": "Paddy"
+   },
+   {
+    "crop": "rice",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Sinner"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "processed_form",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet's \"rice\" is a processed form; the farm produce is paddy",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 1 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "तांदूळ",
+    "name_translated": true,
+    "name_en": "Rice (milled)"
+   },
+   {
+    "crop": "soybean",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Lasalgaon",
+       "APMC Sinner",
+       "Lasalgaon(Niphad)",
+       "Lasalgaon(Vinchur)"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "DES state crop statistics 2024-25",
+     "Agmarknet: sold at 4 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "सोयाबीन",
+    "name_translated": true,
+    "name_en": "Soybean"
+   },
+   {
+    "crop": "tur",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Malegaon"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 5,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 2 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "तूर",
+    "name_translated": true,
+    "name_en": "Tur (arhar)"
+   },
+   {
+    "crop": "banana",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "केळी",
+    "name_translated": true,
+    "name_en": "Banana"
+   },
+   {
+    "crop": "brinjal",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Ghoti",
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 2 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "वांगी",
+    "name_translated": true,
+    "name_en": "Brinjal"
+   },
+   {
+    "crop": "cabbage",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Ghoti",
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 2 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "कोबी",
+    "name_translated": true,
+    "name_en": "Cabbage"
+   },
+   {
+    "crop": "carrot",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "गाजर",
+    "name_translated": true,
+    "name_en": "Carrot"
+   },
+   {
+    "crop": "cauliflower",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Ghoti",
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 2 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "फूलकोबी",
+    "name_translated": true,
+    "name_en": "Cauliflower"
+   },
+   {
+    "crop": "chilli",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "मिरची",
+    "name_translated": true,
+    "name_en": "Chilli"
+   },
+   {
+    "crop": "garlic",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "लसूण",
+    "name_translated": true,
+    "name_en": "Garlic"
+   },
+   {
+    "crop": "gram",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Malegaon",
+       "APMC Nandgaon",
+       "APMC Satana",
+       "APMC Sinner",
+       "Lasalgaon(Niphad)"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 6 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "हरभरा",
+    "name_translated": true,
+    "name_en": "Gram (chana)"
+   },
+   {
+    "crop": "mustard",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "assessed_only",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 1 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "मोहरी",
+    "name_translated": true,
+    "name_en": "Mustard"
+   },
+   {
+    "crop": "onion",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Chandwad",
+       "APMC Devala",
+       "APMC Dindori",
+       "APMC Kalvan",
+       "APMC Lasalgaon",
+       "APMC Manmad",
+       "APMC Nampur",
+       "APMC Nasik",
+       "APMC Pimpalgaon Baswant",
+       "APMC Satana",
+       "APMC Sinner",
+       "APMC Umrane",
+       "APMC Yeola",
+       "Dindori(Vani)",
+       "Lasalgaon(Niphad)",
+       "Lasalgaon(Vinchur)",
+       "Pimpalgaon Baswant(Saykheda)",
+       "Shivsiddha Govind Producer Company Ltd Sanchalit Khajgi Krushi Utpann Bajar Samati-Abhona-Kalwan"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 18 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "कांदा",
+    "name_translated": true,
+    "name_en": "Onion"
+   },
+   {
+    "crop": "potato",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "बटाटा",
+    "name_translated": true,
+    "name_en": "Potato"
+   },
+   {
+    "crop": "safflower",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "assessed_only",
+    "evidence": [],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "करडई",
+    "name_translated": true,
+    "name_en": "Safflower"
+   },
+   {
+    "crop": "sesamum(sesame,gingelly,til)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Malegaon"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "DES state crop statistics 2024-25",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "तीळ",
+    "name_translated": true,
+    "name_en": "Sesame (til)"
+   },
+   {
+    "crop": "tomato",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Ghoti"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "टोमॅटो",
+    "name_translated": true,
+    "name_en": "Tomato"
+   },
+   {
+    "crop": "wheat",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Devala",
+       "APMC Lasalgaon",
+       "APMC Malegaon",
+       "APMC Nandgaon",
+       "APMC Satana",
+       "APMC Sinner",
+       "Lasalgaon(Niphad)"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 4,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25",
+     "Agmarknet: sold at 7 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "गहू",
+    "name_translated": true,
+    "name_en": "Wheat"
+   },
+   {
+    "crop": "moong",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 3,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "first_page_shown_as": "green gram(moong)(whole)",
+    "name": "मूग",
+    "name_translated": true,
+    "name_en": "Green gram (moong)"
+   },
+   {
+    "crop": "paddy",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 3,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "first_page_shown_as": "paddy(common)",
+    "name": "भात",
+    "name_translated": true,
+    "name_en": "Paddy"
+   },
+   {
+    "crop": "urad",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": true,
+      "na_reason_code": null
+     }
+    },
+    "answerable_by": 3,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "first_page_shown_as": "black gram(urd beans)(whole)",
+    "name": "उडीद",
+    "name_translated": true,
+    "name_en": "Black gram (urad)"
+   },
+   {
+    "crop": "amla(nelli kai)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 2 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "आवळा",
+    "name_translated": true,
+    "name_en": "Amla"
+   },
+   {
+    "crop": "apple",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_no_growing_record",
+    "evidence": [
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "सफरचंद",
+    "name_translated": true,
+    "name_en": "Apple"
+   },
+   {
+    "crop": "beans",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "घेवडा",
+    "name_translated": true,
+    "name_en": "Beans"
+   },
+   {
+    "crop": "bitter gourd",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "कारले",
+    "name_translated": true,
+    "name_en": "Bitter gourd (karela)"
+   },
+   {
+    "crop": "bottle gourd",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "दुधी भोपळा",
+    "name_translated": true,
+    "name_en": "Bottle gourd"
+   },
+   {
+    "crop": "castor seed",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Malegaon"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "DES state crop statistics 2024-25",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 2 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "एरंडी",
+    "name_translated": true,
+    "name_en": "Castor seed"
+   },
+   {
+    "crop": "chikoos(sapota)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "चिकू",
+    "name_translated": true,
+    "name_en": "Sapota (chikoo)"
+   },
+   {
+    "crop": "chilly capsicum",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Ghoti",
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 2 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "ढोबळी मिरची",
+    "name_translated": true,
+    "name_en": "Capsicum"
+   },
+   {
+    "crop": "coriander(leaves)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "कोथिंबीर",
+    "name_translated": true,
+    "name_en": "Coriander (leaves)"
+   },
+   {
+    "crop": "corriander seed",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "धणे",
+    "name_translated": true,
+    "name_en": "Coriander seed"
+   },
+   {
+    "crop": "cowpea(lobia/karamani)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "चवळी",
+    "name_translated": true,
+    "name_en": "Cowpea (lobia)"
+   },
+   {
+    "crop": "cucumbar(kheera)",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Ghoti",
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 2 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "काकडी",
+    "name_translated": true,
+    "name_en": "Cucumber"
+   },
+   {
+    "crop": "drumstick",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_no_growing_record",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 2 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "शेवगा",
+    "name_translated": true,
+    "name_en": "Drumstick (moringa)"
+   },
+   {
+    "crop": "french beans(frasbean)",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "फरसबी",
+    "name_translated": true,
+    "name_en": "French beans"
+   },
+   {
+    "crop": "ginger(green)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "आले",
+    "name_translated": true,
+    "name_en": "Ginger (fresh)"
+   },
+   {
+    "crop": "grape",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 1 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "द्राक्षे",
+    "name_translated": true,
+    "name_en": "Grapes"
+   },
+   {
+    "crop": "green peas",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "मटार",
+    "name_translated": true,
+    "name_en": "Green peas"
+   },
+   {
+    "crop": "guar",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "गवार",
+    "name_translated": true,
+    "name_en": "Cluster beans (guar)"
+   },
+   {
+    "crop": "guava",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "पेरू",
+    "name_translated": true,
+    "name_en": "Guava"
+   },
+   {
+    "crop": "karbuja(musk melon)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_no_growing_record",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "खरबूज",
+    "name_translated": true,
+    "name_en": "Muskmelon"
+   },
+   {
+    "crop": "lentil",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "assessed_only",
+    "evidence": [],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "मसूर",
+    "name_translated": true,
+    "name_en": "Lentil (masoor)"
+   },
+   {
+    "crop": "lime",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": true,
+    "first_page": true,
+    "name": "लिंबू",
+    "name_translated": true,
+    "name_en": "Lime"
+   },
+   {
+    "crop": "mataki",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "मटकी",
+    "name_translated": true,
+    "name_en": "Moth bean (matki)"
+   },
+   {
+    "crop": "methi(leaves)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_no_growing_record",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "मेथी (पाने)",
+    "name_translated": true,
+    "name_en": "Fenugreek leaves (methi)"
+   },
+   {
+    "crop": "mousambi(sweet lime)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 1 of the last 3 crop years"
+    ],
+    "citrus_counted_together": true,
+    "first_page": true,
+    "name": "मोसंबी",
+    "name_translated": true,
+    "name_en": "Sweet lime (mosambi)"
+   },
+   {
+    "crop": "okra",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "भेंडी",
+    "name_translated": true,
+    "name_en": "Okra (bhindi)"
+   },
+   {
+    "crop": "onion green",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "कांद्याची पात",
+    "name_translated": true,
+    "name_en": "Spring onion"
+   },
+   {
+    "crop": "orange",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": true,
+    "first_page": true,
+    "name": "संत्री",
+    "name_translated": true,
+    "name_en": "Orange"
+   },
+   {
+    "crop": "papaya",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "पपई",
+    "name_translated": true,
+    "name_en": "Papaya"
+   },
+   {
+    "crop": "peas wet",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "first_page_shown_as": "green peas",
+    "name": "मटार",
+    "name_translated": true,
+    "name_en": "Green peas"
+   },
+   {
+    "crop": "pomegranate",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik",
+       "APMC Pimpalgaon Baswant",
+       "Perfect Krishi Market Yard Pvt Ltd, Dist Nashik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+     "Agmarknet: sold at 3 mandis in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "डाळिंब",
+    "name_translated": true,
+    "name_en": "Pomegranate"
+   },
+   {
+    "crop": "raddish",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "मुळा",
+    "name_translated": true,
+    "name_en": "Radish"
+   },
+   {
+    "crop": "ragi(finger millet)",
+    "grown_here": true,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_district",
+    "evidence": [
+     "DES district crop statistics 2024-25"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "नाचणी",
+    "name_translated": true,
+    "name_en": "Ragi (finger millet)"
+   },
+   {
+    "crop": "ridgeguard(tori)",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "दोडका",
+    "name_translated": true,
+    "name_en": "Ridge gourd (turai)"
+   },
+   {
+    "crop": "seetapal",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "सीताफळ",
+    "name_translated": true,
+    "name_en": "Custard apple (sitaphal)"
+   },
+   {
+    "crop": "sesamum",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "assessed_only",
+    "evidence": [],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "तीळ",
+    "name_translated": true,
+    "name_en": "Sesame (til)"
+   },
+   {
+    "crop": "spinach",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "पालक",
+    "name_translated": true,
+    "name_en": "Spinach (palak)"
+   },
+   {
+    "crop": "sugarcane",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": false,
+      "na_reason_code": "no_mandi_reported"
+     },
+     "water": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "crop": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "assessed_only",
+    "evidence": [],
+    "citrus_counted_together": false,
+    "first_page": false,
+    "name": "ऊस",
+    "name_translated": true,
+    "name_en": "Sugarcane"
+   },
+   {
+    "crop": "sweet pumpkin",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "sold_here_every_year_no_table",
+    "evidence": [
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "गोड भोपळा",
+    "name_translated": true,
+    "name_en": "Sweet pumpkin"
+   },
+   {
+    "crop": "tamarind fruit",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": "nearby_mandis_only",
+      "local_mandis": []
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": "statewide_only"
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 2 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "चिंच",
+    "name_translated": true,
+    "name_en": "Tamarind"
+   },
+   {
+    "crop": "tender coconut",
+    "grown_here": false,
+    "services": {
+     "market": {
+      "available": true,
+      "na_reason_code": null,
+      "local_mandis": [
+       "APMC Nasik"
+      ]
+     },
+     "storage": {
+      "available": true,
+      "na_reason_code": null
+     },
+     "water": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "crop": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     },
+     "weather": {
+      "available": false,
+      "na_reason_code": "not_assessed_here"
+     }
+    },
+    "answerable_by": 2,
+    "basis": "grown_in_state_sold_here",
+    "evidence": [
+     "Horticultural Statistics at a Glance 2018 (state figures, 2015-16 to 2017-18)",
+     "Agmarknet: sold at 1 mandi in this district",
+     "Agmarknet price history, crop years 2023-24 to 2025-26: sold at this district's mandis in 3 of the last 3 crop years"
+    ],
+    "citrus_counted_together": false,
+    "first_page": true,
+    "name": "शहाळे",
+    "name_translated": true,
+    "name_en": "Tender coconut"
+   }
+  ],
+  "grown_not_answered": [],
+  "na_reasons": {
+   "no_mandi_reported": "No mandi in this district reported this crop on the latest price day we hold.",
+   "not_assessed_here": "This service holds no assessment for this crop in this district.",
+   "outside_service_scope": "This service does not advise on this crop.",
+   "no_forecast_held": "No weather forecast is held for this district.",
+   "nearby_mandis_only": "No mandi in this district reported it. The answer compares the mandis within 150 km, or says that none of them reported it.",
+   "statewide_only": "Answered for the crop across the state (a representative mandi's price), not for this district's own mandis."
+  },
+  "bases": {
+   "grown_in_district": "Official statistics record this crop as grown in this district.",
+   "grown_in_state_sold_here": "Official statistics record this crop as grown in this state, and this district's own mandis sell it.",
+   "sold_here_no_district_record": "Official statistics record this crop as grown in this state and this district's mandis sell it, but we hold no record of ANY crop being grown in this district, so its mandis selling a crop does not show the crop is grown here.",
+   "sold_here_no_growing_record": "This district's mandis sell it, but we hold no official record of it being grown in this district or this state: it may be brought from elsewhere.",
+   "sold_here_every_year_no_table": "No growing table we hold covers this crop at all, and this district's own mandis sold it in every one of the last 3 crop years: that trade is the only record we hold of it here.",
+   "processed_form": "The market sells this crop's processed form (milled rice, split pulses), not what a farmer brings to the mandi; the farm produce (paddy, the whole pulse) is offered under its own name.",
+   "assessed_only": "Only our water, crop or weather assessments hold it for this district; we hold no record of it being grown or sold here."
+  },
+  "first_page": [
+   "onion",
+   "maize",
+   "soybean",
+   "wheat",
+   "gram",
+   "bajra",
+   "green gram(moong)(whole)",
+   "tur",
+   "jowar",
+   "tomato",
+   "black gram(urd beans)(whole)",
+   "bitter gourd",
+   "pomegranate",
+   "groundnut",
+   "tamarind fruit",
+   "brinjal",
+   "cucumbar(kheera)",
+   "okra",
+   "cabbage",
+   "mataki",
+   "cauliflower",
+   "bottle gourd",
+   "guar",
+   "coriander(leaves)",
+   "beans",
+   "chilli",
+   "corriander seed",
+   "cowpea(lobia/karamani)",
+   "sesamum(sesame,gingelly,til)",
+   "castor seed",
+   "guava",
+   "french beans(frasbean)",
+   "grape",
+   "paddy(common)",
+   "ragi(finger millet)",
+   "chilly capsicum",
+   "ridgeguard(tori)",
+   "onion green",
+   "raddish",
+   "sweet pumpkin",
+   "carrot",
+   "spinach",
+   "green peas",
+   "potato",
+   "garlic",
+   "banana",
+   "lime",
+   "ginger(green)",
+   "tender coconut",
+   "papaya",
+   "orange",
+   "chikoos(sapota)",
+   "seetapal",
+   "amla(nelli kai)",
+   "mousambi(sweet lime)"
+  ],
+  "sources": [
+   "Agmarknet daily mandi prices (district field)",
+   "DES district crop statistics",
+   "the water, crop and weather assessments held for this district",
+   "Horticultural Statistics at a Glance 2018 (district figures for 2016-17)",
+   "DES state crop statistics 2024-25"
+  ],
+  "state": "maharashtra",
+  "lang": "mr",
+  "district_key": "nashik"
+ }
+}

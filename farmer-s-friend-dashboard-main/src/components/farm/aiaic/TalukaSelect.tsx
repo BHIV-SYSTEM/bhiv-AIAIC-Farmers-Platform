@@ -34,6 +34,7 @@ export function TalukaSelect({
     staleTime: Infinity,
   });
   const rows = q.data?.ok ? q.data.data.talukas : [];
+  const failed = q.isError || q.data?.ok === false;
   return (
     <label className={`block ${className}`}>
       <span className="text-base font-bold text-foreground">{t("aiaic.taluka.label")}</span>
@@ -52,7 +53,7 @@ export function TalukaSelect({
         ))}
       </select>
       <span className="mt-1 block text-xs font-semibold text-muted-foreground">
-        {t("aiaic.taluka.help")}
+        {t(failed ? "aiaic.taluka.failed" : "aiaic.taluka.help")}
       </span>
     </label>
   );

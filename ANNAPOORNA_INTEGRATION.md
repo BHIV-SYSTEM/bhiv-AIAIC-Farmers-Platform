@@ -23,6 +23,17 @@ backend contract, section 20). A town with no Marathi or Hindi name held stays i
 AIAIC sends it. These names are only shown: the mandi sent back to AIAIC is always its own label. An AIAIC server that
 does not send them yet is read as before (a mandi by its label). Nothing to set.
 
+## Store or sell now, step by step (`/storage`)
+
+The farmer's own storage page: four steps as big buttons (1 Where, 2 Crop, 3 How much, 4 The answer), each folding to one
+line with a Change button. The saved farm (`src/lib/farm-storage.ts`, the profile `/ask` uses) fills them, so a returning
+farmer lands on the answer; what is chosen, the taluka and quantity included, is saved in the same profile. The answer is one
+call, `GET /storage/plan` (AIAIC's backend contract, section 33; open, no sign-in, no setting), in the same order as AIAIC's
+dashboard and the Gov Ops portal: the verdict, the key tiles, the prices by month and by year, the warehouses on the map,
+wastage, cold stores, and one Details holding the storage card. Every sentence and figure is AIAIC's; this app adds its frame
+words only. An AIAIC server without the route, or any refusal, says so, with Try again and a link to `/advice/storage`. Links
+in: the home page, the storage tile of the answer at a glance on `/result`, and `/advice/storage`.
+
 ## The settings to add (names only; the values come from the AIAIC owner)
 
 | Setting | What it holds |

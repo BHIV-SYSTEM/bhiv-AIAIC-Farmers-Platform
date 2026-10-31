@@ -15,7 +15,7 @@ import { getPlacesDistricts, getPlacesCrops } from "@/lib/places.functions";
 import { SERVICE_ICON } from "@/lib/service-icons";
 import { farmSearchSchema, parseServices } from "@/lib/aiaic-query";
 import { SERVICES, type Service } from "@/lib/aiaic-types";
-import { loadFarm, saveFarm } from "@/lib/farm-storage";
+import { loadFarm, sameName, saveFarm } from "@/lib/farm-storage";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -125,6 +125,8 @@ function AskPage() {
     if (!saved) return;
     if (!search.state && saved.state) setState(saved.state);
     if (!search.region && saved.region) setRegion(saved.region);
+    if (!search.taluka && saved.taluka && sameName(saved.talukaOf, search.region ?? saved.region))
+      setTaluka(saved.taluka);
     if (!search.crop && saved.crop) setCrop(saved.crop);
     if (!search.mandi && saved.mandi) setMandi(saved.mandi);
     if (!search.land && saved.land) setLand(saved.land);
@@ -149,6 +151,8 @@ function AskPage() {
       ...(land ? { land } : {}),
       state,
       services: services.join(","),
+      taluka: region ? taluka : "",
+      talukaOf: region && taluka ? region : "",
     });
     navigate({
       to: "/result",

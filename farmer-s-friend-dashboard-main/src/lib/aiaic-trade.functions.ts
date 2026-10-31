@@ -9,6 +9,7 @@ import {
   type MineForScreen,
   type NearbyMandis,
   type ReferencePrice,
+  type StoragePlan,
   type StorageVerdict,
   type TradeMode,
   type TransportEstimate,
@@ -180,23 +181,30 @@ export const getTransportEstimate = createServerFn({ method: "GET" })
     return transportEstimate(data);
   });
 
+/** The boxes of a storage question: AIAIC reads the card and the plan by the same ones (contract sections 21 and 33). */
+const storageAsk = z.object({
+  crop: z.string().trim().min(1).max(80),
+  district,
+  state,
+  quantity_q: qty.optional(),
+  lang,
+  taluka: z.string().trim().max(80).optional(),
+});
+
 /** AIAIC's storage verdict card (GET /storage/verdict): store or sell now and the nearest warehouses by name. */
 export const getStorageVerdict = createServerFn({ method: "GET" })
-  .validator((d: unknown) =>
-    z
-      .object({
-        crop: z.string().trim().min(1).max(80),
-        district,
-        state,
-        quantity_q: qty.optional(),
-        lang,
-        taluka: z.string().trim().max(80).optional(),
-      })
-      .parse(d),
-  )
+  .validator((d: unknown) => storageAsk.parse(d))
   .handler(async ({ data }): Promise<AiaicResult<StorageVerdict>> => {
     const { storageVerdict } = await import("./aiaic-trade.server");
     return storageVerdict(data);
+  });
+
+/** AIAIC's storage plan (GET /storage/plan): the storage page's whole answer, in one call. */
+export const getStoragePlan = createServerFn({ method: "GET" })
+  .validator((d: unknown) => storageAsk.parse(d))
+  .handler(async ({ data }): Promise<AiaicResult<StoragePlan>> => {
+    const { storagePlan } = await import("./aiaic-trade.server");
+    return storagePlan(data);
   });
 
 export const getNearbyMandis = createServerFn({ method: "GET" })

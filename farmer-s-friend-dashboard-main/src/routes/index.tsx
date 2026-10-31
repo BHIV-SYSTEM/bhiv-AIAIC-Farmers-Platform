@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, RotateCcw } from "lucide-react";
+import { AlertTriangle, ChevronRight, RotateCcw, Warehouse } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { LanguageSwitcher } from "@/components/farm/LanguageSwitcher";
@@ -65,6 +65,7 @@ function Home() {
             ...(saved.crop ? { crop: saved.crop } : {}),
             ...(saved.land ? { land: saved.land } : {}),
             ...(saved.services ? { services: saved.services } : {}),
+            ...(saved.state ? { state: saved.state } : {}),
           }}
           className="mt-6 flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-primary px-4 py-3 text-center text-lg font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 sm:min-h-16 sm:rounded-3xl sm:px-6 sm:text-xl"
         >
@@ -87,6 +88,24 @@ function Home() {
         }`}
       >
         {t("home.cta")}
+      </Link>
+
+      {/* Store or sell now, step by step: a saved farm opens straight on its answer */}
+      <Link
+        to="/storage"
+        className="mt-3 flex min-h-14 w-full items-center gap-3 rounded-2xl border-2 border-primary/40 bg-card px-4 py-2.5 transition-colors hover:bg-secondary sm:min-h-16 sm:rounded-3xl"
+        data-testid="home-storage-link"
+      >
+        <Warehouse aria-hidden className="size-6 shrink-0 text-primary sm:size-7" />
+        <span className="min-w-0 flex-1">
+          <span className="block break-words text-lg font-extrabold text-foreground sm:text-xl">
+            {t("aiaic.store.home")}
+          </span>
+          <span className="block break-words text-sm text-muted-foreground sm:text-base">
+            {t("aiaic.store.home_tip")}
+          </span>
+        </span>
+        <ChevronRight aria-hidden className="size-6 shrink-0 text-primary" />
       </Link>
 
       <section className="mt-8 sm:mt-10" aria-labelledby="how-heading">
