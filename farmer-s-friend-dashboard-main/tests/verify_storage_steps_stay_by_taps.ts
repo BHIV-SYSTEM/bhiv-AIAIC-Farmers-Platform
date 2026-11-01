@@ -15,13 +15,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const CHROME = process.env["CHROME_PATH"] ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+const CHROME =
+  process.env["CHROME_PATH"] ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const BASE = process.env["ANNAPOORNA_URL"] ?? "http://127.0.0.1:5192";
 const PORT = Number(process.env["CDP_PORT"] ?? 9334);
 const SLOW_MS = 1500;
 const CRISIS_WORDS = "जगायचे नाही आता संपवायचे आहे";
 
-type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+type Json = Record<string, any>;
 
 class Page {
   private next = 1;
@@ -54,7 +55,11 @@ class Page {
     this.listeners.push(listener);
   }
   async js<T>(expression: string): Promise<T> {
-    const r = await this.send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true });
+    const r = await this.send("Runtime.evaluate", {
+      expression,
+      returnByValue: true,
+      awaitPromise: true,
+    });
     if (r["exceptionDetails"]) throw new Error(JSON.stringify(r["exceptionDetails"]).slice(0, 400));
     return r["result"]["value"] as T;
   }
@@ -119,12 +124,19 @@ function check(ok: unknown, what: string) {
 }
 
 async function openPhone(version: Json, slow: boolean, lang = "mr"): Promise<Page> {
-  const made = (await (await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, { method: "PUT" })).json()) as Json;
+  const made = (await (
+    await fetch(`http://127.0.0.1:${PORT}/json/new?about:blank`, { method: "PUT" })
+  ).json()) as Json;
   const page = await Page.open(made["webSocketDebuggerUrl"]);
   void version;
   await page.send("Page.enable");
   await page.send("Runtime.enable");
-  await page.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 740, deviceScaleFactor: 2, mobile: true });
+  await page.send("Emulation.setDeviceMetricsOverride", {
+    width: 360,
+    height: 740,
+    deviceScaleFactor: 2,
+    mobile: true,
+  });
   await page.send("Emulation.setTouchEmulationEnabled", { enabled: true });
   await page.send("Page.addScriptToEvaluateOnNewDocument", {
     // a fresh phone for each walk: one browser's tabs share what the last walk saved
@@ -137,7 +149,10 @@ async function openPhone(version: Json, slow: boolean, lang = "mr"): Promise<Pag
     page.on((method, params) => {
       if (method !== "Fetch.requestPaused") return;
       const wait = params["request"]["method"] === "POST" ? SLOW_MS : 0;
-      setTimeout(() => void page.send("Fetch.continueRequest", { requestId: params["requestId"] }), wait);
+      setTimeout(
+        () => void page.send("Fetch.continueRequest", { requestId: params["requestId"] }),
+        wait,
+      );
     });
   }
   return page;
@@ -147,15 +162,33 @@ async function walk(version: Json, slow: boolean) {
   const label = slow ? `scans held ${SLOW_MS} ms` : "plain";
   const page = await openPhone(version, slow);
   await page.send("Page.navigate", { url: `${BASE}/storage` });
-  await until(page, "the districts", `${q('[data-testid="store-districts"] button')} !== null`, 60000);
+  await until(
+    page,
+    "the districts",
+    `${q('[data-testid="store-districts"] button')} !== null`,
+    60000,
+  );
   check((await page.js(stateOf(1))) === "open", `${label}: step 1 is open on a fresh phone`);
 
-  await tap(page, `[...document.querySelectorAll('[data-testid="store-districts"] button')].find((b) => /सांगली/.test(b.textContent))`);
-  await until(page, "the district's own line", `${q('[data-testid="store-place-chosen"]')} !== null`);
+  await tap(
+    page,
+    `[...document.querySelectorAll('[data-testid="store-districts"] button')].find((b) => /सांगली/.test(b.textContent))`,
+  );
+  await until(
+    page,
+    "the district's own line",
+    `${q('[data-testid="store-place-chosen"]')} !== null`,
+  );
   await sleep(slow ? SLOW_MS + 1200 : 1500);
   check((await page.js(stateOf(1))) === "open", `${label}: the district tapped, step 1 stays open`);
-  check(await page.js(`${q('[data-testid="store-place-chosen"]')}?.textContent.includes("सांगली")`), `${label}: it names the district`);
-  check(await page.js(`${q('[data-testid="aiaic-taluka"]')} !== null`), `${label}: its taluka box is on the screen`);
+  check(
+    await page.js(`${q('[data-testid="store-place-chosen"]')}?.textContent.includes("सांगली")`),
+    `${label}: it names the district`,
+  );
+  check(
+    await page.js(`${q('[data-testid="aiaic-taluka"]')} !== null`),
+    `${label}: its taluka box is on the screen`,
+  );
   check(await page.js(`${q('[data-testid="store-place-next"]')} !== null`), `${label}: and Next`);
 
   await tap(page, q('[data-testid="store-place-next"]'));
@@ -167,18 +200,35 @@ async function walk(version: Json, slow: boolean) {
   );
 
   await until(page, "the crops", `${q('[data-testid="store-crops"] button')} !== null`);
-  await tap(page, `[...document.querySelectorAll('[data-testid="store-crops"] button')].find((b) => /गहू|ज्वारी|तूर|हळद/.test(b.textContent))`);
-  await until(page, "step 3 open, or the answer", `${stateOf(3)} === "open" || ${stateOf(4)} === "open"`);
+  await tap(
+    page,
+    `[...document.querySelectorAll('[data-testid="store-crops"] button')].find((b) => /गहू|ज्वारी|तूर|हळद/.test(b.textContent))`,
+  );
+  await until(
+    page,
+    "step 3 open, or the answer",
+    `${stateOf(3)} === "open" || ${stateOf(4)} === "open"`,
+  );
   await sleep(slow ? SLOW_MS + 600 : 800);
   const at = await page.js<string>(stateOf(3));
   if (at === "open") {
-    check(await page.js(`document.activeElement === ${q('[data-testid="store-step-3"] h2')}`), `${label}: the crop tapped, focus moves on`);
+    check(
+      await page.js(`document.activeElement === ${q('[data-testid="store-step-3"] h2')}`),
+      `${label}: the crop tapped, focus moves on`,
+    );
     await tap(page, `${q('[data-testid="store-step-3"] button')}`);
   }
-  await until(page, "the answer", `${q('[data-testid="store-answer"]')} !== null || ${q('[data-testid="store-step-4"]')}?.dataset.state === "open"`, 60000);
+  await until(
+    page,
+    "the answer",
+    `${q('[data-testid="store-answer"]')} !== null || ${q('[data-testid="store-step-4"]')}?.dataset.state === "open"`,
+    60000,
+  );
   await sleep(800);
 
-  const seen = await page.js<{ replaced: number; gone: number }>(`({ replaced: window.__steps.replaced, gone: window.__steps.gone })`);
+  const seen = await page.js<{ replaced: number; gone: number }>(
+    `({ replaced: window.__steps.replaced, gone: window.__steps.gone })`,
+  );
   check(seen.replaced === 0, `${label}: the steps were never replaced (${seen.replaced} times)`);
   check(seen.gone === 0, `${label}: the steps never left the screen (${seen.gone} frames)`);
   page.close();
@@ -186,10 +236,18 @@ async function walk(version: Json, slow: boolean) {
 
 async function crisisStillTakesThePage(version: Json) {
   const page = await openPhone(version, false);
-  await page.send("Page.navigate", { url: `${BASE}/storage?crop=${encodeURIComponent(CRISIS_WORDS)}` });
+  await page.send("Page.navigate", {
+    url: `${BASE}/storage?crop=${encodeURIComponent(CRISIS_WORDS)}`,
+  });
   await until(page, "the crisis card", `${q("[data-crisis]")} !== null`, 30000);
-  check(await page.js(`${q('[data-testid="store-steps"]')} === null`), "a crisis in the address: the card alone");
-  check(!(await page.js<string>("document.body.innerText")).includes(CRISIS_WORDS), "and the words are not printed");
+  check(
+    await page.js(`${q('[data-testid="store-steps"]')} === null`),
+    "a crisis in the address: the card alone",
+  );
+  check(
+    !(await page.js<string>("document.body.innerText")).includes(CRISIS_WORDS),
+    "and the words are not printed",
+  );
   page.close();
 }
 
@@ -197,7 +255,14 @@ async function main() {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "aiaic_steps_"));
   const chrome = spawn(
     CHROME,
-    ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`, "--disable-gpu", "--no-first-run", "about:blank"],
+    [
+      "--headless=new",
+      `--remote-debugging-port=${PORT}`,
+      `--user-data-dir=${profile}`,
+      "--disable-gpu",
+      "--no-first-run",
+      "about:blank",
+    ],
     { stdio: "ignore" },
   );
   let code = 1;
@@ -205,7 +270,9 @@ async function main() {
     let version: Json | null = null;
     for (let i = 0; i < 50 && !version; i++) {
       await sleep(200);
-      version = await fetch(`http://127.0.0.1:${PORT}/json/version`).then((r) => r.json() as Promise<Json>).catch(() => null);
+      version = await fetch(`http://127.0.0.1:${PORT}/json/version`)
+        .then((r) => r.json() as Promise<Json>)
+        .catch(() => null);
     }
     if (!version) throw new Error("Chrome did not answer");
     await walk(version, false);
