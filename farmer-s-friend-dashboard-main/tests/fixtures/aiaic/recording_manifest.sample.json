@@ -6,8 +6,8 @@
  "prices": "the committed price slice (Agmarknet, newest day 2026-09-25), judged as of price_clock",
  "trace": "taken out of every answer: the id of the request that asked",
  "tree": {
-  "commit": "af857276c3b30c09c4f5e33dc62148170bd3c879",
-  "engine_changed_since": true
+  "commit": "1cd6584a59b32e11984884716723dd00780b247d",
+  "engine_changed_since": false
  },
  "files": {
   "storage_plan_wheat_nashik_en.sample.json": {
@@ -37,8 +37,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "eec433cc6c7d757fe957c31ce0883a0e852eb77e8563d5f941d23889eacdc4cd",
-   "bytes": 60538
+   "sha256": "d0a5fdbb83d40a8758f730c6ad162ee730c1c95cb7b9c317a4ee0503c0cd5427",
+   "bytes": 60536
   },
   "storage_plan_wheat_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -82,8 +82,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "bdddd7e8c6ac05c22c387c80a7587a76d09aaf121a9e05726088fee7775ad8eb",
-   "bytes": 47257
+   "sha256": "2b581016e5b54d7c5965d80b8b253551e7c95882f58ee8fcd4c7812af1c58734",
+   "bytes": 47255
   },
   "storage_plan_onion_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -127,8 +127,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "64f3a368ac0fa277f5a5326e822c6bf036a134c18deff265cc411f328bec8411",
-   "bytes": 61232
+   "sha256": "d06683e3c114bf11fa5cca9f4fb2289f39b4a6f3ccc33647edfe42d956da0733",
+   "bytes": 61230
   },
   "storage_plan_soybean_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -172,8 +172,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "765fa4f67851ebbe702d33519d6382ec8e0ef30db526bcb77a7467f7c482f43e",
-   "bytes": 57590
+   "sha256": "919528c331119714a5fddd75d42e6d8a1536c97aa7a884d1724859381273b5cd",
+   "bytes": 57588
   },
   "storage_plan_mataki_sangli_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -217,8 +217,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "b92ec1ec37959feb397d9eacdc6be8846b53c0b50d02b4264719e6b84182edeb",
-   "bytes": 43428
+   "sha256": "6dc994a75ac9f32d297eabbf89ac4cc211f6826ef5e75535e5446f2838eb4bdc",
+   "bytes": 43426
   },
   "storage_plan_tomato_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
