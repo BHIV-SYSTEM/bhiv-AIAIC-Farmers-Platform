@@ -1122,7 +1122,7 @@
    "key": "near",
    "label": "Near you",
    "value": "15 warehouses · 10 cold stores",
-   "note": "In Nashik. Warehouses: WDRA's list as on 2026-10-21",
+   "note": "In Nashik. Warehouses: WDRA's list as on 2026-10-21. Cold stores: the part of the list AIAIC holds",
    "tone": "neutral"
   }
  ],
@@ -1156,7 +1156,7 @@
   "in_district": 10,
   "near_total": 10,
   "within_km": 100,
-  "headline": "10 cold-storage projects on record in Nashik",
+  "headline": "10 cold-storage projects in the list AIAIC holds for Nashik",
   "near": [
    {
     "name": "M/s Sangale Agro Processing Pvt. Ltd.",
@@ -1183,8 +1183,8 @@
   ],
   "not_named": 8,
   "not_named_text": "8 more without a name we can show",
-  "rate_text": "Rates are not published: we hold no cold store's charges, so ask the store.",
-  "caveat": "Subsidy records, sanctioned 2006-07 to 2014-15. They do not show that a store still runs or takes other farmers' produce.",
+  "rate_text": "AIAIC holds no rate for these stores, so ask the store.",
+  "caveat": "This is part of a government subsidy list, not all of it: the files AIAIC holds run from 2006-07 to 2014-15, and the full list holds more. They do not show that a store still runs or takes other farmers' produce.",
   "source": "Integrated Cold Chain Availability Platform: government project lists"
  },
  "pending_native_review": false,

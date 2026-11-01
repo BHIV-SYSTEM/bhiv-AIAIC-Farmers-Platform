@@ -139,8 +139,8 @@
      "text": "Assumed: 1% of the crop lost each month in storage; give yours"
     },
     {
-     "code": "rate_as_cost",
-     "text": "Storage cost: the published rate at CW PITHAMPUR (CWC)"
+     "code": "rate_as_cost_cotton_seeds",
+     "text": "Storage cost: CWC lists no rate for kapas as a farmer sells it, so this is its rate for cotton seeds, at CW PITHAMPUR"
     },
     {
      "code": "rate.full_bags",
@@ -835,9 +835,9 @@
   },
   {
    "key": "net_gain",
-   "label": "After all costs",
+   "label": "After storage, loss and the trip",
    "value": "-₹176 to +₹1,417 a quintal",
-   "note": null,
+   "note": "Interest, insurance, fumigation and handling are not counted",
    "tone": "neutral"
   },
   {
@@ -879,7 +879,7 @@
    "key": "near",
    "label": "Near you",
    "value": "6 warehouses · 1 cold store",
-   "note": "In Dhar. Warehouses: WDRA's list as on 2026-08-27",
+   "note": "In Dhar. Warehouses: WDRA's list as on 2026-08-27. Cold stores: the part of the list AIAIC holds",
    "tone": "neutral"
   }
  ],
@@ -1196,7 +1196,7 @@
   "in_district": 1,
   "near_total": 31,
   "within_km": 100,
-  "headline": "1 cold-storage project on record in Dhar",
+  "headline": "1 cold-storage project in the list AIAIC holds for Dhar",
   "near": [
    {
     "name": "M/s. Shardiya Agritech Pvt. Ltd.",
@@ -1267,8 +1267,8 @@
   ],
   "not_named": 25,
   "not_named_text": "25 more without a name we can show",
-  "rate_text": "Rates are not published: we hold no cold store's charges, so ask the store.",
-  "caveat": "Subsidy records, sanctioned 2006-07 to 2014-15. They do not show that a store still runs or takes other farmers' produce.",
+  "rate_text": "AIAIC holds no rate for these stores, so ask the store.",
+  "caveat": "This is part of a government subsidy list, not all of it: the files AIAIC holds run from 2006-07 to 2014-15, and the full list holds more. They do not show that a store still runs or takes other farmers' produce.",
   "source": "Integrated Cold Chain Availability Platform: government project lists"
  },
  "pending_native_review": false,
