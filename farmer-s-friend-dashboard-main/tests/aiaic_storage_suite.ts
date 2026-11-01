@@ -3,13 +3,16 @@
  *
  * Run:  npx tsx tests/aiaic_storage_suite.ts   (AIAIC_TEST_JUNIT=<file.xml> also writes a JUnit file)
  *
- * - The storage_plan_*.sample.json fixtures are real: the live storage card of 31 Oct 2026 with the plan's own code around it
- *   (soybean: Store; wheat: Sell now; onion: Not sure, no published rate, published wastage). They are samples because the
- *   whole route has not yet been re-recorded from a test database. places_*.json are AIAIC's recorded answers.
+ * - The storage_plan_*.sample.json fixtures are real: what a local AIAIC answered on a test database, on the committed price
+ *   slice judged at its own day (mataki in Sangli: Store; wheat and soybean in Nashik: Sell now; onion: Not sure, no published
+ *   rate, published wastage; lentil: Not sure, no recent price; wheat on the calendar: Not sure, the newest price too old).
+ *   They are samples: a test database's prices, never shown to a farmer; each is the file AIAIC recorded, byte for byte
+ *   (recording_manifest.sample.json, held below). places_*.json are AIAIC's recorded answers.
  * - The parts of the page are rendered on the server, as the other suites do, so what is asserted is what the page writes.
  * - Calls to AIAIC go to a stand-in `fetch`: no request leaves this process and no port is opened.
  */
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -97,9 +100,28 @@ const sourceOf = (file: string) => fs.readFileSync(path.join(APP, file), "utf-8"
 const SOY = sample("soybean_nashik_en");
 const WHEAT = sample("wheat_nashik_en");
 const ONION = sample("onion_nashik_en");
+const STORE = sample("mataki_sangli_en");
 const SOY_MR = sample("soybean_nashik_mr");
 const ONION_MR = sample("onion_nashik_mr");
-const PLANS = { soybean: SOY, wheat: WHEAT, onion: ONION };
+const STORE_MR = sample("mataki_sangli_mr");
+const SOY_HI = sample("soybean_nashik_hi");
+const ONION_HI = sample("onion_nashik_hi");
+const STORE_HI = sample("mataki_sangli_hi");
+const NO_PRICE = sample("lentil_nashik_en");
+const TOO_OLD = sample("wheat_nashik_prices_too_old_en");
+const NO_PRICE_HI = sample("lentil_nashik_hi");
+const TOO_OLD_MR = sample("wheat_nashik_prices_too_old_mr");
+const PLANS = { mataki: STORE, soybean: SOY, wheat: WHEAT, onion: ONION };
+const LANGUAGES = [
+  ["mr", SOY_MR],
+  ["mr", ONION_MR],
+  ["mr", STORE_MR],
+  ["mr", TOO_OLD_MR],
+  ["hi", SOY_HI],
+  ["hi", ONION_HI],
+  ["hi", STORE_HI],
+  ["hi", NO_PRICE_HI],
+] as const;
 
 // ------------------------------------------------------------------------------------------- the runner
 
@@ -228,7 +250,7 @@ test("S1 the answer's order is the design's: verdict, tiles, prices, map, wastag
 });
 
 test("S2 the verdict line is the first indicator, large, with its note; each of the three answers keeps its code", () => {
-  const codes = { soybean: "store", wheat: "sell_now", onion: "unsure" };
+  const codes = { mataki: "store", soybean: "sell_now", wheat: "sell_now", onion: "unsure" };
   for (const [name, plan] of Object.entries(PLANS)) {
     const html = page(answer(plan));
     const head = plan.indicators[0];
@@ -244,14 +266,14 @@ test("S2 the verdict line is the first indicator, large, with its note; each of 
 });
 
 test("S3 the verdict's key assumptions and 'not yet checked' stay in plain view, outside Details", () => {
-  const html = page(answer(SOY));
+  const html = page(answer(STORE));
   const line = partOf(html, "store-verdict", "store-tiles");
-  const said = (SOY.card?.verdict.assumptions ?? []).filter((a) =>
+  const said = (STORE.card?.verdict.assumptions ?? []).filter((a) =>
     ["loss_assumed", "quantity_example"].includes(a.code),
   );
   assert.equal(said.length, 2, "the sample assumes a loss and an example quantity");
   for (const a of said) ok(line.includes(esc(a.text ?? "")), a.code);
-  ok(line.includes(esc(SOY.card?.verdict.uncalibrated ?? "")));
+  ok(line.includes(esc(STORE.card?.verdict.uncalibrated ?? "")));
   // onion assumes nothing: no empty row of chips
   ok(!page(answer(ONION)).includes('data-testid="store-verdict-assumed"'));
 });
@@ -314,10 +336,11 @@ test("S6 months: a band, the usual line, the two marked months with their figure
   ok(partOf(html, "store-chart-best-figure").includes(wholeRupees(5161.5)));
   ok(partOf(html, "store-chart-low-figure").includes(wholeRupees(4620)));
   ok(partOf(html, "store-chart-now").includes(p.now?.text ?? "?"), "today's price");
-  // today's price sits in October's own place
+  // the latest price sits in its own month's place (September, by its day)
+  assert.equal(p.now?.day, "2026-09-24");
   const dot = /data-testid="store-chart-now"[^>]*><circle cx="([0-9.]+)"/.exec(html);
   ok(dot, "the dot");
-  ok(Math.abs(Number(dot[1]) - monthX(10)) < 0.01, `on its own month: ${dot[1]}`);
+  ok(Math.abs(Number(dot[1]) - monthX(9)) < 0.01, `on its own month: ${dot[1]}`);
 });
 
 test("S7 the chart has a text alternative: the frame's sentence and AIAIC's own; every figure is also in a table", () => {
@@ -443,7 +466,7 @@ test("S12 the map: the chosen warehouse named with its operator and distance, ev
   ok(card);
   const html = page(answer(SOY));
   const said = partOf(html, "store-chosen", "store-map");
-  ok(said.includes("Ambad") && said.includes("MSWC") && said.includes("10 km"), said);
+  ok(said.includes("Ambad") && said.includes("MSWC") && said.includes("9 km"), said);
   const places = warehousePlaces(card);
   ok(places.length >= 2);
   assert.equal(places.filter((p) => p.kind === "chosen").length, 1, "one chosen");
@@ -517,7 +540,12 @@ test("S15 one Details holds the card: the other warehouses, the rule, the assump
 });
 
 test("S16 no figure is made up: every rupee figure on the page is one AIAIC sent", () => {
-  for (const [name, plan] of [...Object.entries(PLANS), ["soybean mr", SOY_MR] as const]) {
+  for (const [name, plan] of [
+    ...Object.entries(PLANS),
+    ["soybean mr", SOY_MR] as const,
+    ["soybean hi", SOY_HI] as const,
+    ["mataki hi", STORE_HI] as const,
+  ]) {
     const held = new Set<string>();
     const strings = [...stringsOf(plan)];
     for (const n of numbersOf(plan)) held.add(wholeRupees(n));
@@ -541,11 +569,15 @@ test("S16 no figure is made up: every rupee figure on the page is one AIAIC sent
 // ------------------------------------------------------------------------------- B. Marathi and Hindi
 
 test("S17 a Marathi or Hindi page: the frame says no English word; the check itself finds English on an English page", () => {
-  for (const plan of [SOY_MR, ONION_MR]) {
-    const html = pageIn("mr", answer(plan));
-    assert.deepEqual(frameLatin(html, plan), []);
-    const years = pageIn("mr", createElement(YearsChart, { prices: plan.prices as never }));
-    assert.deepEqual(frameLatin(years, plan), []);
+  for (const [lang, plan] of LANGUAGES) {
+    const html = pageIn(lang, answer(plan));
+    assert.deepEqual(frameLatin(html, plan), [], `${lang}: ${plan.crop}`);
+    const years = pageIn(lang, createElement(YearsChart, { prices: plan.prices as never }));
+    assert.deepEqual(frameLatin(years, plan), [], `${lang}: ${plan.crop}`);
+    // AIAIC's own sentences on the verdict and the tiles are in the language too: no Latin word there at all
+    const head = partOf(html, "store-verdict", "store-prices");
+    for (const text of textsOf(head))
+      assert.deepEqual(text.match(/[A-Za-z]{2,}/g) ?? [], [], `${lang}: ${plan.crop}: ${text}`);
   }
   // the steps and the failures, which AIAIC has no words in: no Latin word at all
   const noWords = { busy: false, onRetry: () => undefined, advice: null };
@@ -587,7 +619,7 @@ test("S18 a Marathi answer says it awaits a native reader, and the same in Hindi
   const html = pageIn("mr", answer(SOY_MR));
   ok(html.includes('lang="mr"'));
   ok(html.includes(esc(DICTS.mr["aiaic.store.review_note"] ?? "?")));
-  ok(pageIn("hi", answer(SOY_MR)).includes(DICTS.hi["aiaic.store.review_note"] ?? "?"));
+  ok(pageIn("hi", answer(SOY_HI)).includes(DICTS.hi["aiaic.store.review_note"] ?? "?"));
   ok(!page(answer(SOY)).includes('data-testid="store-review-note"'));
   const note = page(answer({ ...SOY, lang_note: "Shown in English." }));
   ok(partOf(note, "store-lang-note").includes("Shown in English."));
@@ -1180,6 +1212,41 @@ async function firstPaint(address: string): Promise<string> {
     "",
   );
 }
+
+test("S44 AIAIC's abstentions as they came: no recent price, or the newest too old: Not sure, no price tile and no latest price drawn", () => {
+  for (const [name, plan, reason] of [
+    ["no recent price", NO_PRICE, "no_prices"],
+    ["too old", TOO_OLD, "prices_too_old"],
+  ] as const) {
+    assert.equal(plan.card?.verdict.code, "unsure", name);
+    assert.equal(plan.card?.verdict.reason_code, reason, name);
+    assert.equal(plan.card?.price, null, name);
+    const html = page(answer(plan));
+    const line = partOf(html, "store-verdict", "store-tiles");
+    ok(line.includes('data-code="unsure"'), name);
+    ok(line.includes(esc(plan.card?.verdict.text ?? "?")), `${name}: the reason is said`);
+    ok(!html.includes('data-testid="store-tile-price_now"'), `${name}: no price tile`);
+    ok(!html.includes('data-testid="store-tile-net_gain"'), `${name}: no gain tile`);
+    ok(!html.includes('data-testid="store-chart-latest"'), `${name}: no latest price drawn`);
+  }
+});
+
+test("S45 every storage sample here is the file AIAIC recorded, byte for byte, and says it is a sample", () => {
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "recording_manifest.sample.json"), "utf-8"),
+  ) as { files: Record<string, { sha256: string }> };
+  const here = fs.readdirSync(FIXTURES).filter((n) => n.endsWith(".sample.json"));
+  const samples = here.filter((n) => n !== "recording_manifest.sample.json");
+  ok(samples.length >= 18, `only ${samples.length}`);
+  for (const name of samples) {
+    const held = manifest.files[name];
+    ok(held, `${name} is not a recording of AIAIC's`);
+    // the text AIAIC wrote: a Windows checkout may write CRLF over the file's LF (core.autocrlf)
+    const text = fs.readFileSync(path.join(FIXTURES, name), "utf-8").replace(/\r\n/g, "\n");
+    const sha = createHash("sha256").update(text, "utf-8").digest("hex");
+    assert.equal(sha, held?.sha256, `${name} is not the file AIAIC recorded`);
+  }
+});
 
 test("S43 the page's first paint: its title, its four steps and the words that it is reading, never a blank", async () => {
   const html = await firstPaint("/storage");
