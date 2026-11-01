@@ -89,7 +89,8 @@ function drawPlaces(
       const name = document.createElement("span");
       name.textContent = p.label;
       // a long Marathi or Hindi name wraps inside a phone's map, never cut at its edge (the walk of 1 Nov 2026)
-      name.style.cssText = "display:block;white-space:normal;width:max-content;max-width:min(170px,45vw)";
+      name.style.cssText =
+        "display:block;white-space:normal;width:max-content;max-width:min(170px,45vw)";
       const below = nameBelow(p, shown);
       marker.bindTooltip(name, {
         permanent: p.kind === "home" || p.kind === "chosen",
