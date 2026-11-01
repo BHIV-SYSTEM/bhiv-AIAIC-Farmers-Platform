@@ -132,6 +132,11 @@ export function AnswerAtAGlance({
                 {v.word}
                 {v.code === "store" && v.months_text ? ` · ${v.months_text}` : ""}
               </p>
+              {v.confidence ? (
+                <p className="text-sm text-foreground" data-testid="glance-confidence">
+                  {v.confidence.label}: {v.confidence.text}
+                </p>
+              ) : null}
             </div>
           ) : (
             <p className="mt-1 text-sm text-muted-foreground">{t("aiaic.glance.no_store")}</p>

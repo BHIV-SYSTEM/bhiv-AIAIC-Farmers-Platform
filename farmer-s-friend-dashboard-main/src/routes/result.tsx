@@ -17,11 +17,22 @@ import { priceCompareOf } from "@/lib/aiaic-analysis";
 import { StorageVerdictCard } from "@/components/farm/aiaic/StorageVerdictCard";
 import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
-import { catalogOptions, catalogQueryOptions, subjectSupport } from "@/lib/catalog-query";
+import {
+  catalogOptions,
+  catalogQueryOptions,
+  displayName,
+  subjectSupport,
+} from "@/lib/catalog-query";
 import { getFarmerAdvice } from "@/lib/farmer-advice.functions";
-import { getPriceSeries } from "@/lib/places.functions";
+import { getPlacesCrops, getPlacesDistricts, getPriceSeries } from "@/lib/places.functions";
 import type { ServiceResult } from "@/lib/aiaic-types";
-import { loadCachedAdvice, saveCachedAdvice, saveFarm, savePlantResult } from "@/lib/farm-storage";
+import {
+  loadCachedAdvice,
+  sameName,
+  saveCachedAdvice,
+  saveFarm,
+  savePlantResult,
+} from "@/lib/farm-storage";
 import { useI18n, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/result")({
@@ -124,7 +135,38 @@ function ResultPage() {
     }
   }, [query.data, farmerAdviceQuery.data?.distress, cacheKey]);
 
-  const subject = [search.crop, search.mandi ?? search.region].filter(Boolean).join(" • ");
+  // Her crop and district by the names the lists show, in her language: the raw keys ("mataki • sangli") stood here on a Marathi
+  // screen (the audit of 1 Nov 2026, F11). The same two reads `/ask` makes, so usually already held.
+  const placeState = search.state || "mh";
+  const districtsQuery = useQuery({
+    queryKey: ["places-districts", placeState, activeLang],
+    queryFn: () => getPlacesDistricts({ data: { state: placeState, lang: activeLang } }),
+    enabled: Boolean(search.region),
+    staleTime: 5 * 60_000,
+  });
+  const cropsQuery = useQuery({
+    queryKey: ["places-crops", search.region, placeState, activeLang],
+    queryFn: () =>
+      getPlacesCrops({
+        data: { district: search.region ?? "", state: placeState, lang: activeLang },
+      }),
+    enabled: Boolean(search.region),
+    staleTime: 5 * 60_000,
+  });
+  const cardSubject = farmerAdviceQuery.data?.cards?.[0]?.summary?.subject;
+  const cropShown =
+    (cropsQuery.data?.ok
+      ? cropsQuery.data.crops.find((c) => sameName(c.crop, search.crop))?.name
+      : null) ||
+    cardSubject?.crop ||
+    (search.crop ? displayName(search.crop) : "");
+  const districtShown =
+    (districtsQuery.data?.ok
+      ? districtsQuery.data.districts.find((d) => sameName(d.key, search.region))?.name
+      : null) ||
+    cardSubject?.place ||
+    (search.region ? displayName(search.region) : "");
+  const subject = [cropShown, search.mandi ?? districtShown].filter(Boolean).join(" • ");
   const linkSearch = {
     ...(search.region ? { region: search.region } : {}),
     ...(search.crop ? { crop: search.crop } : {}),
@@ -200,7 +242,9 @@ function ResultPage() {
         {subject ? (
           <p className="mt-2 break-words text-base text-foreground/75 sm:text-lg">
             {t("result.for")}: <span className="font-bold">{subject}</span>
-            {search.land ? ` • ${search.land} acres` : ""}
+            {search.land
+              ? ` • ${t(Number(search.land) === 1 ? "result.acres.one" : "result.acres", { n: search.land })}`
+              : ""}
           </p>
         ) : null}
         <div className="mt-3 flex flex-wrap gap-2">

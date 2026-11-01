@@ -19,6 +19,16 @@
    "reason_code": "engine_stores",
    "word": "भंडारण करें",
    "text": "4 महीने भंडारण करें: महाराष्ट्र राज्य वखार महामंडळ मिरज, 10 किमी: प्रति क्विंटल लगभग +₹1,515",
+   "tone": "warn",
+   "confidence": {
+    "band": "low",
+    "text": "ज़्यादा पक्का नहीं",
+    "label": "कितना पक्का",
+    "reasons": [
+     "भाव 5 दिन पुराने हैं, इसलिए भरोसा एक स्तर कम दिखाया गया है।",
+     "किसी खराब पिछले साल में इतने समय भंडारण से अभी बेचने से कम मिलता, इसलिए भरोसा कम दिखाया गया है।"
+    ]
+   },
    "months": 4,
    "months_text": "4 महीने",
    "warehouse": {
@@ -82,7 +92,7 @@
    },
    "chosen_by": {
     "code": "best_store_gain",
-    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
     "text": "सूची के जिन गोदामों में भंडारण की सलाह है (3), उनमें से भंडारण, नुकसान और ढुलाई के बाद प्रति क्विंटल यहाँ सबसे ज़्यादा बचता है"
    },
    "net_gain_per_q": {
@@ -256,55 +266,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -423,55 +384,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -659,55 +571,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -770,7 +633,7 @@
     "hired_premises_run_from_here": 0,
     "town": "Jaysingpur",
     "town_shown": "Jaysingpur",
-    "place_shown": "जयसिंगपूर (Jaysingpur)",
+    "place_shown": "जयसिंगपूर",
     "state": "maharashtra",
     "district_key": "kolhapur",
     "district_shown": "कोल्हापुर",
@@ -900,55 +763,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1016,7 +830,7 @@
     "hired_premises_run_from_here": 0,
     "town": "Tasgaon",
     "town_shown": "Tasgaon",
-    "place_shown": "तासगांव (Tasgaon)",
+    "place_shown": "तासगांव",
     "state": "maharashtra",
     "district_key": "sangli",
     "district_shown": "सांगली",
@@ -1146,47 +960,6 @@
       "low_rs": 110,
       "high_rs": 131
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1312,47 +1085,6 @@
       "low_rs": 212,
       "high_rs": 253
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1416,7 +1148,7 @@
    "active_capacity_mt": 168622.0,
    "total_capacity_mt": 185529.0,
    "has_active_registered_warehouse": true,
-   "as_of": "2025-01-01",
+   "as_of": "2026-08-27",
    "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
   },
   "wdra_others": {
@@ -1437,7 +1169,8 @@
   "price": {
    "rs_per_q": 16500.0,
    "day": "2026-09-24",
-   "basis_kind": "district_median"
+   "basis_kind": "district_median",
+   "radius_km": null
   },
   "past_years": [
    {
@@ -1507,8 +1240,8 @@
    },
    {
     "what": "wdra",
-    "date": "2025-01-01",
-    "text": "भंडारण विकास एवं विनियामक प्राधिकरण: सांगली में पंजीकृत 31 में से 24 गोदाम चालू"
+    "date": "2026-08-27",
+    "text": "भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची: सांगली में पंजीकृत 31 में से 24 गोदाम चालू"
    },
    {
     "what": "wdra_registrations",
@@ -1537,7 +1270,7 @@
    "label": "निर्णय",
    "value": "भंडारण करें · 4 महीने",
    "note": "4 महीने भंडारण करें: महाराष्ट्र राज्य वखार महामंडळ मिरज, 10 किमी: प्रति क्विंटल लगभग +₹1,515",
-   "tone": "good"
+   "tone": "warn"
   },
   {
    "key": "net_gain",
@@ -1585,7 +1318,7 @@
    "key": "near",
    "label": "आपके पास",
    "value": "25 गोदाम · 11 शीतगृह",
-   "note": "सांगली में दर्ज",
+   "note": "सांगली में। गोदाम: भंडारण विकास एवं विनियामक प्राधिकरण की 21/10/2026 की सूची",
    "tone": "neutral"
   }
  ],
@@ -1595,7 +1328,10 @@
    "text": "₹16,500",
    "day": "2026-09-24",
    "against": "above",
-   "against_text": "सितंबर की सामान्य सीमा से ऊपर"
+   "against_text": "सितंबर की सामान्य सीमा से ऊपर",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
   },
   "months": [
    {
@@ -1856,6 +1592,36 @@
     "text": "वर्ष के अनुसार: वर्ष का औसत, सबसे ऊँचा महीना और सबसे नीचा महीना (Agmarknet)"
    }
   ]
+ },
+ "loan": {
+  "question": "क्या उससे पहले कोई कर्ज़ चुकाना है?",
+  "note": "यह सिर्फ़ इस जवाब के लिए इस्तेमाल होता है, रखा नहीं जाता।",
+  "due_in_days": null,
+  "choices": [
+   {
+    "due_in_days": 30,
+    "text": "1 महीने के भीतर"
+   },
+   {
+    "due_in_days": 60,
+    "text": "2 महीनों के भीतर"
+   },
+   {
+    "due_in_days": 90,
+    "text": "3 महीनों के भीतर"
+   },
+   {
+    "due_in_days": 120,
+    "text": "4 महीनों के भीतर"
+   }
+  ],
+  "clear": "कोई कर्ज़ देय नहीं"
+ },
+ "wdra_list": {
+  "listed": 25,
+  "as_on": "2026-10-21",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
  },
  "wastage": {
   "kind": "dry",

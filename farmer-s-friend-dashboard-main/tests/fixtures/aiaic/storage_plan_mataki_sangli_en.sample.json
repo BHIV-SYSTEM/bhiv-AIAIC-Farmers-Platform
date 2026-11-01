@@ -3,14 +3,14 @@
  "district": "Sangli",
  "district_shown": "Sangli",
  "crop": "mataki",
- "crop_shown": "mataki",
+ "crop_shown": "Moth bean (matki)",
  "lang": "en",
  "card": {
   "state": "maharashtra",
   "district": "Sangli",
   "district_shown": "Sangli",
   "crop": "mataki",
-  "crop_shown": "mataki",
+  "crop_shown": "Moth bean (matki)",
   "lang": "en",
   "quantity_q": 10.0,
   "quantity_given": false,
@@ -19,6 +19,16 @@
    "reason_code": "engine_stores",
    "word": "Store",
    "text": "Store 4 months at MSWC Miraj, 10 km: about +₹1,515 a quintal",
+   "tone": "warn",
+   "confidence": {
+    "band": "low",
+    "text": "Not very sure",
+    "label": "How sure",
+    "reasons": [
+     "The prices are 5 days old, so confidence is shown one step lower.",
+     "In a bad past year storing this long would leave less than selling now, so confidence is shown as low."
+    ]
+   },
    "months": 4,
    "months_text": "4 months",
    "warehouse": {
@@ -82,7 +92,7 @@
    },
    "chosen_by": {
     "code": "best_store_gain",
-    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
     "text": "Of the warehouses listed where storing is advised (3), this one leaves the most a quintal after storage, loss and the trip"
    },
    "net_gain_per_q": {
@@ -256,55 +266,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -423,55 +384,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -659,55 +571,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -900,55 +763,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1146,47 +960,6 @@
       "low_rs": 110,
       "high_rs": 131
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1312,47 +1085,6 @@
       "low_rs": 212,
       "high_rs": 253
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1416,7 +1148,7 @@
    "active_capacity_mt": 168622.0,
    "total_capacity_mt": 185529.0,
    "has_active_registered_warehouse": true,
-   "as_of": "2025-01-01",
+   "as_of": "2026-08-27",
    "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
   },
   "wdra_others": {
@@ -1437,7 +1169,8 @@
   "price": {
    "rs_per_q": 16500.0,
    "day": "2026-09-24",
-   "basis_kind": "district_median"
+   "basis_kind": "district_median",
+   "radius_km": null
   },
   "past_years": [
    {
@@ -1507,8 +1240,8 @@
    },
    {
     "what": "wdra",
-    "date": "2025-01-01",
-    "text": "WDRA: 24 active of 31 registered warehouses in Sangli"
+    "date": "2026-08-27",
+    "text": "WDRA's file of 2026-08-27: 24 active of 31 registered warehouses in Sangli"
    },
    {
     "what": "wdra_registrations",
@@ -1537,7 +1270,7 @@
    "label": "Decision",
    "value": "Store · 4 months",
    "note": "Store 4 months at MSWC Miraj, 10 km: about +₹1,515 a quintal",
-   "tone": "good"
+   "tone": "warn"
   },
   {
    "key": "net_gain",
@@ -1585,7 +1318,7 @@
    "key": "near",
    "label": "Near you",
    "value": "25 warehouses · 11 cold stores",
-   "note": "On record in Sangli",
+   "note": "In Sangli. Warehouses: WDRA's list as on 2026-10-21",
    "tone": "neutral"
   }
  ],
@@ -1595,7 +1328,10 @@
    "text": "₹16,500",
    "day": "2026-09-24",
    "against": "above",
-   "against_text": "Above the usual range for September"
+   "against_text": "Above the usual range for September",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
   },
   "months": [
    {
@@ -1856,6 +1592,36 @@
     "text": "Year by year: the year's average, its highest month and its lowest (Agmarknet)"
    }
   ]
+ },
+ "loan": {
+  "question": "Does a loan fall due before then?",
+  "note": "Used for this answer only, and not kept.",
+  "due_in_days": null,
+  "choices": [
+   {
+    "due_in_days": 30,
+    "text": "Within 1 month"
+   },
+   {
+    "due_in_days": 60,
+    "text": "Within 2 months"
+   },
+   {
+    "due_in_days": 90,
+    "text": "Within 3 months"
+   },
+   {
+    "due_in_days": 120,
+    "text": "Within 4 months"
+   }
+  ],
+  "clear": "No loan falls due"
+ },
+ "wdra_list": {
+  "listed": 25,
+  "as_on": "2026-10-21",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
  },
  "wastage": {
   "kind": "dry",

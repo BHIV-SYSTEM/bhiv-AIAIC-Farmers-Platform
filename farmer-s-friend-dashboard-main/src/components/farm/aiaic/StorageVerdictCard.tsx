@@ -10,8 +10,8 @@ import {
 import { useState } from "react";
 
 import {
-  KEY_ASSUMED,
   away,
+  keyAssumed as keyAssumedOf,
   sameWarehouse as same,
   useStorageVerdict,
   verdictMark,
@@ -22,6 +22,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { RouteMap } from "./RouteMap";
+import { ConfidenceLine } from "./storage/StorageTiles";
 
 /**
  * AIAIC's STORAGE VERDICT (GET /storage/verdict, AIAIC_BACKEND_CONTRACT.md section 21): store or sell now in one line,
@@ -33,14 +34,17 @@ import { RouteMap } from "./RouteMap";
  * is the card itself, for a page that already holds the answer (the storage page, from its plan).
  */
 const TONE = {
-  store: "border-primary bg-primary/10 text-primary",
-  sell_now: "border-amber-500/60 bg-amber-50 text-amber-900",
-  unsure: "border-border bg-muted text-foreground",
+  good: "border-primary bg-primary/10 text-primary",
+  warn: "border-amber-500/60 bg-amber-50 text-amber-900",
+  neutral: "border-border bg-muted text-foreground",
 } as const;
 
-/** The verdict's chip by its code: a code this card does not know is shown as "not sure" would be. */
-const toneOf = (code: string) =>
-  code === "store" || code === "sell_now" ? TONE[code] : TONE.unsure;
+/**
+ * The verdict's chip by the tone AIAIC gives it, never by its code: a store AIAIC is not sure of is not green (the audit of 1 Nov
+ * 2026, F2). A tone this card does not know is shown as "not sure" would be.
+ */
+const toneOf = (tone: string | undefined) =>
+  tone === "good" || tone === "warn" ? TONE[tone] : TONE.neutral;
 
 function Marks({ w }: { w: StorageWarehouse }) {
   const wdra = w.wdra?.registered ? w.wdra.text : null;
@@ -104,7 +108,7 @@ export function StorageCardBody({
   const km = away(w);
   const places = warehousePlaces(card);
   const assumed = (v.assumptions ?? []).filter((a) => a.text);
-  const keyAssumed = assumed.filter((a) => KEY_ASSUMED.includes(a.code));
+  const keyAssumed = keyAssumedOf(v);
   const Mark = verdictMark(v.code);
   return (
     <section
@@ -119,7 +123,7 @@ export function StorageCardBody({
         <span
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-base font-extrabold",
-            toneOf(v.code),
+            toneOf(v.tone),
           )}
         >
           <Mark className="size-5" aria-hidden="true" />
@@ -130,6 +134,7 @@ export function StorageCardBody({
         ) : null}
       </div>
       <p className="text-base font-semibold leading-snug text-foreground">{v.text}</p>
+      {v.confidence ? <ConfidenceLine confidence={v.confidence} /> : null}
       {keyAssumed.length ? (
         <ul className="flex flex-wrap gap-1.5">
           {keyAssumed.map((a) => (

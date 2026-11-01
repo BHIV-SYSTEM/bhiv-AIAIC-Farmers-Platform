@@ -19,6 +19,16 @@
    "reason_code": "storing_unlikely_to_pay",
    "word": "अभी बेचें",
    "text": "अभी बेचें: महाराष्ट्र राज्य वखार महामंडळ अंबड, 9 किमी, में भंडारण से फ़ायदा होने की संभावना कम",
+   "tone": "warn",
+   "confidence": {
+    "band": "low",
+    "text": "ज़्यादा पक्का नहीं",
+    "label": "कितना पक्का",
+    "reasons": [
+     "भाव 5 दिन पुराने हैं, इसलिए भरोसा एक स्तर कम दिखाया गया है।",
+     "भंडारण से औसतन थोड़ा ही ज़्यादा मिलेगा, उस सीमा से कम जिसे अभी परखा नहीं गया, इसलिए भरोसा एक स्तर कम दिखाया गया है।"
+    ]
+   },
    "months": 4,
    "months_text": null,
    "warehouse": {
@@ -82,7 +92,7 @@
    },
    "chosen_by": {
     "code": "best_gain",
-    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
     "text": "सूची के जिन गोदामों में भंडारण का हिसाब लगाया जा सकता है (6), उनमें से भंडारण, नुकसान और ढुलाई के बाद प्रति क्विंटल यह सबसे अच्छा"
    },
    "net_gain_per_q": {
@@ -325,55 +335,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -537,55 +498,6 @@
       "low_rs": 85,
       "high_rs": 120
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "near_district_centre_warehouse",
-       "text": "The warehouse is near your district's centre: your trip from your farm may be longer."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      },
-      {
-       "code": "minimum_per_trip_applied",
-       "text": "The least a trip costs applies."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -641,7 +553,7 @@
     "hired_premises_run_from_here": 0,
     "town": "Sinnar",
     "town_shown": "Sinnar",
-    "place_shown": "सिन्नर (Sinnar)",
+    "place_shown": "सिन्नर",
     "state": "maharashtra",
     "district_key": "nashik",
     "district_shown": "नासिक",
@@ -771,47 +683,6 @@
       "low_rs": 147,
       "high_rs": 176
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -874,7 +745,7 @@
     "hired_premises_run_from_here": 0,
     "town": "Musalgaon",
     "town_shown": "Musalgaon",
-    "place_shown": "मुसळगांव (Musalgaon)",
+    "place_shown": "मुसळगांव",
     "state": "maharashtra",
     "district_key": "nashik",
     "district_shown": "नासिक",
@@ -1004,47 +875,6 @@
       "low_rs": 191,
       "high_rs": 228
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 100 km cost more per km: x1.38.",
-       "values": {
-        "up_to_km": 100,
-        "factor": 1.38
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_rural: x1.2, an assumption.",
-       "values": {
-        "route": "rural_rural",
-        "factor": 1.2
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1213,47 +1043,6 @@
       "low_rs": 437,
       "high_rs": 519
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 200 km cost more per km: x1.15.",
-       "values": {
-        "up_to_km": 200,
-        "factor": 1.15
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_rural: x1.2, an assumption.",
-       "values": {
-        "route": "rural_rural",
-        "factor": 1.2
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1410,47 +1199,6 @@
       "low_rs": 478,
       "high_rs": 568
      },
-     "notes": [
-      {
-       "code": "from_district_centre",
-       "text": "Measured from your district's centre, not from your farm."
-      },
-      {
-       "code": "to_warehouse_town",
-       "text": "Measured to the warehouse's town."
-      },
-      {
-       "code": "distance_estimate",
-       "text": "Straight line x 1.3: an estimate."
-      },
-      {
-       "code": "rates_averaged",
-       "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
-       "values": {
-        "n": 2
-       }
-      },
-      {
-       "code": "short_trip_band",
-       "text": "Trips up to 200 km cost more per km: x1.15.",
-       "values": {
-        "up_to_km": 200,
-        "factor": 1.15
-       }
-      },
-      {
-       "code": "route_type_assumption",
-       "text": "Route type rural_urban: x1.1, an assumption.",
-       "values": {
-        "route": "rural_urban",
-        "factor": 1.1
-       }
-      },
-      {
-       "code": "tolls_mixed",
-       "text": "Tolls are inside some sources' rates, not others'."
-      }
-     ],
      "attribution": [
       {
        "text": "© OpenStreetMap contributors",
@@ -1526,7 +1274,7 @@
    "active_capacity_mt": 106325.0,
    "total_capacity_mt": 113795.0,
    "has_active_registered_warehouse": true,
-   "as_of": "2025-01-01",
+   "as_of": "2026-08-27",
    "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
   },
   "wdra_others": {
@@ -1545,7 +1293,8 @@
   "price": {
    "rs_per_q": 5775.5,
    "day": "2026-09-24",
-   "basis_kind": "district_median"
+   "basis_kind": "district_median",
+   "radius_km": null
   },
   "past_years": [
    {
@@ -1615,8 +1364,8 @@
    },
    {
     "what": "wdra",
-    "date": "2025-01-01",
-    "text": "भंडारण विकास एवं विनियामक प्राधिकरण: नासिक में पंजीकृत 21 में से 15 गोदाम चालू"
+    "date": "2026-08-27",
+    "text": "भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची: नासिक में पंजीकृत 21 में से 15 गोदाम चालू"
    },
    {
     "what": "wdra_registrations",
@@ -1693,7 +1442,7 @@
    "key": "near",
    "label": "आपके पास",
    "value": "15 गोदाम · 10 शीतगृह",
-   "note": "नासिक में दर्ज",
+   "note": "नासिक में। गोदाम: भंडारण विकास एवं विनियामक प्राधिकरण की 21/10/2026 की सूची",
    "tone": "neutral"
   }
  ],
@@ -1703,7 +1452,10 @@
    "text": "₹5,776",
    "day": "2026-09-24",
    "against": "above",
-   "against_text": "सितंबर की सामान्य सीमा से ऊपर"
+   "against_text": "सितंबर की सामान्य सीमा से ऊपर",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
   },
   "months": [
    {
@@ -1965,6 +1717,13 @@
    }
   ]
  },
+ "loan": null,
+ "wdra_list": {
+  "listed": 15,
+  "as_on": "2026-10-21",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
+ },
  "wastage": {
   "kind": "dry",
   "assumed_pct_month": 1.0,
@@ -1991,7 +1750,7 @@
     "where_text": "इसी ज़िले में"
    },
    {
-    "name": "Chairman Late Ashokrao Bankar Nagari Sahakari",
+    "name": "Late Ashokrao Bankar Nagari Sahakari Patsanstha Ltd.",
     "district_shown": "नासिक",
     "capacity_mt": 1965.0,
     "capacity_text": "1,965 टन",

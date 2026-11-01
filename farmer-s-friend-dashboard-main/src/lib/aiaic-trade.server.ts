@@ -1001,6 +1001,8 @@ export type StorageAsk = {
   quantity_q?: number | undefined;
   taluka?: string | undefined;
   lang: string;
+  /** What the farmer said of a loan: for the plan, and for that one answer. */
+  loan_due_in_days?: number | undefined;
 };
 
 const storageQuery = (q: StorageAsk): Query => ({
@@ -1026,10 +1028,17 @@ export async function storageVerdict(q: StorageAsk): Promise<AiaicResult<Storage
 /**
  * GET /storage/plan: the storage page's whole answer, the verdict card with the key tiles, the prices by month and by year,
  * the wastage and the cold stores around it (contract section 33). The same boxes as the card, kept the same way: its
- * road distances are the same paid routes.
+ * road distances are the same paid routes. What she said of a loan is used for this answer only, as the page tells her: an answer
+ * read with one is not kept here, even for a while.
  */
 export async function storagePlan(q: StorageAsk): Promise<AiaicResult<StoragePlan>> {
   const query = storageQuery(q);
+  if (q.loan_due_in_days)
+    return call<StoragePlan>({
+      path: "/storage/plan",
+      query: { ...query, loan_due_in_days: q.loan_due_in_days },
+      as: "person",
+    });
   return keptTransport(`storage-plan:${JSON.stringify(query)}`, () =>
     call<StoragePlan>({ path: "/storage/plan", query, as: "person" }),
   );

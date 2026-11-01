@@ -10,6 +10,7 @@ import {
   type StoreChoice,
   type StoreQuantity,
 } from "@/lib/aiaic-storage";
+import { WORDS_PAUSE_MS } from "@/lib/aiaic-heard";
 import { quintalWords } from "@/lib/aiaic-trade";
 import type { Estate } from "@/lib/aiaic-trip";
 import { sameName } from "@/lib/farm-storage";
@@ -392,7 +393,6 @@ export function CropStep({
 }
 
 /** How long a box waits after the last key before its words are read (never per key), as the dashboard's boxes do. */
-const WORDS_PAUSE_MS = 1200;
 
 /**
  * Step 3: a tap finishes it. `Other` opens one box; Skip uses AIAIC's labelled example.

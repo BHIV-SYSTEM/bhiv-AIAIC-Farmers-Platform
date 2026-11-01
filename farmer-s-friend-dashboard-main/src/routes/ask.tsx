@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, Info, MapPin, WifiOff } from "lucide-react";
 
 import { BigSelect } from "@/components/farm/BigSelect";
+import { CrisisFirst } from "@/components/farm/aiaic/CrisisFirst";
 import {
   catalogOptions,
   catalogQueryOptions,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/catalog-query";
 import { getPlacesDistricts, getPlacesCrops } from "@/lib/places.functions";
 import { SERVICE_ICON } from "@/lib/service-icons";
+import { useHearWords, useNumberBoxHeard } from "@/lib/aiaic-heard";
 import { farmSearchSchema, parseServices } from "@/lib/aiaic-query";
 import { SERVICES, type Service } from "@/lib/aiaic-types";
 import { loadFarm, sameName, saveFarm } from "@/lib/farm-storage";
@@ -40,6 +42,14 @@ export const Route = createFileRoute("/ask")({
 });
 
 function AskPage() {
+  return (
+    <CrisisFirst>
+      <AskForm />
+    </CrisisFirst>
+  );
+}
+
+function AskForm() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const search = Route.useSearch();
@@ -55,6 +65,13 @@ function AskPage() {
 
   // Dynamic places query from confirmed /places/districts endpoint
   const activeLang = (["en", "mr", "hi"].includes(lang) ? lang : "en") as Lang;
+
+  // NO BOX IS BLIND TO A PERSON IN CRISIS (D-105; the audit of 1 Nov 2026, F12). The land box was `type="number"`: words typed there
+  // held "", so nothing could hear them. It now keeps what is typed; anything but a plain number is read by AIAIC, after a pause and
+  // on the button, and its crisis card takes the whole page. Only a plain number is ever carried on.
+  const { words: landWords, heard: readLand } = useNumberBoxHeard(land, activeLang);
+  // A list's search box: words that match nothing on the list are read too.
+  const hearWords = useHearWords(activeLang);
   const districtsQuery = useQuery({
     queryKey: ["places-districts", state, activeLang],
     queryFn: () => getPlacesDistricts({ data: { state, lang: activeLang } }),
@@ -140,7 +157,11 @@ function AskPage() {
     );
   };
 
-  const submit = () => {
+  const submit = async () => {
+    if (landWords) {
+      await readLand();
+      return;
+    }
     const services = selected.length ? selected : [...SERVICES];
     const wantsMarket = services.includes("market");
     const marketChoice = wantsMarket && mandi ? mandi : "";
@@ -236,6 +257,7 @@ function AskPage() {
           anyLabel={t("ask.district.any")}
           options={availableDistricts}
           display={formatDistrict}
+          onUnmatched={hearWords}
           value={region}
           onChange={(v: string) => {
             setRegion(v);
@@ -260,6 +282,7 @@ function AskPage() {
           anyLabel={t("ask.crop.any")}
           options={availableCrops}
           display={formatCrop}
+          onUnmatched={hearWords}
           value={crop}
           onChange={setCrop}
         />
@@ -272,6 +295,7 @@ function AskPage() {
             anyLabel={t("ask.mandi.any")}
             options={activeOptions.mandis}
             display={displayName}
+            onUnmatched={hearWords}
             value={mandi}
             onChange={setMandi}
           />
@@ -285,14 +309,22 @@ function AskPage() {
           <p className="mt-1 text-sm text-muted-foreground sm:text-base">{t("ask.land.help")}</p>
           <input
             id="land"
-            type="number"
+            type="text"
             inputMode="decimal"
-            min="0"
-            step="0.25"
             value={land}
             onChange={(e) => setLand(e.target.value)}
+            data-testid="ask-land"
             className="mt-2 min-h-14 w-full rounded-2xl border-2 border-input bg-card px-4 text-lg font-semibold text-foreground outline-none focus:border-ring sm:min-h-16 sm:text-xl"
           />
+          {landWords ? (
+            <p
+              role="alert"
+              className="mt-1 text-sm font-bold text-destructive"
+              data-testid="ask-land-number"
+            >
+              {t("ask.land.number")}
+            </p>
+          ) : null}
         </div>
 
         {/* Official Groundwater / Soil Caveat */}
@@ -348,7 +380,7 @@ function AskPage() {
         <div className="pt-4">
           <button
             type="button"
-            onClick={submit}
+            onClick={() => void submit()}
             className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-primary px-6 text-xl font-extrabold text-primary-foreground shadow-md transition-colors hover:bg-primary/90 sm:min-h-16 sm:rounded-3xl sm:text-2xl"
           >
             {t("ask.submit")}

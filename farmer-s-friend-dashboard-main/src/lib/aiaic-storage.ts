@@ -11,6 +11,7 @@ import type {
   StorageVerdict,
   StorageWarehouse,
 } from "@/lib/aiaic-trade";
+import { plainNumber } from "@/lib/aiaic-heard";
 import { getStoragePlan, getStorageVerdict } from "@/lib/aiaic-trade.functions";
 import { estateOf, type Estate } from "@/lib/aiaic-trip";
 import { sameName, type SavedFarm } from "@/lib/farm-storage";
@@ -31,6 +32,17 @@ export const verdictMark = (code: string | null | undefined) =>
 
 /** The assumptions that decide a verdict, said in plain view under it (push 4); every other one is behind the tap. */
 export const KEY_ASSUMED = ["loss_assumed", "quantity_example"];
+
+/**
+ * What a verdict's reader sees without a tap: the two above, and, under a store verdict, that no loan was asked about (the audit of
+ * 1 Nov 2026, F9: a farmer whose loan falls due in two weeks read "Store 4 months" with no word of it above the fold).
+ */
+export const keyAssumed = (v: Pick<StorageVerdict["verdict"], "code" | "assumptions">) =>
+  (v.assumptions ?? []).filter(
+    (a) =>
+      a.text &&
+      (KEY_ASSUMED.includes(a.code) || (v.code === "store" && a.code === "no_loan_asked")),
+  );
 
 /** A map's places from a storage verdict: each listed warehouse that has a point, the one the verdict names `chosen`. */
 export function warehousePlaces(card: StorageVerdict): MapPlace[] {
@@ -111,13 +123,12 @@ export const quantityFits = (q: unknown): q is number =>
 
 /**
  * What the "Other" box holds, read from a copy: the box keeps what was typed. `words`: anything but a plain number, which AIAIC
- * reads for distress before the quantity is used (the platform's rule D-105: no box is blind to a person in crisis).
+ * reads for distress before anything else is said (the platform's rule D-105: no box is blind to a person in crisis); the page
+ * then asks for the number of quintals.
  */
 export function quantityTyped(typed: string): { q: number | null; fits: boolean; words: boolean } {
-  const said = typed.trim();
-  const digits = said.replace(/[^0-9.]/g, "");
-  const q = digits === "" ? null : Number(digits);
-  return { q, fits: quantityFits(q), words: /[^\d.\s]/.test(said) };
+  const q = plainNumber(typed);
+  return { q, fits: quantityFits(q), words: typed.trim() !== "" && q === null };
 }
 
 /** What the page has been told so far: `region` is the district's key, `taluka` empty for the whole district. */
@@ -254,6 +265,7 @@ export function useStoragePlan({
   state,
   quantity,
   taluka,
+  loanDueInDays,
   enabled = true,
 }: {
   crop: string;
@@ -261,6 +273,8 @@ export function useStoragePlan({
   state: string;
   quantity: StoreQuantity | null;
   taluka?: string | undefined;
+  /** What the farmer said of a loan on the answer's own question: used for this read only, never saved. */
+  loanDueInDays?: number | null | undefined;
   enabled?: boolean | undefined;
 }) {
   const { lang } = useI18n();
@@ -276,6 +290,7 @@ export function useStoragePlan({
       quantityQ ?? null,
       lang,
       taluka || null,
+      loanDueInDays ?? null,
     ],
     queryFn: () =>
       planFn({
@@ -286,6 +301,7 @@ export function useStoragePlan({
           lang,
           ...(quantityQ ? { quantity_q: quantityQ } : {}),
           ...(taluka ? { taluka } : {}),
+          ...(loanDueInDays ? { loan_due_in_days: loanDueInDays } : {}),
         },
       }),
     enabled: enabled && Boolean(crop && district),

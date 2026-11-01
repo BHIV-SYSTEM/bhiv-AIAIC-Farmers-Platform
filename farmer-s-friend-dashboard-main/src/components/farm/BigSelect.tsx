@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { WORDS_PAUSE_MS } from "@/lib/aiaic-heard";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ export function BigSelect({
   display,
   value,
   onChange,
+  onUnmatched,
 }: {
   label: string;
   help?: string;
@@ -25,6 +27,8 @@ export function BigSelect({
   display?: (value: string) => string;
   value: string;
   onChange: (value: string) => void;
+  /** Words in the search box that match nothing on the list, after a pause: the page has AIAIC read them (D-105). */
+  onUnmatched?: (words: string) => void;
 }) {
   const { t } = useI18n();
   const show = useCallback((v: string) => (display ? display(v) : v), [display]);
@@ -37,6 +41,14 @@ export function BigSelect({
       ? options.filter((o) => o.toLowerCase().includes(q) || show(o).toLowerCase().includes(q))
       : options;
   }, [options, query, show]);
+
+  const unmatched = query.trim() !== "" && filtered.length === 0;
+  useEffect(() => {
+    if (!unmatched || !onUnmatched) return undefined;
+    const id = setTimeout(() => onUnmatched(query), WORDS_PAUSE_MS);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, unmatched]);
 
   return (
     <div>

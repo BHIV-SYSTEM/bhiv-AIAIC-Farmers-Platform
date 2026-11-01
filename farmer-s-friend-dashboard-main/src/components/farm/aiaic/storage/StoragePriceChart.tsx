@@ -184,7 +184,8 @@ export function MonthsChart({ prices }: { prices: StoragePrices }) {
       </p>
     );
   const nowMonth = monthOfDay(prices.now?.day);
-  const now = prices.now && nowMonth ? prices.now : null;
+  // a price from outside the district is not drawn on the district's months (the audit of 1 Nov 2026, F3)
+  const now = prices.now && nowMonth && !prices.now.outside ? prices.now : null;
   const figures = rows.flatMap((m) => [m.low_rs, m.high_rs, m.usual_rs]);
   if (now) figures.push(now.rs_per_q);
   const highest = Math.max(...figures);

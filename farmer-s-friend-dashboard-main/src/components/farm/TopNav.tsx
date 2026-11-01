@@ -28,7 +28,7 @@ export function TopNav() {
               {t("app.name")}
             </span>
             <span className="block text-[11px] font-semibold text-muted-foreground sm:text-xs">
-              Farm-to-Retail
+              {t("nav.farmToRetail")}
             </span>
           </div>
         </Link>

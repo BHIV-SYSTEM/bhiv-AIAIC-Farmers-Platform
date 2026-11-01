@@ -1333,6 +1333,14 @@ export type StorageWarehouse = {
 };
 
 /** AIAIC's storage verdict card: store or sell now, and the nearest public warehouses by name (section 21). */
+/** How sure AIAIC is of a verdict: its band, the farmer's word for it and a sentence for each reason, in the language asked. */
+export type StorageConfidence = {
+  band: string;
+  text: string;
+  label: string;
+  reasons: string[];
+};
+
 export type StorageVerdict = {
   lang: string;
   /** The quintals the trip was priced for: the farmer's, or AIAIC's labelled example of 10. */
@@ -1341,6 +1349,10 @@ export type StorageVerdict = {
     code: string;
     word: string;
     text: string;
+    /** The colour AIAIC shows it in (`good`, `warn`, `neutral`): a store below medium confidence is never `good`. */
+    tone?: string;
+    /** How sure AIAIC is of this verdict, and why: always shown with it. */
+    confidence?: StorageConfidence | null;
     months_text: string | null;
     warehouse: StorageWarehouse | null;
     net_gain_per_q: { text: string | null } | null;
@@ -1400,6 +1412,9 @@ export type StoragePrices = {
     day: string | null;
     against: string | null;
     against_text: string | null;
+    /** True for a price from outside the district: it is never drawn on the district's months. */
+    outside?: boolean;
+    whose_text?: string | null;
   } | null;
   months: StorageMonth[];
   years: StorageYear[];
@@ -1436,6 +1451,15 @@ export type StorageColdStores = {
   source: string | null;
 };
 
+/** AIAIC's question about a loan, in the language asked: a tap on a choice asks the plan again with its `due_in_days`. */
+export type StorageLoanAsk = {
+  question: string;
+  note: string;
+  due_in_days: number | null;
+  choices: { due_in_days: number; text: string }[];
+  clear: string;
+};
+
 /**
  * AIAIC's storage plan (GET /storage/plan, AIAIC_BACKEND_CONTRACT.md section 33): everything the step-by-step storage page
  * shows, in one call. `card` is the storage verdict card, unchanged; every sentence and figure is AIAIC's, in the language
@@ -1449,6 +1473,8 @@ export type StoragePlan = {
   card: StorageVerdict | null;
   indicators: StorageIndicator[];
   prices: StoragePrices | null;
+  /** The one question that reaches the loan guard: there under a store verdict, or while a loan is set. */
+  loan?: StorageLoanAsk | null;
   wastage: StorageWastage | null;
   cold_storages: StorageColdStores | null;
   pending_native_review: boolean;

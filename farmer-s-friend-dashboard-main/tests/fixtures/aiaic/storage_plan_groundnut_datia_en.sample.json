@@ -1,0 +1,1069 @@
+{
+ "state": "madhya pradesh",
+ "district": "Datia",
+ "district_shown": "Datia",
+ "crop": "groundnut",
+ "crop_shown": "Groundnut",
+ "lang": "en",
+ "card": {
+  "state": "madhya pradesh",
+  "district": "Datia",
+  "district_shown": "Datia",
+  "crop": "groundnut",
+  "crop_shown": "Groundnut",
+  "lang": "en",
+  "quantity_q": 10.0,
+  "quantity_given": false,
+  "verdict": {
+   "code": "store",
+   "reason_code": "engine_stores",
+   "word": "Store",
+   "text": "Store 4 months at CWC CW-GWALIOR, 87 km: about +₹1,302 a quintal",
+   "tone": "warn",
+   "confidence": {
+    "band": "low",
+    "text": "Not very sure",
+    "label": "How sure",
+    "reasons": [
+     "No mandi in your district reported this crop that day, so the price is the middle price of the mandis within 150 km: confidence is shown one step lower."
+    ]
+   },
+   "months": 4,
+   "months_text": "4 months",
+   "warehouse": {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "CW-GWALIOR",
+    "kind": "general",
+    "basis": "named_town",
+    "category": "950",
+    "name_shown": "CW-GWALIOR",
+    "place_shown": "CW-GWALIOR",
+    "town": "Gwalior",
+    "town_shown": "Gwalior",
+    "state": "madhya pradesh",
+    "district_key": "gwalior",
+    "district_shown": "Gwalior",
+    "km": 87.2,
+    "km_method": "estimate",
+    "rs_per_q_month": 21.04,
+    "farmer_rate": {
+     "low_rs": 21.04,
+     "high_rs": 21.04,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 30.06,
+      "high_rs": 30.06
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹21.04 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹30.06 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "cost": {
+      "low_rs": 3573,
+      "high_rs": 4236
+     },
+     "per_quintal": {
+      "low_rs": 357,
+      "high_rs": 424
+     },
+     "text": "Transport for 10 quintals: ₹3,573 to ₹4,236",
+     "per_quintal_text": "₹357 to ₹424 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-01-04",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2027-01-04"
+    },
+    "under_half_full": null
+   },
+   "chosen_by": {
+    "code": "best_store_gain",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "text": "Of the warehouses listed where storing is advised (3), this one leaves the most a quintal after storage, loss and the trip"
+   },
+   "net_gain_per_q": {
+    "low_rs": 121,
+    "typical_rs": 1302,
+    "high_rs": 2691,
+    "text": "+₹121 to +₹2,691 a quintal"
+   },
+   "gain_before_transport_per_q": {
+    "low_rs": 545,
+    "typical_rs": 1692,
+    "high_rs": 3048
+   },
+   "parts_per_q": {
+    "price_now_rs": 8012.0,
+    "price_later_rs": {
+     "p25": 8962.22,
+     "p50": 10108.74,
+     "p75": 11464.37
+    },
+    "storage_rs": 84.16,
+    "loss_rs": 320.48,
+    "finance_rs": 0.0,
+    "transport_rs": {
+     "low_rs": 357,
+     "high_rs": 424
+    }
+   },
+   "engine_says": {
+    "1": "STORE_SELF_FINANCED",
+    "2": "STORE_SELF_FINANCED",
+    "3": "STORE_SELF_FINANCED",
+    "4": "STORE_SELF_FINANCED"
+   },
+   "decision_ids": [
+    "dec_abf6bb9536c4e21cd8064a6ce7640db1",
+    "dec_20ad0691ca5eaca94ca24440ad294d23",
+    "dec_e8afb64ac9aa34cb202a530cfcc1c860",
+    "dec_16a0c9a03d37ade26a7506ea8622b57e"
+   ],
+   "assumptions": [
+    {
+     "code": "loss_assumed",
+     "text": "Assumed: 1% of the crop lost each month in storage; give yours"
+    },
+    {
+     "code": "rate_as_cost",
+     "text": "Storage cost: the published rate at CW-GWALIOR (CWC)"
+    },
+    {
+     "code": "rate.full_bags",
+     "text": "CWC charges by the bag: costed as full 50 kg bags"
+    },
+    {
+     "code": "rate.insurance_extra",
+     "text": "CWC charges insurance on top of this rate"
+    },
+    {
+     "code": "from_district_centre",
+     "text": "Distance from your district's centre, not from your farm"
+    },
+    {
+     "code": "distance_estimate",
+     "text": "Distance: straight line × 1.3, an estimate"
+    },
+    {
+     "code": "onward_trip",
+     "text": "Only the trip to the warehouse is counted: the trip to the mandi after storing is taken to cost what it costs now"
+    },
+    {
+     "code": "farm_is_rural",
+     "text": "Your farm is taken to be in a village (the route type), an assumption"
+    },
+    {
+     "code": "quantity_example",
+     "text": "Transport priced for 10 quintals, an example: give yours"
+    },
+    {
+     "code": "no_loan_asked",
+     "text": "No loan was asked about: storing is judged as if none falls due"
+    },
+    {
+     "code": "past_years",
+     "text": "Prices after storing: what past years did (2002–2026), not a forecast"
+    }
+   ],
+   "uncalibrated": "Not yet checked by farm scientists: use as guidance, not a guarantee."
+  },
+  "warehouses": [
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "CW-GWALIOR",
+    "name_shown": "CW-GWALIOR",
+    "sr": "6",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Gwalior",
+    "town_shown": "Gwalior",
+    "place_shown": "CW-GWALIOR",
+    "state": "madhya pradesh",
+    "district_key": "gwalior",
+    "district_shown": "Gwalior",
+    "point": {
+     "lat": 26.20372,
+     "lon": 78.15736,
+     "geocoder": "nominatim",
+     "osm_ref": "node/568412253",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 67.1,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 21.04,
+     "before_rebate_rs": 30.06,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "GROUNDNUT KERNELS",
+     "category": "950",
+     "bag_wt_kg": 50.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "50"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 21.04,
+     "high_rs": 21.04,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 30.06,
+      "high_rs": 30.06
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹21.04 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹30.06 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 87.2,
+      "method": "estimate",
+      "straight_km": 67.1,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 3573,
+      "high_rs": 4236
+     },
+     "per_quintal": {
+      "low_rs": 357,
+      "high_rs": 424
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹3,573 to ₹4,236",
+     "per_quintal_text": "₹357 to ₹424 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-01-04",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2027-01-04"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "Store",
+     "months": 4,
+     "months_text": "4 months",
+     "net_gain_per_q": {
+      "low_rs": 121,
+      "typical_rs": 1302,
+      "high_rs": 2691,
+      "text": "+₹121 to +₹2,691 a quintal"
+     },
+     "decision_ids": [
+      "dec_abf6bb9536c4e21cd8064a6ce7640db1",
+      "dec_20ad0691ca5eaca94ca24440ad294d23",
+      "dec_e8afb64ac9aa34cb202a530cfcc1c860",
+      "dec_16a0c9a03d37ade26a7506ea8622b57e"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 1302.0,
+     "counted_gain_rs": 1302.0
+    },
+    "chosen": true
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "CW MALANPUR",
+    "name_shown": "CW MALANPUR",
+    "sr": "8",
+    "kind": "general",
+    "category": "740",
+    "basis": "named_town",
+    "note": "Malanpur industrial area (Gohad tehsil)",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Malanpur",
+    "town_shown": "Malanpur",
+    "place_shown": "CW MALANPUR",
+    "state": "madhya pradesh",
+    "district_key": "bhind",
+    "district_shown": "Bhind",
+    "point": {
+     "lat": 26.35782,
+     "lon": 78.29295,
+     "geocoder": "nominatim",
+     "osm_ref": "relation/16457358",
+     "geocoded_on": "2026-10-24",
+     "area": "unknown",
+     "place_class": "unknown"
+    },
+    "straight_km": 78.8,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.62,
+     "before_rebate_rs": 23.74,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "GROUNDNUT KERNELS",
+     "category": "740",
+     "bag_wt_kg": 50.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "50"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.62,
+     "high_rs": 16.62,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.74,
+      "high_rs": 23.74
+     },
+     "with_rebate": null,
+     "category": "740",
+     "category_shown": "740",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹16.62 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹23.74 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 102.5,
+      "method": "estimate",
+      "straight_km": 78.8,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": null,
+      "possible": [
+       "rural_urban",
+       "rural_rural"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 3500,
+      "high_rs": 4527
+     },
+     "per_quintal": {
+      "low_rs": 350,
+      "high_rs": 453
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹3,500 to ₹4,527",
+     "per_quintal_text": "₹350 to ₹453 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-03-21",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2031-03-21"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "Store",
+     "months": 4,
+     "months_text": "4 months",
+     "net_gain_per_q": {
+      "low_rs": 110,
+      "typical_rs": 1308,
+      "high_rs": 2716,
+      "text": "+₹110 to +₹2,716 a quintal"
+     },
+     "decision_ids": [
+      "dec_a36bcdb5d0da371df21194bca5bfbe23",
+      "dec_bd692773d945f14140929a6b71e30117",
+      "dec_551af02cd3d0c84644dec4b926995632",
+      "dec_61d28dedbf0886bc3991019ce539deb1"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 1308.0,
+     "counted_gain_rs": 1308.0
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "CW MORENA -I",
+    "name_shown": "CW MORENA -I",
+    "sr": "13",
+    "kind": "general",
+    "category": "740",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [
+     "CW MORENA -II"
+    ],
+    "hired_premises_run_from_here": 0,
+    "town": "Morena",
+    "town_shown": "Morena",
+    "place_shown": "CW MORENA -I",
+    "state": "madhya pradesh",
+    "district_key": "morena",
+    "district_shown": "Morena",
+    "point": {
+     "lat": 26.49099,
+     "lon": 77.98137,
+     "geocoder": "nominatim",
+     "osm_ref": "node/568412249",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 103.5,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.62,
+     "before_rebate_rs": 23.74,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "GROUNDNUT KERNELS",
+     "category": "740",
+     "bag_wt_kg": 50.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "50"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.62,
+     "high_rs": 16.62,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.74,
+      "high_rs": 23.74
+     },
+     "with_rebate": null,
+     "category": "740",
+     "category_shown": "740",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹16.62 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹23.74 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 134.6,
+      "method": "estimate",
+      "straight_km": 103.5,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 4597,
+      "high_rs": 5449
+     },
+     "per_quintal": {
+      "low_rs": 459,
+      "high_rs": 545
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹4,597 to ₹5,449",
+     "per_quintal_text": "₹459 to ₹545 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2029-06-06",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2029-06-06"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "Store",
+     "months": 4,
+     "months_text": "4 months",
+     "net_gain_per_q": {
+      "low_rs": 18,
+      "typical_rs": 1208,
+      "high_rs": 2607,
+      "text": "+₹18 to +₹2,607 a quintal"
+     },
+     "decision_ids": [
+      "dec_a36bcdb5d0da371df21194bca5bfbe23",
+      "dec_bd692773d945f14140929a6b71e30117",
+      "dec_551af02cd3d0c84644dec4b926995632",
+      "dec_61d28dedbf0886bc3991019ce539deb1"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 1208.0,
+     "counted_gain_rs": 1208.0
+    },
+    "chosen": false
+   }
+  ],
+  "operators_not_listed": [
+   {
+    "operator": "MSWC",
+    "operator_shown": "MSWC",
+    "operator_full": "Maharashtra State Warehousing Corporation",
+    "serves_states": [
+     "maharashtra"
+    ],
+    "reason_code": "serves_other_states",
+    "text": "Maharashtra State Warehousing Corporation serves Maharashtra's farmers only: not listed"
+   }
+  ],
+  "warehouses_left_out": {
+   "CWC": {
+    "not_farm_storage": {
+     "container_freight_station": 1,
+     "bonded": 1,
+     "inland_container_depot": 1,
+     "rail_terminal": 1
+    },
+    "not_placed": 4
+   }
+  },
+  "wdra": {
+   "district": "Datia",
+   "n_registered": 25,
+   "n_active": 8,
+   "active_capacity_mt": 33279.0,
+   "total_capacity_mt": 124508.0,
+   "has_active_registered_warehouse": true,
+   "as_of": "2026-08-27",
+   "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
+  },
+  "wdra_others": null,
+  "price": {
+   "rs_per_q": 8012.0,
+   "day": "2026-09-24",
+   "basis_kind": "reach_median",
+   "radius_km": 150
+  },
+  "past_years": [
+   {
+    "horizon_months": 1,
+    "uplift_pct_p25": 4.51,
+    "uplift_pct_p50": 9.83,
+    "uplift_pct_p75": 15.24,
+    "n_years": 22,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 2,
+    "uplift_pct_p25": 2.84,
+    "uplift_pct_p50": 13.4,
+    "uplift_pct_p75": 28.05,
+    "n_years": 22,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 3,
+    "uplift_pct_p25": 10.87,
+    "uplift_pct_p50": 23.06,
+    "uplift_pct_p75": 31.15,
+    "n_years": 21,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 4,
+    "uplift_pct_p25": 11.86,
+    "uplift_pct_p50": 26.17,
+    "uplift_pct_p75": 43.09,
+    "n_years": 20,
+    "verdict": "consistently_gained"
+   }
+  ],
+  "first_year": 2002,
+  "last_year": 2026,
+  "storage_cost": {
+   "value": 21.04,
+   "kind": "rate"
+  },
+  "loss_pct_month": {
+   "value": 1.0,
+   "kind": "assumed"
+  },
+  "sources": [
+   {
+    "what": "price",
+    "text": "Latest price ₹8,012/q, the middle price across the mandis within 150 km of Datia that reported (1); no mandi in Datia reported it. Observed 2026-09-24.",
+    "date": "2026-09-24"
+   },
+   {
+    "what": "tariff",
+    "operator": "CWC",
+    "date": "2026-04-01",
+    "text": "CWC tariff from 2026-04-01 at CW-GWALIOR (category 950): ₹21.04 a quintal a month after the 30% farmer rebate (₹30.06 before it)"
+   },
+   {
+    "what": "distance",
+    "date": null,
+    "text": "Distance 87 km: the straight line between the two towns × 1.3, an estimate"
+   },
+   {
+    "what": "transport",
+    "date": null,
+    "text": "Transport for 10 quintals: ACE / DOST / PICKUP (1.5 TON), ₹357 to ₹424 a quintal, from published truck rates, not a quote"
+   },
+   {
+    "what": "wdra",
+    "date": "2026-08-27",
+    "text": "WDRA's file of 2026-08-27: 8 active of 25 registered warehouses in Datia"
+   },
+   {
+    "what": "wdra_registrations",
+    "date": "2026-08-27",
+    "text": "WDRA registrations: WDRA's list of 2026-08-27"
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "pending_native_review": false
+ },
+ "indicators": [
+  {
+   "key": "verdict",
+   "label": "Decision",
+   "value": "Store · 4 months",
+   "note": "Store 4 months at CWC CW-GWALIOR, 87 km: about +₹1,302 a quintal",
+   "tone": "warn"
+  },
+  {
+   "key": "net_gain",
+   "label": "After all costs",
+   "value": "+₹121 to +₹2,691 a quintal",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "price_now",
+   "label": "Price nearby",
+   "value": "₹8,012 a quintal",
+   "note": "Not from your district: the middle price within 150 km, on 2026-09-24. It is above every month's usual high in your district (₹6,308): your own mandi may pay less, and the gain counts on this price.",
+   "tone": "warn"
+  },
+  {
+   "key": "best_month",
+   "label": "Usually highest",
+   "value": "January",
+   "note": "₹5,540 a quintal",
+   "tone": "neutral"
+  },
+  {
+   "key": "storage_rate",
+   "label": "Storage rate",
+   "value": "₹21.04 a quintal a month",
+   "note": "CW-GWALIOR, CWC",
+   "tone": "neutral"
+  },
+  {
+   "key": "distance",
+   "label": "Distance",
+   "value": "87 km",
+   "note": "₹357 to ₹424 a quintal",
+   "tone": "neutral"
+  },
+  {
+   "key": "wastage",
+   "label": "Wastage",
+   "value": "About 1% a month",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "near",
+   "label": "Near you",
+   "value": "8 warehouses",
+   "note": "In Datia. Warehouses: WDRA's list as on 2026-08-27",
+   "tone": "neutral"
+  }
+ ],
+ "prices": {
+  "now": {
+   "rs_per_q": 8012.0,
+   "text": "₹8,012",
+   "day": "2026-09-24",
+   "against": null,
+   "against_text": null,
+   "outside": true,
+   "basis_kind": "reach_median",
+   "whose_text": "Not from your district: the middle price within 150 km, on 2026-09-24."
+  },
+  "months": [
+   {
+    "month": 1,
+    "name": "January",
+    "short": "Jan",
+    "usual_rs": 5540.0,
+    "low_rs": 4175.62,
+    "high_rs": 6248.75,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 2,
+    "name": "February",
+    "short": "Feb",
+    "usual_rs": 4872.5,
+    "low_rs": 4300.0,
+    "high_rs": 6307.5,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 3,
+    "name": "March",
+    "short": "Mar",
+    "usual_rs": 5095.0,
+    "low_rs": 4522.5,
+    "high_rs": 5210.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 10,
+    "name": "October",
+    "short": "Oct",
+    "usual_rs": 4825.0,
+    "low_rs": 4595.0,
+    "high_rs": 5120.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 11,
+    "name": "November",
+    "short": "Nov",
+    "usual_rs": 4850.0,
+    "low_rs": 4402.8,
+    "high_rs": 5075.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 12,
+    "name": "December",
+    "short": "Dec",
+    "usual_rs": 5075.0,
+    "low_rs": 4616.25,
+    "high_rs": 5799.38,
+    "n_years": 5,
+    "years": "2021-2025"
+   }
+  ],
+  "years": [
+   {
+    "year": 2019,
+    "partial": false,
+    "average_rs": 3719.79,
+    "high_rs": 3820.0,
+    "high_month": 3,
+    "low_rs": 3600.0,
+    "low_month": 1,
+    "n_months": 6,
+    "n_days": 86
+   },
+   {
+    "year": 2022,
+    "partial": false,
+    "average_rs": 4925.18,
+    "high_rs": 5367.5,
+    "high_month": 12,
+    "low_rs": 4600.0,
+    "low_month": 1,
+    "n_months": 7,
+    "n_days": 127
+   },
+   {
+    "year": 2023,
+    "partial": false,
+    "average_rs": 5794.17,
+    "high_rs": 6270.0,
+    "high_month": 2,
+    "low_rs": 5120.0,
+    "low_month": 10,
+    "n_months": 6,
+    "n_days": 89
+   },
+   {
+    "year": 2024,
+    "partial": false,
+    "average_rs": 4751.19,
+    "high_rs": 5191.25,
+    "high_month": 3,
+    "low_rs": 4100.0,
+    "low_month": 12,
+    "n_months": 10,
+    "n_days": 130
+   },
+   {
+    "year": 2025,
+    "partial": false,
+    "average_rs": 4486.88,
+    "high_rs": 5871.88,
+    "high_month": 12,
+    "low_rs": 4022.5,
+    "low_month": 1,
+    "n_months": 10,
+    "n_days": 154
+   }
+  ],
+  "best_month": {
+   "month": 1,
+   "name": "January",
+   "usual_rs": 5540.0,
+   "text": "Usually highest in January: about ₹5,540 a quintal"
+  },
+  "lowest_month": {
+   "month": 10,
+   "name": "October",
+   "usual_rs": 4825.0,
+   "text": "Usually lowest in October: about ₹4,825 a quintal"
+  },
+  "held": true,
+  "headline": null,
+  "note": "History, not a forecast: this district's mandis in past years, in rupees as published, not adjusted for inflation.",
+  "sources": [
+   {
+    "what": "months",
+    "text": "Month by month: the usual price and the middle half of the district's daily prices, 2021-2025, 2022-2026 (Agmarknet)"
+   },
+   {
+    "what": "years",
+    "text": "Year by year: the year's average, its highest month and its lowest (Agmarknet)"
+   }
+  ]
+ },
+ "loan": {
+  "question": "Does a loan fall due before then?",
+  "note": "Used for this answer only, and not kept.",
+  "due_in_days": null,
+  "choices": [
+   {
+    "due_in_days": 30,
+    "text": "Within 1 month"
+   },
+   {
+    "due_in_days": 60,
+    "text": "Within 2 months"
+   },
+   {
+    "due_in_days": 90,
+    "text": "Within 3 months"
+   },
+   {
+    "due_in_days": 120,
+    "text": "Within 4 months"
+   }
+  ],
+  "clear": "No loan falls due"
+ },
+ "wdra_list": {
+  "listed": 8,
+  "as_on": "2026-08-27",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
+ },
+ "wastage": {
+  "kind": "dry",
+  "assumed_pct_month": 1.0,
+  "headline": "We assumed about 1% a month. Moisture, pests and handling decide your own.",
+  "value": "About 1% a month",
+  "published": []
+ },
+ "cold_storages": {
+  "held": true,
+  "in_district": 0,
+  "near_total": 3,
+  "within_km": 100,
+  "headline": "No cold-storage project on record in Datia",
+  "near": [],
+  "not_named": 3,
+  "not_named_text": "3 more without a name we can show",
+  "rate_text": "Rates are not published: we hold no cold store's charges, so ask the store.",
+  "caveat": "Subsidy records, sanctioned 2006-07 to 2014-15. They do not show that a store still runs or takes other farmers' produce.",
+  "source": "Integrated Cold Chain Availability Platform: government project lists"
+ },
+ "pending_native_review": false,
+ "lang_note": null
+}

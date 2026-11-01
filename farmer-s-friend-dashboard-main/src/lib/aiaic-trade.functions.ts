@@ -189,6 +189,7 @@ const storageAsk = z.object({
   quantity_q: qty.optional(),
   lang,
   taluka: z.string().trim().max(80).optional(),
+  loan_due_in_days: z.number().int().positive().max(3650).optional(),
 });
 
 /** AIAIC's storage verdict card (GET /storage/verdict): store or sell now and the nearest warehouses by name. */

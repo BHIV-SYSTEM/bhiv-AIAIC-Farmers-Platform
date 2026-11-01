@@ -61,6 +61,7 @@ import {
   cropsOffered,
   farmWith,
   firstToDo,
+  keyAssumed,
   planHolds,
   planShown,
   quantityFits,
@@ -69,6 +70,7 @@ import {
   warehousePlaces,
   type StoreChoice,
 } from "../src/lib/aiaic-storage";
+import { plainNumber } from "../src/lib/aiaic-heard";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
@@ -285,7 +287,7 @@ test("S4 the tiles are the rest of the indicators in the order sent, each with l
     for (const x of plan.indicators.slice(1)) {
       const tile = partOf(tiles, `store-tile-${x.key}`);
       ok(tile.includes(esc(x.label)), `${name} ${x.key}: label`);
-      ok(tile.includes(esc(x.value)), `${name} ${x.key}: value`);
+      ok(tile.replace(/<\/?span[^>]*>/g, "").includes(esc(x.value)), `${name} ${x.key}: value`);
       if (x.note) ok(tile.includes(esc(x.note)), `${name} ${x.key}: note`);
     }
   }
@@ -920,13 +922,20 @@ test("S46 the Other box keeps what is typed: anything but a plain number is read
   // button stayed grey and no helpline could come (the platform's rule D-105). The browser walk shows the crisis card now.
   assert.deepEqual(quantityTyped("37"), { q: 37, fits: true, words: false });
   assert.deepEqual(quantityTyped(" 37.5 "), { q: 37.5, fits: true, words: false });
-  assert.deepEqual(quantityTyped("37.5kg"), { q: 37.5, fits: true, words: true });
+  assert.deepEqual(quantityTyped("37.5kg"), { q: null, fits: false, words: true });
   assert.deepEqual(quantityTyped("I want to end my life"), { q: null, fits: false, words: true });
   assert.deepEqual(
     quantityTyped("100001"),
     { q: 100001, fits: false, words: false },
     "out of range: its sentence, no scan",
   );
+  // THE AUDIT OF 1 NOV 2026, F13: "500 kg" was read as 500 quintals, "10 20" as 1,020 with no scan, "५०" was refused, and a quantity can
+  // flip a verdict. A plain number only, Devanagari digits included; never a guess from the digits.
+  for (const typed of ["500 kg", "2 tonnes", "10-20", "10 20", "-5", "1,000", "abc"])
+    assert.deepEqual(quantityTyped(typed), { q: null, fits: false, words: true }, typed);
+  assert.deepEqual(quantityTyped("५०"), { q: 50, fits: true, words: false });
+  assert.deepEqual(quantityTyped("१२.५"), { q: 12.5, fits: true, words: false });
+  assert.deepEqual(quantityTyped("२ टन"), { q: null, fits: false, words: true });
   assert.equal(
     quantityTyped("3 acres, I want to end my life").words,
     true,
@@ -945,6 +954,170 @@ test("S46 the Other box keeps what is typed: anything but a plain number is read
     "the page has AIAIC read the words",
   );
   ok(route.includes('raise?.(problem("crisis"'), "and AIAIC's crisis card takes the whole page");
+});
+
+const pageOf = (plan: StoragePlan) => page(answer(plan), undefined, plan.lang as "en" | "mr" | "hi");
+const DATIA = sample("groundnut_datia_en");
+const DATIA_MR = sample("groundnut_datia_mr");
+const LOAN_60 = sample("mataki_sangli_loan_60_en");
+const LOAN_30 = sample("mataki_sangli_loan_30_en");
+
+test("S48 how sure AIAIC is stands under the verdict with its reasons, in the reader's language, on every kind of answer (the audit of 1 Nov 2026, F2)", () => {
+  for (const plan of [STORE, WHEAT, ONION, NO_PRICE, TOO_OLD, STORE_MR, STORE_HI, ONION_MR]) {
+    const c = plan.card?.verdict.confidence;
+    ok(c && c.text && c.label, `${plan.crop_shown}: the answer carries it`);
+    const shown = partOf(pageOf(plan), "store-verdict-confidence");
+    ok(shown.includes(esc(c!.text)) && shown.includes(esc(c!.label)), `${plan.crop_shown}: shown`);
+    for (const reason of c!.reasons) ok(shown.includes(esc(reason)), `${plan.crop_shown}: ${reason}`);
+    ok(pageOf(plan).indexOf("store-verdict-confidence") < pageOf(plan).indexOf("store-tiles"), "above the tiles");
+  }
+  ok(STORE.card?.verdict.confidence?.band === "low", "the case the audit found");
+});
+
+test("S49 a store AIAIC is not sure of is not shown green, on the page or on the card (F2)", () => {
+  assert.equal(STORE.card?.verdict.tone, "warn");
+  const shown = pageOf(STORE);
+  ok(shown.includes('data-testid="store-verdict" data-tone="warn"'), "the verdict line");
+  ok(!/data-testid="store-tile-net_gain" data-tone="good"/.test(shown), "the gain tile");
+  const card = page(createElement(StorageCardBody, { card: STORE.card!, unfolded: true }));
+  ok(!card.includes("bg-primary/10 text-primary"), "the card's chip");
+  ok(card.includes("store-verdict-confidence"), "and the card says how sure");
+});
+
+test("S50 under a store verdict, that no loan was asked stands above the fold; a verdict that stores nothing does not say it (F9)", () => {
+  const line = STORE.card?.verdict.assumptions?.find((a) => a.code === "no_loan_asked")?.text;
+  ok(line, "the sentence exists");
+  ok(partOf(pageOf(STORE), "store-verdict-assumed").includes(esc(line!)), "shown under the verdict");
+  const other = WHEAT.card?.verdict.assumptions?.find((a) => a.code === "no_loan_asked")?.text;
+  ok(other && !partOf(pageOf(WHEAT), "store-verdict-assumed", "store-tiles").includes(esc(other)), "not under Sell now");
+  assert.deepEqual(keyAssumed({ code: "store", assumptions: [{ code: "no_loan_asked", text: "x" }] }).length, 1);
+  assert.deepEqual(keyAssumed({ code: "sell_now", assumptions: [{ code: "no_loan_asked", text: "x" }] }).length, 0);
+});
+
+test("S51 the loan guard is one tap from a store verdict: a chip a length, and the question stays while a loan is set (F9)", () => {
+  const chips = (plan: StoragePlan) =>
+    page(createElement(StorageAnswer, { plan, onLoan: () => undefined }));
+  const free = partOf(chips(STORE), "store-loan");
+  ok(free.includes(esc(STORE.loan!.question)) && free.includes(esc(STORE.loan!.note)), "asked, and what happens to the answer said");
+  for (const c of STORE.loan!.choices) ok(free.includes(`store-loan-${c.due_in_days}`), `chip ${c.text}`);
+  ok(!free.includes("store-loan-clear"), "nothing to take back yet");
+  ok(chips(STORE).indexOf('"store-loan"') < chips(STORE).indexOf('"store-tiles"'), "above the tiles");
+  ok(!chips(WHEAT).includes('"store-loan"'), "no question under Sell now");
+  ok(!page(answer(STORE)).includes('"store-loan"'), "a page that cannot ask again does not ask");
+  const bound = partOf(chips(LOAN_60), "store-loan");
+  ok(bound.includes("store-loan-clear") && bound.includes(esc(LOAN_60.loan!.clear)), "it can be taken back");
+  ok(/aria-pressed="true"[^>]*data-testid="store-loan-60"/.test(bound), "the choice stands pressed");
+  assert.equal(LOAN_60.card?.verdict.code, "sell_now", "the guard answered");
+  assert.equal(LOAN_30.card?.verdict.reason_code, "loan_due_first");
+  const route = sourceOf("src/routes/storage.tsx");
+  ok(!/loanDueInDays[^\n]*saveFarm|farmWith[^\n]*loan/.test(route), "never saved");
+  ok(!sourceOf("src/lib/aiaic-storage.ts").includes("loan_due_in_days: c."), "never in the address");
+});
+
+test("S52 a loan reaches AIAIC for this answer only: sent, and not kept here even for a while (F9)", async () => {
+  const q = { crop: "mataki", district: "Sangli", state: "mh", lang: "en", loan_due_in_days: 60 };
+  await withAiaic(
+    () => ({ status: 200, body: LOAN_60 }),
+    async (asked) => {
+      await client.storagePlan(q);
+      await client.storagePlan(q);
+      assert.equal(asked.length, 2, "asked each time: nothing kept");
+      assert.equal(asked[0]?.url.searchParams.get("loan_due_in_days"), "60");
+    },
+  );
+});
+
+test("S53 a price from outside the district is said as whose it is, makes no claim, and is not drawn on its months (F3, F23)", () => {
+  const now = DATIA.prices?.now;
+  assert.equal(now?.outside, true);
+  const tile = partOf(pageOf(DATIA), "store-tile-price_now");
+  ok(tile.includes(esc(now!.whose_text!)), "whose it is");
+  ok(tile.includes(esc("your own mandi may pay less")), "what that means under a store verdict");
+  ok(!tile.includes("Price now"), "not called the price now");
+  ok(partOf(pageOf(DATIA_MR), "store-tile-price_now").includes(esc(DATIA_MR.prices!.now!.whose_text!)), "in Marathi");
+  ok(!page(createElement(MonthsChart, { prices: DATIA.prices! })).includes("store-chart-now"), "not on the chart");
+  ok(page(createElement(MonthsChart, { prices: STORE.prices! })).includes("store-chart-now"), "the district's own is");
+});
+
+test("S54 the land box and every list's search box are heard; an address's crop is read before it is dropped (F12)", () => {
+  const ask = sourceOf("src/routes/ask.tsx");
+  ok(/id="land"\s+type="text"/.test(ask), "the land box holds what is typed");
+  ok(ask.includes("useNumberBoxHeard(land, activeLang)"), "AIAIC reads anything but a number");
+  ok(ask.includes("<CrisisFirst>"), "and its card takes the page");
+  ok(ask.includes("await readLand()"), "on the button too");
+  ok((ask.match(/onUnmatched=\{hearWords\}/g) ?? []).length === 3, "every list's search box");
+  const route = sourceOf("src/routes/storage.tsx");
+  ok(/void scan\.refuse\(dropped, lang/.test(route), "the crop the list does not hold is read first");
+  ok(route.indexOf("scan.refuse(dropped") < route.indexOf('crop: "" } : c'), "then dropped");
+  assert.equal(plainNumber("2.5"), 2.5);
+  assert.equal(plainNumber("२.५"), 2.5);
+  assert.equal(plainNumber("मला जगायचे नाही"), null);
+  assert.equal(plainNumber("3 acres"), null);
+});
+
+/**
+ * EVERY BOX OF THE APP THAT CAN HOLD WORDS IS HEARD BY THE CRISIS CHECK (the audit of 1 Nov 2026, F12; the dashboard has held this since
+ * 13 Oct). This finds every <input> and <textarea> in the app's code and holds each to one of: it takes no text; a secret; `heard`: what
+ * is typed reaches AIAIC, by a route that reads it first or by `/safety/check`; `demo`: a form of the app's own demo store, shown only
+ * when this server is not set up for AIAIC (`TradeSwitch`), where no AIAIC stands behind it. A new box that is none of these fails here.
+ */
+const BOXES: Record<string, [count: number, how: "heard" | "demo" | "secret", why: string][]> = {
+  "components/farm/BigSelect.tsx": [[1, "heard", "words that match nothing go to onUnmatched: useHearWords, or the page's scan"]],
+  "components/farm/aiaic/AiaicPayments.tsx": [[5, "heard", "the payout details: an AIAIC route, by `press`"]],
+  "components/farm/aiaic/AiaicSellForm.tsx": [[2, "heard", "useNumberBoxHeard: anything but a plain number is read"]],
+  "components/farm/aiaic/FromAiaicCard.tsx": [[4, "heard", "the payout destination: an AIAIC route, by `press`"]],
+  "components/farm/aiaic/storage/StorageSteps.tsx": [[1, "heard", "onWords: the page's scan"]],
+  "components/farm/BankDetailsCard.tsx": [
+    [3, "heard", "AIAIC's payout route, by `press`"],
+    [1, "secret", "the account number typed again"],
+  ],
+  "routes/ask.tsx": [[1, "heard", "useNumberBoxHeard: anything but a plain number is read"]],
+  "routes/help.$queryId.tsx": [[1, "heard", "a help query: an AIAIC route"]],
+  "routes/help.index.tsx": [[1, "heard", "a help query: an AIAIC route, or the scan"]],
+  "routes/listing.new.tsx": [[9, "demo", "LocalNewListingPage; AiaicSellForm when AIAIC is set up"]],
+  "routes/orders.$orderId.tsx": [[1, "demo", "the local order page; AIAIC's own when AIAIC is set up"]],
+  "routes/register.tsx": [[4, "heard", "AIAIC's registration, or the scan on a refusal"]],
+  "routes/signin.tsx": [[2, "heard", "AIAIC's sign-in, or the scan on a refusal"]],
+};
+
+test("S55 every box of the app that can hold words is listed and heard; a new one fails here (F12)", () => {
+  const found: Record<string, number> = {};
+  const walk = (dir: string) => {
+    for (const name of fs.readdirSync(dir)) {
+      const full = path.join(dir, name);
+      if (fs.statSync(full).isDirectory()) {
+        if (name !== "ui") walk(full);
+      } else if (name.endsWith(".tsx")) {
+        for (const m of fs.readFileSync(full, "utf-8").matchAll(/<(input|textarea)\b([^>]*?)\/?>/gs)) {
+          const type = /type="([^"]+)"/.exec(m[2] ?? "")?.[1] ?? "text";
+          if (m[1] === "input" && ["checkbox", "file", "radio"].includes(type)) continue;
+          const rel = path.relative(path.join(APP, "src"), full).replaceAll("\\", "/");
+          const demo = BOXES[rel]?.every((r) => r[1] === "demo");
+          ok(type !== "number" || demo, `${rel}: a number box holds "" for words: keep what is typed (useNumberBoxHeard)`);
+          found[rel] = (found[rel] ?? 0) + 1;
+        }
+      }
+    }
+  };
+  walk(path.join(APP, "src"));
+  const listed = Object.fromEntries(
+    Object.entries(BOXES).map(([file, rows]) => [file, rows.reduce((n, r) => n + r[0], 0)]),
+  );
+  assert.deepEqual(found, listed, "every box listed, with how it is heard");
+});
+
+test("S56 /result names the crop and district as the lists do, and acres in the reader's language (F11)", () => {
+  const result = sourceOf("src/routes/result.tsx");
+  ok(!result.includes("} acres`"), "no English word typed into the line");
+  ok(result.includes('"result.acres.one" : "result.acres"'), "a key");
+  ok(!result.includes("[search.crop, search.mandi ?? search.region]"), "no raw key in the subject");
+  for (const lang of ["en", "mr", "hi"] as const) ok(DICTS[lang]?.["result.acres"], lang);
+  ok(/[ऀ-ॿ]/.test(DICTS.mr?.["result.acres"] ?? "") && /[ऀ-ॿ]/.test(DICTS.hi?.["ask.land.number"] ?? ""), "theirs");
+  ok(!sourceOf("src/components/farm/TopNav.tsx").includes("Farm-to-Retail"), "the header's line too (F22)");
+});
+
+test("S57 the answer at a glance says how sure the verdict is, beside the verdict's word (F2)", () => {
+  ok(sourceOf("src/components/farm/aiaic/AnswerAtAGlance.tsx").includes("v.confidence.text"), "read from the card");
 });
 
 test("S47 the chart's key writes the latest price's day as the apps do, never an ISO day", () => {

@@ -98,6 +98,8 @@ function StorageFlow() {
   // the saved farm lives in the browser, so it is read after hydration; until then the page says it is reading
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState<StoreStep | null>(null);
+  // What the farmer said of a loan, on the answer's own question: for this answer only, so never saved and never in the address.
+  const [loanDueInDays, setLoanDueInDays] = useState<number | null>(null);
 
   // Words typed where a number was asked: AIAIC reads them for distress, and its crisis card takes the whole page (`CrisisFirst`).
   const scan = useScanBeforeRefusing();
@@ -138,9 +140,15 @@ function StorageFlow() {
   const firstPage = cropsRead.data?.ok ? cropsRead.data.firstPage : [];
 
   // A crop stays only while the district's own list offers it: until that is known no step opens and nothing is asked.
+  // WORDS IN THE ADDRESS ARE READ BEFORE THEY ARE DROPPED (the audit of 1 Nov 2026, F12): `/storage?crop=<words>` went to no reader, while
+  // the same words in `region=` and `taluka=` reached AIAIC's crisis card. The scan comes first, then the step opens.
   const cropStays = cropStands(cropRows, crop);
   useEffect(() => {
-    if (ready && !cropStays) setChoice((c) => ({ ...c, crop: "" }));
+    if (!ready || cropStays) return;
+    const dropped = crop;
+    void scan.refuse(dropped, lang, "", () => undefined);
+    setChoice((c) => (c.crop === dropped ? { ...c, crop: "" } : c));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, cropStays]);
 
   const settling = !ready || !cropStays || Boolean(region && crop && cropsRead.isPending);
@@ -178,6 +186,7 @@ function StorageFlow() {
     state,
     quantity,
     taluka,
+    loanDueInDays,
     enabled: ready && step === 4,
   });
   const shown = planShown(plan);
@@ -330,7 +339,7 @@ function StorageFlow() {
       {step === 4 && shown.show === "empty" ? (
         <PlanEmpty busy={plan.isFetching} onRetry={retry} advice={advice} />
       ) : null}
-      {step === 4 && answer ? <StorageAnswer plan={answer} /> : null}
+      {step === 4 && answer ? <StorageAnswer plan={answer} onLoan={setLoanDueInDays} /> : null}
     </div>
   );
 }

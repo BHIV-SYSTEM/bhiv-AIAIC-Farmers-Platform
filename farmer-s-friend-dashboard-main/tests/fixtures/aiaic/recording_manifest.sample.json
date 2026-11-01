@@ -6,7 +6,7 @@
  "prices": "the committed price slice (Agmarknet, newest day 2026-09-25), judged as of price_clock",
  "trace": "taken out of every answer: the id of the request that asked",
  "tree": {
-  "commit": "4261b3598dcdf081047d1204ca3528ee4c2f2720",
+  "commit": "71eba13d996374880eae15b262ddc8a145085293",
   "engine_changed_since": false
  },
  "files": {
@@ -21,9 +21,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "b26590e8219201ca39b812f051160efb640a8124f01965e6545ea89cc3764a17",
-   "bytes": 52039
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "504c04ead9bc148f366a2a7b8d74387937dd6ad565210ec5e5bf398e28fa6867",
+   "bytes": 46039
   },
   "storage_plan_wheat_nashik_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -36,9 +36,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "d0a5fdbb83d40a8758f730c6ad162ee730c1c95cb7b9c317a4ee0503c0cd5427",
-   "bytes": 60536
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "d34937ba48f3695e635be10043ab52cc6e924fcb92033791c526aff1151bb37c",
+   "bytes": 54944
   },
   "storage_plan_wheat_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -51,9 +51,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "b82a13ae5c471f11d84fe0a02e49a1e031d8d71ed342237d168f7f7137eb99f9",
-   "bytes": 60049
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "fe89a52a2dbde747f81177ba3c95de07abf81726e8ba548d33ec189803ad399c",
+   "bytes": 54473
   },
   "storage_plan_onion_nashik_en.sample.json": {
    "route": "GET /storage/plan",
@@ -66,9 +66,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "d748318cba0b47c94e3957cc9b17562c76126adb38f65c8e1f2d3a02c21880eb",
-   "bytes": 40837
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "b87a2a5afc45b9b9c778c6c5e4ea21719266c7774fff6c48cc2de561716fd2d9",
+   "bytes": 34700
   },
   "storage_plan_onion_nashik_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -81,9 +81,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "2b581016e5b54d7c5965d80b8b253551e7c95882f58ee8fcd4c7812af1c58734",
-   "bytes": 47255
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "20081baeec482164feb49ae3ccb8f876de6247ae3beaa12e8104dbabb670cbdd",
+   "bytes": 41337
   },
   "storage_plan_onion_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -96,9 +96,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "ef510433be491d2bf88e26f89649690e41c7fb83b614ab2af4e2337c8cbdcf32",
-   "bytes": 46683
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "6fccf1ac156d93e8a81b8ede5942ab75ccd0c6a4f204a088ae18728b2333a489",
+   "bytes": 40796
   },
   "storage_plan_soybean_nashik_en.sample.json": {
    "route": "GET /storage/plan",
@@ -111,9 +111,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "e1159a4acf51fd02fe66581f0dc3a66228dec63a576ca83330d0068f73772a4d",
-   "bytes": 52442
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "5993e28739e4b7d395ba587de57e20fda08aa31d78db4451ceff0cb14ad0a6bc",
+   "bytes": 46442
   },
   "storage_plan_soybean_nashik_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -126,9 +126,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "d06683e3c114bf11fa5cca9f4fb2289f39b4a6f3ccc33647edfe42d956da0733",
-   "bytes": 61230
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "53e2192683123b3158571628046fc126f026ab8fa0485d61b7f3516216195f71",
+   "bytes": 55638
   },
   "storage_plan_soybean_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -141,9 +141,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "571d9343fd3ba73e6c5d6fb6543d90909f3d8dc927d5fb75fac45cb38a1001af",
-   "bytes": 60653
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "cff7be2b3ecefd0b1352edadf40e28f3f957083c9f9f8501ae6799a0fd1f7e49",
+   "bytes": 55077
   },
   "storage_plan_mataki_sangli_en.sample.json": {
    "route": "GET /storage/plan",
@@ -156,9 +156,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "f587462c35866363bcd8c0ab77514e6c2fd1bbeb37800017052b45e2fb3e441b",
-   "bytes": 49468
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "64f6d84e052c1ed63f79c07f536487b3af5d8bd4cd0a97bdcb72dd2cfa9c3182",
+   "bytes": 43342
   },
   "storage_plan_mataki_sangli_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -171,9 +171,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "7b0db010d486debfc22f141d180f69bbb29fcdec38d3f92f79f8b0d207763c15",
-   "bytes": 57812
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "1c4955b25c2751c85187890034e88a1678321dd5803ef42a721985d1dbf52c77",
+   "bytes": 52391
   },
   "storage_plan_mataki_sangli_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -186,9 +186,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "cd28653009bbd0128d3298d0c40992f94b70f6d4c7632f049719dc739a67ce0f",
-   "bytes": 57386
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "9cf9d858305ed6dd4152526fe4faf51874d83493181fcb4e29d17df515261b9d",
+   "bytes": 51923
   },
   "storage_plan_tomato_nashik_en.sample.json": {
    "route": "GET /storage/plan",
@@ -201,9 +201,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "ea7ee7b20f66fc3af5110b3eb67306d103ba2aa2bd40a0ad88ff40d4eb769888",
-   "bytes": 38096
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "4ee348067c82f40864b454ce2701f61ffbeea137edefbdc7cd5279760c144a96",
+   "bytes": 31997
   },
   "storage_plan_tomato_nashik_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -216,9 +216,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "6dc994a75ac9f32d297eabbf89ac4cc211f6826ef5e75535e5446f2838eb4bdc",
-   "bytes": 43426
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "e93ad3f4ae00c18800fcbef53224aedf87dc7da687f84dc15984894bdeb67c06",
+   "bytes": 37633
   },
   "storage_plan_tomato_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -231,9 +231,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "e86959fb42ad18865228b65f20af43bb39c3e43c428390cb390c8d94d71592bc",
-   "bytes": 42975
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "219cbec85c052afaec0eea8e0dad8159110d4674004e5c4bf7699ea6267ff509",
+   "bytes": 37169
   },
   "storage_plan_refused_cow.sample.json": {
    "route": "GET /storage/plan",
@@ -246,7 +246,7 @@
    "status": 400,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
    "sha256": "e8ee4275aab3fb2e2be9af881e0fc782c06c70bc7979fa6de6af2486711ea965",
    "bytes": 348,
    "same_body_in": [
@@ -265,7 +265,7 @@
    "status": 404,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
    "sha256": "02bab6329e48ba6f2661060a1039756f6c6135569803f5eaa0fc3b30e8b66eaf",
    "bytes": 227,
    "same_body_in": [
@@ -282,9 +282,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "8b57adea1f5876740c419ebc1e5a5ef120b45953e3d114b580d5e83d37e3d030",
-   "bytes": 85584
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "f5216f35b816b718918efc8b1f6bed28ed090833918f6d802c38811fe625723a",
+   "bytes": 85600
   },
   "wdra_warehouses_mh_mr.sample.json": {
    "route": "GET /places/wdra-warehouses",
@@ -295,9 +295,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "b59cb187902dafc874290d7f9800634de91fc19bce8a3f1bc30ba386d29386e0",
-   "bytes": 89295
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "ae5421c3cd5e5d992654b579c3a7487c1056ee3fee348b25cd660a034d929a8b",
+   "bytes": 89311
   },
   "wdra_warehouses_mh_hi.sample.json": {
    "route": "GET /places/wdra-warehouses",
@@ -308,9 +308,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "9ca3a3e95a69b666c62b06a47a30a61e967d47c33cd9cf7a4f6938bc5df7669c",
-   "bytes": 89397
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "029a337152afc616eacd834eb43506083108ad94c8d2dc378b71d0df736b5c20",
+   "bytes": 89413
   },
   "storage_plan_wheat_nashik_prices_too_old_en.sample.json": {
    "route": "GET /storage/plan",
@@ -323,9 +323,9 @@
    "status": 200,
    "price_clock": "2026-11-01",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "323ff50330af4c00c2753684dc625b345dec94ca00a0d9d0d91491c8ccd6c806",
-   "bytes": 46632
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "e0b1289f9c2f7c662b82940be8c40eea5d7d49c7da9a077b6d99f062030e2a46",
+   "bytes": 40430
   },
   "storage_plan_wheat_nashik_prices_too_old_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -338,9 +338,9 @@
    "status": 200,
    "price_clock": "2026-11-01",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "5ffbe34bd74fae5cb33b53046529593774e5064cec67a63978ab1c1a6b79d730",
-   "bytes": 53222
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "640f9f3ced17c889a96ff536992c8c1f321fc70d6f3d7bf692598d7e2d637250",
+   "bytes": 47283
   },
   "storage_plan_wheat_nashik_prices_too_old_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -353,9 +353,9 @@
    "status": 200,
    "price_clock": "2026-11-01",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "bb9b8b293f0ff190233c5d10a4ddb83299c96b1a8d06b685342eff8dad8412a4",
-   "bytes": 52787
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "a4784f2999ff2e52cac2b70b8fcfb2910700cf4d21f4d0dc27ba6e9625ce0dcc",
+   "bytes": 46886
   },
   "storage_plan_lentil_nashik_en.sample.json": {
    "route": "GET /storage/plan",
@@ -368,9 +368,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "a57d9c043a5c60108260d603393c352f0e90834ba1ee40406d06fca3e80c196b",
-   "bytes": 38678
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "cf47230f1aaa871a4d659d8885d814dff5156b48fd890fc3e50d211e0294faff",
+   "bytes": 32400
   },
   "storage_plan_lentil_nashik_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -383,9 +383,9 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "a6199fb200f760b5c0da368f787413b65cb9d101155f9858b22d538c25e2d241",
-   "bytes": 44249
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "9a322df4fcd794f7baacdb4a0cb4a8daaf92efdc5dc362fcb801517d290d7b63",
+   "bytes": 37976
   },
   "storage_plan_lentil_nashik_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -398,9 +398,150 @@
    "status": 200,
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
-   "evidence": "sha256c:dc92a61b08a3b8e146b0e8438ca246eb(5306)",
-   "sha256": "2aa5ccfd50b30d0ba5203150b66faa9326e9c130c64cc0a2e0eb7ea0cff97846",
-   "bytes": 43923
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "1b40c6b361f03380fb459558d3c09c21793cdfdf5b4d33279747f6b18720a2e2",
+   "bytes": 37683
+  },
+  "storage_plan_groundnut_datia_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "groundnut",
+    "district": "Datia",
+    "state": "mp",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "77d7fff4fa5e52609192eca92168c33717172ce1d21fc0f35fc534add3a19066",
+   "bytes": 28929
+  },
+  "storage_plan_groundnut_datia_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "groundnut",
+    "district": "Datia",
+    "state": "mp",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "88f905b2829f464fb8f52156c0e1c6a996f96117d2414351e8bddd004810c797",
+   "bytes": 36681
+  },
+  "storage_plan_groundnut_datia_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "groundnut",
+    "district": "Datia",
+    "state": "mp",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "1fcb9aaf03211e8162876264c4592707d5d9be65d5b36343bfecdd9033baeb54",
+   "bytes": 36294
+  },
+  "storage_plan_mataki_sangli_loan_60_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "en",
+    "loan_due_in_days": 60
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "fc7c3a06733418a40aab421445314b3ad629c3e4f29a644d87c562b3da8836ee",
+   "bytes": 41977
+  },
+  "storage_plan_mataki_sangli_loan_60_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "mr",
+    "loan_due_in_days": 60
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "22d9445f6aacc0ac9288e15781cfc26e5b16df4e89be457d9be1ed541170ab49",
+   "bytes": 50622
+  },
+  "storage_plan_mataki_sangli_loan_60_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "hi",
+    "loan_due_in_days": 60
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "426d9838b94c9c99de7e4460e1712a448f03eef4b0de2f6debb869c864a7a8cc",
+   "bytes": 50073
+  },
+  "storage_plan_mataki_sangli_loan_30_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "en",
+    "loan_due_in_days": 30
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "dbd669b0f25a9a3856dbea6cf3f63844dabe2d8aed806c80eb93cc2b05d8fa15",
+   "bytes": 39617
+  },
+  "storage_plan_mataki_sangli_loan_30_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "mr",
+    "loan_due_in_days": 30
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "f22d75ec3359b1588ce7ca64962a79f861592372dc935813f89b2876616c07dd",
+   "bytes": 47186
+  },
+  "storage_plan_mataki_sangli_loan_30_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "hi",
+    "loan_due_in_days": 30
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-01",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "2ef793b8d56e986e98097b6e90f723e4d525fb1ea80b8386e277c1c2dc6bb065",
+   "bytes": 46641
   }
  }
 }

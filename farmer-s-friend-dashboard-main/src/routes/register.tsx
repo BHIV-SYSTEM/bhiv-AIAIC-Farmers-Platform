@@ -251,6 +251,7 @@ function RegisterPage() {
           anyLabel={t("aiaic.account.choose_district")}
           options={list.map((d) => d.key)}
           display={(k) => names[k] ?? k}
+          onUnmatched={(words) => void scan.refuse(words, activeLang, "", () => undefined)}
           value={district}
           onChange={setDistrict}
         />

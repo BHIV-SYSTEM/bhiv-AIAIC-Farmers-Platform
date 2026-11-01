@@ -11,7 +11,7 @@ import { useI18n } from "@/lib/i18n";
 
 import { ColdStoresPanel } from "./ColdStoresPanel";
 import { StoragePriceChart } from "./StoragePriceChart";
-import { KeyTiles, VerdictLine } from "./StorageTiles";
+import { KeyTiles, LoanAsk, VerdictLine } from "./StorageTiles";
 import { WastagePanel } from "./WastagePanel";
 
 /*
@@ -20,7 +20,14 @@ import { WastagePanel } from "./WastagePanel";
  * holding the card's other warehouses, its rule, assumptions and sources. Display only: every decision is AIAIC's, every
  * sentence and figure AIAIC's in the language asked; this file adds the frame's few words.
  */
-export function StorageAnswer({ plan }: { plan: StoragePlan }) {
+export function StorageAnswer({
+  plan,
+  onLoan,
+}: {
+  plan: StoragePlan;
+  /** Asks the plan again with what the farmer said of a loan; a page with no such question passes nothing. */
+  onLoan?: (dueInDays: number | null) => void;
+}) {
   const { t } = useI18n();
   const [head, ...tiles] = plan.indicators;
   const card = plan.card;
@@ -35,6 +42,7 @@ export function StorageAnswer({ plan }: { plan: StoragePlan }) {
       data-code={card?.verdict.code}
     >
       {head ? <VerdictLine head={head} card={card} /> : null}
+      {plan.loan && onLoan ? <LoanAsk loan={plan.loan} onChoose={onLoan} /> : null}
       <KeyTiles tiles={tiles} />
       {plan.lang_note ? (
         <p className="text-sm text-muted-foreground" data-testid="store-lang-note">

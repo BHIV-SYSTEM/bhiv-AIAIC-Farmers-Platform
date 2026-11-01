@@ -28,6 +28,8 @@ export type FarmerAdviceSummary = {
   price_compare?: PriceCompare | undefined;
   /** The first source the answer names, with its date. */
   source?: SummarySource | undefined;
+  /** The crop and place in the reader's language. */
+  subject?: { crop?: string | undefined; place?: string | undefined } | undefined;
 };
 
 export type FarmerAdviceCard = {
@@ -152,6 +154,19 @@ export const getFarmerAdvice = createServerFn({ method: "GET" })
                       typeof c.summary.decision_id === "string" ? c.summary.decision_id : undefined,
                     price_compare: priceCompareOf(c.summary.price_compare) ?? undefined,
                     source: summarySourceOf(c.summary.sections) ?? undefined,
+                    subject:
+                      c.summary.subject && typeof c.summary.subject === "object"
+                        ? {
+                            crop:
+                              typeof c.summary.subject.crop === "string"
+                                ? c.summary.subject.crop
+                                : undefined,
+                            place:
+                              typeof c.summary.subject.place === "string"
+                                ? c.summary.subject.place
+                                : undefined,
+                          }
+                        : undefined,
                   }
                 : undefined,
             abstained: typeof c.abstained === "boolean" ? c.abstained : undefined,
