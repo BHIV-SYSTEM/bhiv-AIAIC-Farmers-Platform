@@ -64,6 +64,7 @@ import {
   planHolds,
   planShown,
   quantityFits,
+  quantityTyped,
   searchOf,
   warehousePlaces,
   type StoreChoice,
@@ -156,25 +157,19 @@ const router = createRouter({
 });
 
 /** A part of a page in English, with a router and a query cache around it, its texts joined. */
-function page(el: ReactElement, queries?: QueryClient): string {
+function page(el: ReactElement, queries?: QueryClient, lang: "en" | "mr" | "hi" = "en"): string {
   const withQueries = createElement(QueryClientProvider, {
     client: queries ?? new QueryClient(),
-    children: createElement(I18nProvider, { children: el }),
+    children: createElement(I18nProvider, { initialLang: lang, children: el }),
   });
   return renderToString(
     createElement(RouterContextProvider, { router: router as never, children: withQueries }),
   ).replaceAll("<!-- -->", "");
 }
 
-/** The same page in another language: the provider starts in English, and its dictionary is that language's for this render. */
+/** The same page in another language. */
 function pageIn(lang: "mr" | "hi", el: ReactElement): string {
-  const english = DICTS.en;
-  DICTS.en = DICTS[lang];
-  try {
-    return page(el);
-  } finally {
-    DICTS.en = english;
-  }
+  return page(el, undefined, lang);
 }
 
 /** What a page says: its texts, one to a line, the chart's text alternative and the table's cells included. */
@@ -918,6 +913,46 @@ test("S31 step 3: chips of 10, 25, 50 and 100 quintals, Other, and Skip for the 
   ok(typed.includes('data-testid="store-qty-typed"'), "a kept 37 opens the box");
   ok(typed.includes('value="37"') && typed.includes("<label"), "with a real label");
   ok(typed.includes('inputMode="decimal"'));
+});
+
+test("S46 the Other box keeps what is typed: anything but a plain number is read for distress before the quantity is used", () => {
+  // The walk of 1 Nov 2026, a real browser: this box kept only digits, so "I want to end my life" vanished as it was typed, its
+  // button stayed grey and no helpline could come (the platform's rule D-105). The browser walk shows the crisis card now.
+  assert.deepEqual(quantityTyped("37"), { q: 37, fits: true, words: false });
+  assert.deepEqual(quantityTyped(" 37.5 "), { q: 37.5, fits: true, words: false });
+  assert.deepEqual(quantityTyped("37.5kg"), { q: 37.5, fits: true, words: true });
+  assert.deepEqual(quantityTyped("I want to end my life"), { q: null, fits: false, words: true });
+  assert.deepEqual(
+    quantityTyped("100001"),
+    { q: 100001, fits: false, words: false },
+    "out of range: its sentence, no scan",
+  );
+  assert.equal(
+    quantityTyped("3 acres, I want to end my life").words,
+    true,
+    "a crisis beside a number",
+  );
+  assert.equal(quantityTyped("मी आत्महत्या करणार").words, true, "in Devanagari");
+  assert.equal(quantityTyped("").words, false);
+  const src = (file: string) => fs.readFileSync(path.join(here, "../src", file), "utf-8");
+  ok(
+    !src("components/farm/aiaic/storage/StorageSteps.tsx").includes('.replace(/[^0-9.]/g, "")'),
+    "the box itself drops nothing",
+  );
+  const route = src("routes/storage.tsx");
+  ok(
+    route.includes("onWords=") && route.includes("useScanBeforeRefusing()"),
+    "the page has AIAIC read the words",
+  );
+  ok(route.includes('raise?.(problem("crisis"'), "and AIAIC's crisis card takes the whole page");
+});
+
+test("S47 the chart's key writes the latest price's day as the apps do, never an ISO day", () => {
+  const html = page(createElement(MonthsChart, { prices: STORE.prices }));
+  ok(html.includes("24 Sep 2026"), "the day as the apps write it");
+  ok(!/\d{4}-\d{2}-\d{2}/.test(html), "no ISO day on the chart");
+  const marathi = pageIn("mr", createElement(MonthsChart, { prices: STORE_MR.prices }));
+  ok(marathi.includes("24/9/2026") && !/\d{4}-\d{2}-\d{2}/.test(marathi), "and in Marathi");
 });
 
 test("S32 a finished step folds to one line with a Change button; aria-current names the open step alone", () => {

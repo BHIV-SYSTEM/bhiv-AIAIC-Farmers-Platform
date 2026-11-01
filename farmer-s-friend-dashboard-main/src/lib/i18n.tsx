@@ -1440,8 +1440,15 @@ type I18nValue = {
 
 const I18nContext = createContext<I18nValue | null>(null);
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+export function I18nProvider({
+  children,
+  initialLang = "en",
+}: {
+  children: ReactNode;
+  /** The first render's language: English on every page; a test of a page in another language names it. */
+  initialLang?: Lang;
+}) {
+  const [lang, setLangState] = useState<Lang>(initialLang);
 
   // Read stored preference after hydration so server and client first render match.
   useEffect(() => {

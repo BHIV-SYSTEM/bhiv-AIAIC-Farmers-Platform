@@ -109,6 +109,17 @@ export const MAX_QUANTITY_Q = 100_000;
 export const quantityFits = (q: unknown): q is number =>
   typeof q === "number" && Number.isFinite(q) && q > 0 && q <= MAX_QUANTITY_Q;
 
+/**
+ * What the "Other" box holds, read from a copy: the box keeps what was typed. `words`: anything but a plain number, which AIAIC
+ * reads for distress before the quantity is used (the platform's rule D-105: no box is blind to a person in crisis).
+ */
+export function quantityTyped(typed: string): { q: number | null; fits: boolean; words: boolean } {
+  const said = typed.trim();
+  const digits = said.replace(/[^0-9.]/g, "");
+  const q = digits === "" ? null : Number(digits);
+  return { q, fits: quantityFits(q), words: /[^\d.\s]/.test(said) };
+}
+
 /** What the page has been told so far: `region` is the district's key, `taluka` empty for the whole district. */
 export type StoreChoice = {
   state: Estate;

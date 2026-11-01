@@ -1,7 +1,8 @@
 import { BarChart3, ChevronDown } from "lucide-react";
 import { useState, type PointerEvent, type ReactNode } from "react";
 
-import { dayOf, type StorageMonth, type StoragePrices, type StorageYear } from "@/lib/aiaic-trade";
+import { dayLabel } from "@/lib/aiaic-analysis";
+import type { StorageMonth, StoragePrices, StorageYear } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -173,7 +174,7 @@ function SmallFold({
 }
 
 export function MonthsChart({ prices }: { prices: StoragePrices }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [pointed, setPointed] = useState<number | null>(null);
   const rows = prices.months ?? [];
   if (!rows.length)
@@ -391,7 +392,9 @@ export function MonthsChart({ prices }: { prices: StoragePrices }) {
           { mark: "band", label: t("aiaic.store.chart.band") },
           best ? { mark: "up", label: t("aiaic.store.chart.best") } : null,
           low ? { mark: "down", label: t("aiaic.store.chart.lowest") } : null,
-          now ? { mark: "dot", label: t("aiaic.store.chart.now", { day: dayOf(now.day) }) } : null,
+          now
+            ? { mark: "dot", label: t("aiaic.store.chart.now", { day: dayLabel(now.day, lang) }) }
+            : null,
         ]}
       />
     </>

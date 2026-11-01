@@ -17,7 +17,9 @@ import {
   StepRow,
   type ListRead,
 } from "@/components/farm/aiaic/storage/StorageSteps";
+import { useRaiseCrisis } from "@/lib/aiaic-crisis";
 import { farmSearchSchema } from "@/lib/aiaic-query";
+import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import {
   choiceFrom,
   cropIn,
@@ -31,7 +33,7 @@ import {
   type StoreQuantity,
   type StoreStep,
 } from "@/lib/aiaic-storage";
-import { quintalWords } from "@/lib/aiaic-trade";
+import { problem, quintalWords } from "@/lib/aiaic-trade";
 import { getTripTalukas } from "@/lib/aiaic-trade.functions";
 import { displayName } from "@/lib/catalog-query";
 import { loadFarm, saveFarm, sameName } from "@/lib/farm-storage";
@@ -96,6 +98,13 @@ function StorageFlow() {
   // the saved farm lives in the browser, so it is read after hydration; until then the page says it is reading
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState<StoreStep | null>(null);
+
+  // Words typed where a number was asked: AIAIC reads them for distress, and its crisis card takes the whole page (`CrisisFirst`).
+  const scan = useScanBeforeRefusing();
+  const raise = useRaiseCrisis();
+  useEffect(() => {
+    if (scan.inCrisis) raise?.(problem("crisis", { crisis: scan.crisis }));
+  }, [scan.inCrisis, scan.crisis, raise]);
 
   useEffect(() => {
     setChoice(choiceFrom(search, loadFarm()));
@@ -285,7 +294,11 @@ function StorageFlow() {
           onChange={change(3)}
           focusRef={heading}
         >
-          <QuantityStep value={quantity} onChoose={chooseQuantity} />
+          <QuantityStep
+            value={quantity}
+            onChoose={chooseQuantity}
+            onWords={(words) => scan.refuse(words, lang, "", () => undefined)}
+          />
         </StepRow>
         <StepRow
           n={4}

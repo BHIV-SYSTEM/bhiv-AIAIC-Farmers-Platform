@@ -1,12 +1,12 @@
 import { ArrowRight, Check, Loader2, RefreshCw } from "lucide-react";
-import { useState, type FormEvent, type ReactNode, type Ref } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode, type Ref } from "react";
 
 import { TalukaSelect } from "@/components/farm/aiaic/TalukaSelect";
 import {
   EXAMPLE,
   QUANTITY_CHIPS,
   cropsOffered,
-  quantityFits,
+  quantityTyped,
   type StoreChoice,
   type StoreQuantity,
 } from "@/lib/aiaic-storage";
@@ -391,24 +391,49 @@ export function CropStep({
   );
 }
 
-/** Step 3: a tap finishes it. `Other` opens one box that keeps only digits and a dot; Skip uses AIAIC's labelled example. */
+/** How long a box waits after the last key before its words are read (never per key), as the dashboard's boxes do. */
+const WORDS_PAUSE_MS = 1200;
+
+/**
+ * Step 3: a tap finishes it. `Other` opens one box; Skip uses AIAIC's labelled example.
+ *
+ * NO BOX IS BLIND TO A PERSON IN CRISIS (the platform's rule D-105; the walk of 1 Nov 2026). This box kept only digits, so words
+ * typed in it vanished, its button stayed grey and no helpline could come. It now keeps what is typed, reads the number from a
+ * copy, and hands anything but a plain number to `onWords`, after a pause and on the button, before the quantity is used; the
+ * page has AIAIC read it (`/safety/check`, which keeps nothing). A number out of range still leaves the button grey.
+ */
 export function QuantityStep({
   value,
   onChoose,
+  onWords,
 }: {
   value: StoreQuantity | null;
   onChoose: (q: StoreQuantity) => void;
+  onWords?: (words: string) => Promise<void> | void;
 }) {
   const { t } = useI18n();
   const kept = typeof value === "number" ? value : null;
   const onChip = (QUANTITY_CHIPS as readonly number[]).includes(kept ?? -1);
   const [other, setOther] = useState(kept !== null && !onChip);
   const [typed, setTyped] = useState(kept !== null && !onChip ? String(kept) : "");
-  const q = typed === "" ? null : Number(typed);
-  const fits = quantityFits(q);
-  const use = (e: FormEvent) => {
+  const said = typed.trim();
+  const { q, fits, words } = quantityTyped(typed);
+  const read = useRef("");
+  const readWords = async () => {
+    if (read.current === said) return;
+    read.current = said;
+    await onWords?.(said);
+  };
+  useEffect(() => {
+    if (!words) return undefined;
+    const id = setTimeout(() => void readWords(), WORDS_PAUSE_MS);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [said, words]);
+  const use = async (e: FormEvent) => {
     e.preventDefault();
-    if (quantityFits(q)) onChoose(q);
+    if (words) await readWords();
+    if (fits && q !== null) onChoose(q);
   };
   return (
     <>
@@ -436,7 +461,7 @@ export function QuantityStep({
         />
       </div>
       {other ? (
-        <form className="space-y-2" onSubmit={use}>
+        <form className="space-y-2" onSubmit={(e) => void use(e)}>
           <label className="block">
             <span className="text-base font-bold text-foreground">
               {t("aiaic.store.qty.other_label")}
@@ -444,7 +469,7 @@ export function QuantityStep({
             <input
               inputMode="decimal"
               value={typed}
-              onChange={(e) => setTyped(e.target.value.replace(/[^0-9.]/g, ""))}
+              onChange={(e) => setTyped(e.target.value)}
               className="mt-1.5 block min-h-14 w-full rounded-2xl border-2 border-input bg-background px-4 text-xl font-bold text-foreground outline-none focus:border-ring"
               data-testid="store-qty-typed"
             />
@@ -460,7 +485,7 @@ export function QuantityStep({
           ) : null}
           <button
             type="submit"
-            disabled={!fits}
+            disabled={!fits && !words}
             className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-primary px-5 text-lg font-extrabold text-primary-foreground shadow-md hover:bg-primary/90 disabled:opacity-60"
             data-testid="store-qty-use"
           >
