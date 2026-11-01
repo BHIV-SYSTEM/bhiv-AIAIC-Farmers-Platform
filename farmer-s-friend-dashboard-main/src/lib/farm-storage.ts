@@ -69,6 +69,20 @@ export function saveFarm(farm: SavedFarm): void {
   }
 }
 
+/** A value of the saved farm a list no longer holds goes: words left by an older page do not stay on a phone a family may share. */
+export function forgetFarmValues(keys: readonly (keyof SavedFarm)[]): void {
+  if (!canUseStorage()) return;
+  const saved = loadFarm();
+  if (!saved) return;
+  const left = { ...saved };
+  for (const key of keys) delete left[key];
+  try {
+    window.localStorage.setItem(FARM_KEY, JSON.stringify(left));
+  } catch {
+    /* storage full or blocked */
+  }
+}
+
 export function clearFarm(): void {
   if (!canUseStorage()) return;
   try {

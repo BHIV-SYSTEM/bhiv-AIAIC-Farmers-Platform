@@ -3,6 +3,7 @@ import { AlertTriangle, ChevronRight, RotateCcw, Warehouse } from "lucide-react"
 import { useEffect, useState } from "react";
 
 import { LanguageSwitcher } from "@/components/farm/LanguageSwitcher";
+import { useAddressNames } from "@/lib/aiaic-address";
 import { loadFarm, type SavedFarm } from "@/lib/farm-storage";
 import { useI18n } from "@/lib/i18n";
 
@@ -27,8 +28,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [saved, setSaved] = useState<SavedFarm | null>(null);
+  // The saved crop and district as the lists call them: never the raw keys, and nothing the lists do not hold (F11, F12).
+  const place = useAddressNames(saved ?? {}, lang as "en" | "mr" | "hi");
 
   // Saved farm lives in the browser, so read it after hydration.
   useEffect(() => {
@@ -73,7 +76,7 @@ function Home() {
           <span className="min-w-0 flex-1 truncate">
             {t("home.continue")}
             <span className="block truncate text-sm font-semibold opacity-90 sm:text-base">
-              {[saved.crop, saved.region].filter(Boolean).join(" • ")}
+              {[place.crop, place.district].filter(Boolean).join(" • ")}
             </span>
           </span>
         </Link>

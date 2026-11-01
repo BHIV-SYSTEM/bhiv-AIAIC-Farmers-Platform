@@ -42,6 +42,9 @@ export function BigSelect({
       : options;
   }, [options, query, show]);
 
+  // A value the list does not hold is never printed (the audit of 1 Nov 2026, F12): an address or a saved farm can hold any words.
+  const held = options.some((o) => o.toLowerCase() === value.toLowerCase());
+
   const unmatched = query.trim() !== "" && filtered.length === 0;
   useEffect(() => {
     if (!unmatched || !onUnmatched) return undefined;
@@ -61,8 +64,8 @@ export function BigSelect({
         aria-expanded={open}
         className="mt-2 flex min-h-14 w-full items-center justify-between gap-2.5 rounded-2xl border-2 border-input bg-card px-3.5 text-left text-lg font-semibold text-foreground sm:min-h-16 sm:px-4 sm:text-xl"
       >
-        <span className={cn("min-w-0 flex-1 truncate", value ? "" : "text-muted-foreground")}>
-          {value ? show(value) : anyLabel}
+        <span className={cn("min-w-0 flex-1 truncate", held ? "" : "text-muted-foreground")}>
+          {held ? show(value) : anyLabel}
         </span>
         {open ? (
           <ChevronUp aria-hidden className="size-6 shrink-0 sm:size-7" />

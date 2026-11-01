@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
@@ -9,7 +9,11 @@ import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
 import { CropSignals } from "@/components/farm/aiaic/CropSignals";
 import { PriceBrief } from "@/components/farm/aiaic/PriceBrief";
 import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
+import { useAddressNames } from "@/lib/aiaic-address";
 import { FOR_SERVICE } from "@/lib/aiaic-analysis";
+import { useRaiseCrisis } from "@/lib/aiaic-crisis";
+import { problem } from "@/lib/aiaic-trade";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
 import { StorageVerdictCard } from "@/components/farm/aiaic/StorageVerdictCard";
@@ -22,9 +26,7 @@ import {
   FileWarning,
   Info,
   Phone,
-  PhoneCall,
   SearchX,
-  ShieldAlert,
   Tag,
   Warehouse,
 } from "lucide-react";
@@ -83,6 +85,15 @@ export const Route = createFileRoute("/advice/$service")({
 });
 
 function AdviceServicePage() {
+  const search = Route.useSearch();
+  return (
+    <FarmGate search={search}>
+      <AdviceAnswer />
+    </FarmGate>
+  );
+}
+
+function AdviceAnswer() {
   const { service } = Route.useParams();
   const search = Route.useSearch();
   const { t, lang } = useI18n();
@@ -150,6 +161,15 @@ function AdviceServicePage() {
   const item = result?.ok ? result.items[search.i ?? 0] : undefined;
   const matchedCard = farmerAdviceQuery.data?.cards?.find((c) => c.service === service);
 
+  // Her crop and district as the lists call them, in her language: never the raw keys (the audit of 1 Nov 2026, F11).
+  const place = useAddressNames(search, activeLang, matchedCard?.summary?.subject);
+  const distress = Boolean(farmerAdviceQuery.data?.distress);
+  // AIAIC's crisis answer takes the page, by the one card: never a banner above money cards (F12).
+  const raise = useRaiseCrisis();
+  useEffect(() => {
+    if (distress) raise?.(problem("crisis"));
+  }, [distress, raise]);
+
   return (
     <div className="mx-auto w-full max-w-xl px-3.5 pb-20 pt-5 sm:px-4 sm:pt-6">
       <Link
@@ -169,36 +189,6 @@ function AdviceServicePage() {
         />
         <span className="break-words">{t(`service.${service}`)}</span>
       </h1>
-
-      {/* Distress Alert if flagged by backend */}
-      {farmerAdviceQuery.data?.distress ? (
-        <div className="mt-4 rounded-2xl border-2 border-destructive bg-danger-soft p-4 text-danger-foreground shadow-md sm:rounded-3xl sm:p-5">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="size-6 shrink-0 text-destructive sm:size-7" />
-            <h2 className="break-words text-lg font-extrabold sm:text-xl">
-              {t("advice.distress.title")}
-            </h2>
-          </div>
-          <p className="mt-2 break-words text-sm font-bold sm:text-base">
-            {farmerAdviceQuery.data.distress_message || t("advice.distress.fallback")}
-          </p>
-          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <a
-              href="tel:18001801551"
-              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground shadow hover:opacity-90"
-            >
-              <PhoneCall className="size-4 shrink-0" />
-              <span>Kisan Call Centre (1800-180-1551)</span>
-            </a>
-            <a
-              href="tel:14416"
-              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-destructive px-3 text-center text-sm font-bold text-destructive hover:bg-destructive/10"
-            >
-              Tele-MANAS (14416)
-            </a>
-          </div>
-        </div>
-      ) : null}
 
       <div className="mt-6">
         {query.isPending ? (
@@ -223,7 +213,9 @@ function AdviceServicePage() {
             matchedCard={matchedCard}
             priceSeries={priceSeriesQuery.data}
             askAHuman={farmerAdviceQuery.data?.ask_a_human}
-            distress={Boolean(farmerAdviceQuery.data?.distress)}
+            distress={distress}
+            cropShown={place.crop}
+            districtShown={place.district}
           />
         )}
       </div>
@@ -239,6 +231,8 @@ function ItemDetail({
   priceSeries,
   askAHuman,
   distress = false,
+  cropShown,
+  districtShown,
 }: {
   item: IntelligenceItem;
   service: Service;
@@ -253,6 +247,9 @@ function ItemDetail({
   askAHuman?: AskAHuman | undefined;
   /** Words of distress were typed: the crisis box leads, and no money card is added below it. */
   distress?: boolean;
+  /** Her crop and district as the lists call them; empty until read. */
+  cropShown: string;
+  districtShown: string;
 }) {
   const { t, lang } = useI18n();
   const [showTechnical, setShowTechnical] = useState(false);
@@ -271,9 +268,7 @@ function ItemDetail({
     : (item.known_unknowns ?? []);
   const observed = matchedCard?.as_of || observedAt(item);
   const age = observed ? daysOld(observed) : null;
-  const subject = [item.subject?.crop || farm.crop, item.subject?.region || farm.region]
-    .filter(Boolean)
-    .join(" • ");
+  const subject = [cropShown, districtShown].filter(Boolean).join(" • ");
   // For the transport card on a mandi answer: her crop, and the mandi this answer is about (the one she asked for,
   // else the one the engine's own label names, "Sell at APMC Savner"); no mandi named: the card's own default.
   const transportCrop = farm.crop || item.subject?.crop || "";
@@ -357,7 +352,7 @@ function ItemDetail({
 
         {/* No chart above: AIAIC's one line on why it holds no price line (never a second chart of the same) */}
         {service === "market" && !distress && priceSeries && !priceSeries.available ? (
-          <PriceBrief series={priceSeries} crop={farm.crop || item.subject?.crop || ""} />
+          <PriceBrief series={priceSeries} crop={cropShown} />
         ) : null}
 
         {/* What AIAIC holds about her crop here, this answer's own facts first (AIAIC's FOR_SERVICE) */}
@@ -374,7 +369,7 @@ function ItemDetail({
         {service === "market" && transportCrop && farm.region && !distress ? (
           <TransportCostCard
             crop={transportCrop}
-            cropLabel={item.subject?.crop || transportCrop}
+            cropLabel={cropShown}
             quantityQ={10}
             fromState={farm.state}
             fromDistrict={farm.region}

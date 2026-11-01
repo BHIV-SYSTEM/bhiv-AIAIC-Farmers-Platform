@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Loading } from "@/components/farm/aiaic/AiaicBits";
-import { CrisisFirst } from "@/components/farm/aiaic/CrisisFirst";
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
 import {
   PlanEmpty,
   PlanFailed,
@@ -27,6 +27,7 @@ import {
   farmWith,
   firstToDo,
   planShown,
+  regionStands,
   searchOf,
   useStoragePlan,
   type StoreChoice,
@@ -35,7 +36,6 @@ import {
 } from "@/lib/aiaic-storage";
 import { problem, quintalWords } from "@/lib/aiaic-trade";
 import { getTripTalukas } from "@/lib/aiaic-trade.functions";
-import { displayName } from "@/lib/catalog-query";
 import { loadFarm, saveFarm, sameName } from "@/lib/farm-storage";
 import { useI18n } from "@/lib/i18n";
 import { getPlacesCrops, getPlacesDistricts } from "@/lib/places.functions";
@@ -75,8 +75,9 @@ export const Route = createFileRoute("/storage")({
 
 function StoragePage() {
   const { t } = useI18n();
+  const search = Route.useSearch();
   return (
-    <CrisisFirst>
+    <FarmGate search={search}>
       <div className="mx-auto w-full max-w-3xl px-3.5 pb-20 pt-5 sm:px-4 sm:pt-6">
         <h1 className="break-words text-2xl font-extrabold text-foreground sm:text-3xl">
           {t("aiaic.store.title")}
@@ -86,7 +87,7 @@ function StoragePage() {
         </p>
         <StorageFlow />
       </div>
-    </CrisisFirst>
+    </FarmGate>
   );
 }
 
@@ -138,10 +139,22 @@ function StorageFlow() {
     [cropsRead.data],
   );
   const firstPage = cropsRead.data?.ok ? cropsRead.data.firstPage : [];
+  const talukaRows = talukasRead.data?.ok ? talukasRead.data.data.talukas : null;
+
+  // A district stays only while its state's list holds it, as a crop does, and a taluka while its district's does: no step opens on
+  // words from the address or the saved farm, and nothing of them is printed or saved (the audit of 1 Nov 2026, F12).
+  const regionStays = regionStands(districtRows, region);
+  useEffect(() => {
+    if (!ready || regionStays) return;
+    setChoice((c) => ({ ...c, region: "", taluka: "", crop: "" }));
+  }, [ready, regionStays]);
+  useEffect(() => {
+    if (taluka && talukaRows && !talukaRows.some((r) => sameName(r.taluka, taluka)))
+      setChoice((c) => ({ ...c, taluka: "" }));
+  }, [taluka, talukaRows]);
 
   // A crop stays only while the district's own list offers it: until that is known no step opens and nothing is asked.
-  // WORDS IN THE ADDRESS ARE READ BEFORE THEY ARE DROPPED (the audit of 1 Nov 2026, F12): `/storage?crop=<words>` went to no reader, while
-  // the same words in `region=` and `taluka=` reached AIAIC's crisis card. The scan comes first, then the step opens.
+  // WHAT IS DROPPED IS READ FIRST (F12): the page's gate has read the address, and this reads what a saved farm brought.
   const cropStays = cropStands(cropRows, crop);
   useEffect(() => {
     if (!ready || cropStays) return;
@@ -151,12 +164,21 @@ function StorageFlow() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, cropStays]);
 
-  const settling = !ready || !cropStays || Boolean(region && crop && cropsRead.isPending);
+  const settling =
+    !ready || !regionStays || !cropStays || Boolean(region && crop && cropsRead.isPending);
   const step = open ?? (settling ? null : firstToDo(choice));
 
+  // Saved only once the lists hold all of it: `saveFarm` never keeps words (F12).
+  const held =
+    Boolean(region) &&
+    districtRows.some((d) => sameName(d.key, region)) &&
+    (!crop || Boolean(cropIn(cropRows, crop))) &&
+    (!taluka || Boolean(talukaRows?.some((r) => sameName(r.taluka, taluka))));
+  useEffect(() => {
+    if (ready && held) saveFarm(farmWith(loadFarm(), choice));
+  }, [ready, choice, held]);
   useEffect(() => {
     if (!ready) return;
-    if (region) saveFarm(farmWith(loadFarm(), choice));
     const address = searchOf(choice);
     if (JSON.stringify(address) !== JSON.stringify(search))
       void navigate({ to: "/storage", search: address, replace: true, resetScroll: false });
@@ -193,13 +215,9 @@ function StorageFlow() {
   const answer = shown.show === "answer" ? shown.plan : null;
 
   const districtName =
-    districtRows.find((d) => sameName(d.key, region))?.name ||
-    answer?.district_shown ||
-    (lang === "en" ? displayName(region) : "");
-  const talukaRow = talukasRead.data?.ok
-    ? talukasRead.data.data.talukas.find((r) => sameName(r.taluka, taluka))
-    : null;
-  const talukaName = (talukaRow?.names && talukaRow.names[lang]) || taluka;
+    districtRows.find((d) => sameName(d.key, region))?.name || answer?.district_shown || "";
+  const talukaRow = talukaRows?.find((r) => sameName(r.taluka, taluka));
+  const talukaName = talukaRow ? (talukaRow.names && talukaRow.names[lang]) || taluka : "";
   const whereLine = [
     talukaName,
     districtName,
@@ -207,8 +225,7 @@ function StorageFlow() {
   ]
     .filter(Boolean)
     .join(", ");
-  const cropLine =
-    cropIn(cropRows, crop)?.name || answer?.crop_shown || (lang === "en" ? displayName(crop) : "");
+  const cropLine = cropIn(cropRows, crop)?.name || answer?.crop_shown || "";
   const exampleQ = answer?.card?.quantity_q;
   const quantityLine =
     typeof quantity === "number"

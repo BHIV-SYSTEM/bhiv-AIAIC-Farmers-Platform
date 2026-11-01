@@ -34,14 +34,16 @@ export const verdictMark = (code: string | null | undefined) =>
 export const KEY_ASSUMED = ["loss_assumed", "quantity_example"];
 
 /**
- * What a verdict's reader sees without a tap: the two above, and, under a store verdict, that no loan was asked about (the audit of
- * 1 Nov 2026, F9: a farmer whose loan falls due in two weeks read "Store 4 months" with no word of it above the fold).
+ * What a verdict's reader sees without a tap: the two above, and, where the figures lean to storing, said as Store or as Not sure, that
+ * no loan was asked about (the audit of 1 Nov 2026, F9: a farmer whose loan falls due in two weeks read "Store 4 months" with no word of
+ * it above the fold). `leans` (round 2, F1): a check on `code` alone would go silent on the very answers it was written for.
  */
-export const keyAssumed = (v: Pick<StorageVerdict["verdict"], "code" | "assumptions">) =>
+export const keyAssumed = (v: Pick<StorageVerdict["verdict"], "code" | "leans" | "assumptions">) =>
   (v.assumptions ?? []).filter(
     (a) =>
       a.text &&
-      (KEY_ASSUMED.includes(a.code) || (v.code === "store" && a.code === "no_loan_asked")),
+      (KEY_ASSUMED.includes(a.code) ||
+        ((v.leans === "store" || v.code === "store") && a.code === "no_loan_asked")),
   );
 
 /** A map's places from a storage verdict: each listed warehouse that has a point, the one the verdict names `chosen`. */
@@ -198,6 +200,14 @@ export function searchOf(c: StoreChoice): FarmSearch {
 /** The crop of the district's list a saved or linked name means: by AIAIC's label, or by its plain English name. */
 export const cropIn = (crops: readonly CropItem[], name: string | null | undefined) =>
   crops.find((c) => sameName(c.crop, name) || sameName(c.name_en, name)) ?? null;
+
+/**
+ * False for a district its state's list does not hold: words in the address or a saved farm. An empty list decides nothing, as below.
+ */
+export const regionStands = (districts: readonly { key: string; name: string }[], name: string) =>
+  !name ||
+  districts.length === 0 ||
+  districts.some((d) => sameName(d.key, name) || sameName(d.name, name));
 
 /**
  * False for a crop the district's own list does not offer (a change of district, or a crop saved long ago): it is not asked

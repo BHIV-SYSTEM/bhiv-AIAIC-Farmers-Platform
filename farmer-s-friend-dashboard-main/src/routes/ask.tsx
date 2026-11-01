@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, Info, MapPin, WifiOff } from "lucide-react";
 
 import { BigSelect } from "@/components/farm/BigSelect";
-import { CrisisFirst } from "@/components/farm/aiaic/CrisisFirst";
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
 import {
   catalogOptions,
   catalogQueryOptions,
@@ -14,10 +14,12 @@ import {
 } from "@/lib/catalog-query";
 import { getPlacesDistricts, getPlacesCrops } from "@/lib/places.functions";
 import { SERVICE_ICON } from "@/lib/service-icons";
-import { useHearWords, useNumberBoxHeard } from "@/lib/aiaic-heard";
+import { plainNumber, useHearWords, useNumberBoxHeard } from "@/lib/aiaic-heard";
 import { farmSearchSchema, parseServices } from "@/lib/aiaic-query";
+import { cropIn } from "@/lib/aiaic-storage";
+import { estateOf } from "@/lib/aiaic-trip";
 import { SERVICES, type Service } from "@/lib/aiaic-types";
-import { loadFarm, sameName, saveFarm } from "@/lib/farm-storage";
+import { forgetFarmValues, loadFarm, sameName, saveFarm } from "@/lib/farm-storage";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -42,25 +44,32 @@ export const Route = createFileRoute("/ask")({
 });
 
 function AskPage() {
+  const search = Route.useSearch();
   return (
-    <CrisisFirst>
+    <FarmGate search={search}>
       <AskForm />
-    </CrisisFirst>
+    </FarmGate>
   );
 }
+
+/** A land box's text as a plain number, or nothing: words in the address or the saved farm are not put back in the box (F12). */
+const landOf = (typed: string | undefined): string => {
+  const n = plainNumber(typed ?? "");
+  return n !== null && n > 0 ? (typed ?? "").trim() : "";
+};
 
 function AskForm() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const search = Route.useSearch();
 
-  const [state, setState] = useState<string>(search.state ?? "mh");
+  const [state, setState] = useState<string>(estateOf(search.state));
   const [region, setRegion] = useState(search.region ?? "");
   // HER TALUKA, RIGHT AFTER HER DISTRICT (28 Oct 2026): only the distance and the transport change
   const [taluka, setTaluka] = useState(search.taluka ?? "");
   const [crop, setCrop] = useState(search.crop ?? "");
   const [mandi, setMandi] = useState(search.mandi ?? "");
-  const [land, setLand] = useState(search.land ?? "");
+  const [land, setLand] = useState(landOf(search.land));
   const [selected, setSelected] = useState<Service[]>(parseServices(search.services));
 
   // Dynamic places query from confirmed /places/districts endpoint
@@ -136,17 +145,42 @@ function AskForm() {
     districtNameMap.get(key.toLowerCase()) || displayName(key);
   const formatCrop = (key: string) => cropNameMap.get(key.toLowerCase()) || displayName(key);
 
+  // WHAT THE LISTS DO NOT HOLD IS NOT A CHOICE (the audit of 1 Nov 2026, F12): a value from the address or the saved farm stays only
+  // while its list, once read, holds it. Words left on the phone by an older page go with it. `FarmGate` has read the address.
+  const onList = (list: readonly string[], value: string) => list.some((o) => sameName(o, value));
+  const cropListed = (value: string) =>
+    cropsQuery.data?.ok && cropsQuery.data.crops.length > 0
+      ? Boolean(cropIn(cropsQuery.data.crops, value))
+      : onList(activeOptions.crops, value);
+  useEffect(() => {
+    if (!region || !districtsQuery.data?.ok || onList(availableDistricts, region)) return;
+    setRegion("");
+    setTaluka("");
+    forgetFarmValues(["region", "crop", "mandi", "taluka", "talukaOf"]);
+  }, [region, districtsQuery.data, availableDistricts]);
+  useEffect(() => {
+    if (!crop || !cropsQuery.data?.ok || cropListed(crop)) return;
+    setCrop("");
+    forgetFarmValues(["crop"]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crop, cropsQuery.data]);
+  useEffect(() => {
+    if (!mandi || !options.live || onList(activeOptions.mandis, mandi)) return;
+    setMandi("");
+    forgetFarmValues(["mandi"]);
+  }, [mandi, options.live, activeOptions.mandis]);
+
   // Prefill from saved farm
   useEffect(() => {
     const saved = loadFarm();
     if (!saved) return;
-    if (!search.state && saved.state) setState(saved.state);
+    if (!search.state && saved.state) setState(estateOf(saved.state));
     if (!search.region && saved.region) setRegion(saved.region);
     if (!search.taluka && saved.taluka && sameName(saved.talukaOf, search.region ?? saved.region))
       setTaluka(saved.taluka);
     if (!search.crop && saved.crop) setCrop(saved.crop);
     if (!search.mandi && saved.mandi) setMandi(saved.mandi);
-    if (!search.land && saved.land) setLand(saved.land);
+    if (!search.land && landOf(saved.land)) setLand(landOf(saved.land));
     if (!search.services && saved.services) setSelected(parseServices(saved.services));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -164,25 +198,31 @@ function AskForm() {
     }
     const services = selected.length ? selected : [...SERVICES];
     const wantsMarket = services.includes("market");
-    const marketChoice = wantsMarket && mandi ? mandi : "";
+    // Only what a list holds goes on: a press before a list is read carries nothing it could not stand behind.
+    const placeHeld = onList(availableDistricts, region) ? region : "";
+    const cropHeld = crop && cropListed(crop) ? crop : "";
+    const marketChoice = wantsMarket && mandi && onList(activeOptions.mandis, mandi) ? mandi : "";
+    const talukaHeld = placeHeld ? taluka : "";
+    const landNumber = plainNumber(land);
+    const landHeld = landNumber !== null && landNumber > 0 ? String(landNumber) : "";
     saveFarm({
-      ...(region ? { region } : {}),
-      ...(crop ? { crop } : {}),
+      ...(placeHeld ? { region: placeHeld } : {}),
+      ...(cropHeld ? { crop: cropHeld } : {}),
       ...(marketChoice ? { mandi: marketChoice } : {}),
-      ...(land ? { land } : {}),
+      ...(landHeld ? { land: landHeld } : {}),
       state,
       services: services.join(","),
-      taluka: region ? taluka : "",
-      talukaOf: region && taluka ? region : "",
+      taluka: talukaHeld,
+      talukaOf: talukaHeld ? placeHeld : "",
     });
     navigate({
       to: "/result",
       search: {
-        ...(region ? { region } : {}),
-        ...(region && taluka ? { taluka } : {}),
-        ...(crop ? { crop } : {}),
+        ...(placeHeld ? { region: placeHeld } : {}),
+        ...(talukaHeld ? { taluka: talukaHeld } : {}),
+        ...(cropHeld ? { crop: cropHeld } : {}),
         ...(marketChoice ? { mandi: marketChoice } : {}),
-        ...(land ? { land } : {}),
+        ...(landHeld ? { land: landHeld } : {}),
         state,
         services: services.join(","),
       },
