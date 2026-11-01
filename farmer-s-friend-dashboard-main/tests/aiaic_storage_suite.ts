@@ -1036,6 +1036,9 @@ test("S53 a price from outside the district is said as whose it is, makes no cla
   ok(!tile.includes("Price now"), "not called the price now");
   ok(partOf(pageOf(DATIA_MR), "store-tile-price_now").includes(esc(DATIA_MR.prices!.now!.whose_text!)), "in Marathi");
   ok(!page(createElement(MonthsChart, { prices: DATIA.prices! })).includes("store-chart-now"), "not on the chart");
+  // test data: a real answer whose month is held, its price marked as from outside
+  const held = { ...STORE.prices!, now: { ...STORE.prices!.now!, outside: true } };
+  ok(!page(createElement(MonthsChart, { prices: held })).includes("store-chart-now"), "even where the month is held");
   ok(page(createElement(MonthsChart, { prices: STORE.prices! })).includes("store-chart-now"), "the district's own is");
 });
 
