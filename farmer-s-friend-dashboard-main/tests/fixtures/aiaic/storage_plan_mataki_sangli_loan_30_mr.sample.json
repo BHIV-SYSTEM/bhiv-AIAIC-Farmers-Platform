@@ -17,6 +17,7 @@
   "verdict": {
    "code": "unsure",
    "reason_code": "loan_due_first",
+   "leans": null,
    "word": "खात्री नाही",
    "text": "खात्री नाही: कोणतीही साठवण संपण्याआधीच तुमच्या कर्जाची मुदत येते",
    "tone": "neutral",

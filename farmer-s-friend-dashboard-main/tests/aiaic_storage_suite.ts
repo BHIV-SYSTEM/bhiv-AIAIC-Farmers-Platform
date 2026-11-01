@@ -4,7 +4,8 @@
  * Run:  npx tsx tests/aiaic_storage_suite.ts   (AIAIC_TEST_JUNIT=<file.xml> also writes a JUnit file)
  *
  * - The storage_plan_*.sample.json fixtures are real: what a local AIAIC answered on a test database, on the committed price
- *   slice judged at its own day (mataki in Sangli: Store; wheat and soybean in Nashik: Sell now; onion: Not sure, no published
+ *   slice judged at its own day (cotton in Dhar: Store, at Medium; tur in Akola: Sell now, at Medium; mataki in Sangli, wheat and
+ *   soybean in Nashik: Not sure, their figures leaning one way under a band of Low; tomato: Sell now by a fixed rule; onion: Not sure, no published
  *   rate, published wastage; lentil: Not sure, no recent price; wheat on the calendar: Not sure, the newest price too old).
  *   They are samples: a test database's prices, never shown to a farmer; each is the file AIAIC recorded, byte for byte
  *   (recording_manifest.sample.json, held below). places_*.json are AIAIC's recorded answers.
@@ -31,6 +32,7 @@ import { renderToString } from "react-dom/server";
 
 import { AnswerAtAGlance } from "../src/components/farm/aiaic/AnswerAtAGlance";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
+import { BigSelect } from "../src/components/farm/BigSelect";
 import { StorageCardBody } from "../src/components/farm/aiaic/StorageVerdictCard";
 import { monthRuns, monthX, wholeRupees } from "../src/components/farm/aiaic/storage/storage-chart";
 import {
@@ -65,13 +67,20 @@ import {
   planHolds,
   planShown,
   quantityFits,
+  regionStands,
   quantityTyped,
   searchOf,
   warehousePlaces,
   type StoreChoice,
 } from "../src/lib/aiaic-storage";
+import {
+  ADDRESS_KEYS,
+  addressWords,
+  farmToSave,
+  heldOfAddress,
+} from "../src/lib/aiaic-address";
 import { plainNumber } from "../src/lib/aiaic-heard";
-import { farmSearchSchema } from "../src/lib/aiaic-query";
+import { farmSearchSchema, type FarmSearch } from "../src/lib/aiaic-query";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
@@ -104,7 +113,16 @@ const sourceOf = (file: string) => fs.readFileSync(path.join(APP, file), "utf-8"
 const SOY = sample("soybean_nashik_en");
 const WHEAT = sample("wheat_nashik_en");
 const ONION = sample("onion_nashik_en");
+// mataki in Sangli reads Not sure: its figures lean to storing, under a band of Low. What was written for a store stands on it.
 const STORE = sample("mataki_sangli_en");
+// the real Store and Sell now of these prices, each at Medium
+const COTTON = sample("cotton_dhar_en");
+const COTTON_MR = sample("cotton_dhar_mr");
+const COTTON_HI = sample("cotton_dhar_hi");
+const TUR = sample("tur_akola_en");
+const TOMATO = sample("tomato_nashik_en");
+const TOMATO_MR = sample("tomato_nashik_mr");
+const TOMATO_HI = sample("tomato_nashik_hi");
 const SOY_MR = sample("soybean_nashik_mr");
 const ONION_MR = sample("onion_nashik_mr");
 const STORE_MR = sample("mataki_sangli_mr");
@@ -115,7 +133,14 @@ const NO_PRICE = sample("lentil_nashik_en");
 const TOO_OLD = sample("wheat_nashik_prices_too_old_en");
 const NO_PRICE_HI = sample("lentil_nashik_hi");
 const TOO_OLD_MR = sample("wheat_nashik_prices_too_old_mr");
-const PLANS = { mataki: STORE, soybean: SOY, wheat: WHEAT, onion: ONION };
+const PLANS = {
+  mataki: STORE,
+  soybean: SOY,
+  wheat: WHEAT,
+  onion: ONION,
+  cotton: COTTON,
+  tur: TUR,
+};
 const LANGUAGES = [
   ["mr", SOY_MR],
   ["mr", ONION_MR],
@@ -248,7 +273,14 @@ test("S1 the answer's order is the design's: verdict, tiles, prices, map, wastag
 });
 
 test("S2 the verdict line is the first indicator, large, with its note; each of the three answers keeps its code", () => {
-  const codes = { mataki: "store", soybean: "sell_now", wheat: "sell_now", onion: "unsure" };
+  const codes = {
+    mataki: "unsure",
+    soybean: "unsure",
+    wheat: "unsure",
+    onion: "unsure",
+    cotton: "store",
+    tur: "sell_now",
+  };
   for (const [name, plan] of Object.entries(PLANS)) {
     const html = page(answer(plan));
     const head = plan.indicators[0];
@@ -257,7 +289,7 @@ test("S2 the verdict line is the first indicator, large, with its note; each of 
     const line = partOf(html, "store-verdict", "store-tiles");
     assert.match(line, /text-3xl/, "large");
     ok(line.includes(esc(head.value)), `${name}: its value`);
-    ok(line.includes(esc(head.note ?? "")), `${name}: its note`);
+    ok(line.replace(/<[^>]+>/g, "").includes(esc(head.note ?? "")), `${name}: its note`);
     ok(line.includes(`data-code="${codes[name as keyof typeof codes]}"`), name);
     ok(line.includes(`data-tone="${head.tone}"`), name);
   }
@@ -980,10 +1012,10 @@ test("S48 how sure AIAIC is stands under the verdict with its reasons, in the re
   ok(STORE.card?.verdict.confidence?.band === "low", "the case the audit found");
 });
 
-test("S49 a store AIAIC is not sure of is not shown green, on the page or on the card (F2)", () => {
-  assert.equal(STORE.card?.verdict.tone, "warn");
+test("S49 a lean to store AIAIC is not sure of is not shown green, on the page or on the card (F2)", () => {
+  assert.equal(STORE.card?.verdict.tone, "neutral");
   const shown = pageOf(STORE);
-  ok(shown.includes('data-testid="store-verdict" data-tone="warn"'), "the verdict line");
+  ok(shown.includes('data-testid="store-verdict" data-tone="neutral"'), "the verdict line");
   ok(!/data-testid="store-tile-net_gain" data-tone="good"/.test(shown), "the gain tile");
   const card = page(createElement(StorageCardBody, { card: STORE.card!, unfolded: true }));
   ok(!card.includes("bg-primary/10 text-primary"), "the card's chip");
@@ -1094,7 +1126,7 @@ test("S54 the land box and every list's search box are heard; an address's crop 
   const ask = sourceOf("src/routes/ask.tsx");
   ok(/id="land"\s+type="text"/.test(ask), "the land box holds what is typed");
   ok(ask.includes("useNumberBoxHeard(land, activeLang)"), "AIAIC reads anything but a number");
-  ok(ask.includes("<CrisisFirst>"), "and its card takes the page");
+  ok(ask.includes("<FarmGate"), "and its card takes the page");
   ok(ask.includes("await readLand()"), "on the button too");
   ok((ask.match(/onUnmatched=\{hearWords\}/g) ?? []).length === 3, "every list's search box");
   const route = sourceOf("src/routes/storage.tsx");
@@ -1492,7 +1524,7 @@ test("S41 the home page, the storage advice page, the route tree and the bottom 
   const nav = sourceOf("src/components/farm/BottomNav.tsx");
   ok(nav.includes('currentPath.startsWith("/storage")'), "it belongs to the advice tab");
   const route = sourceOf("src/routes/storage.tsx");
-  ok(route.includes('createFileRoute("/storage")') && route.includes("<CrisisFirst>"));
+  ok(route.includes('createFileRoute("/storage")') && route.includes("<FarmGate"));
   ok(route.includes('to="/advice/$service"') && route.includes('service: "storage"'));
 });
 
@@ -1562,12 +1594,189 @@ test("S43 the page's first paint: its title, its four steps and the words that i
   ok(html.includes('data-testid="store-settling"'), "it says it is reading");
   for (const n of [1, 2, 3, 4]) ok(html.includes(`data-testid="store-step-${n}"`), `step ${n}`);
   ok(html.includes('data-state="todo"') && !html.includes('aria-current="step"'), "none open yet");
-  // a link's own place and crop are on the first paint, folded; the answer waits for the browser
+  // a link's address is read by AIAIC before the page mounts (F12): the first paint says it is reading, and prints nothing of it
   const link = await firstPaint("/storage?region=nashik&crop=onion&state=mh");
-  ok(partOf(link, "store-step-1-summary").includes("Nashik, Maharashtra"), "the place");
-  ok(partOf(link, "store-step-2-summary").includes("Onion"), "the crop");
-  ok(partOf(link, "store-step-3-summary").includes(">An example quantity<"), "labelled as one");
+  ok(link.includes(esc(DICTS.en["result.loading"] ?? "?")), "it says it is reading");
+  ok(!link.includes("data-testid=\"store-step-1\""), "no step on words not yet read");
   ok(!link.includes('data-testid="store-answer"'), "nothing is shown before AIAIC answers");
+});
+
+const WORDS = "जगायचे नाही आता संपवायचे आहे";
+
+test("S60 every farm page reads its whole address at one gate, every key of the schema, before anything of it mounts (F12)", async () => {
+  // every route that takes a farm address
+  const routes = fs.readdirSync(path.join(APP, "src/routes")).filter((f) => f.endsWith(".tsx"));
+  const farm = routes.filter((f) => /validateSearch: (farmSearchSchema|detailSearchSchema)/.test(sourceOf(`src/routes/${f}`)));
+  assert.deepEqual(farm.sort(), ["advice.$service.tsx", "ask.tsx", "result.tsx", "review.tsx", "storage.tsx"]);
+  for (const f of farm) {
+    const source = sourceOf(`src/routes/${f}`);
+    ok(source.includes("<FarmGate search={search}>"), `${f}: the gate, with the whole address`);
+    ok(!/<CrisisFirst>/.test(source), `${f}: one gate`);
+  }
+  // every key of the schema is read, from the schema, so a key added there needs no line here
+  assert.deepEqual([...ADDRESS_KEYS].sort(), Object.keys(farmSearchSchema.shape).sort());
+  for (const key of ["region", "taluka", "crop", "mandi", "land", "services", "state"])
+    ok(ADDRESS_KEYS.includes(key as keyof FarmSearch), key);
+  for (const key of ADDRESS_KEYS) {
+    assert.equal(addressWords({ [key]: WORDS }), WORDS, `${key} is read`);
+  }
+  assert.equal(addressWords({}), "", "an empty address asks nothing");
+  assert.equal(addressWords({ crop: "  ", region: "nashik" }), "nashik");
+  // the first paint of the page holds nothing of an address, whatever its box
+  for (const key of ADDRESS_KEYS) {
+    const html = await firstPaint(`/storage?${key}=${encodeURIComponent(WORDS)}`);
+    ok(!html.includes(WORDS), `/storage?${key}= is not printed on the first paint`);
+  }
+});
+
+const LISTS = {
+  districts: [{ key: "nashik", name: "Nashik" }] as DistrictItem[],
+  crops: [{ crop: "onion", name: "Onion", name_en: "Onion" }] as CropItem[],
+  mandis: ["lasalgaon"],
+};
+
+test("S61 what the lists do not hold is neither printed nor saved: a value of the address, in any box (F12)", () => {
+  const every = Object.fromEntries(ADDRESS_KEYS.map((k) => [k, WORDS])) as FarmSearch;
+  const held = heldOfAddress(every, LISTS);
+  ok(!JSON.stringify(held).includes(WORDS), "no box's words are held");
+  ok(!JSON.stringify(farmToSave(held)).includes(WORDS), "and none is saved");
+  const good: FarmSearch = {
+    region: "Nashik",
+    crop: "onion",
+    mandi: "Lasalgaon",
+    land: "2.5",
+    state: "mp",
+    services: "market,storage",
+  };
+  assert.deepEqual(farmToSave(heldOfAddress(good, LISTS)), good, "what the lists hold stays, as it was");
+  assert.deepEqual(
+    heldOfAddress(good, { districts: null, crops: null, mandis: null }).region,
+    undefined,
+    "a list not read holds nothing",
+  );
+  assert.equal(heldOfAddress({ land: "२" }, LISTS).land, "2", "a phone's digits are a number");
+  assert.equal(heldOfAddress({ land: "0" }, LISTS).land, undefined, "no land is no land");
+  ok(regionStands(LISTS.districts, "Nashik") && !regionStands(LISTS.districts, WORDS), "a district");
+  ok(regionStands([], WORDS), "an empty list decides nothing");
+});
+
+test("S62 no page prints or keeps an address's words: the list, the subject line, the saved farm, the cached answer's key (F12)", () => {
+  const select = page(
+    createElement(BigSelect, {
+      label: "x",
+      anyLabel: "Any crop",
+      options: ["onion"],
+      value: WORDS,
+      onChange: () => undefined,
+    }),
+  );
+  ok(!select.includes(WORDS) && select.includes("Any crop"), "a list prints only what it holds");
+  const result = sourceOf("src/routes/result.tsx");
+  ok(
+    result.includes("[cropShown, mandiShown || districtShown]") && !result.includes("{search.land"),
+    "the subject line",
+  );
+  ok(!result.includes("displayName("), "no raw key made to look like a name");
+  ok(result.includes("saveFarm(farmToSave(held))"), "the saved farm: what the lists hold");
+  ok(result.includes("if (!place.settled || isDistress) return;"), "and nothing on a crisis");
+  ok(result.includes("held.region ?? \"\"}|${held.crop"), "the cached answer's key, kept on the phone");
+  const ask = sourceOf("src/routes/ask.tsx");
+  ok(ask.includes("useState(landOf(search.land))"), "words are not put back in the land box");
+  ok(ask.includes("forgetFarmValues(["), "words left on a phone by an older page go");
+  const storage = sourceOf("src/routes/storage.tsx");
+  ok(storage.includes("if (ready && held) saveFarm"), "the storage page saves only what the lists hold");
+  ok(!storage.includes("displayName("), "and prints no raw key");
+  ok(!sourceOf("src/routes/review.tsx").includes("{search.crop ||"), "the review packet");
+});
+
+test("S63 AIAIC's crisis answer takes the page by the one card, never a banner over money cards (F12)", () => {
+  for (const file of ["src/routes/result.tsx", "src/routes/advice.$service.tsx"]) {
+    const source = sourceOf(file);
+    ok(source.includes('raise?.(problem("crisis"))'), `${file}: raised to the gate`);
+    ok(!source.includes("advice.distress.title"), `${file}: no second wording`);
+    ok(!source.includes("tel:14416"), `${file}: the helplines are the card's`);
+  }
+  const card = page(
+    createElement(CrisisOnly, { crisis: problem("crisis"), children: createElement("p", null, "money") }),
+  );
+  ok(card.includes("14416") && card.includes("1800-180-1551"), "with no list sent, the helplines stand");
+  ok(!card.includes("money"), "and the card alone");
+});
+
+test("S64 a refusal for pace is said as what it is, in three languages, never as something they did (F30)", () => {
+  assert.equal(client.refusalOf(429, { detail: "Too many" }).code, "aiaic_busy");
+  assert.equal(client.refusalOf(429, { detail: "Busy" }, "server_busy").code, "aiaic_server_busy");
+  for (const lang of ["en", "mr", "hi"] as const)
+    for (const key of ["aiaic.problem.aiaic_busy", "aiaic.problem.aiaic_server_busy"]) {
+      ok(DICTS[lang]?.[key], `${lang} ${key}`);
+      assert.notEqual(DICTS[lang]?.[key], DICTS[lang]?.["aiaic.refused.refused"]);
+    }
+  ok(/[ऀ-ॿ]/.test(DICTS.mr?.["aiaic.problem.aiaic_busy"] ?? ""), "theirs");
+  const failed = page(
+    createElement(PlanFailed, {
+      problem: problem("aiaic_busy", { status: 429 }),
+      busy: false,
+      onRetry: () => undefined,
+      advice: null,
+    }),
+    undefined,
+    "mr",
+  );
+  ok(failed.includes(esc(DICTS.mr?.["aiaic.problem.aiaic_busy"] ?? "?")), "the page says it");
+  ok(!failed.includes(esc(DICTS.mr?.["aiaic.refused.refused"] ?? "?")), "never that AIAIC refused");
+});
+
+test("S65 a sign keeps to its figure on the card's own range line and in the verdict's sentence (F22)", () => {
+  const card = page(createElement(StorageCardBody, { card: STORE.card!, unfolded: true }));
+  const gain = STORE.card!.verdict.net_gain_per_q as { low_rs: number; high_rs: number };
+  ok(card.includes(`<span class="whitespace-nowrap">-₹${Math.abs(gain.low_rs)}</span>`), "the low end");
+  const high = gain.high_rs.toLocaleString("en-IN");
+  ok(card.includes(`<span class="whitespace-nowrap">+₹${high}</span>`), "the high end");
+  const line = partOf(pageOf(STORE), "store-verdict-note", "store-tiles");
+  ok(line.includes('<span class="whitespace-nowrap">'), "the verdict's sentence");
+});
+
+test("S66 what the audit's one rule leaves on a card: Not sure, or a Store and a Sell now that say what section 3 asks (F1, F27, F31)", () => {
+  const v = STORE.card!.verdict;
+  assert.equal(v.code, "unsure");
+  assert.equal(v.leans, "store");
+  ok(!pageOf(STORE).includes(`data-code="store"`), "no card says store under Low");
+  ok(STORE.loan?.question, "the loan question stays on the lean");
+  ok(WHEAT.loan === null, "and is not asked of a lean to sell");
+  ok(
+    partOf(pageOf(STORE), "store-verdict-assumed").includes(
+      esc(v.assumptions?.find((a) => a.code === "no_loan_asked")?.text ?? "?"),
+    ),
+    "and that none was asked",
+  );
+  ok(partOf(pageOf(STORE), "store-tile-price_now").includes('data-tone="warn"'), "and the warning");
+  // an older server sends no `leans`
+  const line = { code: "no_loan_asked", text: "No loan was asked about" };
+  assert.deepEqual(keyAssumed({ code: "store", assumptions: [line] }), [line]);
+  assert.deepEqual(keyAssumed({ code: "unsure", leans: "sell_now", assumptions: [line] }), []);
+  for (const [lang, plan, words] of [
+    ["en", COTTON, "KVK or FPO"],
+    ["mr", COTTON_MR, "कृषी विज्ञान केंद्राकडे"],
+    ["hi", COTTON_HI, "कृषि विज्ञान केंद्र"],
+  ] as const) {
+    ok(plan.card?.verdict.text.includes(words), `${lang}: confirm with a person`);
+    ok(plan.card?.verdict.text.includes("₹"), `${lang}: its figures`);
+  }
+  for (const [lang, plan] of [["en", TOMATO], ["mr", TOMATO_MR], ["hi", TOMATO_HI]] as const) {
+    const sure = plan.card?.verdict.confidence;
+    assert.equal(sure?.band, "rule", lang);
+    assert.notEqual(sure?.text, DICTS[lang]?.["advice.confidence.unknown"], lang);
+  }
+  for (const [lang, imperative] of [["en", "Store at"], ["mr", "साठवा"], ["hi", "रखें"]] as const)
+    ok(
+      !(DICTS[lang]?.["aiaic.glance.store_at"] ?? "").includes(imperative),
+      `${lang}: the glance's label tells nobody to store`,
+    );
+  ok(!sourceOf("src/routes/index.tsx").includes("[saved.crop, saved.region]"), "no raw keys at home");
+  ok(
+    !sourceOf("src/routes/advice.$service.tsx").includes("[item.subject?.crop || farm.crop"),
+    "or on /advice (F11)",
+  );
 });
 
 /** The words the repositories were cleaned of, spelled apart so this file holds none of them. */

@@ -391,6 +391,8 @@ export const APP_PROBLEMS = [
   "aiaic_account_not_practice",
   "aiaic_unavailable",
   "aiaic_answer_unreadable",
+  "aiaic_busy",
+  "aiaic_server_busy",
 ] as const;
 
 export function problem(
@@ -1351,6 +1353,8 @@ export type StorageVerdict = {
     text: string;
     /** The colour AIAIC shows it in (`good`, `warn`, `neutral`): a store below medium confidence is never `good`. */
     tone?: string;
+    /** Which way the figures lean, `store` or `sell_now`, said as a directive or as Not sure; what is meant for a farmer who might store reads this, never `code`. */
+    leans?: string | null;
     /** How sure AIAIC is of this verdict, and why: always shown with it. */
     confidence?: StorageConfidence | null;
     months_text: string | null;

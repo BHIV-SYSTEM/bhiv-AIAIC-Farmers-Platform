@@ -17,6 +17,7 @@
   "verdict": {
    "code": "unsure",
    "reason_code": "no_published_rate",
+   "leans": null,
    "word": "खात्री नाही",
    "text": "खात्री नाही: जवळच्या कोणत्याही गोदामाचा कांदा साठी साठवण दर छापलेला नाही; गोदामाला त्यांचा दर विचारा",
    "tone": "neutral",

@@ -15,11 +15,12 @@
   "quantity_q": 10.0,
   "quantity_given": false,
   "verdict": {
-   "code": "store",
-   "reason_code": "engine_stores",
-   "word": "भंडारण करें",
-   "text": "4 महीने भंडारण करें: महाराष्ट्र राज्य वखार महामंडळ मिरज, 10 किमी: प्रति क्विंटल लगभग +₹1,515",
-   "tone": "warn",
+   "code": "unsure",
+   "reason_code": "too_uncertain_to_direct",
+   "leans": "store",
+   "word": "पक्का नहीं",
+   "text": "पक्का नहीं: महाराष्ट्र राज्य वखार महामंडळ मिरज, 10 किमी, में 4 महीने भंडारण से प्रति क्विंटल लगभग +₹1,515 बच सकते हैं, खराब साल में -₹871। ये आँकड़े इतने अनिश्चित हैं कि हम भंडारण करने को नहीं कह रहे",
+   "tone": "neutral",
    "confidence": {
     "band": "low",
     "text": "ज़्यादा पक्का नहीं",
@@ -30,7 +31,7 @@
     ]
    },
    "months": 4,
-   "months_text": "4 महीने",
+   "months_text": null,
    "warehouse": {
     "operator": "MSWC",
     "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
@@ -91,9 +92,9 @@
     "under_half_full": null
    },
    "chosen_by": {
-    "code": "best_store_gain",
+    "code": "best_leaning",
     "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
-    "text": "सूची के जिन गोदामों में भंडारण की सलाह है (3), उनमें से भंडारण, नुकसान और ढुलाई के बाद प्रति क्विंटल यहाँ सबसे ज़्यादा बचता है"
+    "text": "सूची के जिन गोदामों में आँकड़े भंडारण की ओर झुकते हैं (3), उनमें से भंडारण, नुकसान और ढुलाई के बाद प्रति क्विंटल यहाँ सबसे ज़्यादा बचता है"
    },
    "net_gain_per_q": {
     "low_rs": -871,
@@ -593,11 +594,11 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "भंडारण करें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
-     "months_text": "4 महीने",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": -871,
       "typical_rs": 1515,
@@ -790,11 +791,11 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "भंडारण करें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
-     "months_text": "4 महीने",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": -872,
       "typical_rs": 1514,
@@ -982,11 +983,11 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "भंडारण करें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
-     "months_text": "4 महीने",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": -881,
       "typical_rs": 1498,
@@ -1268,9 +1269,9 @@
   {
    "key": "verdict",
    "label": "निर्णय",
-   "value": "भंडारण करें · 4 महीने",
-   "note": "4 महीने भंडारण करें: महाराष्ट्र राज्य वखार महामंडळ मिरज, 10 किमी: प्रति क्विंटल लगभग +₹1,515",
-   "tone": "warn"
+   "value": "पक्का नहीं",
+   "note": "पक्का नहीं: महाराष्ट्र राज्य वखार महामंडळ मिरज, 10 किमी, में 4 महीने भंडारण से प्रति क्विंटल लगभग +₹1,515 बच सकते हैं, खराब साल में -₹871। ये आँकड़े इतने अनिश्चित हैं कि हम भंडारण करने को नहीं कह रहे",
+   "tone": "neutral"
   },
   {
    "key": "net_gain",

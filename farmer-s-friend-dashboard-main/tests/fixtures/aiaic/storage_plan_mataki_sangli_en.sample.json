@@ -15,11 +15,12 @@
   "quantity_q": 10.0,
   "quantity_given": false,
   "verdict": {
-   "code": "store",
-   "reason_code": "engine_stores",
-   "word": "Store",
-   "text": "Store 4 months at MSWC Miraj, 10 km: about +₹1,515 a quintal",
-   "tone": "warn",
+   "code": "unsure",
+   "reason_code": "too_uncertain_to_direct",
+   "leans": "store",
+   "word": "Not sure",
+   "text": "Not sure: storing 4 months at MSWC Miraj, 10 km, might leave about +₹1,515 a quintal, or -₹871 in a bad year. We are too unsure of these figures to tell you to store",
+   "tone": "neutral",
    "confidence": {
     "band": "low",
     "text": "Not very sure",
@@ -30,7 +31,7 @@
     ]
    },
    "months": 4,
-   "months_text": "4 months",
+   "months_text": null,
    "warehouse": {
     "operator": "MSWC",
     "operator_shown": "MSWC",
@@ -91,9 +92,9 @@
     "under_half_full": null
    },
    "chosen_by": {
-    "code": "best_store_gain",
+    "code": "best_leaning",
     "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
-    "text": "Of the warehouses listed where storing is advised (3), this one leaves the most a quintal after storage, loss and the trip"
+    "text": "Of the warehouses listed where the figures lean to storing (3), this one leaves the most a quintal after storage, loss and the trip"
    },
    "net_gain_per_q": {
     "low_rs": -871,
@@ -593,11 +594,11 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "Store",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
-     "months_text": "4 months",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": -871,
       "typical_rs": 1515,
@@ -790,11 +791,11 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "Store",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
-     "months_text": "4 months",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": -872,
       "typical_rs": 1514,
@@ -982,11 +983,11 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "Store",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
-     "months_text": "4 months",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": -881,
       "typical_rs": 1498,
@@ -1268,9 +1269,9 @@
   {
    "key": "verdict",
    "label": "Decision",
-   "value": "Store · 4 months",
-   "note": "Store 4 months at MSWC Miraj, 10 km: about +₹1,515 a quintal",
-   "tone": "warn"
+   "value": "Not sure",
+   "note": "Not sure: storing 4 months at MSWC Miraj, 10 km, might leave about +₹1,515 a quintal, or -₹871 in a bad year. We are too unsure of these figures to tell you to store",
+   "tone": "neutral"
   },
   {
    "key": "net_gain",

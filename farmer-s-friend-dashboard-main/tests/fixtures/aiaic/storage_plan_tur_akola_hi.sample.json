@@ -1,0 +1,1751 @@
+{
+ "state": "maharashtra",
+ "district": "Akola",
+ "district_shown": "अकोला",
+ "crop": "tur",
+ "crop_shown": "अरहर",
+ "lang": "hi",
+ "card": {
+  "state": "maharashtra",
+  "district": "Akola",
+  "district_shown": "अकोला",
+  "crop": "tur",
+  "crop_shown": "अरहर",
+  "lang": "hi",
+  "quantity_q": 10.0,
+  "quantity_given": false,
+  "verdict": {
+   "code": "sell_now",
+   "reason_code": "storing_unlikely_to_pay",
+   "leans": "sell_now",
+   "word": "अभी बेचें",
+   "text": "अभी बेचें: महाराष्ट्र राज्य वखार महामंडळ अकोला, 2 किमी, में भंडारण से फ़ायदा होने की संभावना कम। कदम उठाने से पहले अपने कृषि विज्ञान केंद्र या किसान उत्पादक संगठन से पक्का कर लें",
+   "tone": "warn",
+   "confidence": {
+    "band": "medium",
+    "text": "कुछ हद तक पक्का",
+    "label": "कितना पक्का",
+    "reasons": [
+     "भाव 5 दिन पुराने हैं, इसलिए भरोसा एक स्तर कम दिखाया गया है।"
+    ]
+   },
+   "months": 1,
+   "months_text": null,
+   "warehouse": {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Akola",
+    "kind": "general",
+    "basis": "named_town",
+    "category": "A",
+    "name_shown": "अकोला",
+    "place_shown": "अकोला",
+    "town": "Akola",
+    "town_shown": "अकोला",
+    "state": "maharashtra",
+    "district_key": "akola",
+    "district_shown": "अकोला",
+    "km": 1.8,
+    "km_method": "estimate",
+    "rs_per_q_month": 9.9,
+    "farmer_rate": {
+     "low_rs": 7.0,
+     "high_rs": 9.9,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 50.0,
+     "before_rebate": {
+      "low_rs": 14.0,
+      "high_rs": 19.8
+     },
+     "with_rebate": null,
+     "category": "A",
+     "category_shown": "A",
+     "effective_from": "2026-02-01",
+     "source": "MSWC Schedule No. 60 of warehousing charges, effective 01.02.2026",
+     "text": "प्रति क्विंटल हर महीने ₹7 से ₹9.90",
+     "rebate_text": "किसानों की 50% छूट के बाद (छूट से पहले ₹14 से ₹19.80)"
+    },
+    "trip": {
+     "measured": true,
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "text": "10 क्विंटल की ढुलाई: ₹850 से ₹1,200",
+     "per_quintal_text": "प्रति क्विंटल ₹85 से ₹120"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-06-12",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 12/6/2027 तक वैध"
+    },
+    "under_half_full": null
+   },
+   "chosen_by": {
+    "code": "best_gain",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "text": "सूची के जिन गोदामों में भंडारण का हिसाब लगाया जा सकता है (6), उनमें से भंडारण, नुकसान और ढुलाई के बाद प्रति क्विंटल यह सबसे अच्छा"
+   },
+   "net_gain_per_q": {
+    "low_rs": -702,
+    "typical_rs": -279,
+    "high_rs": 151,
+    "text": "प्रति क्विंटल -₹702 से +₹151"
+   },
+   "gain_before_transport_per_q": {
+    "low_rs": -582,
+    "typical_rs": -176,
+    "high_rs": 236
+   },
+   "parts_per_q": {
+    "price_now_rs": 9335.0,
+    "price_later_rs": {
+     "p25": 8857.05,
+     "p50": 9262.19,
+     "p75": 9673.86
+    },
+    "storage_rs": 9.9,
+    "loss_rs": 93.35,
+    "finance_rs": 0.0,
+    "transport_rs": {
+     "low_rs": 85,
+     "high_rs": 120
+    }
+   },
+   "engine_says": {
+    "1": "SELL_NOW",
+    "2": "SELL_NOW",
+    "3": "SELL_NOW",
+    "4": "SELL_NOW"
+   },
+   "decision_ids": [
+    "dec_9af1d03077622b059b9d9b61316a04bd",
+    "dec_d3e5c9df0fdc3e4b983380b567ba7dcf",
+    "dec_e13ccd475c197b04e130a580584d4530",
+    "dec_6f38190b61e4506f0e098b4096439e06"
+   ],
+   "assumptions": [
+    {
+     "code": "loss_assumed",
+     "text": "मान लिया: भंडारण में हर महीने 1% माल ख़राब होता है; अपना आँकड़ा दें"
+    },
+    {
+     "code": "rate_as_cost",
+     "text": "भंडारण ख़र्च: अकोला की प्रकाशित दर (महाराष्ट्र राज्य वखार महामंडळ)"
+    },
+    {
+     "code": "rate.mswc_per_bag",
+     "text": "महाराष्ट्र राज्य वखार महामंडळ बोरी के हिसाब से दर लेता है: 50 या 100 किलो की बोरियाँ मानी गईं"
+    },
+    {
+     "code": "rate.mswc_rebate_needs_7_12",
+     "text": "महाराष्ट्र राज्य वखार महामंडळ की 50% किसान छूट के लिए आपका 7/12 उतारा और गोदाम रसीद चाहिए"
+    },
+    {
+     "code": "rate.mswc_dearest_end",
+     "text": "महाराष्ट्र राज्य वखार महामंडळ की दरों में से ज़्यादा वाली दर ली गई"
+    },
+    {
+     "code": "rate.mswc_hired_godown",
+     "text": "महाराष्ट्र राज्य वखार महामंडळ के किराये के गोदाम में भंडारण 10% महँगा"
+    },
+    {
+     "code": "from_district_centre",
+     "text": "आपके खेत से नहीं, आपके ज़िले के केंद्र से दूरी"
+    },
+    {
+     "code": "distance_estimate",
+     "text": "दूरी: सीधी रेखा × 1.3, एक अनुमान"
+    },
+    {
+     "code": "onward_trip",
+     "text": "केवल गोदाम तक का फेरा जोड़ा गया: भंडारण के बाद मंडी तक के फेरे का ख़र्च अभी जितना ही माना गया"
+    },
+    {
+     "code": "farm_is_rural",
+     "text": "आपका खेत गाँव में माना गया (रास्ते का प्रकार), यह एक मान्यता है"
+    },
+    {
+     "code": "quantity_example",
+     "text": "10 क्विंटल के लिए ढुलाई का ख़र्च, एक उदाहरण: अपनी मात्रा दें"
+    },
+    {
+     "code": "no_loan_asked",
+     "text": "कर्ज़ के बारे में नहीं पूछा गया: यह मानकर देखा गया कि कोई कर्ज़ चुकाना नहीं है"
+    },
+    {
+     "code": "past_years",
+     "text": "भंडारण के बाद के भाव: पिछले सालों में क्या हुआ (2002–2025), कोई अनुमान नहीं"
+    }
+   ],
+   "uncalibrated": "अभी तक कृषि वैज्ञानिकों द्वारा जाँचा नहीं गया: इसे मार्गदर्शन मानें, गारंटी नहीं।"
+  },
+  "warehouses": [
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "AKOLA-I",
+    "name_shown": "AKOLA-I",
+    "sr": "1",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [
+     "AKOLA-II",
+     "AKOLA-II (HIRED)"
+    ],
+    "hired_premises_run_from_here": 13,
+    "town": "Akola",
+    "town_shown": "अकोला",
+    "place_shown": "AKOLA-I (अकोला)",
+    "state": "maharashtra",
+    "district_key": "akola",
+    "district_shown": "अकोला",
+    "point": {
+     "lat": 20.71166,
+     "lon": 77.00263,
+     "geocoder": "nominatim",
+     "osm_ref": "node/245690517",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 1.4,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.3,
+     "before_rebate_rs": 23.28,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "TUR (BROKEN/WHOLE)",
+     "category": "950",
+     "bag_wt_kg": 25.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "25"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.3,
+     "high_rs": 16.3,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.28,
+      "high_rs": 23.28
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "प्रति क्विंटल हर महीने ₹16.30",
+     "rebate_text": "किसानों की 30% छूट के बाद (छूट से पहले ₹23.28)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 1.8,
+      "method": "estimate",
+      "straight_km": 1.4,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹850 से ₹1,200",
+     "per_quintal_text": "प्रति क्विंटल ₹85 से ₹120"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-05-04",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Maharashtra file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 4/5/2031 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "storing_unlikely_to_pay",
+     "word": "अभी बेचें",
+     "months": 1,
+     "months_text": null,
+     "net_gain_per_q": {
+      "low_rs": -708,
+      "typical_rs": -285,
+      "high_rs": 145,
+      "text": "प्रति क्विंटल -₹708 से +₹145"
+     },
+     "decision_ids": [
+      "dec_2a6d702b78630b1c3fa0928bffa509a6",
+      "dec_6499e6a2e8346a43122309a2643d5718",
+      "dec_a704f9a5c82a1b0f79e6638351c33d3f",
+      "dec_eed388132ca5e6b2b28713850cf08490"
+     ]
+    },
+    "rule": {
+     "step": 1,
+     "store_gain_rs": null,
+     "counted_gain_rs": -285.0
+    },
+    "chosen": false
+   },
+   {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Akola",
+    "name_shown": "अकोला",
+    "sr": "1224",
+    "kind": "general",
+    "category": "A",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Akola",
+    "town_shown": "अकोला",
+    "place_shown": "अकोला",
+    "state": "maharashtra",
+    "district_key": "akola",
+    "district_shown": "अकोला",
+    "point": {
+     "lat": 20.71166,
+     "lon": 77.00263,
+     "geocoder": "nominatim",
+     "osm_ref": "node/245690517",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 1.4,
+    "rate": {
+     "operator": "MSWC",
+     "rs_per_q_month": 9.9,
+     "before_rebate_rs": 19.8,
+     "farmer_rebate_pct": 50.0,
+     "commodity": "TUR",
+     "category": "A",
+     "effective_from": "2026-02-01",
+     "source": "MSWC Schedule No. 60 of warehousing charges, effective 01.02.2026",
+     "notes": [
+      {
+       "code": "mswc_per_bag",
+       "slots": {
+        "sizes": [
+         "50",
+         "100"
+        ]
+       }
+      },
+      {
+       "code": "mswc_rebate_needs_7_12",
+       "slots": {
+        "pct": "50"
+       }
+      },
+      {
+       "code": "mswc_dearest_end",
+       "slots": {}
+      },
+      {
+       "code": "mswc_hired_godown",
+       "slots": {}
+      }
+     ],
+     "range_rs": {
+      "low": 7.0,
+      "high": 9.9
+     },
+     "gst": "GST, if any, not included",
+     "minimum_total_rs": 50,
+     "rebate_status": "applied",
+     "rebate_pct": 50.0,
+     "with_rebate_rs": {
+      "low": 7.0,
+      "high": 9.9
+     },
+     "without_rebate_rs": {
+      "low": 14.0,
+      "high": 19.8
+     },
+     "ad_valorem_rs": null,
+     "needs_price": false
+    },
+    "farmer_rate": {
+     "low_rs": 7.0,
+     "high_rs": 9.9,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 50.0,
+     "before_rebate": {
+      "low_rs": 14.0,
+      "high_rs": 19.8
+     },
+     "with_rebate": null,
+     "category": "A",
+     "category_shown": "A",
+     "effective_from": "2026-02-01",
+     "source": "MSWC Schedule No. 60 of warehousing charges, effective 01.02.2026",
+     "text": "प्रति क्विंटल हर महीने ₹7 से ₹9.90",
+     "rebate_text": "किसानों की 50% छूट के बाद (छूट से पहले ₹14 से ₹19.80)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 1.8,
+      "method": "estimate",
+      "straight_km": 1.4,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹850 से ₹1,200",
+     "per_quintal_text": "प्रति क्विंटल ₹85 से ₹120"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-06-12",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 12/6/2027 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "storing_unlikely_to_pay",
+     "word": "अभी बेचें",
+     "months": 1,
+     "months_text": null,
+     "net_gain_per_q": {
+      "low_rs": -702,
+      "typical_rs": -279,
+      "high_rs": 151,
+      "text": "प्रति क्विंटल -₹702 से +₹151"
+     },
+     "decision_ids": [
+      "dec_9af1d03077622b059b9d9b61316a04bd",
+      "dec_d3e5c9df0fdc3e4b983380b567ba7dcf",
+      "dec_e13ccd475c197b04e130a580584d4530",
+      "dec_6f38190b61e4506f0e098b4096439e06"
+     ]
+    },
+    "rule": {
+     "step": 1,
+     "store_gain_rs": null,
+     "counted_gain_rs": -279.0
+    },
+    "chosen": true
+   },
+   {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Warkhed, Khamgaon",
+    "name_shown": "खामगाव (वरखेड)",
+    "sr": "1207",
+    "kind": "general",
+    "category": "A",
+    "basis": "named_place",
+    "note": "of the places of its name, only one in Khamgaon taluka is taken",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Warkhed",
+    "town_shown": "Warkhed",
+    "place_shown": "खामगाव (वरखेड)",
+    "state": "maharashtra",
+    "district_key": "buldhana",
+    "district_shown": "बुलढाणा",
+    "point": {
+     "lat": 20.62275,
+     "lon": 76.69387,
+     "geocoder": "nominatim",
+     "osm_ref": "relation/14282166",
+     "geocoded_on": "2026-10-24",
+     "area": "unknown",
+     "place_class": "unknown"
+    },
+    "straight_km": 33.8,
+    "rate": {
+     "operator": "MSWC",
+     "rs_per_q_month": 9.9,
+     "before_rebate_rs": 19.8,
+     "farmer_rebate_pct": 50.0,
+     "commodity": "TUR",
+     "category": "A",
+     "effective_from": "2026-02-01",
+     "source": "MSWC Schedule No. 60 of warehousing charges, effective 01.02.2026",
+     "notes": [
+      {
+       "code": "mswc_per_bag",
+       "slots": {
+        "sizes": [
+         "50",
+         "100"
+        ]
+       }
+      },
+      {
+       "code": "mswc_rebate_needs_7_12",
+       "slots": {
+        "pct": "50"
+       }
+      },
+      {
+       "code": "mswc_dearest_end",
+       "slots": {}
+      },
+      {
+       "code": "mswc_hired_godown",
+       "slots": {}
+      }
+     ],
+     "range_rs": {
+      "low": 7.0,
+      "high": 9.9
+     },
+     "gst": "GST, if any, not included",
+     "minimum_total_rs": 50,
+     "rebate_status": "applied",
+     "rebate_pct": 50.0,
+     "with_rebate_rs": {
+      "low": 7.0,
+      "high": 9.9
+     },
+     "without_rebate_rs": {
+      "low": 14.0,
+      "high": 19.8
+     },
+     "ad_valorem_rs": null,
+     "needs_price": false
+    },
+    "farmer_rate": {
+     "low_rs": 7.0,
+     "high_rs": 9.9,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 50.0,
+     "before_rebate": {
+      "low_rs": 14.0,
+      "high_rs": 19.8
+     },
+     "with_rebate": null,
+     "category": "A",
+     "category_shown": "A",
+     "effective_from": "2026-02-01",
+     "source": "MSWC Schedule No. 60 of warehousing charges, effective 01.02.2026",
+     "text": "प्रति क्विंटल हर महीने ₹7 से ₹9.90",
+     "rebate_text": "किसानों की 50% छूट के बाद (छूट से पहले ₹14 से ₹19.80)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 44.0,
+      "method": "estimate",
+      "straight_km": 33.8,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": null,
+      "possible": [
+       "rural_urban",
+       "rural_rural"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 1803,
+      "high_rs": 2332
+     },
+     "per_quintal": {
+      "low_rs": 180,
+      "high_rs": 234
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹1,803 से ₹2,332",
+     "per_quintal_text": "प्रति क्विंटल ₹180 से ₹234"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-05-29",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 29/5/2027 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "storing_unlikely_to_pay",
+     "word": "अभी बेचें",
+     "months": 1,
+     "months_text": null,
+     "net_gain_per_q": {
+      "low_rs": -816,
+      "typical_rs": -383,
+      "high_rs": 56,
+      "text": "प्रति क्विंटल -₹816 से +₹56"
+     },
+     "decision_ids": [
+      "dec_9af1d03077622b059b9d9b61316a04bd",
+      "dec_d3e5c9df0fdc3e4b983380b567ba7dcf",
+      "dec_e13ccd475c197b04e130a580584d4530",
+      "dec_6f38190b61e4506f0e098b4096439e06"
+     ]
+    },
+    "rule": {
+     "step": 1,
+     "store_gain_rs": null,
+     "counted_gain_rs": -383.0
+    },
+    "chosen": false
+   },
+   {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Murtizapur",
+    "name_shown": "मुर्तिजापूर",
+    "sr": "1202",
+    "kind": "general",
+    "category": "B",
+    "basis": "named_town",
+    "note": "OpenStreetMap names the town Murtijapur",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Murtijapur",
+    "town_shown": "Murtijapur",
+    "place_shown": "मुर्तिजापूर",
+    "state": "maharashtra",
+    "district_key": "akola",
+    "district_shown": "अकोला",
+    "point": {
+     "lat": 20.73465,
+     "lon": 77.36993,
+     "geocoder": "nominatim",
+     "osm_ref": "node/245690647",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "town"
+    },
+    "straight_km": 37.8,
+    "rate": {
+     "operator": "MSWC",
+     "rs_per_q_month": 9.7,
+     "before_rebate_rs": 19.4,
+     "farmer_rebate_pct": 50.0,
+     "commodity": "TUR",
+     "category": "B",
+     "effective_from": "2026-02-01",
+     "source": "MSWC Schedule No. 60 of warehousing charges, effective 01.02.2026",
+     "notes": [
+      {
+       "code": "mswc_per_bag",
+       "slots": {
+        "sizes": [
+         "50",
+         "100"
+        ]
+       }
+      },
+      {
+       "code": "mswc_rebate_needs_7_12",
+       "slots": {
+        "pct": "50"
+       }
+      },
+      {
+       "code": "mswc_dearest_end",
+       "slots": {}
+      },
+      {
+       "code": "mswc_hired_godown",
+       "slots": {}
+      }
+     ],
+     "range_rs": {
+      "low": 6.85,
+      "high": 9.7
+     },
+     "gst": "GST, if any, not included",
+     "minimum_total_rs": 50,
+     "rebate_status": "applied",
+     "rebate_pct": 50.0,
+     "with_rebate_rs": {
+      "low": 6.85,
+      "high": 9.7
+     },
+     "without_rebate_rs": {
+      "low": 13.7,
+      "high": 19.4
+     },
+     "ad_valorem_rs": null,
+     "needs_price": false
+    },
+    "farmer_rate": {
+     "low_rs": 6.85,
+     "high_rs": 9.7,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 50.0,
+     "before_rebate": {
+      "low_rs": 13.7,
+      "high_rs": 19.4
+     },
+     "with_rebate": null,
+     "category": "B",
+     "category_shown": "B",
+     "effective_from": "2026-02-01",
+     "source": "MSWC Schedule No. 60 of warehousing charges, effective 01.02.2026",
+     "text": "प्रति क्विंटल हर महीने ₹6.85 से ₹9.70",
+     "rebate_text": "किसानों की 50% छूट के बाद (छूट से पहले ₹13.70 से ₹19.40)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 49.2,
+      "method": "estimate",
+      "straight_km": 37.8,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 2016,
+      "high_rs": 2390
+     },
+     "per_quintal": {
+      "low_rs": 201,
+      "high_rs": 239
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹2,016 से ₹2,390",
+     "per_quintal_text": "प्रति क्विंटल ₹201 से ₹239"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-05-25",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 25/5/2027 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "storing_unlikely_to_pay",
+     "word": "अभी बेचें",
+     "months": 1,
+     "months_text": null,
+     "net_gain_per_q": {
+      "low_rs": -820,
+      "typical_rs": -396,
+      "high_rs": 35,
+      "text": "प्रति क्विंटल -₹820 से +₹35"
+     },
+     "decision_ids": [
+      "dec_b66e28ccca9e2b466f0537125a886705",
+      "dec_b44568afaae2f35fd5ac1923843e754c",
+      "dec_7b999eb53cedafe47d4ee17a33e23e37",
+      "dec_57873cf7be4a8bc8c33b977b0f506ff7"
+     ]
+    },
+    "rule": {
+     "step": 1,
+     "store_gain_rs": null,
+     "counted_gain_rs": -396.0
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "AKOLA-II (KHAMGAON)",
+    "name_shown": "AKOLA-II (KHAMGAON)",
+    "sr": "15",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": "run by CWC Akola-II but the premises are at Khamgaon (a Buldhana taluka)",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Khamgaon",
+    "town_shown": "Khamgaon",
+    "place_shown": "AKOLA-II (KHAMGAON)",
+    "state": "maharashtra",
+    "district_key": "buldhana",
+    "district_shown": "बुलढाणा",
+    "point": {
+     "lat": 20.70535,
+     "lon": 76.56697,
+     "geocoder": "nominatim",
+     "osm_ref": "node/2301931841",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "town"
+    },
+    "straight_km": 45.9,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.3,
+     "before_rebate_rs": 23.28,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "TUR (BROKEN/WHOLE)",
+     "category": "950",
+     "bag_wt_kg": 25.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "25"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.3,
+     "high_rs": 16.3,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.28,
+      "high_rs": 23.28
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "प्रति क्विंटल हर महीने ₹16.30",
+     "rebate_text": "किसानों की 30% छूट के बाद (छूट से पहले ₹23.28)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 59.7,
+      "method": "estimate",
+      "straight_km": 45.9,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 2446,
+      "high_rs": 2900
+     },
+     "per_quintal": {
+      "low_rs": 244,
+      "high_rs": 290
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹2,446 से ₹2,900",
+     "per_quintal_text": "प्रति क्विंटल ₹244 से ₹290"
+    },
+    "wdra": null,
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "storing_unlikely_to_pay",
+     "word": "अभी बेचें",
+     "months": 1,
+     "months_text": null,
+     "net_gain_per_q": {
+      "low_rs": -878,
+      "typical_rs": -449,
+      "high_rs": -14,
+      "text": "प्रति क्विंटल -₹878 से -₹14"
+     },
+     "decision_ids": [
+      "dec_2a6d702b78630b1c3fa0928bffa509a6",
+      "dec_6499e6a2e8346a43122309a2643d5718",
+      "dec_a704f9a5c82a1b0f79e6638351c33d3f",
+      "dec_eed388132ca5e6b2b28713850cf08490"
+     ]
+    },
+    "rule": {
+     "step": 1,
+     "store_gain_rs": null,
+     "counted_gain_rs": -449.0
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "AMRAVATI",
+    "name_shown": "AMRAVATI",
+    "sr": "20",
+    "kind": "general",
+    "category": "1090",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Amravati",
+    "town_shown": "अमरावती",
+    "place_shown": "AMRAVATI (अमरावती)",
+    "state": "maharashtra",
+    "district_key": "amravati",
+    "district_shown": "अमरावती",
+    "point": {
+     "lat": 20.93162,
+     "lon": 77.75885,
+     "geocoder": "nominatim",
+     "osm_ref": "node/3141968010",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 82.2,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 21.03,
+     "before_rebate_rs": 30.04,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "TUR (BROKEN/WHOLE)",
+     "category": "1090",
+     "bag_wt_kg": 25.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "25"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 21.03,
+     "high_rs": 21.03,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 30.04,
+      "high_rs": 30.04
+     },
+     "with_rebate": null,
+     "category": "1090",
+     "category_shown": "1090",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "प्रति क्विंटल हर महीने ₹21.03",
+     "rebate_text": "किसानों की 30% छूट के बाद (छूट से पहले ₹30.04)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 106.8,
+      "method": "estimate",
+      "straight_km": 82.2,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 3647,
+      "high_rs": 4324
+     },
+     "per_quintal": {
+      "low_rs": 364,
+      "high_rs": 433
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹3,647 से ₹4,324",
+     "per_quintal_text": "प्रति क्विंटल ₹364 से ₹433"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2029-02-21",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Maharashtra file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 21/2/2029 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "storing_unlikely_to_pay",
+     "word": "अभी बेचें",
+     "months": 1,
+     "months_text": null,
+     "net_gain_per_q": {
+      "low_rs": -1026,
+      "typical_rs": -586,
+      "high_rs": -139,
+      "text": "प्रति क्विंटल -₹1,026 से -₹139"
+     },
+     "decision_ids": [
+      "dec_a9296dd1b6bf10f017be254c93e1fa4b",
+      "dec_f76f36edc9602e5106ff624ad8f34aa2",
+      "dec_a95c29ed0c1bc42297b42620394dfd98",
+      "dec_74852d26203572d702ef6073161585bf"
+     ]
+    },
+    "rule": {
+     "step": 1,
+     "store_gain_rs": null,
+     "counted_gain_rs": -586.0
+    },
+    "chosen": false
+   }
+  ],
+  "operators_not_listed": [],
+  "warehouses_left_out": {
+   "CWC": {
+    "not_farm_storage": {
+     "container_freight_station": 1,
+     "bonded": 1,
+     "inland_container_depot": 1,
+     "rail_terminal": 1
+    },
+    "not_placed": 4
+   },
+   "MSWC": {
+    "not_farm_storage": {
+     "peg": 2,
+     "no_capacity_printed": 2,
+     "bonded": 1
+    },
+    "not_placed": 14
+   }
+  },
+  "wdra": {
+   "district": "Akola",
+   "n_registered": 43,
+   "n_active": 29,
+   "active_capacity_mt": 188019.0,
+   "total_capacity_mt": 244773.0,
+   "has_active_registered_warehouse": true,
+   "as_of": "2026-08-27",
+   "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
+  },
+  "wdra_others": {
+   "n": 10,
+   "names": [
+    "National Collateral Management Services Limited",
+    "MARUTI NANDAN WAREHOUSE CORPORATION",
+    "Basant Agro Tech (I) Limited"
+   ],
+   "more": 7,
+   "operator_types": [
+    "company"
+   ],
+   "file_date": "2026-08-27",
+   "source": "WDRA registered warehouses export ('registered-wh-public', Maharashtra file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+   "text": "अकोला में डब्ल्यूडीआरए-पंजीकृत और 10 गोदाम, संस्थाओं के (National Collateral Management Services Limited, MARUTI NANDAN WAREHOUSE CORPORATION, Basant Agro Tech (I) Limited …)"
+  },
+  "price": {
+   "rs_per_q": 9335.0,
+   "day": "2026-09-24",
+   "basis_kind": "district_median",
+   "radius_km": null
+  },
+  "past_years": [
+   {
+    "horizon_months": 1,
+    "uplift_pct_p25": -5.12,
+    "uplift_pct_p50": -0.78,
+    "uplift_pct_p75": 3.63,
+    "n_years": 23,
+    "verdict": "mixed"
+   },
+   {
+    "horizon_months": 2,
+    "uplift_pct_p25": -9.12,
+    "uplift_pct_p50": -2.45,
+    "uplift_pct_p75": 1.12,
+    "n_years": 23,
+    "verdict": "mixed"
+   },
+   {
+    "horizon_months": 3,
+    "uplift_pct_p25": -10.35,
+    "uplift_pct_p50": -4.39,
+    "uplift_pct_p75": 3.54,
+    "n_years": 22,
+    "verdict": "mixed"
+   },
+   {
+    "horizon_months": 4,
+    "uplift_pct_p25": -8.25,
+    "uplift_pct_p50": -1.7,
+    "uplift_pct_p75": 8.11,
+    "n_years": 22,
+    "verdict": "mixed"
+   }
+  ],
+  "first_year": 2002,
+  "last_year": 2025,
+  "storage_cost": {
+   "value": 9.9,
+   "kind": "rate"
+  },
+  "loss_pct_month": {
+   "value": 1.0,
+   "kind": "assumed"
+  },
+  "sources": [
+   {
+    "what": "price",
+    "text": "ताज़ा भाव ₹9,335/क्विंटल, अकोला की रिपोर्ट करने वाली मंडियों (2) का बीच का भाव, 24/9/2026 को दर्ज।",
+    "date": "2026-09-24"
+   },
+   {
+    "what": "tariff",
+    "operator": "MSWC",
+    "date": "2026-02-01",
+    "text": "1/2/2026 से दर (महाराष्ट्र राज्य वखार महामंडळ), अकोला (श्रेणी A): किसानों की 50% छूट के बाद प्रति क्विंटल हर महीने ₹7 से ₹9.90 (छूट से पहले ₹14 से ₹19.80)"
+   },
+   {
+    "what": "distance",
+    "date": null,
+    "text": "दूरी 2 किमी: दोनों जगहों के बीच की सीधी रेखा × 1.3, एक अनुमान"
+   },
+   {
+    "what": "transport",
+    "date": null,
+    "text": "10 क्विंटल की ढुलाई: एस / दोस्त / पिकअप (1.5 टन), प्रति क्विंटल ₹85 से ₹120, प्रकाशित ट्रक दरों से, कोई तय भाव नहीं"
+   },
+   {
+    "what": "wdra",
+    "date": "2026-08-27",
+    "text": "भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची: अकोला में पंजीकृत 43 में से 29 गोदाम चालू"
+   },
+   {
+    "what": "wdra_registrations",
+    "date": "2026-08-27",
+    "text": "डब्ल्यूडीआरए पंजीकरण: भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची"
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "pending_native_review": true
+ },
+ "indicators": [
+  {
+   "key": "verdict",
+   "label": "निर्णय",
+   "value": "अभी बेचें",
+   "note": "अभी बेचें: महाराष्ट्र राज्य वखार महामंडळ अकोला, 2 किमी, में भंडारण से फ़ायदा होने की संभावना कम। कदम उठाने से पहले अपने कृषि विज्ञान केंद्र या किसान उत्पादक संगठन से पक्का कर लें",
+   "tone": "warn"
+  },
+  {
+   "key": "net_gain",
+   "label": "सभी खर्चों के बाद",
+   "value": "प्रति क्विंटल -₹702 से +₹151",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "price_now",
+   "label": "अभी का भाव",
+   "value": "₹9,335 प्रति क्विंटल",
+   "note": "सितंबर की सामान्य सीमा में",
+   "tone": "neutral"
+  },
+  {
+   "key": "best_month",
+   "label": "आमतौर पर सबसे ऊँचा",
+   "value": "जून",
+   "note": "₹9,487 प्रति क्विंटल",
+   "tone": "neutral"
+  },
+  {
+   "key": "storage_rate",
+   "label": "भंडारण दर",
+   "value": "₹7 से ₹9.90 प्रति क्विंटल प्रति माह",
+   "note": "अकोला, महाराष्ट्र राज्य वखार महामंडळ",
+   "tone": "neutral"
+  },
+  {
+   "key": "distance",
+   "label": "दूरी",
+   "value": "2 किमी",
+   "note": "प्रति क्विंटल ₹85 से ₹120",
+   "tone": "neutral"
+  },
+  {
+   "key": "wastage",
+   "label": "बर्बादी",
+   "value": "लगभग 1% प्रति माह",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "near",
+   "label": "आपके पास",
+   "value": "26 गोदाम",
+   "note": "अकोला में। गोदाम: भंडारण विकास एवं विनियामक प्राधिकरण की 21/10/2026 की सूची",
+   "tone": "neutral"
+  }
+ ],
+ "prices": {
+  "now": {
+   "rs_per_q": 9335.0,
+   "text": "₹9,335",
+   "day": "2026-09-24",
+   "against": "within",
+   "against_text": "सितंबर की सामान्य सीमा में",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
+  },
+  "months": [
+   {
+    "month": 1,
+    "name": "जनवरी",
+    "short": "जन",
+    "usual_rs": 7162.0,
+    "low_rs": 6164.38,
+    "high_rs": 8141.25,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 2,
+    "name": "फ़रवरी",
+    "short": "फर",
+    "usual_rs": 7600.0,
+    "low_rs": 6941.25,
+    "high_rs": 8300.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 3,
+    "name": "मार्च",
+    "short": "मार्च",
+    "usual_rs": 7665.0,
+    "low_rs": 6365.62,
+    "high_rs": 8350.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 4,
+    "name": "अप्रैल",
+    "short": "अप्रै",
+    "usual_rs": 8000.0,
+    "low_rs": 6166.75,
+    "high_rs": 8211.25,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 5,
+    "name": "मई",
+    "short": "मई",
+    "usual_rs": 8225.0,
+    "low_rs": 6000.0,
+    "high_rs": 9707.75,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 6,
+    "name": "जून",
+    "short": "जून",
+    "usual_rs": 9486.75,
+    "low_rs": 6196.25,
+    "high_rs": 10603.75,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 7,
+    "name": "जुलाई",
+    "short": "जुल",
+    "usual_rs": 9100.0,
+    "low_rs": 7167.5,
+    "high_rs": 9811.25,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 8,
+    "name": "अगस्त",
+    "short": "अग",
+    "usual_rs": 8000.0,
+    "low_rs": 6502.5,
+    "high_rs": 10008.75,
+    "n_years": 4,
+    "years": "2021-2024"
+   },
+   {
+    "month": 9,
+    "name": "सितंबर",
+    "short": "सित",
+    "usual_rs": 7500.0,
+    "low_rs": 6482.5,
+    "high_rs": 10162.5,
+    "n_years": 4,
+    "years": "2021-2024"
+   },
+   {
+    "month": 10,
+    "name": "अक्टूबर",
+    "short": "अक्टू",
+    "usual_rs": 7500.0,
+    "low_rs": 6100.0,
+    "high_rs": 9800.0,
+    "n_years": 4,
+    "years": "2021-2024"
+   },
+   {
+    "month": 11,
+    "name": "नवंबर",
+    "short": "नव",
+    "usual_rs": 7400.0,
+    "low_rs": 5857.5,
+    "high_rs": 9842.5,
+    "n_years": 4,
+    "years": "2021-2024"
+   },
+   {
+    "month": 12,
+    "name": "दिसंबर",
+    "short": "दिस",
+    "usual_rs": 7020.0,
+    "low_rs": 5962.5,
+    "high_rs": 8440.0,
+    "n_years": 4,
+    "years": "2021-2024"
+   }
+  ],
+  "years": [
+   {
+    "year": 2016,
+    "partial": false,
+    "average_rs": 7280.65,
+    "high_rs": 8737.0,
+    "high_month": 4,
+    "low_rs": 4531.5,
+    "low_month": 12,
+    "n_months": 12,
+    "n_days": 336
+   },
+   {
+    "year": 2017,
+    "partial": false,
+    "average_rs": 3938.65,
+    "high_rs": 4397.5,
+    "high_month": 3,
+    "low_rs": 3593.75,
+    "low_month": 6,
+    "n_months": 12,
+    "n_days": 334
+   },
+   {
+    "year": 2018,
+    "partial": false,
+    "average_rs": 3859.69,
+    "high_rs": 4300.0,
+    "high_month": 12,
+    "low_rs": 3515.0,
+    "low_month": 10,
+    "n_months": 12,
+    "n_days": 343
+   },
+   {
+    "year": 2019,
+    "partial": false,
+    "average_rs": 5254.5,
+    "high_rs": 5610.0,
+    "high_month": 5,
+    "low_rs": 4875.5,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 339
+   },
+   {
+    "year": 2020,
+    "partial": false,
+    "average_rs": 5369.4,
+    "high_rs": 6785.0,
+    "high_month": 10,
+    "low_rs": 4696.25,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 286
+   },
+   {
+    "year": 2021,
+    "partial": false,
+    "average_rs": 6173.75,
+    "high_rs": 6750.0,
+    "high_month": 4,
+    "low_rs": 5600.0,
+    "low_month": 11,
+    "n_months": 12,
+    "n_days": 313
+   },
+   {
+    "year": 2022,
+    "partial": false,
+    "average_rs": 6613.0,
+    "high_rs": 7695.0,
+    "high_month": 8,
+    "low_rs": 5888.5,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 326
+   },
+   {
+    "year": 2023,
+    "partial": false,
+    "average_rs": 8987.83,
+    "high_rs": 10662.5,
+    "high_month": 9,
+    "low_rs": 6911.25,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 309
+   },
+   {
+    "year": 2024,
+    "partial": false,
+    "average_rs": 9877.92,
+    "high_rs": 11176.25,
+    "high_month": 6,
+    "low_rs": 8440.0,
+    "low_month": 12,
+    "n_months": 12,
+    "n_days": 280
+   },
+   {
+    "year": 2026,
+    "partial": true,
+    "average_rs": 8118.12,
+    "high_rs": 8225.0,
+    "high_month": 1,
+    "low_rs": 8055.0,
+    "low_month": 8,
+    "n_months": 8,
+    "n_days": 105
+   }
+  ],
+  "best_month": {
+   "month": 6,
+   "name": "जून",
+   "usual_rs": 9486.75,
+   "text": "आमतौर पर जून में सबसे ऊँचा: लगभग ₹9,487 प्रति क्विंटल"
+  },
+  "lowest_month": {
+   "month": 12,
+   "name": "दिसंबर",
+   "usual_rs": 7020.0,
+   "text": "आमतौर पर दिसंबर में सबसे नीचा: लगभग ₹7,020 प्रति क्विंटल"
+  },
+  "held": true,
+  "headline": null,
+  "note": "यह इतिहास है, पूर्वानुमान नहीं: पिछले वर्षों में इस ज़िले की मंडियों के भाव, प्रकाशित रुपयों में, महँगाई के हिसाब से समायोजित नहीं।",
+  "sources": [
+   {
+    "what": "months",
+    "text": "महीने के अनुसार: ज़िले के दैनिक भावों का सामान्य भाव और बीच का आधा हिस्सा, 2021-2024, 2022-2026 (Agmarknet)"
+   },
+   {
+    "what": "years",
+    "text": "वर्ष के अनुसार: वर्ष का औसत, सबसे ऊँचा महीना और सबसे नीचा महीना (Agmarknet)"
+   }
+  ]
+ },
+ "loan": null,
+ "wdra_list": {
+  "listed": 26,
+  "as_on": "2026-10-21",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
+ },
+ "wastage": {
+  "kind": "dry",
+  "assumed_pct_month": 1.0,
+  "headline": "हमने लगभग 1% प्रति माह माना है। आपका नुकसान नमी, कीट और रखरखाव पर निर्भर करता है।",
+  "value": "लगभग 1% प्रति माह",
+  "published": []
+ },
+ "cold_storages": {
+  "held": true,
+  "in_district": 0,
+  "near_total": 0,
+  "within_km": 100,
+  "headline": "अकोला में कोई शीतगृह परियोजना दर्ज नहीं",
+  "near": [],
+  "not_named": 0,
+  "not_named_text": null,
+  "rate_text": "दरें प्रकाशित नहीं हैं: हमारे पास किसी शीतगृह का शुल्क नहीं है, इसलिए शीतगृह से पूछें।",
+  "caveat": "ये अनुदान के रिकॉर्ड हैं, 2006-07 से 2014-15 तक स्वीकृत। इनसे यह पता नहीं चलता कि शीतगृह अभी चल रहा है या दूसरे किसानों की उपज लेता है।",
+  "source": "एकीकृत शीत शृंखला उपलब्धता मंच: सरकारी परियोजना सूचियाँ"
+ },
+ "pending_native_review": true,
+ "lang_note": null
+}

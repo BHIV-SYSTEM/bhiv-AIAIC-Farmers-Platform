@@ -17,6 +17,7 @@
   "verdict": {
    "code": "unsure",
    "reason_code": "loan_due_first",
+   "leans": null,
    "word": "Not sure",
    "text": "Not sure: your loan falls due before any length of storing ends",
    "tone": "neutral",

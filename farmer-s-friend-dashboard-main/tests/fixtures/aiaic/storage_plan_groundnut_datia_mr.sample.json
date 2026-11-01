@@ -15,11 +15,12 @@
   "quantity_q": 10.0,
   "quantity_given": false,
   "verdict": {
-   "code": "store",
-   "reason_code": "engine_stores",
-   "word": "साठवा",
-   "text": "4 महिने साठवा: केंद्रीय वखार महामंडळ CW-GWALIOR (ग्वालियर), 87 किमी: क्विंटलमागे सुमारे +₹1,302",
-   "tone": "warn",
+   "code": "unsure",
+   "reason_code": "too_uncertain_to_direct",
+   "leans": "store",
+   "word": "खात्री नाही",
+   "text": "खात्री नाही: केंद्रीय वखार महामंडळ CW-GWALIOR (ग्वालियर), 87 किमी, येथे 4 महिने साठवल्यास क्विंटलमागे सुमारे +₹1,302 उरू शकतात, वाईट वर्षात +₹121. हे आकडे इतके अनिश्चित आहेत की आम्ही साठवा असे सांगत नाही",
+   "tone": "neutral",
    "confidence": {
     "band": "low",
     "text": "फारशी खात्री नाही",
@@ -29,7 +30,7 @@
     ]
    },
    "months": 4,
-   "months_text": "4 महिने",
+   "months_text": null,
    "warehouse": {
     "operator": "CWC",
     "operator_shown": "केंद्रीय वखार महामंडळ",
@@ -90,9 +91,9 @@
     "under_half_full": null
    },
    "chosen_by": {
-    "code": "level_store_gain",
+    "code": "level_leaning",
     "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
-    "text": "यादीतील साठवण्याचा सल्ला असलेल्या गोदामांपैकी (3), वाहतुकीनंतर सर्वोत्तम फायदे इतके जवळचे आहेत की फरक सांगता येत नाही, म्हणून हे त्यांतील सर्वात जवळचे गोदाम"
+    "text": "यादीतील आकडे साठवणीकडे झुकणाऱ्या गोदामांपैकी (3), वाहतुकीनंतर सर्वोत्तम फायदे इतके जवळचे आहेत की फरक सांगता येत नाही, म्हणून हे त्यांतील सर्वात जवळचे गोदाम"
    },
    "net_gain_per_q": {
     "low_rs": 121,
@@ -319,11 +320,11 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "साठवा",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "खात्री नाही",
      "months": 4,
-     "months_text": "4 महिने",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": 121,
       "typical_rs": 1302,
@@ -483,11 +484,11 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "साठवा",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "खात्री नाही",
      "months": 4,
-     "months_text": "4 महिने",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": 110,
       "typical_rs": 1308,
@@ -648,11 +649,11 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "store",
-     "reason_code": "engine_stores",
-     "word": "साठवा",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "खात्री नाही",
      "months": 4,
-     "months_text": "4 महिने",
+     "months_text": null,
      "net_gain_per_q": {
       "low_rs": 18,
       "typical_rs": 1208,
@@ -804,9 +805,9 @@
   {
    "key": "verdict",
    "label": "निर्णय",
-   "value": "साठवा · 4 महिने",
-   "note": "4 महिने साठवा: केंद्रीय वखार महामंडळ CW-GWALIOR (ग्वालियर), 87 किमी: क्विंटलमागे सुमारे +₹1,302",
-   "tone": "warn"
+   "value": "खात्री नाही",
+   "note": "खात्री नाही: केंद्रीय वखार महामंडळ CW-GWALIOR (ग्वालियर), 87 किमी, येथे 4 महिने साठवल्यास क्विंटलमागे सुमारे +₹1,302 उरू शकतात, वाईट वर्षात +₹121. हे आकडे इतके अनिश्चित आहेत की आम्ही साठवा असे सांगत नाही",
+   "tone": "neutral"
   },
   {
    "key": "net_gain",

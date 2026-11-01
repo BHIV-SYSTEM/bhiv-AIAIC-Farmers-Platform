@@ -17,6 +17,7 @@
   "verdict": {
    "code": "unsure",
    "reason_code": "prices_too_old",
+   "leans": null,
    "word": "Not sure",
    "text": "Not sure: the newest price for wheat is too old to act on",
    "tone": "neutral",

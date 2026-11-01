@@ -15,11 +15,12 @@
   "quantity_q": 10.0,
   "quantity_given": false,
   "verdict": {
-   "code": "sell_now",
-   "reason_code": "storing_unlikely_to_pay",
-   "word": "Sell now",
-   "text": "Sell now: storing at MSWC Ambad, 9 km, is unlikely to pay",
-   "tone": "warn",
+   "code": "unsure",
+   "reason_code": "too_uncertain_to_direct",
+   "leans": "sell_now",
+   "word": "Not sure",
+   "text": "Not sure, but storing at MSWC Ambad, 9 km, looks unlikely to pay: even a good year loses",
+   "tone": "neutral",
    "confidence": {
     "band": "low",
     "text": "Not very sure",
@@ -357,9 +358,9 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "Sell now",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -509,9 +510,9 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "Sell now",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -701,9 +702,9 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "Sell now",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -898,9 +899,9 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "Sell now",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -1050,9 +1051,9 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "Sell now",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "Not sure",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -1380,9 +1381,9 @@
   {
    "key": "verdict",
    "label": "Decision",
-   "value": "Sell now",
-   "note": "Sell now: storing at MSWC Ambad, 9 km, is unlikely to pay",
-   "tone": "warn"
+   "value": "Not sure",
+   "note": "Not sure, but storing at MSWC Ambad, 9 km, looks unlikely to pay: even a good year loses",
+   "tone": "neutral"
   },
   {
    "key": "net_gain",

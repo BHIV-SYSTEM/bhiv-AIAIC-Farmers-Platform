@@ -17,6 +17,7 @@
   "verdict": {
    "code": "unsure",
    "reason_code": "no_prices",
+   "leans": null,
    "word": "Not sure",
    "text": "Not sure: no recent price for lentil (masoor) near you",
    "tone": "neutral",

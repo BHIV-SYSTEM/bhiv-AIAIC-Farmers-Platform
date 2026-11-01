@@ -17,6 +17,7 @@
   "verdict": {
    "code": "unsure",
    "reason_code": "no_prices",
+   "leans": null,
    "word": "पक्का नहीं",
    "text": "पक्का नहीं: आपके पास मसूर का हाल का भाव नहीं है",
    "tone": "neutral",

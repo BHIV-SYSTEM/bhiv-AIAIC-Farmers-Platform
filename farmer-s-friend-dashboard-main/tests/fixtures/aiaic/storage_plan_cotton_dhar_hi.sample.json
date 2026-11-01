@@ -1,0 +1,1276 @@
+{
+ "state": "madhya pradesh",
+ "district": "Dhar",
+ "district_shown": "धार",
+ "crop": "cotton",
+ "crop_shown": "कपास",
+ "lang": "hi",
+ "card": {
+  "state": "madhya pradesh",
+  "district": "Dhar",
+  "district_shown": "धार",
+  "crop": "cotton",
+  "crop_shown": "कपास",
+  "lang": "hi",
+  "quantity_q": 10.0,
+  "quantity_given": false,
+  "verdict": {
+   "code": "store",
+   "reason_code": "engine_stores",
+   "leans": "store",
+   "word": "भंडारण करें",
+   "text": "2 महीने भंडारण करें: केंद्रीय भंडारण निगम CW PITHAMPUR (पीथमपुर), 50 किमी: प्रति क्विंटल लगभग +₹739, खराब साल में -₹176। कदम उठाने से पहले अपने कृषि विज्ञान केंद्र या किसान उत्पादक संगठन से पक्का कर लें",
+   "tone": "good",
+   "confidence": {
+    "band": "medium",
+    "text": "कुछ हद तक पक्का",
+    "label": "कितना पक्का",
+    "reasons": [
+     "भाव 4 दिन पुराने हैं, इसलिए भरोसा एक स्तर कम दिखाया गया है।"
+    ]
+   },
+   "months": 2,
+   "months_text": "2 महीने",
+   "warehouse": {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "CW PITHAMPUR",
+    "kind": "general",
+    "basis": "named_town",
+    "category": "780",
+    "name_shown": "CW PITHAMPUR",
+    "place_shown": "CW PITHAMPUR (पीथमपुर)",
+    "town": "Pithampur",
+    "town_shown": "पीथमपुर",
+    "state": "madhya pradesh",
+    "district_key": "dhar",
+    "district_shown": "धार",
+    "km": 50.3,
+    "km_method": "estimate",
+    "rs_per_q_month": 13.3,
+    "farmer_rate": {
+     "low_rs": 13.3,
+     "high_rs": 13.3,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 19.0,
+      "high_rs": 19.0
+     },
+     "with_rebate": null,
+     "category": "780",
+     "category_shown": "780",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "प्रति क्विंटल हर महीने ₹13.30",
+     "rebate_text": "किसानों की 30% छूट के बाद (छूट से पहले ₹19)"
+    },
+    "trip": {
+     "measured": true,
+     "cost": {
+      "low_rs": 2061,
+      "high_rs": 2444
+     },
+     "per_quintal": {
+      "low_rs": 206,
+      "high_rs": 245
+     },
+     "text": "10 क्विंटल की ढुलाई: ₹2,061 से ₹2,444",
+     "per_quintal_text": "प्रति क्विंटल ₹206 से ₹245"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-06-30",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 30/6/2031 तक वैध"
+    },
+    "under_half_full": null
+   },
+   "chosen_by": {
+    "code": "best_store_gain",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "text": "सूची के जिन गोदामों में भंडारण की सलाह है (3), उनमें से भंडारण, नुकसान और ढुलाई के बाद प्रति क्विंटल यहाँ सबसे ज़्यादा बचता है"
+   },
+   "net_gain_per_q": {
+    "low_rs": -176,
+    "typical_rs": 739,
+    "high_rs": 1417,
+    "text": "प्रति क्विंटल -₹176 से +₹1,417"
+   },
+   "gain_before_transport_per_q": {
+    "low_rs": 69,
+    "typical_rs": 964,
+    "high_rs": 1623
+   },
+   "parts_per_q": {
+    "price_now_rs": 7500.0,
+    "price_later_rs": {
+     "p25": 7746.0,
+     "p50": 8640.75,
+     "p75": 9299.25
+    },
+    "storage_rs": 26.6,
+    "loss_rs": 150.0,
+    "finance_rs": 0.0,
+    "transport_rs": {
+     "low_rs": 206,
+     "high_rs": 245
+    }
+   },
+   "engine_says": {
+    "1": "STORE_SELF_FINANCED",
+    "2": "STORE_SELF_FINANCED",
+    "3": "STORE_SELF_FINANCED",
+    "4": "STORE_SELF_FINANCED"
+   },
+   "decision_ids": [
+    "dec_e97973de2ca982f445259edf30900159",
+    "dec_1d38b020486e10ab46da9a2f7d9af090",
+    "dec_24775f65a6a5fa8f186e191c31e078db",
+    "dec_04c41b70673d0493799e40cddaabd732"
+   ],
+   "assumptions": [
+    {
+     "code": "loss_assumed",
+     "text": "मान लिया: भंडारण में हर महीने 1% माल ख़राब होता है; अपना आँकड़ा दें"
+    },
+    {
+     "code": "rate_as_cost",
+     "text": "भंडारण ख़र्च: CW PITHAMPUR की प्रकाशित दर (केंद्रीय भंडारण निगम)"
+    },
+    {
+     "code": "rate.full_bags",
+     "text": "केंद्रीय भंडारण निगम बोरी के हिसाब से दर लेता है: पूरी 40 किलो की बोरियाँ मानी गईं"
+    },
+    {
+     "code": "rate.insurance_extra",
+     "text": "इस दर के ऊपर केंद्रीय भंडारण निगम बीमा अलग से लेता है"
+    },
+    {
+     "code": "rate.other_commodity",
+     "text": "यह इस फ़सल के बीज की दर है (केंद्रीय भंडारण निगम); फ़सल के भंडारण में ज़्यादा ख़र्च आ सकता है"
+    },
+    {
+     "code": "from_district_centre",
+     "text": "आपके खेत से नहीं, आपके ज़िले के केंद्र से दूरी"
+    },
+    {
+     "code": "distance_estimate",
+     "text": "दूरी: सीधी रेखा × 1.3, एक अनुमान"
+    },
+    {
+     "code": "onward_trip",
+     "text": "केवल गोदाम तक का फेरा जोड़ा गया: भंडारण के बाद मंडी तक के फेरे का ख़र्च अभी जितना ही माना गया"
+    },
+    {
+     "code": "farm_is_rural",
+     "text": "आपका खेत गाँव में माना गया (रास्ते का प्रकार), यह एक मान्यता है"
+    },
+    {
+     "code": "quantity_example",
+     "text": "10 क्विंटल के लिए ढुलाई का ख़र्च, एक उदाहरण: अपनी मात्रा दें"
+    },
+    {
+     "code": "no_loan_asked",
+     "text": "कर्ज़ के बारे में नहीं पूछा गया: यह मानकर देखा गया कि कोई कर्ज़ चुकाना नहीं है"
+    },
+    {
+     "code": "past_years",
+     "text": "भंडारण के बाद के भाव: पिछले सालों में क्या हुआ (2002–2026), कोई अनुमान नहीं"
+    }
+   ],
+   "uncalibrated": "अभी तक कृषि वैज्ञानिकों द्वारा जाँचा नहीं गया: इसे मार्गदर्शन मानें, गारंटी नहीं।"
+  },
+  "warehouses": [
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "CW PITHAMPUR",
+    "name_shown": "CW PITHAMPUR",
+    "sr": "10",
+    "kind": "general",
+    "category": "780",
+    "basis": "named_town",
+    "note": "Pithampur industrial area",
+    "also_here": [
+     "CW PITHAMPUR I - HIRED",
+     "CW PITHAMPUR II- HIRED"
+    ],
+    "hired_premises_run_from_here": 0,
+    "town": "Pithampur",
+    "town_shown": "पीथमपुर",
+    "place_shown": "CW PITHAMPUR (पीथमपुर)",
+    "state": "madhya pradesh",
+    "district_key": "dhar",
+    "district_shown": "धार",
+    "point": {
+     "lat": 22.61056,
+     "lon": 75.67903,
+     "geocoder": "nominatim",
+     "osm_ref": "node/4775441478",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 38.7,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 13.3,
+     "before_rebate_rs": 19.0,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "COTTON SEEDS",
+     "category": "780",
+     "bag_wt_kg": 40.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "40"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      },
+      {
+       "code": "other_commodity",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 13.3,
+     "high_rs": 13.3,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 19.0,
+      "high_rs": 19.0
+     },
+     "with_rebate": null,
+     "category": "780",
+     "category_shown": "780",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "प्रति क्विंटल हर महीने ₹13.30",
+     "rebate_text": "किसानों की 30% छूट के बाद (छूट से पहले ₹19)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 50.3,
+      "method": "estimate",
+      "straight_km": 38.7,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 2061,
+      "high_rs": 2444
+     },
+     "per_quintal": {
+      "low_rs": 206,
+      "high_rs": 245
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹2,061 से ₹2,444",
+     "per_quintal_text": "प्रति क्विंटल ₹206 से ₹245"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-06-30",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 30/6/2031 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "भंडारण करें",
+     "months": 2,
+     "months_text": "2 महीने",
+     "net_gain_per_q": {
+      "low_rs": -176,
+      "typical_rs": 739,
+      "high_rs": 1417,
+      "text": "प्रति क्विंटल -₹176 से +₹1,417"
+     },
+     "decision_ids": [
+      "dec_e97973de2ca982f445259edf30900159",
+      "dec_1d38b020486e10ab46da9a2f7d9af090",
+      "dec_24775f65a6a5fa8f186e191c31e078db",
+      "dec_04c41b70673d0493799e40cddaabd732"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 739.0,
+     "counted_gain_rs": 739.0
+    },
+    "chosen": true
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "INDORE–I MANGLI WH-2 (HIRED)",
+    "name_shown": "INDORE–I MANGLI WH-2 (HIRED)",
+    "sr": "35",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": "Mangliya is in Indore district",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Mangliya",
+    "town_shown": "Mangliya",
+    "place_shown": "INDORE–I MANGLI WH-2 (HIRED) (Mangliya)",
+    "state": "madhya pradesh",
+    "district_key": "indore",
+    "district_shown": "इंदौर",
+    "point": {
+     "lat": 22.8465,
+     "lon": 75.69817,
+     "geocoder": "nominatim",
+     "osm_ref": "relation/16636299",
+     "geocoded_on": "2026-10-24",
+     "area": "unknown",
+     "place_class": "unknown"
+    },
+    "straight_km": 49.0,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.26,
+     "before_rebate_rs": 23.23,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "COTTON SEEDS",
+     "category": "950",
+     "bag_wt_kg": 40.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "40"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      },
+      {
+       "code": "other_commodity",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.26,
+     "high_rs": 16.26,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.23,
+      "high_rs": 23.23
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "प्रति क्विंटल हर महीने ₹16.26",
+     "rebate_text": "किसानों की 30% छूट के बाद (छूट से पहले ₹23.23)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 63.6,
+      "method": "estimate",
+      "straight_km": 49.0,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": null,
+      "possible": [
+       "rural_urban",
+       "rural_rural"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 2606,
+      "high_rs": 3371
+     },
+     "per_quintal": {
+      "low_rs": 260,
+      "high_rs": 338
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹2,606 से ₹3,371",
+     "per_quintal_text": "प्रति क्विंटल ₹260 से ₹338"
+    },
+    "wdra": null,
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "भंडारण करें",
+     "months": 2,
+     "months_text": "2 महीने",
+     "net_gain_per_q": {
+      "low_rs": -275,
+      "typical_rs": 659,
+      "high_rs": 1357,
+      "text": "प्रति क्विंटल -₹275 से +₹1,357"
+     },
+     "decision_ids": [
+      "dec_046326015cb2cad314841f3f3f77e3c8",
+      "dec_3ef652ba8ffa6a4fa35f8a051831faa5",
+      "dec_6348f60cc7ebaa80de12b2935ba5d7a5",
+      "dec_c9534ca3598553156d364ec40181f49f"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 659.0,
+     "counted_gain_rs": 659.0
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "CW INDORE 1",
+    "name_shown": "CW INDORE 1",
+    "sr": "15",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [
+     "INDORE-V"
+    ],
+    "hired_premises_run_from_here": 1,
+    "town": "Indore",
+    "town_shown": "इंदौर",
+    "place_shown": "CW INDORE 1 (इंदौर)",
+    "state": "madhya pradesh",
+    "district_key": "indore",
+    "district_shown": "इंदौर",
+    "point": {
+     "lat": 22.72036,
+     "lon": 75.8682,
+     "geocoder": "nominatim",
+     "osm_ref": "node/245709027",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 59.6,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.26,
+     "before_rebate_rs": 23.23,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "COTTON SEEDS",
+     "category": "950",
+     "bag_wt_kg": 40.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "40"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      },
+      {
+       "code": "other_commodity",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.26,
+     "high_rs": 16.26,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.23,
+      "high_rs": 23.23
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "प्रति क्विंटल हर महीने ₹16.26",
+     "rebate_text": "किसानों की 30% छूट के बाद (छूट से पहले ₹23.23)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 77.5,
+      "method": "estimate",
+      "straight_km": 59.6,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 3176,
+      "high_rs": 3765
+     },
+     "per_quintal": {
+      "low_rs": 317,
+      "high_rs": 377
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹3,176 से ₹3,765",
+     "per_quintal_text": "प्रति क्विंटल ₹317 से ₹377"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2029-04-25",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 25/4/2029 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "भंडारण करें",
+     "months": 2,
+     "months_text": "2 महीने",
+     "net_gain_per_q": {
+      "low_rs": -314,
+      "typical_rs": 611,
+      "high_rs": 1300,
+      "text": "प्रति क्विंटल -₹314 से +₹1,300"
+     },
+     "decision_ids": [
+      "dec_046326015cb2cad314841f3f3f77e3c8",
+      "dec_3ef652ba8ffa6a4fa35f8a051831faa5",
+      "dec_6348f60cc7ebaa80de12b2935ba5d7a5",
+      "dec_c9534ca3598553156d364ec40181f49f"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 611.0,
+     "counted_gain_rs": 611.0
+    },
+    "chosen": false
+   }
+  ],
+  "operators_not_listed": [
+   {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "serves_states": [
+     "maharashtra"
+    ],
+    "reason_code": "serves_other_states",
+    "text": "महाराष्ट्र राज्य वखार महामंडळ केवल महाराष्ट्र के किसानों के लिए: यहाँ नहीं दिखाया"
+   }
+  ],
+  "warehouses_left_out": {
+   "CWC": {
+    "not_farm_storage": {
+     "container_freight_station": 1,
+     "bonded": 1,
+     "inland_container_depot": 1,
+     "rail_terminal": 1
+    },
+    "not_placed": 4
+   }
+  },
+  "wdra": {
+   "district": "Dhar",
+   "n_registered": 40,
+   "n_active": 6,
+   "active_capacity_mt": 44279.0,
+   "total_capacity_mt": 204637.0,
+   "has_active_registered_warehouse": true,
+   "as_of": "2026-08-27",
+   "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
+  },
+  "wdra_others": {
+   "n": 1,
+   "names": [
+    "Dhiraj warehouse pvt ltd"
+   ],
+   "more": 0,
+   "operator_types": [
+    "company"
+   ],
+   "file_date": "2026-08-27",
+   "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+   "text": "धार में डब्ल्यूडीआरए-पंजीकृत और 1 गोदाम, एक संस्था का (Dhiraj warehouse pvt ltd)"
+  },
+  "price": {
+   "rs_per_q": 7500.0,
+   "day": "2026-09-25",
+   "basis_kind": "district_median",
+   "radius_km": null
+  },
+  "past_years": [
+   {
+    "horizon_months": 1,
+    "uplift_pct_p25": 1.39,
+    "uplift_pct_p50": 13.05,
+    "uplift_pct_p75": 18.08,
+    "n_years": 24,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 2,
+    "uplift_pct_p25": 3.28,
+    "uplift_pct_p50": 15.21,
+    "uplift_pct_p75": 23.99,
+    "n_years": 24,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 3,
+    "uplift_pct_p25": 4.88,
+    "uplift_pct_p50": 12.87,
+    "uplift_pct_p75": 28.37,
+    "n_years": 23,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 4,
+    "uplift_pct_p25": 8.75,
+    "uplift_pct_p50": 14.15,
+    "uplift_pct_p75": 29.08,
+    "n_years": 22,
+    "verdict": "consistently_gained"
+   }
+  ],
+  "first_year": 2002,
+  "last_year": 2026,
+  "storage_cost": {
+   "value": 13.3,
+   "kind": "rate"
+  },
+  "loss_pct_month": {
+   "value": 1.0,
+   "kind": "assumed"
+  },
+  "sources": [
+   {
+    "what": "price",
+    "text": "ताज़ा भाव ₹7,500/क्विंटल, धार की रिपोर्ट करने वाली मंडियों (4) का बीच का भाव, 25/9/2026 को दर्ज।",
+    "date": "2026-09-25"
+   },
+   {
+    "what": "tariff",
+    "operator": "CWC",
+    "date": "2026-04-01",
+    "text": "1/4/2026 से दर (केंद्रीय भंडारण निगम), CW PITHAMPUR (श्रेणी 780): किसानों की 30% छूट के बाद प्रति क्विंटल हर महीने ₹13.30 (छूट से पहले ₹19)"
+   },
+   {
+    "what": "distance",
+    "date": null,
+    "text": "दूरी 50 किमी: दोनों जगहों के बीच की सीधी रेखा × 1.3, एक अनुमान"
+   },
+   {
+    "what": "transport",
+    "date": null,
+    "text": "10 क्विंटल की ढुलाई: एस / दोस्त / पिकअप (1.5 टन), प्रति क्विंटल ₹206 से ₹245, प्रकाशित ट्रक दरों से, कोई तय भाव नहीं"
+   },
+   {
+    "what": "wdra",
+    "date": "2026-08-27",
+    "text": "भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची: धार में पंजीकृत 40 में से 6 गोदाम चालू"
+   },
+   {
+    "what": "wdra_registrations",
+    "date": "2026-08-27",
+    "text": "डब्ल्यूडीआरए पंजीकरण: भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची"
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "pending_native_review": true
+ },
+ "indicators": [
+  {
+   "key": "verdict",
+   "label": "निर्णय",
+   "value": "भंडारण करें · 2 महीने",
+   "note": "2 महीने भंडारण करें: केंद्रीय भंडारण निगम CW PITHAMPUR (पीथमपुर), 50 किमी: प्रति क्विंटल लगभग +₹739, खराब साल में -₹176। कदम उठाने से पहले अपने कृषि विज्ञान केंद्र या किसान उत्पादक संगठन से पक्का कर लें",
+   "tone": "good"
+  },
+  {
+   "key": "net_gain",
+   "label": "सभी खर्चों के बाद",
+   "value": "प्रति क्विंटल -₹176 से +₹1,417",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "price_now",
+   "label": "अभी का भाव",
+   "value": "₹7,500 प्रति क्विंटल",
+   "note": "पहले से ही सितंबर की सामान्य सीमा से ऊपर। फ़ायदे के लिए भाव को यहाँ से और बढ़ना होगा, और ज़रूरी नहीं कि वह बढ़े।",
+   "tone": "warn"
+  },
+  {
+   "key": "best_month",
+   "label": "आमतौर पर सबसे ऊँचा",
+   "value": "फ़रवरी",
+   "note": "₹7,662 प्रति क्विंटल",
+   "tone": "neutral"
+  },
+  {
+   "key": "storage_rate",
+   "label": "भंडारण दर",
+   "value": "₹13.30 प्रति क्विंटल प्रति माह",
+   "note": "CW PITHAMPUR (पीथमपुर), केंद्रीय भंडारण निगम",
+   "tone": "neutral"
+  },
+  {
+   "key": "distance",
+   "label": "दूरी",
+   "value": "50 किमी",
+   "note": "प्रति क्विंटल ₹206 से ₹245",
+   "tone": "neutral"
+  },
+  {
+   "key": "wastage",
+   "label": "बर्बादी",
+   "value": "लगभग 1% प्रति माह",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "near",
+   "label": "आपके पास",
+   "value": "6 गोदाम · 1 शीतगृह",
+   "note": "धार में। गोदाम: भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची",
+   "tone": "neutral"
+  }
+ ],
+ "prices": {
+  "now": {
+   "rs_per_q": 7500.0,
+   "text": "₹7,500",
+   "day": "2026-09-25",
+   "against": "above",
+   "against_text": "सितंबर की सामान्य सीमा से ऊपर",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
+  },
+  "months": [
+   {
+    "month": 1,
+    "name": "जनवरी",
+    "short": "जन",
+    "usual_rs": 7600.0,
+    "low_rs": 7200.0,
+    "high_rs": 7937.5,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 2,
+    "name": "फ़रवरी",
+    "short": "फर",
+    "usual_rs": 7662.5,
+    "low_rs": 7448.75,
+    "high_rs": 8087.5,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 3,
+    "name": "मार्च",
+    "short": "मार्च",
+    "usual_rs": 7595.0,
+    "low_rs": 7250.5,
+    "high_rs": 7900.0,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 4,
+    "name": "अप्रैल",
+    "short": "अप्रै",
+    "usual_rs": 7636.25,
+    "low_rs": 7339.38,
+    "high_rs": 8612.5,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 5,
+    "name": "मई",
+    "short": "मई",
+    "usual_rs": 7571.25,
+    "low_rs": 7000.0,
+    "high_rs": 8879.38,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 6,
+    "name": "जून",
+    "short": "जून",
+    "usual_rs": 7200.0,
+    "low_rs": 6900.0,
+    "high_rs": 7781.25,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 7,
+    "name": "जुलाई",
+    "short": "जुल",
+    "usual_rs": 6830.0,
+    "low_rs": 6725.0,
+    "high_rs": 6952.5,
+    "n_years": 3,
+    "years": "2023-2026"
+   },
+   {
+    "month": 8,
+    "name": "अगस्त",
+    "short": "अग",
+    "usual_rs": 7000.0,
+    "low_rs": 6823.5,
+    "high_rs": 7225.0,
+    "n_years": 4,
+    "years": "2022-2025"
+   },
+   {
+    "month": 9,
+    "name": "सितंबर",
+    "short": "सित",
+    "usual_rs": 6518.0,
+    "low_rs": 5775.0,
+    "high_rs": 7100.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 10,
+    "name": "अक्टूबर",
+    "short": "अक्टू",
+    "usual_rs": 6700.0,
+    "low_rs": 6252.5,
+    "high_rs": 7100.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 11,
+    "name": "नवंबर",
+    "short": "नव",
+    "usual_rs": 7000.0,
+    "low_rs": 6762.5,
+    "high_rs": 8037.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 12,
+    "name": "दिसंबर",
+    "short": "दिस",
+    "usual_rs": 7051.25,
+    "low_rs": 6892.5,
+    "high_rs": 8018.75,
+    "n_years": 5,
+    "years": "2021-2025"
+   }
+  ],
+  "years": [
+   {
+    "year": 2016,
+    "partial": false,
+    "average_rs": 4416.11,
+    "high_rs": 4887.5,
+    "high_month": 12,
+    "low_rs": 3940.0,
+    "low_month": 5,
+    "n_months": 9,
+    "n_days": 232
+   },
+   {
+    "year": 2017,
+    "partial": false,
+    "average_rs": 4706.02,
+    "high_rs": 5600.0,
+    "high_month": 3,
+    "low_rs": 3300.0,
+    "low_month": 9,
+    "n_months": 11,
+    "n_days": 283
+   },
+   {
+    "year": 2018,
+    "partial": false,
+    "average_rs": 4968.41,
+    "high_rs": 5437.5,
+    "high_month": 11,
+    "low_rs": 4631.25,
+    "low_month": 9,
+    "n_months": 11,
+    "n_days": 275
+   },
+   {
+    "year": 2019,
+    "partial": false,
+    "average_rs": 5210.35,
+    "high_rs": 6000.0,
+    "high_month": 6,
+    "low_rs": 3827.25,
+    "low_month": 9,
+    "n_months": 10,
+    "n_days": 262
+   },
+   {
+    "year": 2020,
+    "partial": false,
+    "average_rs": 4518.39,
+    "high_rs": 5157.0,
+    "high_month": 12,
+    "low_rs": 3462.5,
+    "low_month": 9,
+    "n_months": 9,
+    "n_days": 176
+   },
+   {
+    "year": 2021,
+    "partial": false,
+    "average_rs": 6238.8,
+    "high_rs": 8177.5,
+    "high_month": 12,
+    "low_rs": 5070.0,
+    "low_month": 5,
+    "n_months": 10,
+    "n_days": 228
+   },
+   {
+    "year": 2022,
+    "partial": false,
+    "average_rs": 9030.95,
+    "high_rs": 10179.5,
+    "high_month": 4,
+    "low_rs": 7950.0,
+    "low_month": 10,
+    "n_months": 10,
+    "n_days": 267
+   },
+   {
+    "year": 2023,
+    "partial": false,
+    "average_rs": 7146.04,
+    "high_rs": 7682.5,
+    "high_month": 1,
+    "low_rs": 6760.0,
+    "low_month": 9,
+    "n_months": 12,
+    "n_days": 336
+   },
+   {
+    "year": 2025,
+    "partial": false,
+    "average_rs": 6863.11,
+    "high_rs": 7175.0,
+    "high_month": 4,
+    "low_rs": 6000.0,
+    "low_month": 9,
+    "n_months": 11,
+    "n_days": 287
+   },
+   {
+    "year": 2026,
+    "partial": true,
+    "average_rs": 8018.91,
+    "high_rs": 8900.0,
+    "high_month": 8,
+    "low_rs": 7547.5,
+    "low_month": 1,
+    "n_months": 8,
+    "n_days": 179
+   }
+  ],
+  "best_month": {
+   "month": 2,
+   "name": "फ़रवरी",
+   "usual_rs": 7662.5,
+   "text": "आमतौर पर फ़रवरी में सबसे ऊँचा: लगभग ₹7,662 प्रति क्विंटल"
+  },
+  "lowest_month": {
+   "month": 9,
+   "name": "सितंबर",
+   "usual_rs": 6518.0,
+   "text": "आमतौर पर सितंबर में सबसे नीचा: लगभग ₹6,518 प्रति क्विंटल"
+  },
+  "held": true,
+  "headline": null,
+  "note": "यह इतिहास है, पूर्वानुमान नहीं: पिछले वर्षों में इस ज़िले की मंडियों के भाव, प्रकाशित रुपयों में, महँगाई के हिसाब से समायोजित नहीं।",
+  "sources": [
+   {
+    "what": "months",
+    "text": "महीने के अनुसार: ज़िले के दैनिक भावों का सामान्य भाव और बीच का आधा हिस्सा, 2021-2025, 2022-2025, 2022-2026, 2023-2026 (Agmarknet)"
+   },
+   {
+    "what": "years",
+    "text": "वर्ष के अनुसार: वर्ष का औसत, सबसे ऊँचा महीना और सबसे नीचा महीना (Agmarknet)"
+   }
+  ]
+ },
+ "loan": {
+  "question": "क्या उससे पहले कोई कर्ज़ चुकाना है?",
+  "note": "यह सिर्फ़ इस जवाब के लिए इस्तेमाल होता है, रखा नहीं जाता।",
+  "due_in_days": null,
+  "choices": [
+   {
+    "due_in_days": 30,
+    "text": "1 महीने के भीतर"
+   },
+   {
+    "due_in_days": 60,
+    "text": "2 महीनों के भीतर"
+   },
+   {
+    "due_in_days": 90,
+    "text": "3 महीनों के भीतर"
+   },
+   {
+    "due_in_days": 120,
+    "text": "4 महीनों के भीतर"
+   }
+  ],
+  "clear": "कोई कर्ज़ देय नहीं"
+ },
+ "wdra_list": {
+  "listed": 6,
+  "as_on": "2026-08-27",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
+ },
+ "wastage": {
+  "kind": "dry",
+  "assumed_pct_month": 1.0,
+  "headline": "हमने लगभग 1% प्रति माह माना है। आपका नुकसान नमी, कीट और रखरखाव पर निर्भर करता है।",
+  "value": "लगभग 1% प्रति माह",
+  "published": []
+ },
+ "cold_storages": {
+  "held": true,
+  "in_district": 1,
+  "near_total": 31,
+  "within_km": 100,
+  "headline": "धार में 1 शीतगृह परियोजना दर्ज है",
+  "near": [
+   {
+    "name": "M/s. Shardiya Agritech Pvt. Ltd.",
+    "district_shown": "इंदौर",
+    "capacity_mt": 15766.0,
+    "capacity_text": "15,766 टन",
+    "year_sanctioned": "2012-13",
+    "year_text": "2012-13 में स्वीकृत",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "लगभग 58 किमी दूर"
+   },
+   {
+    "name": "Maa Vaishnav Ice and Cold Storage Limited",
+    "district_shown": "इंदौर",
+    "capacity_mt": 15431.0,
+    "capacity_text": "15,431 टन",
+    "year_sanctioned": "2011-12",
+    "year_text": "2011-12 में स्वीकृत",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "लगभग 58 किमी दूर"
+   },
+   {
+    "name": "M/s Shakti Cold Storage Pvt. Ltd.",
+    "district_shown": "इंदौर",
+    "capacity_mt": 14980.0,
+    "capacity_text": "14,980 टन",
+    "year_sanctioned": "2014-15",
+    "year_text": "2014-15 में स्वीकृत",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "लगभग 58 किमी दूर"
+   },
+   {
+    "name": "Maa Annapurna Agritech Pvt. Ltd.",
+    "district_shown": "इंदौर",
+    "capacity_mt": 14577.0,
+    "capacity_text": "14,577 टन",
+    "year_sanctioned": "2012-13",
+    "year_text": "2012-13 में स्वीकृत",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "लगभग 58 किमी दूर"
+   },
+   {
+    "name": "M/s. Shri Shree Dutt Sheetgrah Pvt. Ltd.",
+    "district_shown": "इंदौर",
+    "capacity_mt": 13750.0,
+    "capacity_text": "13,750 टन",
+    "year_sanctioned": "2011-12",
+    "year_text": "2011-12 में स्वीकृत",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "लगभग 58 किमी दूर"
+   },
+   {
+    "name": "M/s Yaser Cold Storage Pvt. Ltd.",
+    "district_shown": "इंदौर",
+    "capacity_mt": 12715.0,
+    "capacity_text": "12,715 टन",
+    "year_sanctioned": "2013-14",
+    "year_text": "2013-14 में स्वीकृत",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "लगभग 58 किमी दूर"
+   }
+  ],
+  "not_named": 25,
+  "not_named_text": "25 और, जिनका नाम हम नहीं दिखा सकते",
+  "rate_text": "दरें प्रकाशित नहीं हैं: हमारे पास किसी शीतगृह का शुल्क नहीं है, इसलिए शीतगृह से पूछें।",
+  "caveat": "ये अनुदान के रिकॉर्ड हैं, 2006-07 से 2014-15 तक स्वीकृत। इनसे यह पता नहीं चलता कि शीतगृह अभी चल रहा है या दूसरे किसानों की उपज लेता है।",
+  "source": "एकीकृत शीत शृंखला उपलब्धता मंच: सरकारी परियोजना सूचियाँ"
+ },
+ "pending_native_review": true,
+ "lang_note": null
+}

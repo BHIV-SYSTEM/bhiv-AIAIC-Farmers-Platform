@@ -1,0 +1,1276 @@
+{
+ "state": "madhya pradesh",
+ "district": "Dhar",
+ "district_shown": "Dhar",
+ "crop": "cotton",
+ "crop_shown": "Cotton",
+ "lang": "en",
+ "card": {
+  "state": "madhya pradesh",
+  "district": "Dhar",
+  "district_shown": "Dhar",
+  "crop": "cotton",
+  "crop_shown": "Cotton",
+  "lang": "en",
+  "quantity_q": 10.0,
+  "quantity_given": false,
+  "verdict": {
+   "code": "store",
+   "reason_code": "engine_stores",
+   "leans": "store",
+   "word": "Store",
+   "text": "Store 2 months at CWC CW PITHAMPUR, 50 km: about +₹739 a quintal, -₹176 in a bad year. Confirm with your KVK or FPO before you act",
+   "tone": "good",
+   "confidence": {
+    "band": "medium",
+    "text": "Somewhat sure",
+    "label": "How sure",
+    "reasons": [
+     "The prices are 4 days old, so confidence is shown one step lower."
+    ]
+   },
+   "months": 2,
+   "months_text": "2 months",
+   "warehouse": {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "CW PITHAMPUR",
+    "kind": "general",
+    "basis": "named_town",
+    "category": "780",
+    "name_shown": "CW PITHAMPUR",
+    "place_shown": "CW PITHAMPUR",
+    "town": "Pithampur",
+    "town_shown": "Pithampur",
+    "state": "madhya pradesh",
+    "district_key": "dhar",
+    "district_shown": "Dhar",
+    "km": 50.3,
+    "km_method": "estimate",
+    "rs_per_q_month": 13.3,
+    "farmer_rate": {
+     "low_rs": 13.3,
+     "high_rs": 13.3,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 19.0,
+      "high_rs": 19.0
+     },
+     "with_rebate": null,
+     "category": "780",
+     "category_shown": "780",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹13.30 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹19 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "cost": {
+      "low_rs": 2061,
+      "high_rs": 2444
+     },
+     "per_quintal": {
+      "low_rs": 206,
+      "high_rs": 245
+     },
+     "text": "Transport for 10 quintals: ₹2,061 to ₹2,444",
+     "per_quintal_text": "₹206 to ₹245 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-06-30",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2031-06-30"
+    },
+    "under_half_full": null
+   },
+   "chosen_by": {
+    "code": "best_store_gain",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "text": "Of the warehouses listed where storing is advised (3), this one leaves the most a quintal after storage, loss and the trip"
+   },
+   "net_gain_per_q": {
+    "low_rs": -176,
+    "typical_rs": 739,
+    "high_rs": 1417,
+    "text": "-₹176 to +₹1,417 a quintal"
+   },
+   "gain_before_transport_per_q": {
+    "low_rs": 69,
+    "typical_rs": 964,
+    "high_rs": 1623
+   },
+   "parts_per_q": {
+    "price_now_rs": 7500.0,
+    "price_later_rs": {
+     "p25": 7746.0,
+     "p50": 8640.75,
+     "p75": 9299.25
+    },
+    "storage_rs": 26.6,
+    "loss_rs": 150.0,
+    "finance_rs": 0.0,
+    "transport_rs": {
+     "low_rs": 206,
+     "high_rs": 245
+    }
+   },
+   "engine_says": {
+    "1": "STORE_SELF_FINANCED",
+    "2": "STORE_SELF_FINANCED",
+    "3": "STORE_SELF_FINANCED",
+    "4": "STORE_SELF_FINANCED"
+   },
+   "decision_ids": [
+    "dec_e97973de2ca982f445259edf30900159",
+    "dec_1d38b020486e10ab46da9a2f7d9af090",
+    "dec_24775f65a6a5fa8f186e191c31e078db",
+    "dec_04c41b70673d0493799e40cddaabd732"
+   ],
+   "assumptions": [
+    {
+     "code": "loss_assumed",
+     "text": "Assumed: 1% of the crop lost each month in storage; give yours"
+    },
+    {
+     "code": "rate_as_cost",
+     "text": "Storage cost: the published rate at CW PITHAMPUR (CWC)"
+    },
+    {
+     "code": "rate.full_bags",
+     "text": "CWC charges by the bag: costed as full 40 kg bags"
+    },
+    {
+     "code": "rate.insurance_extra",
+     "text": "CWC charges insurance on top of this rate"
+    },
+    {
+     "code": "rate.other_commodity",
+     "text": "This is the rate for the crop's seed (CWC); the crop itself may cost more to store"
+    },
+    {
+     "code": "from_district_centre",
+     "text": "Distance from your district's centre, not from your farm"
+    },
+    {
+     "code": "distance_estimate",
+     "text": "Distance: straight line × 1.3, an estimate"
+    },
+    {
+     "code": "onward_trip",
+     "text": "Only the trip to the warehouse is counted: the trip to the mandi after storing is taken to cost what it costs now"
+    },
+    {
+     "code": "farm_is_rural",
+     "text": "Your farm is taken to be in a village (the route type), an assumption"
+    },
+    {
+     "code": "quantity_example",
+     "text": "Transport priced for 10 quintals, an example: give yours"
+    },
+    {
+     "code": "no_loan_asked",
+     "text": "No loan was asked about: storing is judged as if none falls due"
+    },
+    {
+     "code": "past_years",
+     "text": "Prices after storing: what past years did (2002–2026), not a forecast"
+    }
+   ],
+   "uncalibrated": "Not yet checked by farm scientists: use as guidance, not a guarantee."
+  },
+  "warehouses": [
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "CW PITHAMPUR",
+    "name_shown": "CW PITHAMPUR",
+    "sr": "10",
+    "kind": "general",
+    "category": "780",
+    "basis": "named_town",
+    "note": "Pithampur industrial area",
+    "also_here": [
+     "CW PITHAMPUR I - HIRED",
+     "CW PITHAMPUR II- HIRED"
+    ],
+    "hired_premises_run_from_here": 0,
+    "town": "Pithampur",
+    "town_shown": "Pithampur",
+    "place_shown": "CW PITHAMPUR",
+    "state": "madhya pradesh",
+    "district_key": "dhar",
+    "district_shown": "Dhar",
+    "point": {
+     "lat": 22.61056,
+     "lon": 75.67903,
+     "geocoder": "nominatim",
+     "osm_ref": "node/4775441478",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 38.7,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 13.3,
+     "before_rebate_rs": 19.0,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "COTTON SEEDS",
+     "category": "780",
+     "bag_wt_kg": 40.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "40"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      },
+      {
+       "code": "other_commodity",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 13.3,
+     "high_rs": 13.3,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 19.0,
+      "high_rs": 19.0
+     },
+     "with_rebate": null,
+     "category": "780",
+     "category_shown": "780",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹13.30 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹19 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 50.3,
+      "method": "estimate",
+      "straight_km": 38.7,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 2061,
+      "high_rs": 2444
+     },
+     "per_quintal": {
+      "low_rs": 206,
+      "high_rs": 245
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹2,061 to ₹2,444",
+     "per_quintal_text": "₹206 to ₹245 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-06-30",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2031-06-30"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "Store",
+     "months": 2,
+     "months_text": "2 months",
+     "net_gain_per_q": {
+      "low_rs": -176,
+      "typical_rs": 739,
+      "high_rs": 1417,
+      "text": "-₹176 to +₹1,417 a quintal"
+     },
+     "decision_ids": [
+      "dec_e97973de2ca982f445259edf30900159",
+      "dec_1d38b020486e10ab46da9a2f7d9af090",
+      "dec_24775f65a6a5fa8f186e191c31e078db",
+      "dec_04c41b70673d0493799e40cddaabd732"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 739.0,
+     "counted_gain_rs": 739.0
+    },
+    "chosen": true
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "INDORE–I MANGLI WH-2 (HIRED)",
+    "name_shown": "INDORE–I MANGLI WH-2 (HIRED)",
+    "sr": "35",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": "Mangliya is in Indore district",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Mangliya",
+    "town_shown": "Mangliya",
+    "place_shown": "INDORE–I MANGLI WH-2 (HIRED) (Mangliya)",
+    "state": "madhya pradesh",
+    "district_key": "indore",
+    "district_shown": "Indore",
+    "point": {
+     "lat": 22.8465,
+     "lon": 75.69817,
+     "geocoder": "nominatim",
+     "osm_ref": "relation/16636299",
+     "geocoded_on": "2026-10-24",
+     "area": "unknown",
+     "place_class": "unknown"
+    },
+    "straight_km": 49.0,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.26,
+     "before_rebate_rs": 23.23,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "COTTON SEEDS",
+     "category": "950",
+     "bag_wt_kg": 40.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "40"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      },
+      {
+       "code": "other_commodity",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.26,
+     "high_rs": 16.26,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.23,
+      "high_rs": 23.23
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹16.26 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹23.23 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 63.6,
+      "method": "estimate",
+      "straight_km": 49.0,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": null,
+      "possible": [
+       "rural_urban",
+       "rural_rural"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 2606,
+      "high_rs": 3371
+     },
+     "per_quintal": {
+      "low_rs": 260,
+      "high_rs": 338
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹2,606 to ₹3,371",
+     "per_quintal_text": "₹260 to ₹338 a quintal"
+    },
+    "wdra": null,
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "Store",
+     "months": 2,
+     "months_text": "2 months",
+     "net_gain_per_q": {
+      "low_rs": -275,
+      "typical_rs": 659,
+      "high_rs": 1357,
+      "text": "-₹275 to +₹1,357 a quintal"
+     },
+     "decision_ids": [
+      "dec_046326015cb2cad314841f3f3f77e3c8",
+      "dec_3ef652ba8ffa6a4fa35f8a051831faa5",
+      "dec_6348f60cc7ebaa80de12b2935ba5d7a5",
+      "dec_c9534ca3598553156d364ec40181f49f"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 659.0,
+     "counted_gain_rs": 659.0
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "CW INDORE 1",
+    "name_shown": "CW INDORE 1",
+    "sr": "15",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [
+     "INDORE-V"
+    ],
+    "hired_premises_run_from_here": 1,
+    "town": "Indore",
+    "town_shown": "Indore",
+    "place_shown": "CW INDORE 1",
+    "state": "madhya pradesh",
+    "district_key": "indore",
+    "district_shown": "Indore",
+    "point": {
+     "lat": 22.72036,
+     "lon": 75.8682,
+     "geocoder": "nominatim",
+     "osm_ref": "node/245709027",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "city"
+    },
+    "straight_km": 59.6,
+    "rate": {
+     "operator": "CWC",
+     "rs_per_q_month": 16.26,
+     "before_rebate_rs": 23.23,
+     "farmer_rebate_pct": 30.0,
+     "commodity": "COTTON SEEDS",
+     "category": "950",
+     "bag_wt_kg": 40.0,
+     "insurance_extra": true,
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "notes": [
+      {
+       "code": "full_bags",
+       "slots": {
+        "kg": "40"
+       }
+      },
+      {
+       "code": "insurance_extra",
+       "slots": {}
+      },
+      {
+       "code": "other_commodity",
+       "slots": {}
+      }
+     ]
+    },
+    "farmer_rate": {
+     "low_rs": 16.26,
+     "high_rs": 16.26,
+     "per": "quintal_month",
+     "rebate_status": "applied",
+     "rebate_pct": 30.0,
+     "before_rebate": {
+      "low_rs": 23.23,
+      "high_rs": 23.23
+     },
+     "with_rebate": null,
+     "category": "950",
+     "category_shown": "950",
+     "effective_from": "2026-04-01",
+     "source": "CWC storage tariff w.e.f. 01.04.2026 (letter CWC CO-CD/4/2025-COMM, 28.02.2026)",
+     "text": "₹16.26 a quintal a month",
+     "rebate_text": "After the 30% farmer rebate (₹23.23 before it)"
+    },
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 77.5,
+      "method": "estimate",
+      "straight_km": 59.6,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 3176,
+      "high_rs": 3765
+     },
+     "per_quintal": {
+      "low_rs": 317,
+      "high_rs": 377
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹3,176 to ₹3,765",
+     "per_quintal_text": "₹317 to ₹377 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2029-04-25",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2029-04-25"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "store",
+     "reason_code": "engine_stores",
+     "word": "Store",
+     "months": 2,
+     "months_text": "2 months",
+     "net_gain_per_q": {
+      "low_rs": -314,
+      "typical_rs": 611,
+      "high_rs": 1300,
+      "text": "-₹314 to +₹1,300 a quintal"
+     },
+     "decision_ids": [
+      "dec_046326015cb2cad314841f3f3f77e3c8",
+      "dec_3ef652ba8ffa6a4fa35f8a051831faa5",
+      "dec_6348f60cc7ebaa80de12b2935ba5d7a5",
+      "dec_c9534ca3598553156d364ec40181f49f"
+     ]
+    },
+    "rule": {
+     "step": 0,
+     "store_gain_rs": 611.0,
+     "counted_gain_rs": 611.0
+    },
+    "chosen": false
+   }
+  ],
+  "operators_not_listed": [
+   {
+    "operator": "MSWC",
+    "operator_shown": "MSWC",
+    "operator_full": "Maharashtra State Warehousing Corporation",
+    "serves_states": [
+     "maharashtra"
+    ],
+    "reason_code": "serves_other_states",
+    "text": "Maharashtra State Warehousing Corporation serves Maharashtra's farmers only: not listed"
+   }
+  ],
+  "warehouses_left_out": {
+   "CWC": {
+    "not_farm_storage": {
+     "container_freight_station": 1,
+     "bonded": 1,
+     "inland_container_depot": 1,
+     "rail_terminal": 1
+    },
+    "not_placed": 4
+   }
+  },
+  "wdra": {
+   "district": "Dhar",
+   "n_registered": 40,
+   "n_active": 6,
+   "active_capacity_mt": 44279.0,
+   "total_capacity_mt": 204637.0,
+   "has_active_registered_warehouse": true,
+   "as_of": "2026-08-27",
+   "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
+  },
+  "wdra_others": {
+   "n": 1,
+   "names": [
+    "Dhiraj warehouse pvt ltd"
+   ],
+   "more": 0,
+   "operator_types": [
+    "company"
+   ],
+   "file_date": "2026-08-27",
+   "source": "WDRA registered warehouses export ('registered-wh-public', Madhya Pradesh file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+   "text": "Also registered with WDRA in Dhar: 1 warehouse run by an organisation (Dhiraj warehouse pvt ltd)"
+  },
+  "price": {
+   "rs_per_q": 7500.0,
+   "day": "2026-09-25",
+   "basis_kind": "district_median",
+   "radius_km": null
+  },
+  "past_years": [
+   {
+    "horizon_months": 1,
+    "uplift_pct_p25": 1.39,
+    "uplift_pct_p50": 13.05,
+    "uplift_pct_p75": 18.08,
+    "n_years": 24,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 2,
+    "uplift_pct_p25": 3.28,
+    "uplift_pct_p50": 15.21,
+    "uplift_pct_p75": 23.99,
+    "n_years": 24,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 3,
+    "uplift_pct_p25": 4.88,
+    "uplift_pct_p50": 12.87,
+    "uplift_pct_p75": 28.37,
+    "n_years": 23,
+    "verdict": "consistently_gained"
+   },
+   {
+    "horizon_months": 4,
+    "uplift_pct_p25": 8.75,
+    "uplift_pct_p50": 14.15,
+    "uplift_pct_p75": 29.08,
+    "n_years": 22,
+    "verdict": "consistently_gained"
+   }
+  ],
+  "first_year": 2002,
+  "last_year": 2026,
+  "storage_cost": {
+   "value": 13.3,
+   "kind": "rate"
+  },
+  "loss_pct_month": {
+   "value": 1.0,
+   "kind": "assumed"
+  },
+  "sources": [
+   {
+    "what": "price",
+    "text": "Latest price ₹7,500/q, the middle price across the mandis of Dhar that reported (4), observed 2026-09-25.",
+    "date": "2026-09-25"
+   },
+   {
+    "what": "tariff",
+    "operator": "CWC",
+    "date": "2026-04-01",
+    "text": "CWC tariff from 2026-04-01 at CW PITHAMPUR (category 780): ₹13.30 a quintal a month after the 30% farmer rebate (₹19 before it)"
+   },
+   {
+    "what": "distance",
+    "date": null,
+    "text": "Distance 50 km: the straight line between the two towns × 1.3, an estimate"
+   },
+   {
+    "what": "transport",
+    "date": null,
+    "text": "Transport for 10 quintals: ACE / DOST / PICKUP (1.5 TON), ₹206 to ₹245 a quintal, from published truck rates, not a quote"
+   },
+   {
+    "what": "wdra",
+    "date": "2026-08-27",
+    "text": "WDRA's file of 2026-08-27: 6 active of 40 registered warehouses in Dhar"
+   },
+   {
+    "what": "wdra_registrations",
+    "date": "2026-08-27",
+    "text": "WDRA registrations: WDRA's list of 2026-08-27"
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "pending_native_review": false
+ },
+ "indicators": [
+  {
+   "key": "verdict",
+   "label": "Decision",
+   "value": "Store · 2 months",
+   "note": "Store 2 months at CWC CW PITHAMPUR, 50 km: about +₹739 a quintal, -₹176 in a bad year. Confirm with your KVK or FPO before you act",
+   "tone": "good"
+  },
+  {
+   "key": "net_gain",
+   "label": "After all costs",
+   "value": "-₹176 to +₹1,417 a quintal",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "price_now",
+   "label": "Price now",
+   "value": "₹7,500 a quintal",
+   "note": "Already above the usual range for September. The gain needs the price to rise further from here, and it may not.",
+   "tone": "warn"
+  },
+  {
+   "key": "best_month",
+   "label": "Usually highest",
+   "value": "February",
+   "note": "₹7,662 a quintal",
+   "tone": "neutral"
+  },
+  {
+   "key": "storage_rate",
+   "label": "Storage rate",
+   "value": "₹13.30 a quintal a month",
+   "note": "CW PITHAMPUR, CWC",
+   "tone": "neutral"
+  },
+  {
+   "key": "distance",
+   "label": "Distance",
+   "value": "50 km",
+   "note": "₹206 to ₹245 a quintal",
+   "tone": "neutral"
+  },
+  {
+   "key": "wastage",
+   "label": "Wastage",
+   "value": "About 1% a month",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "near",
+   "label": "Near you",
+   "value": "6 warehouses · 1 cold store",
+   "note": "In Dhar. Warehouses: WDRA's list as on 2026-08-27",
+   "tone": "neutral"
+  }
+ ],
+ "prices": {
+  "now": {
+   "rs_per_q": 7500.0,
+   "text": "₹7,500",
+   "day": "2026-09-25",
+   "against": "above",
+   "against_text": "Above the usual range for September",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
+  },
+  "months": [
+   {
+    "month": 1,
+    "name": "January",
+    "short": "Jan",
+    "usual_rs": 7600.0,
+    "low_rs": 7200.0,
+    "high_rs": 7937.5,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 2,
+    "name": "February",
+    "short": "Feb",
+    "usual_rs": 7662.5,
+    "low_rs": 7448.75,
+    "high_rs": 8087.5,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 3,
+    "name": "March",
+    "short": "Mar",
+    "usual_rs": 7595.0,
+    "low_rs": 7250.5,
+    "high_rs": 7900.0,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 4,
+    "name": "April",
+    "short": "Apr",
+    "usual_rs": 7636.25,
+    "low_rs": 7339.38,
+    "high_rs": 8612.5,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 5,
+    "name": "May",
+    "short": "May",
+    "usual_rs": 7571.25,
+    "low_rs": 7000.0,
+    "high_rs": 8879.38,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 6,
+    "name": "June",
+    "short": "Jun",
+    "usual_rs": 7200.0,
+    "low_rs": 6900.0,
+    "high_rs": 7781.25,
+    "n_years": 4,
+    "years": "2022-2026"
+   },
+   {
+    "month": 7,
+    "name": "July",
+    "short": "Jul",
+    "usual_rs": 6830.0,
+    "low_rs": 6725.0,
+    "high_rs": 6952.5,
+    "n_years": 3,
+    "years": "2023-2026"
+   },
+   {
+    "month": 8,
+    "name": "August",
+    "short": "Aug",
+    "usual_rs": 7000.0,
+    "low_rs": 6823.5,
+    "high_rs": 7225.0,
+    "n_years": 4,
+    "years": "2022-2025"
+   },
+   {
+    "month": 9,
+    "name": "September",
+    "short": "Sep",
+    "usual_rs": 6518.0,
+    "low_rs": 5775.0,
+    "high_rs": 7100.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 10,
+    "name": "October",
+    "short": "Oct",
+    "usual_rs": 6700.0,
+    "low_rs": 6252.5,
+    "high_rs": 7100.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 11,
+    "name": "November",
+    "short": "Nov",
+    "usual_rs": 7000.0,
+    "low_rs": 6762.5,
+    "high_rs": 8037.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 12,
+    "name": "December",
+    "short": "Dec",
+    "usual_rs": 7051.25,
+    "low_rs": 6892.5,
+    "high_rs": 8018.75,
+    "n_years": 5,
+    "years": "2021-2025"
+   }
+  ],
+  "years": [
+   {
+    "year": 2016,
+    "partial": false,
+    "average_rs": 4416.11,
+    "high_rs": 4887.5,
+    "high_month": 12,
+    "low_rs": 3940.0,
+    "low_month": 5,
+    "n_months": 9,
+    "n_days": 232
+   },
+   {
+    "year": 2017,
+    "partial": false,
+    "average_rs": 4706.02,
+    "high_rs": 5600.0,
+    "high_month": 3,
+    "low_rs": 3300.0,
+    "low_month": 9,
+    "n_months": 11,
+    "n_days": 283
+   },
+   {
+    "year": 2018,
+    "partial": false,
+    "average_rs": 4968.41,
+    "high_rs": 5437.5,
+    "high_month": 11,
+    "low_rs": 4631.25,
+    "low_month": 9,
+    "n_months": 11,
+    "n_days": 275
+   },
+   {
+    "year": 2019,
+    "partial": false,
+    "average_rs": 5210.35,
+    "high_rs": 6000.0,
+    "high_month": 6,
+    "low_rs": 3827.25,
+    "low_month": 9,
+    "n_months": 10,
+    "n_days": 262
+   },
+   {
+    "year": 2020,
+    "partial": false,
+    "average_rs": 4518.39,
+    "high_rs": 5157.0,
+    "high_month": 12,
+    "low_rs": 3462.5,
+    "low_month": 9,
+    "n_months": 9,
+    "n_days": 176
+   },
+   {
+    "year": 2021,
+    "partial": false,
+    "average_rs": 6238.8,
+    "high_rs": 8177.5,
+    "high_month": 12,
+    "low_rs": 5070.0,
+    "low_month": 5,
+    "n_months": 10,
+    "n_days": 228
+   },
+   {
+    "year": 2022,
+    "partial": false,
+    "average_rs": 9030.95,
+    "high_rs": 10179.5,
+    "high_month": 4,
+    "low_rs": 7950.0,
+    "low_month": 10,
+    "n_months": 10,
+    "n_days": 267
+   },
+   {
+    "year": 2023,
+    "partial": false,
+    "average_rs": 7146.04,
+    "high_rs": 7682.5,
+    "high_month": 1,
+    "low_rs": 6760.0,
+    "low_month": 9,
+    "n_months": 12,
+    "n_days": 336
+   },
+   {
+    "year": 2025,
+    "partial": false,
+    "average_rs": 6863.11,
+    "high_rs": 7175.0,
+    "high_month": 4,
+    "low_rs": 6000.0,
+    "low_month": 9,
+    "n_months": 11,
+    "n_days": 287
+   },
+   {
+    "year": 2026,
+    "partial": true,
+    "average_rs": 8018.91,
+    "high_rs": 8900.0,
+    "high_month": 8,
+    "low_rs": 7547.5,
+    "low_month": 1,
+    "n_months": 8,
+    "n_days": 179
+   }
+  ],
+  "best_month": {
+   "month": 2,
+   "name": "February",
+   "usual_rs": 7662.5,
+   "text": "Usually highest in February: about ₹7,662 a quintal"
+  },
+  "lowest_month": {
+   "month": 9,
+   "name": "September",
+   "usual_rs": 6518.0,
+   "text": "Usually lowest in September: about ₹6,518 a quintal"
+  },
+  "held": true,
+  "headline": null,
+  "note": "History, not a forecast: this district's mandis in past years, in rupees as published, not adjusted for inflation.",
+  "sources": [
+   {
+    "what": "months",
+    "text": "Month by month: the usual price and the middle half of the district's daily prices, 2021-2025, 2022-2025, 2022-2026, 2023-2026 (Agmarknet)"
+   },
+   {
+    "what": "years",
+    "text": "Year by year: the year's average, its highest month and its lowest (Agmarknet)"
+   }
+  ]
+ },
+ "loan": {
+  "question": "Does a loan fall due before then?",
+  "note": "Used for this answer only, and not kept.",
+  "due_in_days": null,
+  "choices": [
+   {
+    "due_in_days": 30,
+    "text": "Within 1 month"
+   },
+   {
+    "due_in_days": 60,
+    "text": "Within 2 months"
+   },
+   {
+    "due_in_days": 90,
+    "text": "Within 3 months"
+   },
+   {
+    "due_in_days": 120,
+    "text": "Within 4 months"
+   }
+  ],
+  "clear": "No loan falls due"
+ },
+ "wdra_list": {
+  "listed": 6,
+  "as_on": "2026-08-27",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
+ },
+ "wastage": {
+  "kind": "dry",
+  "assumed_pct_month": 1.0,
+  "headline": "We assumed about 1% a month. Moisture, pests and handling decide your own.",
+  "value": "About 1% a month",
+  "published": []
+ },
+ "cold_storages": {
+  "held": true,
+  "in_district": 1,
+  "near_total": 31,
+  "within_km": 100,
+  "headline": "1 cold-storage project on record in Dhar",
+  "near": [
+   {
+    "name": "M/s. Shardiya Agritech Pvt. Ltd.",
+    "district_shown": "Indore",
+    "capacity_mt": 15766.0,
+    "capacity_text": "15,766 tonnes",
+    "year_sanctioned": "2012-13",
+    "year_text": "Sanctioned 2012-13",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "About 58 km away"
+   },
+   {
+    "name": "Maa Vaishnav Ice and Cold Storage Limited",
+    "district_shown": "Indore",
+    "capacity_mt": 15431.0,
+    "capacity_text": "15,431 tonnes",
+    "year_sanctioned": "2011-12",
+    "year_text": "Sanctioned 2011-12",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "About 58 km away"
+   },
+   {
+    "name": "M/s Shakti Cold Storage Pvt. Ltd.",
+    "district_shown": "Indore",
+    "capacity_mt": 14980.0,
+    "capacity_text": "14,980 tonnes",
+    "year_sanctioned": "2014-15",
+    "year_text": "Sanctioned 2014-15",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "About 58 km away"
+   },
+   {
+    "name": "Maa Annapurna Agritech Pvt. Ltd.",
+    "district_shown": "Indore",
+    "capacity_mt": 14577.0,
+    "capacity_text": "14,577 tonnes",
+    "year_sanctioned": "2012-13",
+    "year_text": "Sanctioned 2012-13",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "About 58 km away"
+   },
+   {
+    "name": "M/s. Shri Shree Dutt Sheetgrah Pvt. Ltd.",
+    "district_shown": "Indore",
+    "capacity_mt": 13750.0,
+    "capacity_text": "13,750 tonnes",
+    "year_sanctioned": "2011-12",
+    "year_text": "Sanctioned 2011-12",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "About 58 km away"
+   },
+   {
+    "name": "M/s Yaser Cold Storage Pvt. Ltd.",
+    "district_shown": "Indore",
+    "capacity_mt": 12715.0,
+    "capacity_text": "12,715 tonnes",
+    "year_sanctioned": "2013-14",
+    "year_text": "Sanctioned 2013-14",
+    "status": "completed",
+    "km": 58.5,
+    "where_text": "About 58 km away"
+   }
+  ],
+  "not_named": 25,
+  "not_named_text": "25 more without a name we can show",
+  "rate_text": "Rates are not published: we hold no cold store's charges, so ask the store.",
+  "caveat": "Subsidy records, sanctioned 2006-07 to 2014-15. They do not show that a store still runs or takes other farmers' produce.",
+  "source": "Integrated Cold Chain Availability Platform: government project lists"
+ },
+ "pending_native_review": false,
+ "lang_note": null
+}

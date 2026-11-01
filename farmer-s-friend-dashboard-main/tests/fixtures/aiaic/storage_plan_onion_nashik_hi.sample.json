@@ -17,6 +17,7 @@
   "verdict": {
    "code": "unsure",
    "reason_code": "no_published_rate",
+   "leans": null,
    "word": "पक्का नहीं",
    "text": "पक्का नहीं: पास के किसी भी गोदाम की प्याज के लिए भंडारण दर छपी नहीं है; गोदाम से उसकी दर पूछें",
    "tone": "neutral",

@@ -275,6 +275,10 @@ export const AIAIC_EN: Dict = {
     "The AIAIC account set on this server is a real farmer's. A guest's selling screens use only AIAIC's practice account.",
   "aiaic.problem.aiaic_unavailable": "AIAIC is not answering right now. Nothing was changed.",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC's answer could not be read. Try again.",
+  "aiaic.problem.aiaic_busy":
+    "Too many requests from here just now. Wait a minute and try again.",
+  "aiaic.problem.aiaic_server_busy":
+    "The server is busy with other people’s requests just now, so this one was not started. Try again in a moment.",
   // push 4b (25 Oct 2026): her account, the Help tab, and the refusals they meet
   "nav.help": "Help",
   "aiaic.problem.aiaic_signed_out": "You were signed out. Sign in again to see your own sales.",
@@ -782,7 +786,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.storage.map": "The warehouses on a map",
   "aiaic.glance.title": "Your answer at a glance",
   "aiaic.glance.sell_at": "Sell at",
-  "aiaic.glance.store_at": "Store at",
+  "aiaic.glance.store_at": "Storage at",
   "aiaic.glance.trip": "Transport {range} a quintal ({q} quintals)",
   "aiaic.glance.no_sell": "No mandi was chosen in this answer",
   "aiaic.glance.no_store": "No storage answer from AIAIC yet",
@@ -1315,6 +1319,10 @@ export const AIAIC_MR: Dict = {
     "या सर्व्हरवर दिलेले AIAIC खाते खऱ्या शेतकऱ्याचे आहे. पाहुण्यासाठी विक्रीच्या स्क्रीन फक्त AIAIC चे सरावाचे खाते वापरतात.",
   "aiaic.problem.aiaic_unavailable": "AIAIC आत्ता उत्तर देत नाही. काहीही बदलले नाही.",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC चे उत्तर वाचता आले नाही. पुन्हा प्रयत्न करा.",
+  "aiaic.problem.aiaic_busy":
+    "इथून सध्या खूप विनंत्या आल्या आहेत. एक मिनिट थांबून पुन्हा प्रयत्न करा.",
+  "aiaic.problem.aiaic_server_busy":
+    "सर्व्हर सध्या इतर लोकांच्या विनंत्यांमध्ये व्यस्त आहे, त्यामुळे ही विनंती सुरू झाली नाही. थोड्या वेळाने पुन्हा प्रयत्न करा.",
   // push 4b (25 Oct 2026): her account, the Help tab, and the refusals they meet
   "nav.help": "मदत",
   "aiaic.problem.aiaic_signed_out":
@@ -1820,7 +1828,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.storage.map": "नकाशावर गोदामे",
   "aiaic.glance.title": "तुमचे उत्तर एका नजरेत",
   "aiaic.glance.sell_at": "इथे विका",
-  "aiaic.glance.store_at": "इथे साठवा",
+  "aiaic.glance.store_at": "साठवणीचे ठिकाण",
   "aiaic.glance.trip": "वाहतूक क्विंटलला {range} ({q} क्विंटल)",
   "aiaic.glance.no_sell": "या उत्तरात कोणतीही बाजार समिती निवडलेली नाही",
   "aiaic.glance.no_store": "AIAIC कडून अजून साठवणीचे उत्तर नाही",
@@ -2351,6 +2359,10 @@ export const AIAIC_HI: Dict = {
     "इस सर्वर पर दिया गया AIAIC खाता असली किसान का है। अतिथि के लिए बिक्री की स्क्रीन सिर्फ़ AIAIC का अभ्यास खाता इस्तेमाल करती हैं।",
   "aiaic.problem.aiaic_unavailable": "AIAIC अभी जवाब नहीं दे रहा। कुछ भी नहीं बदला।",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC का जवाब पढ़ा नहीं जा सका। फिर से कोशिश करें।",
+  "aiaic.problem.aiaic_busy":
+    "यहाँ से अभी बहुत अनुरोध आए हैं। एक मिनट रुककर फिर से कोशिश करें।",
+  "aiaic.problem.aiaic_server_busy":
+    "सर्वर अभी दूसरे लोगों के अनुरोधों में व्यस्त है, इसलिए यह अनुरोध शुरू नहीं हुआ। थोड़ी देर में फिर से कोशिश करें।",
   // push 4b (25 Oct 2026): her account, the Help tab, and the refusals they meet
   "nav.help": "मदद",
   "aiaic.problem.aiaic_signed_out":
@@ -2852,7 +2864,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.storage.map": "नक्शे पर गोदाम",
   "aiaic.glance.title": "आपका जवाब एक नज़र में",
   "aiaic.glance.sell_at": "यहाँ बेचें",
-  "aiaic.glance.store_at": "यहाँ रखें",
+  "aiaic.glance.store_at": "भंडारण की जगह",
   "aiaic.glance.trip": "ढुलाई प्रति क्विंटल {range} ({q} क्विंटल)",
   "aiaic.glance.no_sell": "इस जवाब में कोई मंडी नहीं चुनी गई",
   "aiaic.glance.no_store": "AIAIC से अभी भंडारण का जवाब नहीं",

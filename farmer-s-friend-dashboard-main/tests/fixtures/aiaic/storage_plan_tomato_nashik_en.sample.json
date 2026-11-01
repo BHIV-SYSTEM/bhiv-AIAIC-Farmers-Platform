@@ -1,0 +1,1236 @@
+{
+ "state": "maharashtra",
+ "district": "Nashik",
+ "district_shown": "Nashik",
+ "crop": "tomato",
+ "crop_shown": "Tomato",
+ "lang": "en",
+ "card": {
+  "state": "maharashtra",
+  "district": "Nashik",
+  "district_shown": "Nashik",
+  "crop": "tomato",
+  "crop_shown": "Tomato",
+  "lang": "en",
+  "quantity_q": 10.0,
+  "quantity_given": false,
+  "verdict": {
+   "code": "sell_now",
+   "reason_code": "not_storable",
+   "leans": null,
+   "word": "Sell now",
+   "text": "Sell now: tomato does not keep in ordinary storage",
+   "tone": "warn",
+   "confidence": {
+    "band": "rule",
+    "text": "A fixed rule",
+    "label": "How sure",
+    "reasons": [
+     "This follows a fixed rule, not a weighing of prices, so no level can be given."
+    ]
+   },
+   "months": null,
+   "months_text": null,
+   "warehouse": {
+    "operator": "MSWC",
+    "operator_shown": "MSWC",
+    "operator_full": "Maharashtra State Warehousing Corporation",
+    "name": "Ambad",
+    "kind": "general",
+    "basis": "named_town",
+    "category": "B",
+    "name_shown": "Ambad",
+    "place_shown": "Ambad",
+    "town": "Ambad",
+    "town_shown": "Ambad",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "Nashik",
+    "km": 9.2,
+    "km_method": "estimate",
+    "rs_per_q_month": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "text": "Transport for 10 quintals: ₹850 to ₹1,200",
+     "per_quintal_text": "₹85 to ₹120 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-07",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "Registered with WDRA, valid until 2027-08-07"
+    },
+    "under_half_full": null
+   },
+   "chosen_by": {
+    "code": "nearest",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "text": "The nearest warehouse listed"
+   },
+   "net_gain_per_q": null,
+   "gain_before_transport_per_q": null,
+   "parts_per_q": null,
+   "engine_says": {},
+   "decision_ids": [],
+   "assumptions": [],
+   "uncalibrated": "Not yet checked by farm scientists: use as guidance, not a guarantee."
+  },
+  "warehouses": [
+   {
+    "operator": "MSWC",
+    "operator_shown": "MSWC",
+    "operator_full": "Maharashtra State Warehousing Corporation",
+    "name": "Ambad",
+    "name_shown": "Ambad",
+    "sr": "1427",
+    "kind": "general",
+    "category": "B",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Ambad",
+    "town_shown": "Ambad",
+    "place_shown": "Ambad",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "Nashik",
+    "point": {
+     "lat": 19.94999,
+     "lon": 73.74315,
+     "geocoder": "nominatim",
+     "osm_ref": "node/660236320",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "suburb"
+    },
+    "straight_km": 7.1,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 9.2,
+      "method": "estimate",
+      "straight_km": 7.1,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹850 to ₹1,200",
+     "per_quintal_text": "₹85 to ₹120 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-07",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "Registered with WDRA, valid until 2027-08-07"
+    },
+    "under_half_full": null,
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "Sell now",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": true
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "NASIK ROAD",
+    "name_shown": "NASIK ROAD",
+    "sr": "34",
+    "kind": "general",
+    "category": "1090",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Nashik Road",
+    "town_shown": "Nashik Road",
+    "place_shown": "NASIK ROAD (Nashik Road)",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "Nashik",
+    "point": {
+     "lat": 19.95048,
+     "lon": 73.83885,
+     "geocoder": "nominatim",
+     "osm_ref": "node/13447487624",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "suburb"
+    },
+    "straight_km": 7.3,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 9.5,
+      "method": "estimate",
+      "straight_km": 7.3,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹850 to ₹1,200",
+     "per_quintal_text": "₹85 to ₹120 a quintal"
+    },
+    "wdra": null,
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "Sell now",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "MSWC",
+    "operator_shown": "MSWC",
+    "operator_full": "Maharashtra State Warehousing Corporation",
+    "name": "Sinner",
+    "name_shown": "Sinner",
+    "sr": "1425",
+    "kind": "general",
+    "category": "B",
+    "basis": "named_town",
+    "note": "OpenStreetMap names the town Sinnar",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Sinnar",
+    "town_shown": "Sinnar",
+    "place_shown": "Sinner (Sinnar)",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "Nashik",
+    "point": {
+     "lat": 19.84531,
+     "lon": 74.00002,
+     "geocoder": "nominatim",
+     "osm_ref": "node/2299042250",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "town"
+    },
+    "straight_km": 27.8,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 36.1,
+      "method": "estimate",
+      "straight_km": 27.8,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 1479,
+      "high_rs": 1754
+     },
+     "per_quintal": {
+      "low_rs": 147,
+      "high_rs": 176
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹1,479 to ₹1,754",
+     "per_quintal_text": "₹147 to ₹176 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-09",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "Registered with WDRA, valid until 2027-08-09"
+    },
+    "under_half_full": null,
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "Sell now",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "MSWC",
+    "operator_shown": "MSWC",
+    "operator_full": "Maharashtra State Warehousing Corporation",
+    "name": "Musalgaon",
+    "name_shown": "Musalgaon",
+    "sr": "1430",
+    "kind": "general",
+    "category": "B",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Musalgaon",
+    "town_shown": "Musalgaon",
+    "place_shown": "Musalgaon",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "Nashik",
+    "point": {
+     "lat": 19.83468,
+     "lon": 74.05359,
+     "geocoder": "nominatim",
+     "osm_ref": "node/5705969375",
+     "geocoded_on": "2026-10-24",
+     "area": "rural",
+     "place_class": "village"
+    },
+    "straight_km": 33.0,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 42.9,
+      "method": "estimate",
+      "straight_km": 33.0,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_rural",
+      "possible": [
+       "rural_rural"
+      ],
+      "factor_low": 1.2,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 1918,
+      "high_rs": 2274
+     },
+     "per_quintal": {
+      "low_rs": 191,
+      "high_rs": 228
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹1,918 to ₹2,274",
+     "per_quintal_text": "₹191 to ₹228 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-12",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "Registered with WDRA, valid until 2027-08-12"
+    },
+    "under_half_full": {
+     "month": "2026-08",
+     "occupancy_pct": 24,
+     "source": "https://mswarehousing.com/Mar-mswc/wp-content/uploads/2026/09/occupancy-below-50-Aug-2026.pdf",
+     "text": "Under half full in Aug 2026"
+    },
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "Sell now",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "PUNTAMBA",
+    "name_shown": "PUNTAMBA",
+    "sr": "35",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": "Puntamba is in Rahata taluka",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Puntamba",
+    "town_shown": "Puntamba",
+    "place_shown": "PUNTAMBA",
+    "state": "maharashtra",
+    "district_key": "ahmednagar",
+    "district_shown": "Ahilyanagar",
+    "point": {
+     "lat": 19.76848,
+     "lon": 74.61849,
+     "geocoder": "nominatim",
+     "osm_ref": "node/794375036",
+     "geocoded_on": "2026-10-24",
+     "area": "rural",
+     "place_class": "village"
+    },
+    "straight_km": 90.4,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 117.5,
+      "method": "estimate",
+      "straight_km": 90.4,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_rural",
+      "possible": [
+       "rural_rural"
+      ],
+      "factor_low": 1.2,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 4378,
+      "high_rs": 5189
+     },
+     "per_quintal": {
+      "low_rs": 437,
+      "high_rs": 519
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹4,378 to ₹5,189",
+     "per_quintal_text": "₹437 to ₹519 a quintal"
+    },
+    "wdra": null,
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "Sell now",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "CWC",
+    "operator_full": "Central Warehousing Corporation",
+    "name": "AMBERNATH",
+    "name_shown": "AMBERNATH",
+    "sr": "19",
+    "kind": "general",
+    "category": "1400",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Ambernath",
+    "town_shown": "Ambernath",
+    "place_shown": "AMBERNATH",
+    "state": "maharashtra",
+    "district_key": "thane",
+    "district_shown": "Thane",
+    "point": {
+     "lat": 19.20156,
+     "lon": 73.20048,
+     "geocoder": "nominatim",
+     "osm_ref": "relation/13184373",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "town"
+    },
+    "straight_km": 107.8,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 140.2,
+      "method": "estimate",
+      "straight_km": 107.8,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 4788,
+      "high_rs": 5676
+     },
+     "per_quintal": {
+      "low_rs": 478,
+      "high_rs": 568
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "Transport for 10 quintals: ₹4,788 to ₹5,676",
+     "per_quintal_text": "₹478 to ₹568 a quintal"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-03-19",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Maharashtra file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "Registered with WDRA, valid until 2031-03-19"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "Sell now",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   }
+  ],
+  "operators_not_listed": [],
+  "warehouses_left_out": {
+   "CWC": {
+    "not_farm_storage": {
+     "container_freight_station": 1,
+     "bonded": 1,
+     "inland_container_depot": 1,
+     "rail_terminal": 1
+    },
+    "not_placed": 4
+   },
+   "MSWC": {
+    "not_farm_storage": {
+     "peg": 2,
+     "no_capacity_printed": 2,
+     "bonded": 1
+    },
+    "not_placed": 14
+   }
+  },
+  "wdra": {
+   "district": "Nashik",
+   "n_registered": 21,
+   "n_active": 15,
+   "active_capacity_mt": 106325.0,
+   "total_capacity_mt": 113795.0,
+   "has_active_registered_warehouse": true,
+   "as_of": "2026-08-27",
+   "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
+  },
+  "wdra_others": {
+   "n": 1,
+   "names": [
+    "B T KADLAG CONSTRUCTION PVT LTD"
+   ],
+   "more": 0,
+   "operator_types": [
+    "company"
+   ],
+   "file_date": "2026-08-27",
+   "source": "WDRA registered warehouses export ('registered-wh-public', Maharashtra file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+   "text": "Also registered with WDRA in Nashik: 1 warehouse run by an organisation (B T KADLAG CONSTRUCTION PVT LTD)"
+  },
+  "price": {
+   "rs_per_q": 2100.0,
+   "day": "2026-09-24",
+   "basis_kind": "district_median",
+   "radius_km": null
+  },
+  "past_years": null,
+  "first_year": null,
+  "last_year": null,
+  "storage_cost": {
+   "value": null,
+   "kind": "none"
+  },
+  "loss_pct_month": {
+   "value": null,
+   "kind": "not_given"
+  },
+  "sources": [
+   {
+    "what": "price",
+    "text": "Latest price ₹2,100/q, the middle price across the mandis of Nashik that reported (1), observed 2026-09-24.",
+    "date": "2026-09-24"
+   },
+   {
+    "what": "distance",
+    "date": null,
+    "text": "Distance 9 km: the straight line between the two towns × 1.3, an estimate"
+   },
+   {
+    "what": "transport",
+    "date": null,
+    "text": "Transport for 10 quintals: ACE / DOST / PICKUP (1.5 TON), ₹85 to ₹120 a quintal, from published truck rates, not a quote"
+   },
+   {
+    "what": "wdra",
+    "date": "2026-08-27",
+    "text": "WDRA's file of 2026-08-27: 15 active of 21 registered warehouses in Nashik"
+   },
+   {
+    "what": "wdra_registrations",
+    "date": "2026-08-27",
+    "text": "WDRA registrations: WDRA's list of 2026-08-27"
+   },
+   {
+    "what": "occupancy",
+    "operator": "MSWC",
+    "date": "2026-08",
+    "text": "Under half full: MSWC's statement of Aug 2026"
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "pending_native_review": false
+ },
+ "indicators": [
+  {
+   "key": "verdict",
+   "label": "Decision",
+   "value": "Sell now",
+   "note": "Sell now: tomato does not keep in ordinary storage",
+   "tone": "warn"
+  },
+  {
+   "key": "price_now",
+   "label": "Price now",
+   "value": "₹2,100 a quintal",
+   "note": "Above the usual range for September",
+   "tone": "good"
+  },
+  {
+   "key": "best_month",
+   "label": "Usually highest",
+   "value": "June",
+   "note": "₹2,000 a quintal",
+   "tone": "neutral"
+  },
+  {
+   "key": "storage_rate",
+   "label": "Storage rate",
+   "value": "Not published",
+   "note": "Ambad, MSWC",
+   "tone": "neutral"
+  },
+  {
+   "key": "distance",
+   "label": "Distance",
+   "value": "9 km",
+   "note": "₹85 to ₹120 a quintal",
+   "tone": "neutral"
+  },
+  {
+   "key": "wastage",
+   "label": "Wastage",
+   "value": "Does not keep",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "near",
+   "label": "Near you",
+   "value": "15 warehouses · 10 cold stores",
+   "note": "In Nashik. Warehouses: WDRA's list as on 2026-10-21",
+   "tone": "neutral"
+  }
+ ],
+ "prices": {
+  "now": {
+   "rs_per_q": 2100.0,
+   "text": "₹2,100",
+   "day": "2026-09-24",
+   "against": "above",
+   "against_text": "Above the usual range for September",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
+  },
+  "months": [
+   {
+    "month": 1,
+    "name": "January",
+    "short": "Jan",
+    "usual_rs": 1125.0,
+    "low_rs": 676.25,
+    "high_rs": 1395.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 2,
+    "name": "February",
+    "short": "Feb",
+    "usual_rs": 827.5,
+    "low_rs": 627.5,
+    "high_rs": 1173.75,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 3,
+    "name": "March",
+    "short": "Mar",
+    "usual_rs": 825.0,
+    "low_rs": 677.5,
+    "high_rs": 1000.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 4,
+    "name": "April",
+    "short": "Apr",
+    "usual_rs": 775.0,
+    "low_rs": 658.75,
+    "high_rs": 1000.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 5,
+    "name": "May",
+    "short": "May",
+    "usual_rs": 1032.5,
+    "low_rs": 700.62,
+    "high_rs": 1721.88,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 6,
+    "name": "June",
+    "short": "Jun",
+    "usual_rs": 2000.0,
+    "low_rs": 1255.0,
+    "high_rs": 3000.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 7,
+    "name": "July",
+    "short": "Jul",
+    "usual_rs": 1975.0,
+    "low_rs": 1500.0,
+    "high_rs": 3555.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 8,
+    "name": "August",
+    "short": "Aug",
+    "usual_rs": 1500.0,
+    "low_rs": 1052.5,
+    "high_rs": 2552.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 9,
+    "name": "September",
+    "short": "Sep",
+    "usual_rs": 1250.0,
+    "low_rs": 600.0,
+    "high_rs": 1700.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 10,
+    "name": "October",
+    "short": "Oct",
+    "usual_rs": 1552.5,
+    "low_rs": 766.09,
+    "high_rs": 2250.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 11,
+    "name": "November",
+    "short": "Nov",
+    "usual_rs": 1877.5,
+    "low_rs": 871.25,
+    "high_rs": 2502.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 12,
+    "name": "December",
+    "short": "Dec",
+    "usual_rs": 1405.0,
+    "low_rs": 934.38,
+    "high_rs": 1805.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   }
+  ],
+  "years": [
+   {
+    "year": 2017,
+    "partial": false,
+    "average_rs": 1593.75,
+    "high_rs": 3875.0,
+    "high_month": 7,
+    "low_rs": 300.0,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 354
+   },
+   {
+    "year": 2018,
+    "partial": false,
+    "average_rs": 669.58,
+    "high_rs": 1168.75,
+    "high_month": 7,
+    "low_rs": 320.0,
+    "low_month": 4,
+    "n_months": 12,
+    "n_days": 346
+   },
+   {
+    "year": 2019,
+    "partial": false,
+    "average_rs": 1452.6,
+    "high_rs": 2250.0,
+    "high_month": 10,
+    "low_rs": 712.5,
+    "low_month": 12,
+    "n_months": 12,
+    "n_days": 336
+   },
+   {
+    "year": 2020,
+    "partial": false,
+    "average_rs": 1373.85,
+    "high_rs": 2375.0,
+    "high_month": 9,
+    "low_rs": 475.0,
+    "low_month": 5,
+    "n_months": 12,
+    "n_days": 327
+   },
+   {
+    "year": 2021,
+    "partial": false,
+    "average_rs": 1105.1,
+    "high_rs": 2751.25,
+    "high_month": 11,
+    "low_rs": 477.5,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 345
+   },
+   {
+    "year": 2022,
+    "partial": false,
+    "average_rs": 1450.31,
+    "high_rs": 3262.5,
+    "high_month": 6,
+    "low_rs": 375.0,
+    "low_month": 12,
+    "n_months": 12,
+    "n_days": 353
+   },
+   {
+    "year": 2023,
+    "partial": false,
+    "average_rs": 1555.59,
+    "high_rs": 6250.0,
+    "high_month": 7,
+    "low_rs": 450.0,
+    "low_month": 5,
+    "n_months": 12,
+    "n_days": 346
+   },
+   {
+    "year": 2024,
+    "partial": false,
+    "average_rs": 1556.66,
+    "high_rs": 2500.0,
+    "high_month": 7,
+    "low_rs": 787.5,
+    "low_month": 4,
+    "n_months": 12,
+    "n_days": 333
+   },
+   {
+    "year": 2025,
+    "partial": false,
+    "average_rs": 1200.62,
+    "high_rs": 2750.0,
+    "high_month": 8,
+    "low_rs": 600.0,
+    "low_month": 2,
+    "n_months": 12,
+    "n_days": 322
+   },
+   {
+    "year": 2026,
+    "partial": true,
+    "average_rs": 1429.69,
+    "high_rs": 2250.0,
+    "high_month": 6,
+    "low_rs": 755.0,
+    "low_month": 2,
+    "n_months": 8,
+    "n_days": 206
+   }
+  ],
+  "best_month": {
+   "month": 6,
+   "name": "June",
+   "usual_rs": 2000.0,
+   "text": "Usually highest in June: about ₹2,000 a quintal"
+  },
+  "lowest_month": {
+   "month": 4,
+   "name": "April",
+   "usual_rs": 775.0,
+   "text": "Usually lowest in April: about ₹775 a quintal"
+  },
+  "held": true,
+  "headline": null,
+  "note": "History, not a forecast: this district's mandis in past years, in rupees as published, not adjusted for inflation.",
+  "sources": [
+   {
+    "what": "months",
+    "text": "Month by month: the usual price and the middle half of the district's daily prices, 2021-2025, 2022-2026 (Agmarknet)"
+   },
+   {
+    "what": "years",
+    "text": "Year by year: the year's average, its highest month and its lowest (Agmarknet)"
+   }
+  ]
+ },
+ "loan": null,
+ "wdra_list": {
+  "listed": 15,
+  "as_on": "2026-10-21",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
+ },
+ "wastage": {
+  "kind": "not_storable",
+  "assumed_pct_month": null,
+  "value": "Does not keep",
+  "headline": "We cannot say this crop keeps in ordinary storage.",
+  "published": []
+ },
+ "cold_storages": {
+  "held": true,
+  "in_district": 10,
+  "near_total": 10,
+  "within_km": 100,
+  "headline": "10 cold-storage projects on record in Nashik",
+  "near": [
+   {
+    "name": "M/s Sangale Agro Processing Pvt. Ltd.",
+    "district_shown": "Nashik",
+    "capacity_mt": 11100.0,
+    "capacity_text": "11,100 tonnes",
+    "year_sanctioned": "2010-11",
+    "year_text": "Sanctioned 2010-11",
+    "status": "completed",
+    "km": 0.0,
+    "where_text": "In this district"
+   },
+   {
+    "name": "Late Ashokrao Bankar Nagari Sahakari Patsanstha Ltd.",
+    "district_shown": "Nashik",
+    "capacity_mt": 1965.0,
+    "capacity_text": "1,965 tonnes",
+    "year_sanctioned": "2010-11",
+    "year_text": "Sanctioned 2010-11",
+    "status": "completed",
+    "km": 0.0,
+    "where_text": "In this district"
+   }
+  ],
+  "not_named": 8,
+  "not_named_text": "8 more without a name we can show",
+  "rate_text": "Rates are not published: we hold no cold store's charges, so ask the store.",
+  "caveat": "Subsidy records, sanctioned 2006-07 to 2014-15. They do not show that a store still runs or takes other farmers' produce.",
+  "source": "Integrated Cold Chain Availability Platform: government project lists"
+ },
+ "pending_native_review": false,
+ "lang_note": null
+}

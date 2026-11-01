@@ -78,7 +78,7 @@ export function VerdictLine({
           className="break-words text-lg font-semibold leading-snug text-foreground"
           data-testid="store-verdict-note"
         >
-          {head.note}
+          <WholeFigures text={head.note} />
         </p>
       ) : null}
       {v?.confidence ? <ConfidenceLine confidence={v.confidence} /> : null}
@@ -107,7 +107,7 @@ export function VerdictLine({
 }
 
 /** A range's ends keep their sign and rupee on one line: "+" and "-" stood alone at a line's end at some widths (the walk of 1 Nov 2026). */
-const WholeFigures = ({ text }: { text: string }) =>
+export const WholeFigures = ({ text }: { text: string }) =>
   text.split(/([+-]₹[\d,.]+)/).map((part, i) =>
     /^[+-]₹/.test(part) ? (
       <span key={i} className="whitespace-nowrap">

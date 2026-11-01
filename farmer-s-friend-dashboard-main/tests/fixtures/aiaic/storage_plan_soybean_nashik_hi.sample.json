@@ -15,11 +15,12 @@
   "quantity_q": 10.0,
   "quantity_given": false,
   "verdict": {
-   "code": "sell_now",
-   "reason_code": "storing_unlikely_to_pay",
-   "word": "अभी बेचें",
-   "text": "अभी बेचें: महाराष्ट्र राज्य वखार महामंडळ अंबड, 9 किमी, में भंडारण से फ़ायदा होने की संभावना कम",
-   "tone": "warn",
+   "code": "unsure",
+   "reason_code": "too_uncertain_to_direct",
+   "leans": "sell_now",
+   "word": "पक्का नहीं",
+   "text": "पक्का नहीं: महाराष्ट्र राज्य वखार महामंडळ अंबड, 9 किमी, में भंडारण से फ़ायदा हो भी सकता है और नहीं भी",
+   "tone": "neutral",
    "confidence": {
     "band": "low",
     "text": "ज़्यादा पक्का नहीं",
@@ -357,9 +358,9 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "अभी बेचें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -513,9 +514,9 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "अभी बेचें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -705,9 +706,9 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "अभी बेचें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -902,9 +903,9 @@
     "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
     "source_date": "2026-10-24",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "अभी बेचें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -1058,9 +1059,9 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "अभी बेचें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -1221,9 +1222,9 @@
     "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
     "source_date": "2026-04-01",
     "storing": {
-     "code": "sell_now",
-     "reason_code": "storing_unlikely_to_pay",
-     "word": "अभी बेचें",
+     "code": "unsure",
+     "reason_code": "too_uncertain_to_direct",
+     "word": "पक्का नहीं",
      "months": 4,
      "months_text": null,
      "net_gain_per_q": {
@@ -1392,9 +1393,9 @@
   {
    "key": "verdict",
    "label": "निर्णय",
-   "value": "अभी बेचें",
-   "note": "अभी बेचें: महाराष्ट्र राज्य वखार महामंडळ अंबड, 9 किमी, में भंडारण से फ़ायदा होने की संभावना कम",
-   "tone": "warn"
+   "value": "पक्का नहीं",
+   "note": "पक्का नहीं: महाराष्ट्र राज्य वखार महामंडळ अंबड, 9 किमी, में भंडारण से फ़ायदा हो भी सकता है और नहीं भी",
+   "tone": "neutral"
   },
   {
    "key": "net_gain",

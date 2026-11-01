@@ -1,0 +1,1236 @@
+{
+ "state": "maharashtra",
+ "district": "Nashik",
+ "district_shown": "नासिक",
+ "crop": "tomato",
+ "crop_shown": "टमाटर",
+ "lang": "hi",
+ "card": {
+  "state": "maharashtra",
+  "district": "Nashik",
+  "district_shown": "नासिक",
+  "crop": "tomato",
+  "crop_shown": "टमाटर",
+  "lang": "hi",
+  "quantity_q": 10.0,
+  "quantity_given": false,
+  "verdict": {
+   "code": "sell_now",
+   "reason_code": "not_storable",
+   "leans": null,
+   "word": "अभी बेचें",
+   "text": "अभी बेचें: टमाटर साधारण भंडारण में नहीं टिकता",
+   "tone": "warn",
+   "confidence": {
+    "band": "rule",
+    "text": "तय नियम",
+    "label": "कितना पक्का",
+    "reasons": [
+     "यह तय नियम से है, भावों की तुलना से नहीं, इसलिए भरोसे का स्तर नहीं बताया जा सकता।"
+    ]
+   },
+   "months": null,
+   "months_text": null,
+   "warehouse": {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Ambad",
+    "kind": "general",
+    "basis": "named_town",
+    "category": "B",
+    "name_shown": "अंबड",
+    "place_shown": "अंबड",
+    "town": "Ambad",
+    "town_shown": "अंबड",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "नासिक",
+    "km": 9.2,
+    "km_method": "estimate",
+    "rs_per_q_month": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "text": "10 क्विंटल की ढुलाई: ₹850 से ₹1,200",
+     "per_quintal_text": "प्रति क्विंटल ₹85 से ₹120"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-07",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 7/8/2027 तक वैध"
+    },
+    "under_half_full": null
+   },
+   "chosen_by": {
+    "code": "nearest",
+    "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
+    "text": "सूची का सबसे पास का गोदाम"
+   },
+   "net_gain_per_q": null,
+   "gain_before_transport_per_q": null,
+   "parts_per_q": null,
+   "engine_says": {},
+   "decision_ids": [],
+   "assumptions": [],
+   "uncalibrated": "अभी तक कृषि वैज्ञानिकों द्वारा जाँचा नहीं गया: इसे मार्गदर्शन मानें, गारंटी नहीं।"
+  },
+  "warehouses": [
+   {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Ambad",
+    "name_shown": "अंबड",
+    "sr": "1427",
+    "kind": "general",
+    "category": "B",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Ambad",
+    "town_shown": "अंबड",
+    "place_shown": "अंबड",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "नासिक",
+    "point": {
+     "lat": 19.94999,
+     "lon": 73.74315,
+     "geocoder": "nominatim",
+     "osm_ref": "node/660236320",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "suburb"
+    },
+    "straight_km": 7.1,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 9.2,
+      "method": "estimate",
+      "straight_km": 7.1,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹850 से ₹1,200",
+     "per_quintal_text": "प्रति क्विंटल ₹85 से ₹120"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-07",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 7/8/2027 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "अभी बेचें",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": true
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "NASIK ROAD",
+    "name_shown": "NASIK ROAD",
+    "sr": "34",
+    "kind": "general",
+    "category": "1090",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Nashik Road",
+    "town_shown": "नाशिक रोड",
+    "place_shown": "NASIK ROAD (नाशिक रोड)",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "नासिक",
+    "point": {
+     "lat": 19.95048,
+     "lon": 73.83885,
+     "geocoder": "nominatim",
+     "osm_ref": "node/13447487624",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "suburb"
+    },
+    "straight_km": 7.3,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 9.5,
+      "method": "estimate",
+      "straight_km": 7.3,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 850,
+      "high_rs": 1200
+     },
+     "per_quintal": {
+      "low_rs": 85,
+      "high_rs": 120
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹850 से ₹1,200",
+     "per_quintal_text": "प्रति क्विंटल ₹85 से ₹120"
+    },
+    "wdra": null,
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "अभी बेचें",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Sinner",
+    "name_shown": "सिन्नर",
+    "sr": "1425",
+    "kind": "general",
+    "category": "B",
+    "basis": "named_town",
+    "note": "OpenStreetMap names the town Sinnar",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Sinnar",
+    "town_shown": "Sinnar",
+    "place_shown": "सिन्नर",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "नासिक",
+    "point": {
+     "lat": 19.84531,
+     "lon": 74.00002,
+     "geocoder": "nominatim",
+     "osm_ref": "node/2299042250",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "town"
+    },
+    "straight_km": 27.8,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 36.1,
+      "method": "estimate",
+      "straight_km": 27.8,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 1479,
+      "high_rs": 1754
+     },
+     "per_quintal": {
+      "low_rs": 147,
+      "high_rs": 176
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹1,479 से ₹1,754",
+     "per_quintal_text": "प्रति क्विंटल ₹147 से ₹176"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-09",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 9/8/2027 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "अभी बेचें",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "MSWC",
+    "operator_shown": "महाराष्ट्र राज्य वखार महामंडळ",
+    "operator_full": "महाराष्ट्र राज्य वखार महामंडळ",
+    "name": "Musalgaon",
+    "name_shown": "मुसळगांव",
+    "sr": "1430",
+    "kind": "general",
+    "category": "B",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Musalgaon",
+    "town_shown": "Musalgaon",
+    "place_shown": "मुसळगांव",
+    "state": "maharashtra",
+    "district_key": "nashik",
+    "district_shown": "नासिक",
+    "point": {
+     "lat": 19.83468,
+     "lon": 74.05359,
+     "geocoder": "nominatim",
+     "osm_ref": "node/5705969375",
+     "geocoded_on": "2026-10-24",
+     "area": "rural",
+     "place_class": "village"
+    },
+    "straight_km": 33.0,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 42.9,
+      "method": "estimate",
+      "straight_km": 33.0,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_rural",
+      "possible": [
+       "rural_rural"
+      ],
+      "factor_low": 1.2,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 1918,
+      "high_rs": 2274
+     },
+     "per_quintal": {
+      "low_rs": 191,
+      "high_rs": 228
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹1,918 से ₹2,274",
+     "per_quintal_text": "प्रति क्विंटल ₹191 से ₹228"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2027-08-12",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export, Maharashtra and Madhya Pradesh files dated 27 Aug 2026",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 12/8/2027 तक वैध"
+    },
+    "under_half_full": {
+     "month": "2026-08",
+     "occupancy_pct": 24,
+     "source": "https://mswarehousing.com/Mar-mswc/wp-content/uploads/2026/09/occupancy-below-50-Aug-2026.pdf",
+     "text": "अगस्त 2026 में आधे से कम भरा"
+    },
+    "source": "MSWC list of centres (https://mswarehousing.com/MSwhs/all-districts-list/ and https://mswarehousing.com/Mar-mswc/all-districts-list/), fetched 2026-10-24; town point: OpenStreetMap via Nominatim",
+    "source_date": "2026-10-24",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "अभी बेचें",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "PUNTAMBA",
+    "name_shown": "PUNTAMBA",
+    "sr": "35",
+    "kind": "general",
+    "category": "950",
+    "basis": "named_town",
+    "note": "Puntamba is in Rahata taluka",
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Puntamba",
+    "town_shown": "Puntamba",
+    "place_shown": "PUNTAMBA",
+    "state": "maharashtra",
+    "district_key": "ahmednagar",
+    "district_shown": "अहिल्यानगर",
+    "point": {
+     "lat": 19.76848,
+     "lon": 74.61849,
+     "geocoder": "nominatim",
+     "osm_ref": "node/794375036",
+     "geocoded_on": "2026-10-24",
+     "area": "rural",
+     "place_class": "village"
+    },
+    "straight_km": 90.4,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 117.5,
+      "method": "estimate",
+      "straight_km": 90.4,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_rural",
+      "possible": [
+       "rural_rural"
+      ],
+      "factor_low": 1.2,
+      "factor_high": 1.2,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 4378,
+      "high_rs": 5189
+     },
+     "per_quintal": {
+      "low_rs": 437,
+      "high_rs": 519
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹4,378 से ₹5,189",
+     "per_quintal_text": "प्रति क्विंटल ₹437 से ₹519"
+    },
+    "wdra": null,
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "अभी बेचें",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   },
+   {
+    "operator": "CWC",
+    "operator_shown": "केंद्रीय भंडारण निगम",
+    "operator_full": "केंद्रीय भंडारण निगम",
+    "name": "AMBERNATH",
+    "name_shown": "AMBERNATH",
+    "sr": "19",
+    "kind": "general",
+    "category": "1400",
+    "basis": "named_town",
+    "note": null,
+    "also_here": [],
+    "hired_premises_run_from_here": 0,
+    "town": "Ambernath",
+    "town_shown": "अंबरनाथ",
+    "place_shown": "AMBERNATH (अंबरनाथ)",
+    "state": "maharashtra",
+    "district_key": "thane",
+    "district_shown": "ठाणे",
+    "point": {
+     "lat": 19.20156,
+     "lon": 73.20048,
+     "geocoder": "nominatim",
+     "osm_ref": "relation/13184373",
+     "geocoded_on": "2026-10-24",
+     "area": "urban",
+     "place_class": "town"
+    },
+    "straight_km": 107.8,
+    "rate": null,
+    "farmer_rate": null,
+    "trip": {
+     "measured": true,
+     "distance": {
+      "km": 140.2,
+      "method": "estimate",
+      "straight_km": 107.8,
+      "factor": 1.3,
+      "why_not_road": "no_routing_key",
+      "source": "straight line x 1.3 between the two points: an estimate, not a road distance"
+     },
+     "route": null,
+     "route_type": {
+      "key": "rural_urban",
+      "possible": [
+       "rural_urban"
+      ],
+      "factor_low": 1.1,
+      "factor_high": 1.1,
+      "assumption": true
+     },
+     "vehicle": {
+      "key": "ace_dost_pickup",
+      "name": "ACE / DOST / PICKUP (1.5 TON)",
+      "names": {
+       "en": "ACE / DOST / PICKUP (1.5 TON)",
+       "mr": "एस / दोस्त / पिकअप (1.5 टन)",
+       "hi": "एस / दोस्त / पिकअप (1.5 टन)"
+      },
+      "capacity_kg": 1500,
+      "capacity_q": 15,
+      "routing_mode": "light_truck",
+      "rate": "market"
+     },
+     "trips": 1,
+     "loads_q": [
+      10.0
+     ],
+     "cost": {
+      "low_rs": 4788,
+      "high_rs": 5676
+     },
+     "per_quintal": {
+      "low_rs": 478,
+      "high_rs": 568
+     },
+     "attribution": [
+      {
+       "text": "© OpenStreetMap contributors",
+       "url": "https://www.openstreetmap.org/copyright",
+       "licence": "ODbL 1.0"
+      }
+     ],
+     "text": "10 क्विंटल की ढुलाई: ₹4,788 से ₹5,676",
+     "per_quintal_text": "प्रति क्विंटल ₹478 से ₹568"
+    },
+    "wdra": {
+     "registered": true,
+     "valid_until": "2031-03-19",
+     "registrations": 1,
+     "file_date": "2026-08-27",
+     "source": "WDRA registered warehouses export ('registered-wh-public', Maharashtra file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+     "text": "डब्ल्यूडीआरए-पंजीकृत, 19/3/2031 तक वैध"
+    },
+    "under_half_full": null,
+    "source": "Central Warehousing Corporation: CWC CO-CD/4/2025-COMM (115136) dated 28.02.2026, effective 2026-04-01; town point: OpenStreetMap via Nominatim, 2026-10-24",
+    "source_date": "2026-04-01",
+    "storing": {
+     "code": "sell_now",
+     "reason_code": "not_storable",
+     "word": "अभी बेचें",
+     "months": null,
+     "months_text": null,
+     "net_gain_per_q": null,
+     "decision_ids": []
+    },
+    "rule": {
+     "step": 3,
+     "store_gain_rs": null,
+     "counted_gain_rs": null
+    },
+    "chosen": false
+   }
+  ],
+  "operators_not_listed": [],
+  "warehouses_left_out": {
+   "CWC": {
+    "not_farm_storage": {
+     "container_freight_station": 1,
+     "bonded": 1,
+     "inland_container_depot": 1,
+     "rail_terminal": 1
+    },
+    "not_placed": 4
+   },
+   "MSWC": {
+    "not_farm_storage": {
+     "peg": 2,
+     "no_capacity_printed": 2,
+     "bonded": 1
+    },
+    "not_placed": 14
+   }
+  },
+  "wdra": {
+   "district": "Nashik",
+   "n_registered": 21,
+   "n_active": 15,
+   "active_capacity_mt": 106325.0,
+   "total_capacity_mt": 113795.0,
+   "has_active_registered_warehouse": true,
+   "as_of": "2026-08-27",
+   "source": "WDRA public registered-warehouse directory (wdra.gov.in), counts per district"
+  },
+  "wdra_others": {
+   "n": 1,
+   "names": [
+    "B T KADLAG CONSTRUCTION PVT LTD"
+   ],
+   "more": 0,
+   "operator_types": [
+    "company"
+   ],
+   "file_date": "2026-08-27",
+   "source": "WDRA registered warehouses export ('registered-wh-public', Maharashtra file dated 27 Aug 2026; https://wdra.gov.in/web/wdra/registered-warehouses)",
+   "text": "नासिक में डब्ल्यूडीआरए-पंजीकृत और 1 गोदाम, एक संस्था का (B T KADLAG CONSTRUCTION PVT LTD)"
+  },
+  "price": {
+   "rs_per_q": 2100.0,
+   "day": "2026-09-24",
+   "basis_kind": "district_median",
+   "radius_km": null
+  },
+  "past_years": null,
+  "first_year": null,
+  "last_year": null,
+  "storage_cost": {
+   "value": null,
+   "kind": "none"
+  },
+  "loss_pct_month": {
+   "value": null,
+   "kind": "not_given"
+  },
+  "sources": [
+   {
+    "what": "price",
+    "text": "ताज़ा भाव ₹2,100/क्विंटल, नासिक की रिपोर्ट करने वाली मंडियों (1) का बीच का भाव, 24/9/2026 को दर्ज।",
+    "date": "2026-09-24"
+   },
+   {
+    "what": "distance",
+    "date": null,
+    "text": "दूरी 9 किमी: दोनों जगहों के बीच की सीधी रेखा × 1.3, एक अनुमान"
+   },
+   {
+    "what": "transport",
+    "date": null,
+    "text": "10 क्विंटल की ढुलाई: एस / दोस्त / पिकअप (1.5 टन), प्रति क्विंटल ₹85 से ₹120, प्रकाशित ट्रक दरों से, कोई तय भाव नहीं"
+   },
+   {
+    "what": "wdra",
+    "date": "2026-08-27",
+    "text": "भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची: नासिक में पंजीकृत 21 में से 15 गोदाम चालू"
+   },
+   {
+    "what": "wdra_registrations",
+    "date": "2026-08-27",
+    "text": "डब्ल्यूडीआरए पंजीकरण: भंडारण विकास एवं विनियामक प्राधिकरण की 27/8/2026 की सूची"
+   },
+   {
+    "what": "occupancy",
+    "operator": "MSWC",
+    "date": "2026-08",
+    "text": "आधे से कम भरा: महाराष्ट्र राज्य वखार महामंडळ का अगस्त 2026 का विवरण"
+   }
+  ],
+  "attribution": [
+   {
+    "text": "© OpenStreetMap contributors",
+    "url": "https://www.openstreetmap.org/copyright",
+    "licence": "ODbL 1.0"
+   }
+  ],
+  "pending_native_review": true
+ },
+ "indicators": [
+  {
+   "key": "verdict",
+   "label": "निर्णय",
+   "value": "अभी बेचें",
+   "note": "अभी बेचें: टमाटर साधारण भंडारण में नहीं टिकता",
+   "tone": "warn"
+  },
+  {
+   "key": "price_now",
+   "label": "अभी का भाव",
+   "value": "₹2,100 प्रति क्विंटल",
+   "note": "सितंबर की सामान्य सीमा से ऊपर",
+   "tone": "good"
+  },
+  {
+   "key": "best_month",
+   "label": "आमतौर पर सबसे ऊँचा",
+   "value": "जून",
+   "note": "₹2,000 प्रति क्विंटल",
+   "tone": "neutral"
+  },
+  {
+   "key": "storage_rate",
+   "label": "भंडारण दर",
+   "value": "प्रकाशित नहीं",
+   "note": "अंबड, महाराष्ट्र राज्य वखार महामंडळ",
+   "tone": "neutral"
+  },
+  {
+   "key": "distance",
+   "label": "दूरी",
+   "value": "9 किमी",
+   "note": "प्रति क्विंटल ₹85 से ₹120",
+   "tone": "neutral"
+  },
+  {
+   "key": "wastage",
+   "label": "बर्बादी",
+   "value": "टिकती नहीं",
+   "note": null,
+   "tone": "neutral"
+  },
+  {
+   "key": "near",
+   "label": "आपके पास",
+   "value": "15 गोदाम · 10 शीतगृह",
+   "note": "नासिक में। गोदाम: भंडारण विकास एवं विनियामक प्राधिकरण की 21/10/2026 की सूची",
+   "tone": "neutral"
+  }
+ ],
+ "prices": {
+  "now": {
+   "rs_per_q": 2100.0,
+   "text": "₹2,100",
+   "day": "2026-09-24",
+   "against": "above",
+   "against_text": "सितंबर की सामान्य सीमा से ऊपर",
+   "outside": false,
+   "basis_kind": "district_median",
+   "whose_text": null
+  },
+  "months": [
+   {
+    "month": 1,
+    "name": "जनवरी",
+    "short": "जन",
+    "usual_rs": 1125.0,
+    "low_rs": 676.25,
+    "high_rs": 1395.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 2,
+    "name": "फ़रवरी",
+    "short": "फर",
+    "usual_rs": 827.5,
+    "low_rs": 627.5,
+    "high_rs": 1173.75,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 3,
+    "name": "मार्च",
+    "short": "मार्च",
+    "usual_rs": 825.0,
+    "low_rs": 677.5,
+    "high_rs": 1000.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 4,
+    "name": "अप्रैल",
+    "short": "अप्रै",
+    "usual_rs": 775.0,
+    "low_rs": 658.75,
+    "high_rs": 1000.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 5,
+    "name": "मई",
+    "short": "मई",
+    "usual_rs": 1032.5,
+    "low_rs": 700.62,
+    "high_rs": 1721.88,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 6,
+    "name": "जून",
+    "short": "जून",
+    "usual_rs": 2000.0,
+    "low_rs": 1255.0,
+    "high_rs": 3000.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 7,
+    "name": "जुलाई",
+    "short": "जुल",
+    "usual_rs": 1975.0,
+    "low_rs": 1500.0,
+    "high_rs": 3555.0,
+    "n_years": 5,
+    "years": "2022-2026"
+   },
+   {
+    "month": 8,
+    "name": "अगस्त",
+    "short": "अग",
+    "usual_rs": 1500.0,
+    "low_rs": 1052.5,
+    "high_rs": 2552.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 9,
+    "name": "सितंबर",
+    "short": "सित",
+    "usual_rs": 1250.0,
+    "low_rs": 600.0,
+    "high_rs": 1700.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 10,
+    "name": "अक्टूबर",
+    "short": "अक्टू",
+    "usual_rs": 1552.5,
+    "low_rs": 766.09,
+    "high_rs": 2250.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 11,
+    "name": "नवंबर",
+    "short": "नव",
+    "usual_rs": 1877.5,
+    "low_rs": 871.25,
+    "high_rs": 2502.5,
+    "n_years": 5,
+    "years": "2021-2025"
+   },
+   {
+    "month": 12,
+    "name": "दिसंबर",
+    "short": "दिस",
+    "usual_rs": 1405.0,
+    "low_rs": 934.38,
+    "high_rs": 1805.0,
+    "n_years": 5,
+    "years": "2021-2025"
+   }
+  ],
+  "years": [
+   {
+    "year": 2017,
+    "partial": false,
+    "average_rs": 1593.75,
+    "high_rs": 3875.0,
+    "high_month": 7,
+    "low_rs": 300.0,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 354
+   },
+   {
+    "year": 2018,
+    "partial": false,
+    "average_rs": 669.58,
+    "high_rs": 1168.75,
+    "high_month": 7,
+    "low_rs": 320.0,
+    "low_month": 4,
+    "n_months": 12,
+    "n_days": 346
+   },
+   {
+    "year": 2019,
+    "partial": false,
+    "average_rs": 1452.6,
+    "high_rs": 2250.0,
+    "high_month": 10,
+    "low_rs": 712.5,
+    "low_month": 12,
+    "n_months": 12,
+    "n_days": 336
+   },
+   {
+    "year": 2020,
+    "partial": false,
+    "average_rs": 1373.85,
+    "high_rs": 2375.0,
+    "high_month": 9,
+    "low_rs": 475.0,
+    "low_month": 5,
+    "n_months": 12,
+    "n_days": 327
+   },
+   {
+    "year": 2021,
+    "partial": false,
+    "average_rs": 1105.1,
+    "high_rs": 2751.25,
+    "high_month": 11,
+    "low_rs": 477.5,
+    "low_month": 1,
+    "n_months": 12,
+    "n_days": 345
+   },
+   {
+    "year": 2022,
+    "partial": false,
+    "average_rs": 1450.31,
+    "high_rs": 3262.5,
+    "high_month": 6,
+    "low_rs": 375.0,
+    "low_month": 12,
+    "n_months": 12,
+    "n_days": 353
+   },
+   {
+    "year": 2023,
+    "partial": false,
+    "average_rs": 1555.59,
+    "high_rs": 6250.0,
+    "high_month": 7,
+    "low_rs": 450.0,
+    "low_month": 5,
+    "n_months": 12,
+    "n_days": 346
+   },
+   {
+    "year": 2024,
+    "partial": false,
+    "average_rs": 1556.66,
+    "high_rs": 2500.0,
+    "high_month": 7,
+    "low_rs": 787.5,
+    "low_month": 4,
+    "n_months": 12,
+    "n_days": 333
+   },
+   {
+    "year": 2025,
+    "partial": false,
+    "average_rs": 1200.62,
+    "high_rs": 2750.0,
+    "high_month": 8,
+    "low_rs": 600.0,
+    "low_month": 2,
+    "n_months": 12,
+    "n_days": 322
+   },
+   {
+    "year": 2026,
+    "partial": true,
+    "average_rs": 1429.69,
+    "high_rs": 2250.0,
+    "high_month": 6,
+    "low_rs": 755.0,
+    "low_month": 2,
+    "n_months": 8,
+    "n_days": 206
+   }
+  ],
+  "best_month": {
+   "month": 6,
+   "name": "जून",
+   "usual_rs": 2000.0,
+   "text": "आमतौर पर जून में सबसे ऊँचा: लगभग ₹2,000 प्रति क्विंटल"
+  },
+  "lowest_month": {
+   "month": 4,
+   "name": "अप्रैल",
+   "usual_rs": 775.0,
+   "text": "आमतौर पर अप्रैल में सबसे नीचा: लगभग ₹775 प्रति क्विंटल"
+  },
+  "held": true,
+  "headline": null,
+  "note": "यह इतिहास है, पूर्वानुमान नहीं: पिछले वर्षों में इस ज़िले की मंडियों के भाव, प्रकाशित रुपयों में, महँगाई के हिसाब से समायोजित नहीं।",
+  "sources": [
+   {
+    "what": "months",
+    "text": "महीने के अनुसार: ज़िले के दैनिक भावों का सामान्य भाव और बीच का आधा हिस्सा, 2021-2025, 2022-2026 (Agmarknet)"
+   },
+   {
+    "what": "years",
+    "text": "वर्ष के अनुसार: वर्ष का औसत, सबसे ऊँचा महीना और सबसे नीचा महीना (Agmarknet)"
+   }
+  ]
+ },
+ "loan": null,
+ "wdra_list": {
+  "listed": 15,
+  "as_on": "2026-10-21",
+  "source": "Warehousing Development and Regulatory Authority (WDRA), Government of India",
+  "url": "https://wdra.gov.in/web/wdra/registered-warehouses"
+ },
+ "wastage": {
+  "kind": "not_storable",
+  "assumed_pct_month": null,
+  "value": "टिकती नहीं",
+  "headline": "हम नहीं कह सकते कि यह फसल सामान्य भंडारण में टिकती है।",
+  "published": []
+ },
+ "cold_storages": {
+  "held": true,
+  "in_district": 10,
+  "near_total": 10,
+  "within_km": 100,
+  "headline": "नासिक में 10 शीतगृह परियोजनाएँ दर्ज हैं",
+  "near": [
+   {
+    "name": "M/s Sangale Agro Processing Pvt. Ltd.",
+    "district_shown": "नासिक",
+    "capacity_mt": 11100.0,
+    "capacity_text": "11,100 टन",
+    "year_sanctioned": "2010-11",
+    "year_text": "2010-11 में स्वीकृत",
+    "status": "completed",
+    "km": 0.0,
+    "where_text": "इसी ज़िले में"
+   },
+   {
+    "name": "Late Ashokrao Bankar Nagari Sahakari Patsanstha Ltd.",
+    "district_shown": "नासिक",
+    "capacity_mt": 1965.0,
+    "capacity_text": "1,965 टन",
+    "year_sanctioned": "2010-11",
+    "year_text": "2010-11 में स्वीकृत",
+    "status": "completed",
+    "km": 0.0,
+    "where_text": "इसी ज़िले में"
+   }
+  ],
+  "not_named": 8,
+  "not_named_text": "8 और, जिनका नाम हम नहीं दिखा सकते",
+  "rate_text": "दरें प्रकाशित नहीं हैं: हमारे पास किसी शीतगृह का शुल्क नहीं है, इसलिए शीतगृह से पूछें।",
+  "caveat": "ये अनुदान के रिकॉर्ड हैं, 2006-07 से 2014-15 तक स्वीकृत। इनसे यह पता नहीं चलता कि शीतगृह अभी चल रहा है या दूसरे किसानों की उपज लेता है।",
+  "source": "एकीकृत शीत शृंखला उपलब्धता मंच: सरकारी परियोजना सूचियाँ"
+ },
+ "pending_native_review": true,
+ "lang_note": null
+}

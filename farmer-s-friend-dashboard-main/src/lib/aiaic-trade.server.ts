@@ -134,8 +134,14 @@ function crisisOf(body: Record<string, unknown>): AiaicCrisis {
   };
 }
 
-/** AIAIC's refusal, as facts: `{detail: {reason_code, message, ...facts}}` (its contract), or a plain detail. */
-export function refusalOf(status: number, body: unknown): AiaicProblem {
+/**
+ * AIAIC's refusal, as facts: `{detail: {reason_code, message, ...facts}}` (its contract), or a plain detail. A 429 is said as what it
+ * is, never as "AIAIC did not accept this", which points at what they did (the audit of 1 Nov 2026, F30): `refused` is AIAIC's
+ * `X-AIAIC-Refused`, `server_busy` where the heavy slots were full for everyone.
+ */
+export function refusalOf(status: number, body: unknown, refused?: string | null): AiaicProblem {
+  if (status === 429)
+    return problem(refused === "server_busy" ? "aiaic_server_busy" : "aiaic_busy", { status });
   const detail =
     body && typeof body === "object" ? (body as Record<string, unknown>)["detail"] : undefined;
   if (detail && typeof detail === "object" && !Array.isArray(detail)) {
@@ -225,7 +231,11 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
         }),
       };
     }
-    if (!res.ok) return { ok: false, problem: refusalOf(res.status, json) };
+    if (!res.ok)
+      return {
+        ok: false,
+        problem: refusalOf(res.status, json, res.headers.get("x-aiaic-refused")),
+      };
     return { ok: true, data: json as T };
   }
   return { ok: false, problem: problem("aiaic_unavailable") };

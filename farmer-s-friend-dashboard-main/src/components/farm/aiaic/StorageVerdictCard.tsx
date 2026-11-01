@@ -22,7 +22,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { RouteMap } from "./RouteMap";
-import { ConfidenceLine } from "./storage/StorageTiles";
+import { ConfidenceLine, WholeFigures } from "./storage/StorageTiles";
 
 /**
  * AIAIC's STORAGE VERDICT (GET /storage/verdict, AIAIC_BACKEND_CONTRACT.md section 21): store or sell now in one line,
@@ -133,7 +133,9 @@ export function StorageCardBody({
           <span className="text-sm font-bold text-foreground">{v.months_text}</span>
         ) : null}
       </div>
-      <p className="text-base font-semibold leading-snug text-foreground">{v.text}</p>
+      <p className="text-base font-semibold leading-snug text-foreground">
+        <WholeFigures text={v.text} />
+      </p>
       {v.confidence ? <ConfidenceLine confidence={v.confidence} /> : null}
       {keyAssumed.length ? (
         <ul className="flex flex-wrap gap-1.5">
@@ -196,7 +198,9 @@ export function StorageCardBody({
               <span className="text-xs font-bold text-muted-foreground">
                 {t("aiaic.storage.net")}:{" "}
               </span>
-              <b>{v.net_gain_per_q.text}</b>
+              <b>
+                <WholeFigures text={v.net_gain_per_q.text} />
+              </b>
             </p>
           ) : null}
           <Marks w={w} />
@@ -262,7 +266,11 @@ export function StorageCardBody({
                   {x.storing?.word ? (
                     <p>
                       {x.storing.word}
-                      {x.storing.net_gain_per_q?.text ? `: ${x.storing.net_gain_per_q.text}` : ""}
+                      {x.storing.net_gain_per_q?.text ? (
+                        <>
+                          : <WholeFigures text={x.storing.net_gain_per_q.text} />
+                        </>
+                      ) : null}
                     </p>
                   ) : null}
                   <Marks w={x} />

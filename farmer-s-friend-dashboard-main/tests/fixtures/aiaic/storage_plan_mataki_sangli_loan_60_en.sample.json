@@ -17,8 +17,9 @@
   "verdict": {
    "code": "sell_now",
    "reason_code": "storing_unlikely_to_pay",
+   "leans": "sell_now",
    "word": "Sell now",
-   "text": "Sell now: storing at MSWC Miraj, 10 km, is unlikely to pay",
+   "text": "Sell now: storing at MSWC Miraj, 10 km, is unlikely to pay. Confirm with your KVK or FPO before you act",
    "tone": "warn",
    "confidence": {
     "band": "medium",
@@ -1240,7 +1241,7 @@
    "key": "verdict",
    "label": "Decision",
    "value": "Sell now",
-   "note": "Sell now: storing at MSWC Miraj, 10 km, is unlikely to pay",
+   "note": "Sell now: storing at MSWC Miraj, 10 km, is unlikely to pay. Confirm with your KVK or FPO before you act",
    "tone": "warn"
   },
   {
