@@ -31,7 +31,9 @@ farmer lands on the answer; what is chosen, the taluka and quantity included, is
 call, `GET /storage/plan` (AIAIC's backend contract, section 33; open, no sign-in, no setting), in the same order as AIAIC's
 dashboard and the Gov Ops portal: the verdict, the key tiles, the prices by month and by year, the warehouses on the map,
 wastage, cold stores, and one Details holding the storage card. Every sentence and figure is AIAIC's; this app adds its frame
-words only. An AIAIC server without the route, or any refusal, says so, with Try again and a link to `/advice/storage`. Links
+words only. Under the verdict stand how sure AIAIC is, with its reasons, and, under a store verdict, that no loan was asked, with one
+tap to say a loan falls due (`loan_due_in_days`, for that answer only: never saved, never in the address, not kept by this server).
+An AIAIC server without the route, or any refusal, says so, with Try again and a link to `/advice/storage`. Links
 in: the home page, the storage tile of the answer at a glance on `/result`, and `/advice/storage`.
 
 ## The settings to add (names only; the values come from the AIAIC owner)
