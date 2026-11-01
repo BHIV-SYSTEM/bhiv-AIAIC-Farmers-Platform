@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { TalukaSelect } from "@/components/farm/aiaic/TalukaSelect";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { Check, Info, MapPin, WifiOff } from "lucide-react";
 
@@ -17,6 +18,7 @@ import { SERVICE_ICON } from "@/lib/service-icons";
 import { plainNumber, useHearWords, useNumberBoxHeard } from "@/lib/aiaic-heard";
 import { farmSearchSchema, parseServices } from "@/lib/aiaic-query";
 import { cropIn } from "@/lib/aiaic-storage";
+import { getTripTalukas } from "@/lib/aiaic-trade.functions";
 import { estateOf } from "@/lib/aiaic-trip";
 import { SERVICES, type Service } from "@/lib/aiaic-types";
 import { forgetFarmValues, loadFarm, sameName, saveFarm } from "@/lib/farm-storage";
@@ -93,6 +95,15 @@ function AskForm() {
     queryFn: () => getPlacesCrops({ data: { district: region, state, lang: activeLang } }),
     enabled: Boolean(region),
     staleTime: 5 * 60_000,
+  });
+
+  // The same read as the taluka box's: a taluka goes on only once its district's list holds it (F12).
+  const talukasFn = useServerFn(getTripTalukas);
+  const talukasQuery = useQuery({
+    queryKey: ["aiaic-talukas", state, region],
+    queryFn: () => talukasFn({ data: { state, district: region } }),
+    enabled: Boolean(region),
+    staleTime: Infinity,
   });
 
   // Built-in catalog options fallback
@@ -202,7 +213,12 @@ function AskForm() {
     const placeHeld = onList(availableDistricts, region) ? region : "";
     const cropHeld = crop && cropListed(crop) ? crop : "";
     const marketChoice = wantsMarket && mandi && onList(activeOptions.mandis, mandi) ? mandi : "";
-    const talukaHeld = placeHeld ? taluka : "";
+    const talukaHeld =
+      placeHeld &&
+      talukasQuery.data?.ok &&
+      talukasQuery.data.data.talukas.some((r) => sameName(r.taluka, taluka))
+        ? taluka
+        : "";
     const landNumber = plainNumber(land);
     const landHeld = landNumber !== null && landNumber > 0 ? String(landNumber) : "";
     saveFarm({

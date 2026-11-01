@@ -73,12 +73,7 @@ import {
   warehousePlaces,
   type StoreChoice,
 } from "../src/lib/aiaic-storage";
-import {
-  ADDRESS_KEYS,
-  addressWords,
-  farmToSave,
-  heldOfAddress,
-} from "../src/lib/aiaic-address";
+import { ADDRESS_KEYS, addressWords, farmToSave, heldOfAddress } from "../src/lib/aiaic-address";
 import { plainNumber } from "../src/lib/aiaic-heard";
 import { farmSearchSchema, type FarmSearch } from "../src/lib/aiaic-query";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
@@ -1597,7 +1592,7 @@ test("S43 the page's first paint: its title, its four steps and the words that i
   // a link's address is read by AIAIC before the page mounts (F12): the first paint says it is reading, and prints nothing of it
   const link = await firstPaint("/storage?region=nashik&crop=onion&state=mh");
   ok(link.includes(esc(DICTS.en["result.loading"] ?? "?")), "it says it is reading");
-  ok(!link.includes("data-testid=\"store-step-1\""), "no step on words not yet read");
+  ok(!link.includes('data-testid="store-step-1"'), "no step on words not yet read");
   ok(!link.includes('data-testid="store-answer"'), "nothing is shown before AIAIC answers");
 });
 
@@ -1606,8 +1601,16 @@ const WORDS = "जगायचे नाही आता संपवायच�
 test("S60 every farm page reads its whole address at one gate, every key of the schema, before anything of it mounts (F12)", async () => {
   // every route that takes a farm address
   const routes = fs.readdirSync(path.join(APP, "src/routes")).filter((f) => f.endsWith(".tsx"));
-  const farm = routes.filter((f) => /validateSearch: (farmSearchSchema|detailSearchSchema)/.test(sourceOf(`src/routes/${f}`)));
-  assert.deepEqual(farm.sort(), ["advice.$service.tsx", "ask.tsx", "result.tsx", "review.tsx", "storage.tsx"]);
+  const farm = routes.filter((f) =>
+    /validateSearch: (farmSearchSchema|detailSearchSchema)/.test(sourceOf(`src/routes/${f}`)),
+  );
+  assert.deepEqual(farm.sort(), [
+    "advice.$service.tsx",
+    "ask.tsx",
+    "result.tsx",
+    "review.tsx",
+    "storage.tsx",
+  ]);
   for (const f of farm) {
     const source = sourceOf(`src/routes/${f}`);
     ok(source.includes("<FarmGate search={search}>"), `${f}: the gate, with the whole address`);
@@ -1648,7 +1651,11 @@ test("S61 what the lists do not hold is neither printed nor saved: a value of th
     state: "mp",
     services: "market,storage",
   };
-  assert.deepEqual(farmToSave(heldOfAddress(good, LISTS)), good, "what the lists hold stays, as it was");
+  assert.deepEqual(
+    farmToSave(heldOfAddress(good, LISTS)),
+    good,
+    "what the lists hold stays, as it was",
+  );
   assert.deepEqual(
     heldOfAddress(good, { districts: null, crops: null, mandis: null }).region,
     undefined,
@@ -1656,7 +1663,10 @@ test("S61 what the lists do not hold is neither printed nor saved: a value of th
   );
   assert.equal(heldOfAddress({ land: "२" }, LISTS).land, "2", "a phone's digits are a number");
   assert.equal(heldOfAddress({ land: "0" }, LISTS).land, undefined, "no land is no land");
-  ok(regionStands(LISTS.districts, "Nashik") && !regionStands(LISTS.districts, WORDS), "a district");
+  ok(
+    regionStands(LISTS.districts, "Nashik") && !regionStands(LISTS.districts, WORDS),
+    "a district",
+  );
   ok(regionStands([], WORDS), "an empty list decides nothing");
 });
 
@@ -1679,12 +1689,36 @@ test("S62 no page prints or keeps an address's words: the list, the subject line
   ok(!result.includes("displayName("), "no raw key made to look like a name");
   ok(result.includes("saveFarm(farmToSave(held))"), "the saved farm: what the lists hold");
   ok(result.includes("if (!place.settled || isDistress) return;"), "and nothing on a crisis");
-  ok(result.includes("held.region ?? \"\"}|${held.crop"), "the cached answer's key, kept on the phone");
+  ok(
+    result.includes('held.region ?? ""}|${held.crop'),
+    "the cached answer's key, kept on the phone",
+  );
   const ask = sourceOf("src/routes/ask.tsx");
   ok(ask.includes("useState(landOf(search.land))"), "words are not put back in the land box");
+  ok(
+    ask.includes("const talukaHeld =") && ask.includes("talukaHeld ? placeHeld"),
+    "a taluka only once its list holds it",
+  );
+  // every save of the farm, listed: a new one fails here until it says what it keeps
+  const saves: Record<string, number> = {};
+  const walk = (dir: string) => {
+    for (const name of fs.readdirSync(dir)) {
+      const full = path.join(dir, name);
+      if (fs.statSync(full).isDirectory()) walk(full);
+      else if (/\.tsx?$/.test(name) && name !== "farm-storage.ts") {
+        const n = (fs.readFileSync(full, "utf-8").match(/\bsaveFarm\(/g) ?? []).length;
+        if (n) saves[path.relative(path.join(APP, "src"), full).replaceAll("\\", "/")] = n;
+      }
+    }
+  };
+  walk(path.join(APP, "src"));
+  assert.deepEqual(saves, { "routes/ask.tsx": 1, "routes/result.tsx": 1, "routes/storage.tsx": 1 });
   ok(ask.includes("forgetFarmValues(["), "words left on a phone by an older page go");
   const storage = sourceOf("src/routes/storage.tsx");
-  ok(storage.includes("if (ready && held) saveFarm"), "the storage page saves only what the lists hold");
+  ok(
+    storage.includes("if (ready && held) saveFarm"),
+    "the storage page saves only what the lists hold",
+  );
   ok(!storage.includes("displayName("), "and prints no raw key");
   ok(!sourceOf("src/routes/review.tsx").includes("{search.crop ||"), "the review packet");
 });
@@ -1697,9 +1731,15 @@ test("S63 AIAIC's crisis answer takes the page by the one card, never a banner o
     ok(!source.includes("tel:14416"), `${file}: the helplines are the card's`);
   }
   const card = page(
-    createElement(CrisisOnly, { crisis: problem("crisis"), children: createElement("p", null, "money") }),
+    createElement(CrisisOnly, {
+      crisis: problem("crisis"),
+      children: createElement("p", null, "money"),
+    }),
   );
-  ok(card.includes("14416") && card.includes("1800-180-1551"), "with no list sent, the helplines stand");
+  ok(
+    card.includes("14416") && card.includes("1800-180-1551"),
+    "with no list sent, the helplines stand",
+  );
   ok(!card.includes("money"), "and the card alone");
 });
 
@@ -1733,7 +1773,10 @@ test("S65 a sign keeps to its figure on the card's own range line and in the ver
   const label = card.indexOf(esc(DICTS.en?.["aiaic.storage.net"] ?? "?"));
   ok(label >= 0, "the card's range line");
   const own = card.slice(label, card.indexOf("</p>", label));
-  ok(own.includes(`<span class="whitespace-nowrap">-₹${Math.abs(gain.low_rs)}</span>`), "the low end");
+  ok(
+    own.includes(`<span class="whitespace-nowrap">-₹${Math.abs(gain.low_rs)}</span>`),
+    "the low end",
+  );
   const high = gain.high_rs.toLocaleString("en-IN");
   ok(own.includes(`<span class="whitespace-nowrap">+₹${high}</span>`), "the high end");
   const line = partOf(pageOf(STORE), "store-verdict-note", "store-tiles");
@@ -1767,17 +1810,28 @@ test("S66 what the audit's one rule leaves on a card: Not sure, or a Store and a
     ok(plan.card?.verdict.text.includes(words), `${lang}: confirm with a person`);
     ok(plan.card?.verdict.text.includes("₹"), `${lang}: its figures`);
   }
-  for (const [lang, plan] of [["en", TOMATO], ["mr", TOMATO_MR], ["hi", TOMATO_HI]] as const) {
+  for (const [lang, plan] of [
+    ["en", TOMATO],
+    ["mr", TOMATO_MR],
+    ["hi", TOMATO_HI],
+  ] as const) {
     const sure = plan.card?.verdict.confidence;
     assert.equal(sure?.band, "rule", lang);
     assert.notEqual(sure?.text, DICTS[lang]?.["advice.confidence.unknown"], lang);
   }
-  for (const [lang, imperative] of [["en", "Store at"], ["mr", "साठवा"], ["hi", "रखें"]] as const)
+  for (const [lang, imperative] of [
+    ["en", "Store at"],
+    ["mr", "साठवा"],
+    ["hi", "रखें"],
+  ] as const)
     ok(
       !(DICTS[lang]?.["aiaic.glance.store_at"] ?? "").includes(imperative),
       `${lang}: the glance's label tells nobody to store`,
     );
-  ok(!sourceOf("src/routes/index.tsx").includes("[saved.crop, saved.region]"), "no raw keys at home");
+  ok(
+    !sourceOf("src/routes/index.tsx").includes("[saved.crop, saved.region]"),
+    "no raw keys at home",
+  );
   ok(
     !sourceOf("src/routes/advice.$service.tsx").includes("[item.subject?.crop || farm.crop"),
     "or on /advice (F11)",
