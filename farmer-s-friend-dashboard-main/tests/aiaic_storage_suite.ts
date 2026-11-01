@@ -1729,9 +1729,13 @@ test("S64 a refusal for pace is said as what it is, in three languages, never as
 test("S65 a sign keeps to its figure on the card's own range line and in the verdict's sentence (F22)", () => {
   const card = page(createElement(StorageCardBody, { card: STORE.card!, unfolded: true }));
   const gain = STORE.card!.verdict.net_gain_per_q as { low_rs: number; high_rs: number };
-  ok(card.includes(`<span class="whitespace-nowrap">-₹${Math.abs(gain.low_rs)}</span>`), "the low end");
+  // the card's own line, by its label: the warehouses listed under it print the same range
+  const label = card.indexOf(esc(DICTS.en?.["aiaic.storage.net"] ?? "?"));
+  ok(label >= 0, "the card's range line");
+  const own = card.slice(label, card.indexOf("</p>", label));
+  ok(own.includes(`<span class="whitespace-nowrap">-₹${Math.abs(gain.low_rs)}</span>`), "the low end");
   const high = gain.high_rs.toLocaleString("en-IN");
-  ok(card.includes(`<span class="whitespace-nowrap">+₹${high}</span>`), "the high end");
+  ok(own.includes(`<span class="whitespace-nowrap">+₹${high}</span>`), "the high end");
   const line = partOf(pageOf(STORE), "store-verdict-note", "store-tiles");
   ok(line.includes('<span class="whitespace-nowrap">'), "the verdict's sentence");
 });
@@ -1744,7 +1748,7 @@ test("S66 what the audit's one rule leaves on a card: Not sure, or a Store and a
   ok(STORE.loan?.question, "the loan question stays on the lean");
   ok(WHEAT.loan === null, "and is not asked of a lean to sell");
   ok(
-    partOf(pageOf(STORE), "store-verdict-assumed").includes(
+    partOf(pageOf(STORE), "store-verdict-assumed", "store-verdict-uncalibrated").includes(
       esc(v.assumptions?.find((a) => a.code === "no_loan_asked")?.text ?? "?"),
     ),
     "and that none was asked",
@@ -1753,6 +1757,7 @@ test("S66 what the audit's one rule leaves on a card: Not sure, or a Store and a
   // an older server sends no `leans`
   const line = { code: "no_loan_asked", text: "No loan was asked about" };
   assert.deepEqual(keyAssumed({ code: "store", assumptions: [line] }), [line]);
+  assert.deepEqual(keyAssumed({ code: "unsure", leans: "store", assumptions: [line] }), [line]);
   assert.deepEqual(keyAssumed({ code: "unsure", leans: "sell_now", assumptions: [line] }), []);
   for (const [lang, plan, words] of [
     ["en", COTTON, "KVK or FPO"],
