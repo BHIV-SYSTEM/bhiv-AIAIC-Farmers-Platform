@@ -8,7 +8,7 @@ import { SERVICES, isService, type Service } from "./aiaic-types";
  * A box of the address. The router reads `land=3` as a number, so a typed or shared link with a number in any box failed the whole
  * page ("This page didn't load"). A number stands as the text it was.
  */
-const addressBox = z.preprocess(
+export const addressBox = z.preprocess(
   (v) => (typeof v === "number" ? String(v) : v),
   z.string().optional(),
 );

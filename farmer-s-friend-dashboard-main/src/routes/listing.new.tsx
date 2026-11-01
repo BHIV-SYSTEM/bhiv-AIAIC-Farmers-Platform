@@ -15,16 +15,18 @@ import { z } from "zod";
 
 import { TradeSwitch } from "@/components/farm/aiaic/AiaicBits";
 import { AiaicSellForm } from "@/components/farm/aiaic/AiaicSellForm";
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
+import { addressBox } from "@/lib/aiaic-query";
 import { useI18n } from "@/lib/i18n";
 import { createListing } from "@/lib/transactions.functions";
 import type { ProduceQualityGrade } from "@/lib/transaction-types";
 
 const searchSchema = z.object({
-  crop: z.string().optional(),
-  region: z.string().optional(),
-  mandi: z.string().optional(),
-  price: z.string().optional(),
-  decisionId: z.string().optional(),
+  crop: addressBox,
+  region: addressBox,
+  mandi: addressBox,
+  price: addressBox,
+  decisionId: addressBox,
 });
 
 export const Route = createFileRoute("/listing/new")({
@@ -42,19 +44,21 @@ export const Route = createFileRoute("/listing/new")({
   component: NewListingPage,
 });
 
-/** AIAIC's sale form when this server is set up for AIAIC; else the app's own demo-store form, as before. */
+/** AIAIC's sale form when this server is set up for AIAIC; else the app's own demo-store form, as before. Its address is read first. */
 function NewListingPage() {
   const search = Route.useSearch();
   return (
-    <TradeSwitch
-      width="max-w-2xl"
-      aiaic={() => (
-        <div className="mx-auto w-full max-w-2xl px-3.5 pb-20 pt-5 sm:px-4 sm:pb-24 sm:pt-8">
-          <AiaicSellForm initialCrop={search.crop} initialDistrict={search.region} />
-        </div>
-      )}
-      local={() => <LocalNewListingPage />}
-    />
+    <FarmGate search={search}>
+      <TradeSwitch
+        width="max-w-2xl"
+        aiaic={() => (
+          <div className="mx-auto w-full max-w-2xl px-3.5 pb-20 pt-5 sm:px-4 sm:pb-24 sm:pt-8">
+            <AiaicSellForm initialCrop={search.crop} initialDistrict={search.region} />
+          </div>
+        )}
+        local={() => <LocalNewListingPage />}
+      />
+    </FarmGate>
   );
 }
 

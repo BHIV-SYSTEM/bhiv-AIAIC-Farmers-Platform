@@ -73,7 +73,8 @@ import {
   warehousePlaces,
   type StoreChoice,
 } from "../src/lib/aiaic-storage";
-import { ADDRESS_KEYS, addressWords, farmToSave, heldOfAddress } from "../src/lib/aiaic-address";
+import { addressWords, farmToSave, heldOfAddress, scanOutcome } from "../src/lib/aiaic-address";
+import { scanRead } from "../src/lib/aiaic-account.server";
 import { plainNumber } from "../src/lib/aiaic-heard";
 import { farmSearchSchema, type FarmSearch } from "../src/lib/aiaic-query";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
@@ -82,6 +83,8 @@ import * as identity from "../src/lib/aiaic-identity.server";
 import { farmKept, type SavedFarm } from "../src/lib/farm-storage";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
 import type { CropItem, DistrictItem } from "../src/lib/places.functions";
+import { Route as SaleRoute } from "../src/routes/listing.new";
+import { Route as OrdersRoute } from "../src/routes/orders.index";
 import { Route as StorageRoute } from "../src/routes/storage";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -104,6 +107,9 @@ const recorded = <T>(name: string) =>
   (JSON.parse(fs.readFileSync(path.join(FIXTURES, `${name}.json`), "utf-8")) as { answer: T })
     .answer;
 const sourceOf = (file: string) => fs.readFileSync(path.join(APP, file), "utf-8");
+
+/** Every box of a farm page's address, from the schema itself. */
+const ADDRESS_KEYS = Object.keys(farmSearchSchema.shape) as (keyof FarmSearch)[];
 
 const SOY = sample("soybean_nashik_en");
 const WHEAT = sample("wheat_nashik_en");
@@ -1396,6 +1402,21 @@ async function withAiaic(
   }
 }
 
+/** A stand-in for `fetch` itself: the reply is the stand-in's to shape, a refused network or a page that is no JSON. */
+async function withFetch(stand: (url: unknown) => Promise<Response>, run: () => Promise<void>) {
+  const realFetch = globalThis.fetch;
+  const base = process.env["AIAIC_BASE_URL"];
+  process.env["AIAIC_BASE_URL"] = "https://aiaic.test";
+  globalThis.fetch = stand as typeof fetch;
+  try {
+    await run();
+  } finally {
+    globalThis.fetch = realFetch;
+    if (base === undefined) delete process.env["AIAIC_BASE_URL"];
+    else process.env["AIAIC_BASE_URL"] = base;
+  }
+}
+
 const ASK = { crop: "soybean", district: "nashik", state: "mh", lang: "en" };
 
 test("S37 the plan is asked of /storage/plan with only its declared boxes, needs no sign-in, and is kept like the card", async () => {
@@ -1524,7 +1545,11 @@ test("S41 the home page, the storage advice page, the route tree and the bottom 
 });
 
 /** The real route's first paint, at an address, as this app's server writes it: no saved farm is read until the browser. */
-async function firstPaint(address: string): Promise<string> {
+async function firstPaint(
+  address: string,
+  route: typeof StorageRoute | typeof SaleRoute | typeof OrdersRoute = StorageRoute,
+  path = "/storage",
+): Promise<string> {
   const root = createRootRoute({
     component: () =>
       createElement(QueryClientProvider, {
@@ -1532,13 +1557,13 @@ async function firstPaint(address: string): Promise<string> {
         children: createElement(I18nProvider, { children: createElement(Outlet) }),
       }),
   });
-  const storage = StorageRoute.update({
-    id: "/storage",
-    path: "/storage",
+  const page = (route as typeof StorageRoute).update({
+    id: path,
+    path,
     getParentRoute: () => root,
   } as never);
   const inMemory = createRouter({
-    routeTree: root.addChildren([storage]),
+    routeTree: root.addChildren([page]),
     history: createMemoryHistory({ initialEntries: [address] }),
   });
   await inMemory.load();
@@ -1598,26 +1623,25 @@ test("S43 the page's first paint: its title, its four steps and the words that i
 
 const WORDS = "जगायचे नाही आता संपवायचे आहे";
 
-test("S60 every farm page reads its whole address at one gate, every key of the schema, before anything of it mounts (F12)", async () => {
-  // every route that takes a farm address
+test("S60 every page that takes an address reads it whole at one gate, every key of its own schema, before anything of it mounts (F12)", async () => {
+  // EVERY ROUTE WITH AN ADDRESS OF ITS OWN, whatever its schema: selected by `validateSearch`, so a new one fails here until it is read.
+  // Selected by the farm schema, this saw neither the sale page nor the orders page.
   const routes = fs.readdirSync(path.join(APP, "src/routes")).filter((f) => f.endsWith(".tsx"));
-  const farm = routes.filter((f) =>
-    /validateSearch: (farmSearchSchema|detailSearchSchema)/.test(sourceOf(`src/routes/${f}`)),
-  );
-  assert.deepEqual(farm.sort(), [
+  const taking = routes.filter((f) => /validateSearch:/.test(sourceOf(`src/routes/${f}`)));
+  assert.deepEqual(taking.sort(), [
     "advice.$service.tsx",
     "ask.tsx",
+    "listing.new.tsx",
+    "orders.index.tsx",
     "result.tsx",
     "review.tsx",
     "storage.tsx",
   ]);
-  for (const f of farm) {
+  for (const f of taking) {
     const source = sourceOf(`src/routes/${f}`);
     ok(source.includes("<FarmGate search={search}>"), `${f}: the gate, with the whole address`);
     ok(!/<CrisisFirst>/.test(source), `${f}: one gate`);
   }
-  // every key of the schema is read, from the schema, so a key added there needs no line here
-  assert.deepEqual([...ADDRESS_KEYS].sort(), Object.keys(farmSearchSchema.shape).sort());
   for (const key of ["region", "taluka", "crop", "mandi", "land", "services", "state"])
     ok(ADDRESS_KEYS.includes(key as keyof FarmSearch), key);
   for (const key of ADDRESS_KEYS) {
@@ -1630,6 +1654,28 @@ test("S60 every farm page reads its whole address at one gate, every key of the 
     const html = await firstPaint(`/storage?${key}=${encodeURIComponent(WORDS)}`);
     ok(!html.includes(WORDS), `/storage?${key}= is not printed on the first paint`);
   }
+  // nor does the sale page's or the orders page's, on any key of their own: words, or a number the router reads as one
+  const reading = esc(DICTS.en["result.loading"] ?? "?");
+  for (const [route, where, keys] of [
+    [SaleRoute, "/listing/new", ["crop", "region", "mandi", "price", "decisionId"]],
+    [OrdersRoute, "/orders", ["listingId", "status"]],
+  ] as const)
+    for (const key of keys) {
+      const address = `${where}?${key}=${encodeURIComponent(WORDS)}`;
+      const html = await firstPaint(address, route, where);
+      ok(!html.includes(WORDS), `${address}: not printed on the first paint`);
+      ok(html.includes(reading), `${address}: it says it is reading`);
+      assert.equal(addressWords({ [key]: WORDS }), WORDS, `${key} is read`);
+      // the router reads `price=1800` as a number: it stands as the text it was, and fails no page
+      const schema = route.options.validateSearch as unknown as {
+        parse: (v: unknown) => Record<string, unknown>;
+      };
+      assert.deepEqual(schema.parse({ [key]: 1800 }), { [key]: "1800" }, `${where}: ${key}`);
+    }
+  ok(
+    !(await firstPaint("/listing/new", SaleRoute, "/listing/new")).includes(reading),
+    "an address with nothing in it asks nothing",
+  );
 });
 
 const LISTS = {
@@ -1741,6 +1787,85 @@ test("S63 AIAIC's crisis answer takes the page by the one card, never a banner o
     "with no list sent, the helplines stand",
   );
   ok(!card.includes("money"), "and the card alone");
+});
+
+test("S67 the gate closes on a page's first read only: a later address never takes the steps off the screen (F32)", () => {
+  // `tests/verify_storage_steps_stay_by_taps.ts` walks this by real taps in a real browser: a test on parts cannot see a remount
+  const hook = sourceOf("src/lib/aiaic-address.ts");
+  ok(!hook.includes("setOpened(false)"), "the page is never closed again");
+  ok(
+    hook.includes("useState(() => !words || readClean.has(words))"),
+    "it starts closed on a new address",
+  );
+  const gate = sourceOf("src/components/farm/aiaic/FarmGate.tsx");
+  ok(gate.includes("if (opened) return <>{children}</>;"), "the page is its children once open");
+  // what a page writes into its address reaches the scan: a crisis still takes it
+  ok(hook.includes("raise?.(problem("), "a crisis read at any time takes the page");
+  assert.equal(
+    addressWords({ i: 2, crop: "onion" }),
+    "onion",
+    "a number of the schema's own is no words",
+  );
+});
+
+test("S68 a scan that could not be asked is no clean read, and a page opens all the same (F37)", async () => {
+  assert.equal(scanOutcome({ ok: true }), "clean");
+  assert.equal(scanOutcome({ ok: false, code: "crisis", crisis: null }), "crisis");
+  assert.equal(scanOutcome({ ok: false, code: "scan_not_read" }), "unread");
+  await withFetch(
+    async () => {
+      throw new Error("no network");
+    },
+    async () => {
+      assert.deepEqual(await scanRead({ text: "onion", lang: "mr" }), {
+        read: false,
+        crisis: null,
+      });
+    },
+  );
+  await withFetch(
+    async () => new Response("Bad gateway", { status: 502 }),
+    async () => {
+      assert.equal((await scanRead({ text: "onion", lang: "mr" })).read, false);
+    },
+  );
+  await withFetch(
+    async () => new Response(JSON.stringify({ distress: false }), { status: 200 }),
+    async () => {
+      assert.deepEqual(await scanRead({ text: "onion", lang: "mr" }), { read: true, crisis: null });
+    },
+  );
+  await withFetch(
+    async () =>
+      new Response(
+        JSON.stringify({
+          distress: true,
+          talk_to_someone: [{ name: "Tele-MANAS", phone: "14416" }],
+        }),
+        { status: 200 },
+      ),
+    async () => {
+      const got = await scanRead({ text: "x", lang: "mr" });
+      assert.equal(got.read, true);
+      assert.equal(got.crisis?.helplines[0]?.phone, "14416");
+    },
+  );
+  assert.deepEqual(await scanRead({ text: "  ", lang: "mr" }), { read: true, crisis: null });
+});
+
+test("S69 /ask reads what it drops, and the land box's words go from the phone too (F37)", () => {
+  const ask = sourceOf("src/routes/ask.tsx");
+  for (const value of ["region", "crop", "mandi", "taluka"])
+    ok(
+      new RegExp(`void hearWords\\(${value}\\);\\s+set`).test(ask),
+      `${value}: read, then dropped`,
+    );
+  ok(
+    ask.includes("if (saved.land && !landOf(saved.land)) {") &&
+      ask.includes("void hearWords(saved.land);") &&
+      ask.includes('forgetFarmValues(["land"]);'),
+    "the land box's words are read, and go",
+  );
 });
 
 test("S64 a refusal for pace is said as what it is, in three languages, never as something they did (F30)", () => {

@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 
+import type { AccountOutcome } from "./aiaic-account";
 import { scanFirst } from "./aiaic-account.functions";
 import { useRaiseCrisis } from "./aiaic-crisis";
 import { plainNumber } from "./aiaic-heard";
-import { farmSearchSchema, parseServices, type FarmSearch } from "./aiaic-query";
+import { parseServices, type FarmSearch } from "./aiaic-query";
 import { cropIn } from "./aiaic-storage";
 import { problem } from "./aiaic-trade";
 import { estateOf } from "./aiaic-trip";
@@ -23,18 +24,30 @@ import {
  * `/ask?crop=`, `?region=`, `?mandi=` raised no card: the pages printed them beside money cards, held them as a choice, and kept the
  * sentence on a phone a family may share. So no page reads the address for itself:
  * - every value of it, whatever its key, goes through AIAIC's scan first, once (`FarmGate`), and a crisis takes the page;
- * - nothing of a page mounts before that, so nothing is printed or saved on a crisis;
+ * - nothing of a page mounts before its FIRST read, so nothing is printed or saved on a crisis;
  * - what a page prints or saves is what the lists hold (`heldOfAddress`), never what was in the address.
+ *
+ * THE GATE CLOSES ON A PAGE'S FIRST READ ONLY (the audit of 1 Nov 2026, F32). It closed on every new address, and `/storage` writes each
+ * choice into its address, so the steps were unmounted at each choice: a tap on a district lost "the place until Next", its taluka box
+ * and Next went, focus fell to the body, and the steps left the screen for the scan's whole time. A read after the page has opened runs
+ * behind the open page. A crisis still takes the page by the one card (`CrisisFirst`), which is all the gate exists for.
  */
 
-/** Every box of the address, from the schema itself, so a box added there is read here with no line added. */
-export const ADDRESS_KEYS = Object.keys(farmSearchSchema.shape) as (keyof FarmSearch)[];
+/** Any page's address as its own schema read it: a sale's, an order list's, a farm's. */
+export type AddressSearch = Readonly<Record<string, unknown>>;
 
-/** Every value of an address, one to a line: what AIAIC reads for distress. */
-export function addressWords(search: FarmSearch): string {
-  return ADDRESS_KEYS.map((k) => search[k]?.trim())
+/** Every value of an address, one to a line: what AIAIC reads for distress. Whatever a page's schema holds is read, with no line added. */
+export function addressWords(search: AddressSearch): string {
+  return Object.values(search)
+    .map((v) => (typeof v === "string" ? v.trim() : ""))
     .filter(Boolean)
     .join("\n");
+}
+
+/** What a scan's answer leaves. `unread`: AIAIC could not be asked, so the address is no clean read and is asked again (F37). */
+export function scanOutcome(r: AccountOutcome): "crisis" | "clean" | "unread" {
+  if (r.ok) return "clean";
+  return r.code === "crisis" ? "crisis" : "unread";
 }
 
 /** How long a page waits on the scan. Past this it opens, and a crisis read later still takes it: a slow scan never blanks the app. */
@@ -45,8 +58,12 @@ const readClean = new Set<string>();
 
 type Lang = "en" | "mr" | "hi";
 
-/** False while an address is being read for the first time. A crisis goes to the page's gate (`CrisisFirst`). */
-export function useAddressHeard(search: FarmSearch, lang: Lang): boolean {
+/**
+ * False only while the page's FIRST address is being read (F32): once it has opened it stays open, and a later address is read behind
+ * it. A crisis goes to the page's gate (`CrisisFirst`) whenever it is read. A scan that could not be asked is no clean read (F37): the page
+ * opens, and that address is asked again next time.
+ */
+export function useAddressHeard(search: AddressSearch, lang: Lang): boolean {
   const scanFn = useServerFn(scanFirst);
   const raise = useRaiseCrisis();
   const words = addressWords(search);
@@ -57,17 +74,17 @@ export function useAddressHeard(search: FarmSearch, lang: Lang): boolean {
       return undefined;
     }
     let current = true;
-    setOpened(false);
     const late = setTimeout(() => {
       if (current) setOpened(true);
     }, ADDRESS_WAIT_MS);
     void scanFn({ data: { text: words.slice(0, 2000), lang } })
       .then((r) => {
-        if (!r.ok && r.code === "crisis") {
-          raise?.(problem("crisis", { crisis: r.crisis ?? null }));
+        const outcome = scanOutcome(r);
+        if (outcome === "crisis") {
+          raise?.(problem("crisis", { crisis: (!r.ok && r.crisis) || null }));
           return;
         }
-        readClean.add(words);
+        if (outcome === "clean") readClean.add(words);
         if (current) setOpened(true);
       })
       .catch(() => {

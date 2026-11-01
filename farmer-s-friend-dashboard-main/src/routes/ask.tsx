@@ -157,7 +157,8 @@ function AskForm() {
   const formatCrop = (key: string) => cropNameMap.get(key.toLowerCase()) || displayName(key);
 
   // WHAT THE LISTS DO NOT HOLD IS NOT A CHOICE (the audit of 1 Nov 2026, F12): a value from the address or the saved farm stays only
-  // while its list, once read, holds it. Words left on the phone by an older page go with it. `FarmGate` has read the address.
+  // while its list, once read, holds it. Words left on the phone by an older page go with it. `FarmGate` has read the address; WHAT
+  // IS DROPPED IS READ FIRST, as on `/storage` (F37): a saved value has passed no gate.
   const onList = (list: readonly string[], value: string) => list.some((o) => sameName(o, value));
   const cropListed = (value: string) =>
     cropsQuery.data?.ok && cropsQuery.data.crops.length > 0
@@ -165,21 +166,34 @@ function AskForm() {
       : onList(activeOptions.crops, value);
   useEffect(() => {
     if (!region || !districtsQuery.data?.ok || onList(availableDistricts, region)) return;
+    void hearWords(region);
     setRegion("");
     setTaluka("");
     forgetFarmValues(["region", "crop", "mandi", "taluka", "talukaOf"]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [region, districtsQuery.data, availableDistricts]);
   useEffect(() => {
     if (!crop || !cropsQuery.data?.ok || cropListed(crop)) return;
+    void hearWords(crop);
     setCrop("");
     forgetFarmValues(["crop"]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crop, cropsQuery.data]);
   useEffect(() => {
     if (!mandi || !options.live || onList(activeOptions.mandis, mandi)) return;
+    void hearWords(mandi);
     setMandi("");
     forgetFarmValues(["mandi"]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mandi, options.live, activeOptions.mandis]);
+  useEffect(() => {
+    if (!taluka || !talukasQuery.data?.ok) return;
+    if (talukasQuery.data.data.talukas.some((r) => sameName(r.taluka, taluka))) return;
+    void hearWords(taluka);
+    setTaluka("");
+    forgetFarmValues(["taluka", "talukaOf"]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taluka, talukasQuery.data]);
 
   // Prefill from saved farm
   useEffect(() => {
@@ -192,6 +206,11 @@ function AskForm() {
     if (!search.crop && saved.crop) setCrop(saved.crop);
     if (!search.mandi && saved.mandi) setMandi(saved.mandi);
     if (!search.land && landOf(saved.land)) setLand(landOf(saved.land));
+    // words an older build kept in the land box are read, and go: they were left on a phone a family may share until `/result` wrote over
+    if (saved.land && !landOf(saved.land)) {
+      void hearWords(saved.land);
+      forgetFarmValues(["land"]);
+    }
     if (!search.services && saved.services) setSelected(parseServices(saved.services));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
