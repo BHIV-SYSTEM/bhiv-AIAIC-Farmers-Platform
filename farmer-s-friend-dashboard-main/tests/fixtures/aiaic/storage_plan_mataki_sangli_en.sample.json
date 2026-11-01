@@ -1550,8 +1550,8 @@
    "key": "price_now",
    "label": "Price now",
    "value": "₹16,500 a quintal",
-   "note": "Above the usual range for September",
-   "tone": "good"
+   "note": "Already above every month's usual high (₹11,075). The gain needs the price to rise further from here, and it may not.",
+   "tone": "warn"
   },
   {
    "key": "best_month",
