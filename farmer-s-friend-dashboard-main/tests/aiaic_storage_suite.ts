@@ -1202,6 +1202,17 @@ test("S56 /result names the crop and district as the lists do, and acres in the 
   );
 });
 
+test("S59 the result page's standing warning has its heading in the reader's language, never a label's key (F11)", () => {
+  const result = sourceOf("src/routes/result.tsx");
+  ok(!result.includes("data.important_label ||"), "a label's key is never shown as its heading");
+  ok(result.includes('t("result.important")'), "the page's own word");
+  ok(
+    /[ऀ-ॿ]/.test(DICTS.mr?.["result.important"] ?? "") &&
+      /[ऀ-ॿ]/.test(DICTS.hi?.["result.important"] ?? ""),
+    "theirs",
+  );
+});
+
 test("S57 the answer at a glance says how sure the verdict is, beside the verdict's word (F2)", () => {
   ok(
     sourceOf("src/components/farm/aiaic/AnswerAtAGlance.tsx").includes("v.confidence.text"),
