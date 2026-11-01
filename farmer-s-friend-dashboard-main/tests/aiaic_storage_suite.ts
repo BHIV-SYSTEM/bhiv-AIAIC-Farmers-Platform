@@ -1918,7 +1918,10 @@ test("S70 a Madhya Pradesh farmer's state reaches AIAIC, so /advice and /review 
 test("S71 the card under an answer prints the names the page holds, never the answer's raw keys (F11)", () => {
   const card = sourceOf("src/components/farm/RecommendationCard.tsx");
   ok(!card.includes("item.subject"), "no raw key");
-  ok(sourceOf("src/routes/result.tsx").includes("subject={subject}"), "the page's own names");
+  ok(
+    /<RecommendationCard[^>]*subject=\{subject\}/.test(sourceOf("src/routes/result.tsx")),
+    "the page's own names",
+  );
 });
 
 test("S64 a refusal for pace is said as what it is, in three languages, never as something they did (F30)", () => {
