@@ -6,7 +6,7 @@
  "prices": "the committed price slice (Agmarknet, newest day 2026-09-25), judged as of price_clock",
  "trace": "taken out of every answer: the id of the request that asked",
  "tree": {
-  "commit": "71eba13d996374880eae15b262ddc8a145085293",
+  "commit": "2d55d5ec276fdf9a5385b26e05be53858c77421b",
   "engine_changed_since": false
  },
  "files": {
@@ -414,8 +414,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
-   "sha256": "77d7fff4fa5e52609192eca92168c33717172ce1d21fc0f35fc534add3a19066",
-   "bytes": 28929
+   "sha256": "b1a66799208775a01b3d73fb635e78d164773a75b152e07e61debe0af214b35d",
+   "bytes": 28952
   },
   "storage_plan_groundnut_datia_mr.sample.json": {
    "route": "GET /storage/plan",
@@ -429,8 +429,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
-   "sha256": "88f905b2829f464fb8f52156c0e1c6a996f96117d2414351e8bddd004810c797",
-   "bytes": 36681
+   "sha256": "d010ababd135e688e2ffd20751a574e657ac2fe8bc5238836f90877b438f0c7b",
+   "bytes": 36802
   },
   "storage_plan_groundnut_datia_hi.sample.json": {
    "route": "GET /storage/plan",
@@ -444,8 +444,8 @@
    "price_clock": "2026-09-29",
    "today": "2026-11-01",
    "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
-   "sha256": "1fcb9aaf03211e8162876264c4592707d5d9be65d5b36343bfecdd9033baeb54",
-   "bytes": 36294
+   "sha256": "6f4907ff0b85d773dac8bc81addb6db5e32811b73565b329c717716742909492",
+   "bytes": 36385
   },
   "storage_plan_mataki_sangli_loan_60_en.sample.json": {
    "route": "GET /storage/plan",

@@ -90,9 +90,9 @@
     "under_half_full": null
    },
    "chosen_by": {
-    "code": "best_store_gain",
+    "code": "level_store_gain",
     "rule": "The warehouse the farmer named, when they named one; else, among the nearest few of each operator, the one where storing leaves the most per quintal in a typical year after storage, loss and the trip there: first among those where the engine itself said store for some length (the best such length), then among those where storing can be counted at all (the best length); two gains closer than the two trips' own ranges count as level, and the nearer of those wins, the verdict staying what it was; then one with a published rate for the crop; then the nearer (straight line), the cheaper rate, the operator and the name.",
-    "text": "Of the warehouses listed where storing is advised (3), this one leaves the most a quintal after storage, loss and the trip"
+    "text": "Of the warehouses listed where storing is advised (3), the best gains are too close to tell apart after the trip, so this is the nearest of them"
    },
    "net_gain_per_q": {
     "low_rs": 121,
