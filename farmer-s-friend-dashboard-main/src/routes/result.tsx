@@ -326,7 +326,7 @@ function ResultPage() {
             {farmerAdviceQuery.data?.important ? (
               <div className="rounded-2xl border-2 border-warning/50 bg-warning-soft p-4 text-xs font-semibold text-warning-foreground leading-relaxed">
                 <span className="font-bold uppercase tracking-wider block mb-0.5">
-                  {farmerAdviceQuery.data.important_label || "Important Guidance Note"}
+                  {t("result.important")}
                 </span>
                 {farmerAdviceQuery.data.important}
               </div>
