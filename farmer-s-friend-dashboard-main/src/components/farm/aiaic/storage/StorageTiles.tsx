@@ -106,10 +106,10 @@ export function VerdictLine({
   );
 }
 
-/** A range's upper end keeps its sign and rupee on one line: "+" stood alone at a line's end at some widths (the walk of 1 Nov 2026). */
+/** A range's ends keep their sign and rupee on one line: "+" and "-" stood alone at a line's end at some widths (the walk of 1 Nov 2026). */
 const WholeFigures = ({ text }: { text: string }) =>
-  text.split(/(\+₹[\d,.]+)/).map((part, i) =>
-    part.startsWith("+₹") ? (
+  text.split(/([+-]₹[\d,.]+)/).map((part, i) =>
+    /^[+-]₹/.test(part) ? (
       <span key={i} className="whitespace-nowrap">
         {part}
       </span>

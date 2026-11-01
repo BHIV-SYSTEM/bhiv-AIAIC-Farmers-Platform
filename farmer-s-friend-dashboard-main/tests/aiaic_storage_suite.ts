@@ -71,6 +71,7 @@ import {
   type StoreChoice,
 } from "../src/lib/aiaic-storage";
 import { plainNumber } from "../src/lib/aiaic-heard";
+import { farmSearchSchema } from "../src/lib/aiaic-query";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
@@ -1107,6 +1108,10 @@ test("S55 every box of the app that can hold words is listed and heard; a new on
     Object.entries(BOXES).map(([file, rows]) => [file, rows.reduce((n, r) => n + r[0], 0)]),
   );
   assert.deepEqual(found, listed, "every box listed, with how it is heard");
+});
+
+test("S58 a number in any box of an address is that text, never a page that fails to load", () => {
+  assert.deepEqual(farmSearchSchema.parse({ land: 3, crop: 5, region: "nashik" }), { land: "3", crop: "5", region: "nashik" });
 });
 
 test("S56 /result names the crop and district as the lists do, and acres in the reader's language (F11)", () => {
