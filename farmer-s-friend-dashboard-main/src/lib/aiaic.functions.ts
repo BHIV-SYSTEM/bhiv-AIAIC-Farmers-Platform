@@ -16,6 +16,8 @@ const inputSchema = z.object({
   crop: z.string().trim().max(80).optional(),
   /** APMC market for the market service, from the engine catalog. */
   mandi: z.string().trim().max(120).optional(),
+  /** The state the region is in: with none, AIAIC reads Maharashtra (the audit of 1 Nov 2026, F35). */
+  state: z.enum(["mh", "mp"]).optional(),
   limit: z.number().int().min(1).max(20).optional(),
 });
 
@@ -41,6 +43,7 @@ export const getIntelligence = createServerFn({ method: "GET" })
           region: data.region ?? undefined,
           crop: data.crop ?? undefined,
           mandi: data.mandi ?? undefined,
+          state: data.state ?? undefined,
           limit: data.limit ?? 3,
         }),
       ),
@@ -49,21 +52,23 @@ export const getIntelligence = createServerFn({ method: "GET" })
     return { baseUrlConfigured: configured, results };
   });
 
-async function fetchService(args: {
+export async function fetchService(args: {
   baseUrl: string;
   service: Service;
   region: string | undefined;
   crop: string | undefined;
   mandi: string | undefined;
+  state: "mh" | "mp" | undefined;
   limit: number;
 }): Promise<ServiceResult> {
-  const { baseUrl, service, region, crop, mandi, limit } = args;
+  const { baseUrl, service, region, crop, mandi, state, limit } = args;
   const fetchedAt = new Date().toISOString();
   const url = new URL(`${baseUrl}/intelligence/${service}`);
   // The market service reasons about an APMC market; the others about a district.
   if (service === "market" && mandi) url.searchParams.set("region", mandi);
   else if (region) url.searchParams.set("region", region);
   if (crop) url.searchParams.set("crop", crop);
+  if (state) url.searchParams.set("state", state);
   url.searchParams.set("limit", String(limit));
 
   const fail = (reason: FailureReason, status?: number, detail?: string): ServiceResult => ({

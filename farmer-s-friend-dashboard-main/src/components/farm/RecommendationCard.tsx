@@ -19,19 +19,21 @@ export function RecommendationCard({
   item,
   index,
   search,
+  subject,
   children,
 }: {
   service: Service;
   item: IntelligenceItem;
   index: number;
   search: { region?: string; crop?: string; mandi?: string; land?: string; services?: string };
+  /** The crop and place as the page says them, in the reader's language: never the answer's raw keys ("tur • Latur", F11). */
+  subject: string;
   /** Shown under the answer's own words (never under an abstention): the market answer's price comparison. */
   children?: ReactNode;
 }) {
   const { t, lang } = useI18n();
   const abstained = isAbstention(item);
   const level = confidenceLevel(item);
-  const subject = [item.subject?.crop, item.subject?.region].filter(Boolean).join(" • ");
   const Icon = SERVICE_ICON[service];
 
   return (

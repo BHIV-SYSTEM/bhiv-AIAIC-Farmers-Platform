@@ -473,6 +473,7 @@ function ResultAnswer() {
                         item={enhancedItem}
                         index={index}
                         search={linkSearch}
+                        subject={subject}
                       >
                         {/* The price on the first line, and the mandis the market answer compared */}
                         {result.service === "market" &&

@@ -76,7 +76,12 @@ import {
 import { addressWords, farmToSave, heldOfAddress, scanOutcome } from "../src/lib/aiaic-address";
 import { scanRead } from "../src/lib/aiaic-account.server";
 import { plainNumber } from "../src/lib/aiaic-heard";
-import { farmSearchSchema, type FarmSearch } from "../src/lib/aiaic-query";
+import {
+  farmSearchSchema,
+  intelligenceQueryOptions,
+  type FarmSearch,
+} from "../src/lib/aiaic-query";
+import { fetchService } from "../src/lib/aiaic.functions";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
@@ -1866,6 +1871,54 @@ test("S69 /ask reads what it drops, and the land box's words go from the phone t
       ask.includes('forgetFarmValues(["land"]);'),
     "the land box's words are read, and go",
   );
+});
+
+test("S70 a Madhya Pradesh farmer's state reaches AIAIC, so /advice and /review read their district, not Maharashtra's (F35)", async () => {
+  const mp = intelligenceQueryOptions({
+    crop: "cotton",
+    region: "dhar",
+    state: "mp",
+    services: "storage",
+  });
+  const mh = intelligenceQueryOptions({ crop: "cotton", region: "dhar", services: "storage" });
+  assert.notDeepEqual(
+    mp.queryKey,
+    mh.queryKey,
+    "two states are two answers, never one kept answer",
+  );
+  ok(mp.queryKey.includes("mp"), "the state is in the key");
+  const asked: string[] = [];
+  await withFetch(
+    async (url: unknown) => {
+      asked.push(String(url));
+      return new Response(JSON.stringify({ items: [] }), { status: 200 });
+    },
+    async () => {
+      await fetchService({
+        baseUrl: "http://aiaic.test",
+        service: "storage",
+        region: "dhar",
+        crop: "cotton",
+        mandi: undefined,
+        state: "mp",
+        limit: 3,
+      });
+    },
+  );
+  ok(asked[0]?.includes("/intelligence/storage?"), "the route");
+  ok(asked[0]?.includes("state=mp"), `the state goes with the place: ${asked[0]}`);
+  for (const page of [
+    "src/routes/result.tsx",
+    "src/routes/review.tsx",
+    "src/routes/advice.$service.tsx",
+  ])
+    ok(sourceOf(page).includes("intelligenceQueryOptions(search)"), `${page}: the one reader`);
+});
+
+test("S71 the card under an answer prints the names the page holds, never the answer's raw keys (F11)", () => {
+  const card = sourceOf("src/components/farm/RecommendationCard.tsx");
+  ok(!card.includes("item.subject"), "no raw key");
+  ok(sourceOf("src/routes/result.tsx").includes("subject={subject}"), "the page's own names");
 });
 
 test("S64 a refusal for pace is said as what it is, in three languages, never as something they did (F30)", () => {
