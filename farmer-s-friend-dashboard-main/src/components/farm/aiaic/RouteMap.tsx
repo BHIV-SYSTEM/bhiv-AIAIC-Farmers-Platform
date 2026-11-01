@@ -88,14 +88,16 @@ function drawPlaces(
     if (p.label) {
       const name = document.createElement("span");
       name.textContent = p.label;
-      // a long Marathi or Hindi name wraps inside a phone's map, never cut at its edge (the walk of 1 Nov 2026)
+      // a long Marathi or Hindi name wraps inside a phone's map and goes to the side with room, never cut at its edge (the walk of
+      // 1 Nov 2026)
       name.style.cssText =
-        "display:block;white-space:normal;width:max-content;max-width:min(170px,45vw)";
+        "display:block;white-space:normal;width:max-content;max-width:min(140px,38vw)";
       const below = nameBelow(p, shown);
+      const narrow = window.innerWidth < 480;
       marker.bindTooltip(name, {
         permanent: p.kind === "home" || p.kind === "chosen",
-        direction: below ? "bottom" : "top",
-        offset: below ? [0, 8] : [0, -8],
+        direction: narrow ? "auto" : below ? "bottom" : "top",
+        offset: narrow ? [0, 0] : below ? [0, 8] : [0, -8],
       });
     }
     marker.addTo(group);
