@@ -1,4 +1,5 @@
-import { IndianRupee, MapPin, Sprout, Truck, Warehouse } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, IndianRupee, MapPin, Sprout, Truck, Warehouse } from "lucide-react";
 
 import type { PriceCompare } from "@/lib/aiaic-analysis";
 import { away, useStorageVerdict } from "@/lib/aiaic-storage";
@@ -15,7 +16,8 @@ import { cn } from "@/lib/utils";
  *     price a quintal, how far), and the trip there for 10 quintals (asked as the transport card asks it: one request);
  *   - STORE AT: the warehouse the storage verdict names (name, operator), its farmer rate a month, how far, and the
  *     verdict's word.
- * A part AIAIC has not answered is said so, never guessed; nothing at all when neither part has an answer.
+ * A part AIAIC has not answered is said so, never guessed; nothing at all when neither part has an answer. The storage tile
+ * leads to the storage page, with this crop and district (31 Oct 2026).
  */
 export function AnswerAtAGlance({
   crop,
@@ -23,6 +25,7 @@ export function AnswerAtAGlance({
   district,
   districtLabel,
   state,
+  taluka,
   compare,
   toMandi,
   className = "",
@@ -32,6 +35,8 @@ export function AnswerAtAGlance({
   district: string;
   districtLabel?: string | null | undefined;
   state?: string | null | undefined;
+  /** The taluka asked, carried on to the storage page. */
+  taluka?: string | null | undefined;
   /** The market card's `summary.price_compare`, as `priceCompareOf` reads it; null: no market answer. */
   compare: PriceCompare | null;
   /** The mandi the market answer's label names, used when the comparison has no `chosen` row. */
@@ -127,10 +132,29 @@ export function AnswerAtAGlance({
                 {v.word}
                 {v.code === "store" && v.months_text ? ` · ${v.months_text}` : ""}
               </p>
+              {v.confidence ? (
+                <p className="text-sm text-foreground" data-testid="glance-confidence">
+                  {v.confidence.label}: {v.confidence.text}
+                </p>
+              ) : null}
             </div>
           ) : (
             <p className="mt-1 text-sm text-muted-foreground">{t("aiaic.glance.no_store")}</p>
           )}
+          <Link
+            to="/storage"
+            search={{
+              region: district,
+              crop,
+              ...(state ? { state } : {}),
+              ...(taluka ? { taluka } : {}),
+            }}
+            className="mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-xl border-2 border-violet-700/30 px-3 text-sm font-bold text-violet-800 hover:bg-muted"
+            data-testid="glance-storage-link"
+          >
+            {t("aiaic.store.open")}
+            <ArrowRight aria-hidden className="size-4 shrink-0" />
+          </Link>
         </div>
       </div>
     </section>

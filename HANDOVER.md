@@ -10,6 +10,7 @@ Farmer-facing UI for the AIAIC decision engine and the **BHIV Farm-to-Retail Mis
 | `/ask` | Big-target input: district, crop, land size, which topics | Populated via `GET /catalog` (:8017) |
 | `/result` | Multi-service decision overview + sureness meter | Fetches `GET /intelligence/{service}` (:8017) |
 | `/advice/$service` | Full detail: reasoning, evidence, limits, decision ID, + "List My Produce" CTA | Live Agmarknet intelligence (:8017) |
+| `/storage` | Store or sell now, step by step: where, crop, how much, the answer (key tiles, prices by month and year, warehouses on a map, wastage, cold stores). A saved farm opens straight on the answer | Fetches `GET /storage/plan` (:8017) through this app's server |
 | `/listing/new` | **P0 Produce Listing Creation**: Lot specs, grade, asking price, pickup location | **VERIFIED LIVE** — Submits to `createListing` RPC, writes to `data/transactions.json` |
 | `/listings` | **P0 Produce Listing Management**: Status filters, lot cards, matched offer link | **VERIFIED LIVE** — Reads from `getListings` RPC |
 | `/orders` | **P0 Buyer Offers & Orders**: Matched retail bids, sandbox notice, payout preview | **VERIFIED LIVE** — Reads from `getOrders` RPC (Sandbox Matching) |

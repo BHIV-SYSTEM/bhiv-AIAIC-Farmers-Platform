@@ -15,6 +15,11 @@ export type SavedFarm = {
   land?: string;
   services?: string;
   state?: string;
+  /** The taluka, and the district it is a taluka of: used only while that district is still this farm's. */
+  taluka?: string;
+  talukaOf?: string;
+  /** The quintals the storage page last used, as text; "example" when the step was skipped. */
+  storeQuantity?: string;
 };
 
 function canUseStorage(): boolean {
@@ -34,12 +39,47 @@ export function loadFarm(): SavedFarm | null {
   }
 }
 
+/** Two names of one district, whatever their case. */
+export const sameName = (a: string | null | undefined, b: string | null | undefined) =>
+  (a ?? "").trim().toLowerCase() === (b ?? "").trim().toLowerCase();
+
+/**
+ * What a save leaves as it was. Every page saves the whole farm as it knows it, and only the storage page knows the taluka
+ * and the quantity, so those stay unless a save names them; and the state stays with its own district, so a link that
+ * names no state never turns a Madhya Pradesh farm into a Maharashtra one.
+ */
+export function farmKept(before: SavedFarm | null, farm: SavedFarm): SavedFarm {
+  if (!before) return farm;
+  const { taluka, talukaOf, storeQuantity, state } = before;
+  return {
+    ...(taluka ? { taluka } : {}),
+    ...(talukaOf ? { talukaOf } : {}),
+    ...(storeQuantity ? { storeQuantity } : {}),
+    ...(state && sameName(before.region, farm.region) ? { state } : {}),
+    ...farm,
+  };
+}
+
 export function saveFarm(farm: SavedFarm): void {
   if (!canUseStorage()) return;
   try {
-    window.localStorage.setItem(FARM_KEY, JSON.stringify(farm));
+    window.localStorage.setItem(FARM_KEY, JSON.stringify(farmKept(loadFarm(), farm)));
   } catch {
     /* storage full or blocked — the app still works, just without memory */
+  }
+}
+
+/** A value of the saved farm a list no longer holds goes: words left by an older page do not stay on a phone a family may share. */
+export function forgetFarmValues(keys: readonly (keyof SavedFarm)[]): void {
+  if (!canUseStorage()) return;
+  const saved = loadFarm();
+  if (!saved) return;
+  const left = { ...saved };
+  for (const key of keys) delete left[key];
+  try {
+    window.localStorage.setItem(FARM_KEY, JSON.stringify(left));
+  } catch {
+    /* storage full or blocked */
   }
 }
 

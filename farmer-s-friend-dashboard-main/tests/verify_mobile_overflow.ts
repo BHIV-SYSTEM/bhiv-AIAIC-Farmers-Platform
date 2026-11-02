@@ -19,6 +19,7 @@ const ROUTES = [
     path: "/advice/market?region=Pune&crop=Tomato",
     name: "Advice / Price Series & Recommendations",
   },
+  { path: "/storage?region=nashik&crop=onion&state=mh", name: "Store or Sell Now, Step by Step" },
   { path: "/listing/new", name: "New Produce Listing Form" },
   { path: "/listings", name: "Produce Listing Directory & Filters" },
   { path: "/orders", name: "Orders & Matched Buyer Offers" },

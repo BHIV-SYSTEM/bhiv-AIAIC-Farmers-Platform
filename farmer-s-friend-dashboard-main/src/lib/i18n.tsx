@@ -56,6 +56,10 @@ const en: Dict = {
   "service.storage": "Storing my crop",
   "result.title": "Your advice today",
   "result.for": "For",
+  "result.acres": "{n} acres",
+  "result.important": "Important",
+  "result.acres.one": "{n} acre",
+  "ask.land.number": "Give the land as a number of acres.",
   "result.open": "See full details",
   "result.back": "Change my details",
   "result.retry": "Try again",
@@ -532,6 +536,10 @@ const hi: Dict = {
   "service.storage": "फ़सल रखना",
   "result.title": "आज की आपकी सलाह",
   "result.for": "किसके लिए",
+  "result.acres": "{n} एकड़",
+  "result.important": "ज़रूरी बात",
+  "result.acres.one": "{n} एकड़",
+  "ask.land.number": "ज़मीन एकड़ की संख्या में बताएँ।",
   "result.open": "पूरी जानकारी देखें",
   "result.back": "जानकारी बदलें",
   "result.retry": "फिर कोशिश करें",
@@ -999,6 +1007,10 @@ const mr: Dict = {
   "service.storage": "पीक साठवण",
   "result.title": "आजचा तुमचा सल्ला",
   "result.for": "कोणासाठी",
+  "result.acres": "{n} एकर",
+  "result.important": "महत्त्वाचे",
+  "result.acres.one": "{n} एकर",
+  "ask.land.number": "जमीन एकरांच्या संख्येत द्या.",
   "result.open": "पूर्ण माहिती पहा",
   "result.back": "माहिती बदला",
   "result.retry": "पुन्हा प्रयत्न करा",
@@ -1440,8 +1452,15 @@ type I18nValue = {
 
 const I18nContext = createContext<I18nValue | null>(null);
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+export function I18nProvider({
+  children,
+  initialLang = "en",
+}: {
+  children: ReactNode;
+  /** The first render's language: English on every page; a test of a page in another language names it. */
+  initialLang?: Lang;
+}) {
+  const [lang, setLangState] = useState<Lang>(initialLang);
 
   // Read stored preference after hydration so server and client first render match.
   useEffect(() => {

@@ -464,10 +464,18 @@ export async function writeAgain(q: {
  * AIAIC's `/safety/check`, which keeps nothing: its crisis card, or null.
  */
 export async function scanFirst(q: { text: string; lang: string }): Promise<Crisis | null> {
+  return (await scanRead(q)).crisis;
+}
+
+/** The same scan, and whether AIAIC read it at all: a scan that could not be asked is no clean read (the audit of 1 Nov 2026, F37). */
+export async function scanRead(q: {
+  text: string;
+  lang: string;
+}): Promise<{ read: boolean; crisis: Crisis | null }> {
   const text = q.text.trim().slice(0, 2000);
-  if (!text) return null;
+  if (!text) return { read: true, crisis: null };
   const a = await ask("/safety/check", { method: "POST", body: { text, lang: q.lang } });
-  return crisisOf(a.body);
+  return { read: a.status === 200 && Boolean(a.body), crisis: crisisOf(a.body) };
 }
 
 // ------------------------------------------------------------------------------------------------ her erasure

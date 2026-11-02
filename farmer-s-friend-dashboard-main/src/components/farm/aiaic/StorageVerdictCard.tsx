@@ -2,7 +2,6 @@ import {
   BadgeCheck,
   ChevronDown,
   ChevronUp,
-  CircleHelp,
   IndianRupee,
   MapPin,
   Truck,
@@ -11,17 +10,19 @@ import {
 import { useState } from "react";
 
 import {
-  KEY_ASSUMED,
   away,
+  keyAssumed as keyAssumedOf,
   sameWarehouse as same,
   useStorageVerdict,
+  verdictMark,
   warehousePlaces,
 } from "@/lib/aiaic-storage";
-import type { StorageWarehouse } from "@/lib/aiaic-trade";
+import type { StorageVerdict, StorageWarehouse } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 import { RouteMap } from "./RouteMap";
+import { ConfidenceLine, WholeFigures } from "./storage/StorageTiles";
 
 /**
  * AIAIC's STORAGE VERDICT (GET /storage/verdict, AIAIC_BACKEND_CONTRACT.md section 21): store or sell now in one line,
@@ -29,17 +30,21 @@ import { RouteMap } from "./RouteMap";
  * rebate, the trip there and what storing comes to after storage, loss and the trip, with its WDRA badge and "under
  * half full" where AIAIC says so. EVERY SENTENCE IS AIAIC'S OWN, in her language; this card adds only its frame's few
  * words. The other warehouses, the rule and the sources sit behind one tap. Nothing is shown until AIAIC answers (an
- * AIAIC server without the route, or any refusal, shows nothing: the rest of the page is the answer).
+ * AIAIC server without the route, or any refusal, shows nothing: the rest of the page is the answer). `StorageCardBody`
+ * is the card itself, for a page that already holds the answer (the storage page, from its plan).
  */
 const TONE = {
-  store: "border-primary bg-primary/10 text-primary",
-  sell_now: "border-amber-500/60 bg-amber-50 text-amber-900",
-  unsure: "border-border bg-muted text-foreground",
+  good: "border-primary bg-primary/10 text-primary",
+  warn: "border-amber-500/60 bg-amber-50 text-amber-900",
+  neutral: "border-border bg-muted text-foreground",
 } as const;
 
-/** The verdict's chip by its code: a code this card does not know is shown as "not sure" would be. */
-const toneOf = (code: string) =>
-  code === "store" || code === "sell_now" ? TONE[code] : TONE.unsure;
+/**
+ * The verdict's chip by the tone AIAIC gives it, never by its code: a store AIAIC is not sure of is not green (the audit of 1 Nov
+ * 2026, F2). A tone this card does not know is shown as "not sure" would be.
+ */
+const toneOf = (tone: string | undefined) =>
+  tone === "good" || tone === "warn" ? TONE[tone] : TONE.neutral;
 
 function Marks({ w }: { w: StorageWarehouse }) {
   const wdra = w.wdra?.registered ? w.wdra.text : null;
@@ -78,17 +83,33 @@ export function StorageVerdictCard({
   taluka?: string | null | undefined;
   className?: string;
 }) {
+  const card = useStorageVerdict({ crop, district, state, quantityQ, taluka });
+  if (!card?.verdict?.text) return null;
+  return <StorageCardBody card={card} className={className} />;
+}
+
+/**
+ * The card, from an answer already read. `unfolded` (the storage page, 31 Oct 2026): the page holds this card behind its own
+ * one Details and draws the map itself, so the details are open here and no second map is drawn.
+ */
+export function StorageCardBody({
+  card,
+  className = "",
+  unfolded = false,
+}: {
+  card: StorageVerdict;
+  className?: string;
+  unfolded?: boolean;
+}) {
   const { t } = useI18n();
   const [more, setMore] = useState(false);
-  const card = useStorageVerdict({ crop, district, state, quantityQ, taluka });
-  const v = card?.verdict;
-  if (!card || !v?.text) return null;
+  const v = card.verdict;
   const w = v.warehouse;
   const km = away(w);
   const places = warehousePlaces(card);
   const assumed = (v.assumptions ?? []).filter((a) => a.text);
-  const keyAssumed = assumed.filter((a) => KEY_ASSUMED.includes(a.code));
-  const Mark = v.code === "store" ? Warehouse : v.code === "sell_now" ? IndianRupee : CircleHelp;
+  const keyAssumed = keyAssumedOf(v);
+  const Mark = verdictMark(v.code);
   return (
     <section
       className={cn("space-y-3 rounded-2xl border-2 border-border bg-card p-4", className)}
@@ -102,7 +123,7 @@ export function StorageVerdictCard({
         <span
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-base font-extrabold",
-            toneOf(v.code),
+            toneOf(v.tone),
           )}
         >
           <Mark className="size-5" aria-hidden="true" />
@@ -112,7 +133,10 @@ export function StorageVerdictCard({
           <span className="text-sm font-bold text-foreground">{v.months_text}</span>
         ) : null}
       </div>
-      <p className="text-base font-semibold leading-snug text-foreground">{v.text}</p>
+      <p className="text-base font-semibold leading-snug text-foreground">
+        <WholeFigures text={v.text} />
+      </p>
+      {v.confidence ? <ConfidenceLine confidence={v.confidence} /> : null}
       {keyAssumed.length ? (
         <ul className="flex flex-wrap gap-1.5">
           {keyAssumed.map((a) => (
@@ -174,7 +198,9 @@ export function StorageVerdictCard({
               <span className="text-xs font-bold text-muted-foreground">
                 {t("aiaic.storage.net")}:{" "}
               </span>
-              <b>{v.net_gain_per_q.text}</b>
+              <b>
+                <WholeFigures text={v.net_gain_per_q.text} />
+              </b>
             </p>
           ) : null}
           <Marks w={w} />
@@ -182,7 +208,7 @@ export function StorageVerdictCard({
       ) : null}
       {/* THE WAREHOUSES ON A MAP (push 4, the owner: "can we add map there as well with the locations of those"): the
           one the verdict names in orange, the others violet; each where AIAIC places it */}
-      {places.length ? (
+      {places.length && !unfolded ? (
         <RouteMap
           places={places}
           height={220}
@@ -193,20 +219,22 @@ export function StorageVerdictCard({
       {v.uncalibrated ? (
         <p className="text-xs font-semibold text-amber-800">{v.uncalibrated}</p>
       ) : null}
-      <button
-        type="button"
-        onClick={() => setMore((m) => !m)}
-        aria-expanded={more}
-        className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border-2 border-border bg-background px-3 text-sm font-semibold text-foreground"
-      >
-        {t("aiaic.storage.details")}
-        {more ? (
-          <ChevronUp className="size-4" aria-hidden="true" />
-        ) : (
-          <ChevronDown className="size-4" aria-hidden="true" />
-        )}
-      </button>
-      {more ? (
+      {unfolded ? null : (
+        <button
+          type="button"
+          onClick={() => setMore((m) => !m)}
+          aria-expanded={more}
+          className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border-2 border-border bg-background px-3 text-sm font-semibold text-foreground"
+        >
+          {t("aiaic.storage.details")}
+          {more ? (
+            <ChevronUp className="size-4" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="size-4" aria-hidden="true" />
+          )}
+        </button>
+      )}
+      {more || unfolded ? (
         <div className="space-y-3 text-xs text-muted-foreground">
           {card.warehouses.length ? (
             <ul className="space-y-2">
@@ -238,7 +266,11 @@ export function StorageVerdictCard({
                   {x.storing?.word ? (
                     <p>
                       {x.storing.word}
-                      {x.storing.net_gain_per_q?.text ? `: ${x.storing.net_gain_per_q.text}` : ""}
+                      {x.storing.net_gain_per_q?.text ? (
+                        <>
+                          : <WholeFigures text={x.storing.net_gain_per_q.text} />
+                        </>
+                      ) : null}
                     </p>
                   ) : null}
                   <Marks w={x} />

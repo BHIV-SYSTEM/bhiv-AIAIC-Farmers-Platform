@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
@@ -9,7 +9,11 @@ import { PriceSeriesChart } from "@/components/farm/PriceSeriesChart";
 import { CropSignals } from "@/components/farm/aiaic/CropSignals";
 import { PriceBrief } from "@/components/farm/aiaic/PriceBrief";
 import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
+import { useAddressNames } from "@/lib/aiaic-address";
 import { FOR_SERVICE } from "@/lib/aiaic-analysis";
+import { useRaiseCrisis } from "@/lib/aiaic-crisis";
+import { problem } from "@/lib/aiaic-trade";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
 import { StorageVerdictCard } from "@/components/farm/aiaic/StorageVerdictCard";
@@ -17,19 +21,19 @@ import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import {
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   Clock,
   FileWarning,
   Info,
   Phone,
-  PhoneCall,
   SearchX,
-  ShieldAlert,
   Tag,
+  Warehouse,
 } from "lucide-react";
 
 import { AdviceActions } from "@/components/farm/AdviceActions";
 import { FeedbackBlock } from "@/components/farm/FeedbackBlock";
-import { adviceText, summaryLine } from "@/lib/advice-text";
+import { adviceLimits, adviceText, adviceWhy, summaryLine } from "@/lib/advice-text";
 import { isTechnicalLine, recommendationLabel } from "@/lib/aiaic-labels";
 import { SERVICE_ICON } from "@/lib/service-icons";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
@@ -81,6 +85,15 @@ export const Route = createFileRoute("/advice/$service")({
 });
 
 function AdviceServicePage() {
+  const search = Route.useSearch();
+  return (
+    <FarmGate search={search}>
+      <AdviceAnswer />
+    </FarmGate>
+  );
+}
+
+function AdviceAnswer() {
   const { service } = Route.useParams();
   const search = Route.useSearch();
   const { t, lang } = useI18n();
@@ -148,6 +161,15 @@ function AdviceServicePage() {
   const item = result?.ok ? result.items[search.i ?? 0] : undefined;
   const matchedCard = farmerAdviceQuery.data?.cards?.find((c) => c.service === service);
 
+  // Her crop and district as the lists call them, in her language: never the raw keys (the audit of 1 Nov 2026, F11).
+  const place = useAddressNames(search, activeLang, matchedCard?.summary?.subject);
+  const distress = Boolean(farmerAdviceQuery.data?.distress);
+  // AIAIC's crisis answer takes the page, by the one card: never a banner above money cards (F12).
+  const raise = useRaiseCrisis();
+  useEffect(() => {
+    if (distress) raise?.(problem("crisis"));
+  }, [distress, raise]);
+
   return (
     <div className="mx-auto w-full max-w-xl px-3.5 pb-20 pt-5 sm:px-4 sm:pt-6">
       <Link
@@ -167,36 +189,6 @@ function AdviceServicePage() {
         />
         <span className="break-words">{t(`service.${service}`)}</span>
       </h1>
-
-      {/* Distress Alert if flagged by backend */}
-      {farmerAdviceQuery.data?.distress ? (
-        <div className="mt-4 rounded-2xl border-2 border-destructive bg-danger-soft p-4 text-danger-foreground shadow-md sm:rounded-3xl sm:p-5">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="size-6 shrink-0 text-destructive sm:size-7" />
-            <h2 className="break-words text-lg font-extrabold sm:text-xl">
-              {t("advice.distress.title")}
-            </h2>
-          </div>
-          <p className="mt-2 break-words text-sm font-bold sm:text-base">
-            {farmerAdviceQuery.data.distress_message || t("advice.distress.fallback")}
-          </p>
-          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-            <a
-              href="tel:18001801551"
-              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground shadow hover:opacity-90"
-            >
-              <PhoneCall className="size-4 shrink-0" />
-              <span>Kisan Call Centre (1800-180-1551)</span>
-            </a>
-            <a
-              href="tel:14416"
-              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-destructive px-3 text-center text-sm font-bold text-destructive hover:bg-destructive/10"
-            >
-              Tele-MANAS (14416)
-            </a>
-          </div>
-        </div>
-      ) : null}
 
       <div className="mt-6">
         {query.isPending ? (
@@ -221,7 +213,9 @@ function AdviceServicePage() {
             matchedCard={matchedCard}
             priceSeries={priceSeriesQuery.data}
             askAHuman={farmerAdviceQuery.data?.ask_a_human}
-            distress={Boolean(farmerAdviceQuery.data?.distress)}
+            distress={distress}
+            cropShown={place.crop}
+            districtShown={place.district}
           />
         )}
       </div>
@@ -229,7 +223,7 @@ function AdviceServicePage() {
   );
 }
 
-function ItemDetail({
+export function ItemDetail({
   item,
   service,
   farm,
@@ -237,6 +231,9 @@ function ItemDetail({
   priceSeries,
   askAHuman,
   distress = false,
+  cropShown,
+  districtShown,
+  opened = false,
 }: {
   item: IntelligenceItem;
   service: Service;
@@ -251,27 +248,27 @@ function ItemDetail({
   askAHuman?: AskAHuman | undefined;
   /** Words of distress were typed: the crisis box leads, and no money card is added below it. */
   distress?: boolean;
+  /** Her crop and district as the lists call them; empty until read. */
+  cropShown: string;
+  districtShown: string;
+  /** The folds open from the start: what the page shows after its two taps, for the suite to read. */
+  opened?: boolean;
 }) {
   const { t, lang } = useI18n();
-  const [showTechnical, setShowTechnical] = useState(false);
+  const [showTechnical, setShowTechnical] = useState(opened);
 
   const abstained = isAbstention(item) || matchedCard?.abstained === true;
   const level = confidenceLevel(item);
 
-  // Combine explainability lines from technical engine and confirmed /farmer/advice card
-  const cardWhy = matchedCard?.why || [];
-  const lines = cardWhy.length ? cardWhy : (item.explainability ?? []);
+  // The card's own lines, in her language; `item`'s only where no card came (F40)
+  const lines = adviceWhy(matchedCard, item);
   const simple = lines.filter((line) => !isTechnicalLine(line));
-  const technical = (item.explainability ?? []).filter((line) => isTechnicalLine(line));
+  const technical = lines.filter((line) => isTechnicalLine(line));
   const sources = item.sources_used ?? [];
-  const limits = matchedCard?.read_these_first?.length
-    ? [...matchedCard.read_these_first, ...(item.known_unknowns ?? [])]
-    : (item.known_unknowns ?? []);
+  const limits = adviceLimits(matchedCard, item);
   const observed = matchedCard?.as_of || observedAt(item);
   const age = observed ? daysOld(observed) : null;
-  const subject = [item.subject?.crop || farm.crop, item.subject?.region || farm.region]
-    .filter(Boolean)
-    .join(" • ");
+  const subject = [cropShown, districtShown].filter(Boolean).join(" • ");
   // For the transport card on a mandi answer: her crop, and the mandi this answer is about (the one she asked for,
   // else the one the engine's own label names, "Sell at APMC Savner"); no mandi named: the card's own default.
   const transportCrop = farm.crop || item.subject?.crop || "";
@@ -281,7 +278,7 @@ function ItemDetail({
     undefined;
   const serviceLabel = t(`service.${service}`);
   const headline = matchedCard?.answer_headline || recommendationLabel(item.recommendation, lang);
-  const spoken = adviceText(item, serviceLabel, t, lang);
+  const spoken = adviceText(item, serviceLabel, t, lang, matchedCard);
   const decisionId =
     matchedCard?.reference || item.decision_id || item.supporting_evidence?.decision_id;
 
@@ -302,6 +299,7 @@ function ItemDetail({
         service={service}
         subject={subject}
         askAHuman={askAHuman}
+        defaultExpanded={opened}
       >
         {/* Full Recommendation Detail */}
         <section aria-labelledby="rec-heading">
@@ -355,7 +353,7 @@ function ItemDetail({
 
         {/* No chart above: AIAIC's one line on why it holds no price line (never a second chart of the same) */}
         {service === "market" && !distress && priceSeries && !priceSeries.available ? (
-          <PriceBrief series={priceSeries} crop={farm.crop || item.subject?.crop || ""} />
+          <PriceBrief series={priceSeries} crop={cropShown} />
         ) : null}
 
         {/* What AIAIC holds about her crop here, this answer's own facts first (AIAIC's FOR_SERVICE) */}
@@ -372,7 +370,7 @@ function ItemDetail({
         {service === "market" && transportCrop && farm.region && !distress ? (
           <TransportCostCard
             crop={transportCrop}
-            cropLabel={item.subject?.crop || transportCrop}
+            cropLabel={cropShown}
             quantityQ={10}
             fromState={farm.state}
             fromDistrict={farm.region}
@@ -384,6 +382,24 @@ function ItemDetail({
             answers) */}
         {service === "storage" && farm.crop && farm.region && !distress ? (
           <StorageVerdictCard crop={farm.crop} district={farm.region} state={farm.state} />
+        ) : null}
+
+        {/* The storage page, step by step: prices by month and year, warehouses, wastage and cold stores */}
+        {service === "storage" && !distress ? (
+          <Link
+            to="/storage"
+            search={{
+              ...(farm.region ? { region: farm.region } : {}),
+              ...(farm.crop ? { crop: farm.crop } : {}),
+              ...(farm.state ? { state: farm.state } : {}),
+            }}
+            className="flex min-h-14 w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-primary bg-card px-4 py-2 text-center text-lg font-extrabold text-primary transition-colors hover:bg-secondary"
+            data-testid="advice-storage-link"
+          >
+            <Warehouse aria-hidden className="size-5 shrink-0" />
+            <span className="min-w-0 break-words">{t("aiaic.store.open")}</span>
+            <ArrowRight aria-hidden className="size-5 shrink-0" />
+          </Link>
         ) : null}
 
         {/* Official Groundwater / Soil Caveat (for water & crop services) */}

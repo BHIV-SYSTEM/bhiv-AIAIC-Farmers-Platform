@@ -22,14 +22,16 @@ import { z } from "zod";
 
 import { TradeSwitch } from "@/components/farm/aiaic/AiaicBits";
 import { AiaicOrders } from "@/components/farm/aiaic/AiaicOrders";
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
+import { addressBox } from "@/lib/aiaic-query";
 import { useI18n } from "@/lib/i18n";
 import { getOrders } from "@/lib/transactions.functions";
 import type { ProduceOrder, OrderStatus } from "@/lib/transaction-types";
 import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
-  listingId: z.string().optional(),
-  status: z.string().optional(),
+  listingId: addressBox,
+  status: addressBox,
 });
 
 export const Route = createFileRoute("/orders/")({
@@ -47,9 +49,14 @@ export const Route = createFileRoute("/orders/")({
   component: OrdersPage,
 });
 
-/** Offers on her lots and her sales in AIAIC when this server is set up for AIAIC; else the demo store's, as before. */
+/** Offers on her lots and her sales in AIAIC when this server is set up for AIAIC; else the demo store's, as before. Its address is read first. */
 function OrdersPage() {
-  return <TradeSwitch aiaic={() => <AiaicOrders />} local={() => <LocalOrdersPage />} />;
+  const search = Route.useSearch();
+  return (
+    <FarmGate search={search}>
+      <TradeSwitch aiaic={() => <AiaicOrders />} local={() => <LocalOrdersPage />} />
+    </FarmGate>
+  );
 }
 
 function LocalOrdersPage() {

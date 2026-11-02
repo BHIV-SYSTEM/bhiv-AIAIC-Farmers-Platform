@@ -47,6 +47,8 @@ export type CropItem = {
   name_en: string;
   name_translated: boolean;
   first_page: boolean;
+  /** The first-page label this crop is the same product as (AIAIC names it once, under that label). */
+  first_page_shown_as?: string | null;
   grown_here: boolean;
   services?: Record<string, { available: boolean; na_reason_code?: string | null }>;
 };

@@ -5,6 +5,7 @@ import { CheckCircle2, ChevronDown, ChevronUp, Loader2, Tag } from "lucide-react
 import { useEffect, useMemo, useState } from "react";
 
 import { usePress } from "@/lib/aiaic-crisis";
+import { plainNumber, useNumberBoxHeard } from "@/lib/aiaic-heard";
 import {
   QUANTITY_CHOICES,
   answerLanded,
@@ -148,13 +149,18 @@ function SellForm({
     setPrice(typeof s === "number" ? String(Math.round(s)) : "");
   }, [ref, priceTouched]);
 
-  const qty = qtyChoice === "other" ? Number(qtyOther) : Number(qtyChoice);
-  const priceNum = Number(price);
+  // NO BOX IS BLIND (D-105; the audit of 1 Nov 2026, F12): both boxes keep what is typed, and anything but a plain number is read by
+  // AIAIC. Only a plain number is ever used.
+  const heardQty = useNumberBoxHeard(qtyChoice === "other" ? qtyOther : "", lang);
+  const heardPrice = useNumberBoxHeard(price, lang);
+  const qty = qtyChoice === "other" ? (plainNumber(qtyOther) ?? NaN) : Number(qtyChoice);
+  const priceNum = plainNumber(price) ?? NaN;
   const qtyOk = Number.isFinite(qty) && qty > 0 && qty <= 100_000;
   const priceOk = Number.isFinite(priceNum) && priceNum > 0 && priceNum <= 1_000_000;
   const cropLabel = cropList.find((c) => c.crop === crop)?.name ?? crop;
 
   const send = async (confirmed: boolean) => {
+    await Promise.all([heardQty.heard(), heardPrice.heard()]);
     if (!district || !crop || !qtyOk || !priceOk) return;
     setSending(true);
     setProblem(null);
@@ -325,10 +331,8 @@ function SellForm({
             </select>
             {qtyChoice === "other" ? (
               <input
-                type="number"
+                type="text"
                 inputMode="decimal"
-                min="0.01"
-                step="0.01"
                 value={qtyOther}
                 onChange={(e) => setQtyOther(e.target.value)}
                 aria-label={t("aiaic.sell.quantity.other")}
@@ -363,10 +367,8 @@ function SellForm({
             ₹
           </span>
           <input
-            type="number"
+            type="text"
             inputMode="decimal"
-            min="1"
-            step="1"
             value={price}
             onChange={(e) => {
               setPrice(e.target.value);

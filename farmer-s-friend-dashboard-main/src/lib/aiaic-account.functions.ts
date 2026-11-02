@@ -67,9 +67,10 @@ export const registerFarmer = createServerFn({ method: "POST" })
 export const scanFirst = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ text: z.string().max(2000), lang }).parse(d))
   .handler(async ({ data }): Promise<AccountOutcome> => {
-    const { scanFirst: scan } = await import("./aiaic-account.server");
-    const crisis = await scan(data);
-    return crisis ? { ok: false, code: "crisis", crisis } : { ok: true };
+    const { scanRead } = await import("./aiaic-account.server");
+    const { read, crisis } = await scanRead(data);
+    if (crisis) return { ok: false, code: "crisis", crisis };
+    return read ? { ok: true } : { ok: false, code: "scan_not_read" };
   });
 
 /** Her account erased, by herself (push 4b audit, R-10). */

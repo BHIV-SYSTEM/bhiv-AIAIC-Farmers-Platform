@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Archive, ClipboardList, PhoneCall, SearchX, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Archive, ClipboardList, SearchX } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { DashboardSummary } from "@/components/farm/DashboardSummary";
@@ -13,13 +13,18 @@ import { PriceCompare } from "@/components/farm/aiaic/PriceCompare";
 import { SimpleAdviceHero } from "@/components/farm/SimpleAdviceHero";
 import { FailureBlock, LoadingBlock, StateBlock } from "@/components/farm/StateBlock";
 import { AnswerAtAGlance } from "@/components/farm/aiaic/AnswerAtAGlance";
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
+import { farmToSave, useAddressNames } from "@/lib/aiaic-address";
 import { priceCompareOf } from "@/lib/aiaic-analysis";
+import { useRaiseCrisis } from "@/lib/aiaic-crisis";
 import { StorageVerdictCard } from "@/components/farm/aiaic/StorageVerdictCard";
 import { TransportCostCard } from "@/components/farm/aiaic/TransportCostCard";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
 import { catalogOptions, catalogQueryOptions, subjectSupport } from "@/lib/catalog-query";
 import { getFarmerAdvice } from "@/lib/farmer-advice.functions";
 import { getPriceSeries } from "@/lib/places.functions";
+import { mandiKey } from "@/lib/aiaic-trip";
+import { problem } from "@/lib/aiaic-trade";
 import type { ServiceResult } from "@/lib/aiaic-types";
 import { loadCachedAdvice, saveCachedAdvice, saveFarm, savePlantResult } from "@/lib/farm-storage";
 import { useI18n, type Lang } from "@/lib/i18n";
@@ -45,6 +50,15 @@ export const Route = createFileRoute("/result")({
 });
 
 function ResultPage() {
+  const search = Route.useSearch();
+  return (
+    <FarmGate search={search}>
+      <ResultAnswer />
+    </FarmGate>
+  );
+}
+
+function ResultAnswer() {
   const { t, lang } = useI18n();
   const search = Route.useSearch();
   const services = parseServices(search.services);
@@ -94,23 +108,43 @@ function ResultPage() {
     crop: search.crop,
   });
 
+  // Her crop and district by the names the lists show, in her language (the audit of 1 Nov 2026, F11), and what of the address the
+  // lists hold: only that is printed, kept or carried on a link (F12). The address itself is read by `FarmGate`.
+  const cardSubject = farmerAdviceQuery.data?.cards?.[0]?.summary?.subject;
+  const place = useAddressNames(search, activeLang, cardSubject, options.mandis);
+  const held = place.held;
+  const isDistress = Boolean(farmerAdviceQuery.data?.distress);
+
+  // The answer AIAIC gave as a crisis takes the page, as the scan's does: one card, never a banner above money cards.
+  const raise = useRaiseCrisis();
+  useEffect(() => {
+    if (isDistress) raise?.(problem("crisis"));
+  }, [isDistress, raise]);
+
+  // The words of an address the lists do not hold are no key for a cached answer: the key is kept on the phone.
+  const asked = [search.region, search.crop, search.mandi].filter(Boolean).length;
+  const answerKept = [held.region, held.crop, held.mandi].filter(Boolean).length === asked;
   const cacheKey = useMemo(
-    () => `${services.join(",")}|${search.region ?? ""}|${search.crop ?? ""}|${search.mandi ?? ""}`,
-    [services, search.region, search.crop, search.mandi],
+    () => `${services.join(",")}|${held.region ?? ""}|${held.crop ?? ""}|${held.mandi ?? ""}`,
+    [services, held.region, held.crop, held.mandi],
   );
   const [cached, setCached] = useState<{ savedAt: string; results: ServiceResult[] } | null>(null);
 
-  // Remember the farm so a returning farmer does not refill the form.
+  // Remember the farm so a returning farmer does not refill the form: what the lists hold, and nothing on a crisis.
   useEffect(() => {
-    saveFarm({
-      ...(search.region ? { region: search.region } : {}),
-      ...(search.crop ? { crop: search.crop } : {}),
-      ...(search.mandi ? { mandi: search.mandi } : {}),
-      ...(search.land ? { land: search.land } : {}),
-      ...(search.state ? { state: search.state } : {}),
-      services: services.join(","),
-    });
-  }, [search.region, search.crop, search.mandi, search.land, search.state, services]);
+    if (!place.settled || isDistress) return;
+    saveFarm(farmToSave(held));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    place.settled,
+    isDistress,
+    held.region,
+    held.crop,
+    held.mandi,
+    held.land,
+    held.state,
+    held.services,
+  ]);
 
   // Read last good cached answer if offline
   useEffect(() => {
@@ -119,18 +153,26 @@ function ResultPage() {
 
   // Cache only normal responses: never cache distress responses
   useEffect(() => {
-    if (query.data?.results && !farmerAdviceQuery.data?.distress) {
+    if (query.data?.results && !isDistress && place.settled && answerKept) {
       saveCachedAdvice(cacheKey, query.data.results);
     }
-  }, [query.data, farmerAdviceQuery.data?.distress, cacheKey]);
+  }, [query.data, isDistress, place.settled, answerKept, cacheKey]);
 
-  const subject = [search.crop, search.mandi ?? search.region].filter(Boolean).join(" • ");
+  const cropShown = place.crop;
+  const districtShown = place.district;
+  // the market answer's own name for the mandi asked; never the key ("मटकी • sangli", F11)
+  const mandiShown =
+    held.mandi &&
+    priceCompareOf(
+      farmerAdviceQuery.data?.cards?.find((c) => c.service === "market")?.summary?.price_compare,
+    )?.rows.find((r) => mandiKey(r.mandi) === mandiKey(held.mandi))?.mandi_shown;
+  const subject = [cropShown, mandiShown || districtShown].filter(Boolean).join(" • ");
   const linkSearch = {
-    ...(search.region ? { region: search.region } : {}),
-    ...(search.crop ? { crop: search.crop } : {}),
-    ...(search.mandi ? { mandi: search.mandi } : {}),
-    ...(search.land ? { land: search.land } : {}),
-    ...(search.state ? { state: search.state } : {}),
+    ...(held.region ? { region: held.region } : {}),
+    ...(held.crop ? { crop: held.crop } : {}),
+    ...(held.mandi ? { mandi: held.mandi } : {}),
+    ...(held.land ? { land: held.land } : {}),
+    ...(held.state ? { state: held.state } : {}),
     services: services.join(","),
   };
 
@@ -152,7 +194,6 @@ function ResultPage() {
     query.data.results.length > 0 &&
     query.data.results.every((r) => !r.ok);
   // Never allow stale cached normal response to override a current distress response
-  const isDistress = Boolean(farmerAdviceQuery.data?.distress);
   const showCached = !isDistress && Boolean(cached) && (query.isError || everyServiceFailed);
   const results: ServiceResult[] = showCached
     ? (cached?.results ?? [])
@@ -200,7 +241,9 @@ function ResultPage() {
         {subject ? (
           <p className="mt-2 break-words text-base text-foreground/75 sm:text-lg">
             {t("result.for")}: <span className="font-bold">{subject}</span>
-            {search.land ? ` • ${search.land} acres` : ""}
+            {held.land
+              ? ` • ${t(Number(held.land) === 1 ? "result.acres.one" : "result.acres", { n: held.land })}`
+              : ""}
           </p>
         ) : null}
         <div className="mt-3 flex flex-wrap gap-2">
@@ -223,36 +266,6 @@ function ResultPage() {
         </div>
       </header>
 
-      {/* Distress Banner: Prominently at the top when distress=true */}
-      {isDistress ? (
-        <div className="mt-6 rounded-2xl border-2 border-destructive bg-danger-soft p-4 text-danger-foreground shadow-md sm:rounded-3xl sm:p-5">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="size-6 shrink-0 text-destructive sm:size-7" />
-            <h2 className="break-words text-lg font-extrabold sm:text-xl">
-              {t("advice.distress.title")}
-            </h2>
-          </div>
-          <p className="mt-2 break-words text-sm font-bold sm:text-base">
-            {farmerAdviceQuery.data?.distress_message || t("advice.distress.fallback")}
-          </p>
-          <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
-            <a
-              href="tel:18001801551"
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground shadow hover:opacity-90"
-            >
-              <PhoneCall className="size-4 shrink-0" />
-              <span>Kisan Call Centre (1800-180-1551)</span>
-            </a>
-            <a
-              href="tel:14416"
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-destructive px-3 text-center text-sm font-bold text-destructive hover:bg-destructive/10"
-            >
-              Tele-MANAS (14416)
-            </a>
-          </div>
-        </div>
-      ) : null}
-
       {/* Primary Farmer Advice (Simple Advice First with Expandable Details) */}
       {farmerAdviceQuery.isPending || query.isPending ? (
         <div className="mt-6">
@@ -269,8 +282,11 @@ function ResultPage() {
               search.crop && search.region && !isDistress ? (
                 <AnswerAtAGlance
                   crop={search.crop}
+                  cropLabel={cropShown}
                   district={search.region}
+                  districtLabel={districtShown}
                   state={search.state}
+                  taluka={search.taluka}
                   compare={marketCompare}
                   toMandi={advisedMandi}
                 />
@@ -281,7 +297,7 @@ function ResultPage() {
             {farmerAdviceQuery.data?.important ? (
               <div className="rounded-2xl border-2 border-warning/50 bg-warning-soft p-4 text-xs font-semibold text-warning-foreground leading-relaxed">
                 <span className="font-bold uppercase tracking-wider block mb-0.5">
-                  {farmerAdviceQuery.data.important_label || "Important Guidance Note"}
+                  {t("result.important")}
                 </span>
                 {farmerAdviceQuery.data.important}
               </div>
@@ -293,9 +309,10 @@ function ResultPage() {
                 <DashboardSummary
                   results={results}
                   subject={subject}
-                  land={search.land}
+                  land={held.land}
                   updatedAt={updatedAt}
                   search={linkSearch}
+                  cards={farmerAdviceQuery.data?.cards}
                 />
               </div>
             ) : null}
@@ -324,7 +341,7 @@ function ResultPage() {
             !(marketChosen && priceSeriesQuery.data?.available) ? (
               <PriceBrief
                 series={priceSeriesQuery.data}
-                crop={search.crop}
+                crop={cropShown}
                 failed={priceSeriesQuery.isError}
                 onRetry={() => void priceSeriesQuery.refetch()}
               />
@@ -345,7 +362,7 @@ function ResultPage() {
             {services.includes("market") && search.crop && search.region && !isDistress ? (
               <TransportCostCard
                 crop={search.crop}
-                cropLabel={search.crop}
+                cropLabel={cropShown}
                 quantityQ={10}
                 fromState={search.state}
                 fromDistrict={search.region}
@@ -457,6 +474,7 @@ function ResultPage() {
                         item={enhancedItem}
                         index={index}
                         search={linkSearch}
+                        subject={subject}
                       >
                         {/* The price on the first line, and the mandis the market answer compared */}
                         {result.service === "market" &&

@@ -6,6 +6,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect } from "react";
 
 import { getTripTalukas } from "@/lib/aiaic-trade.functions";
 import { useI18n } from "@/lib/i18n";
@@ -34,6 +35,12 @@ export function TalukaSelect({
     staleTime: Infinity,
   });
   const rows = q.data?.ok ? q.data.data.talukas : [];
+  const failed = q.isError || q.data?.ok === false;
+  // A taluka this district's list does not hold is not a choice (the audit of 1 Nov 2026, F12).
+  useEffect(() => {
+    if (value && rows.length > 0 && !rows.some((r) => r.taluka === value)) onChange("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, rows.length]);
   return (
     <label className={`block ${className}`}>
       <span className="text-base font-bold text-foreground">{t("aiaic.taluka.label")}</span>
@@ -52,7 +59,7 @@ export function TalukaSelect({
         ))}
       </select>
       <span className="mt-1 block text-xs font-semibold text-muted-foreground">
-        {t("aiaic.taluka.help")}
+        {t(failed ? "aiaic.taluka.failed" : "aiaic.taluka.help")}
       </span>
     </label>
   );

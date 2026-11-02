@@ -10,7 +10,7 @@
  *   nowhere.
  * - Her token crosses the network only over https, or to an address on this machine or its private network
  *   (`signInAllowed`; `aiaic_sign_in_needs_https` otherwise).
- * - Transport and storage (`/transport/*`, `/storage/verdict`, sections 19 and 21) need no sign-in: public reads, sent
+ * - Transport and storage (`/transport/*`, `/storage/*`, sections 19, 21 and 33) need no sign-in: public reads, sent
  *   with who asked (her token, else this device's id: AIAIC keeps a look), and kept here for 30 minutes so the road
  *   routes AIAIC asks Geoapify for are not spent twice on the same trip (a look served from here is not re-recorded).
  * - Nothing here falls back to the local store: when AIAIC is set up and does not answer, that is SAID.
@@ -45,6 +45,7 @@ import {
   type MineForScreen,
   type NearbyMandis,
   type ReferencePrice,
+  type StoragePlan,
   type StorageVerdict,
   type TradeMode,
   type TransportEstimate,
@@ -133,8 +134,14 @@ function crisisOf(body: Record<string, unknown>): AiaicCrisis {
   };
 }
 
-/** AIAIC's refusal, as facts: `{detail: {reason_code, message, ...facts}}` (its contract), or a plain detail. */
-export function refusalOf(status: number, body: unknown): AiaicProblem {
+/**
+ * AIAIC's refusal, as facts: `{detail: {reason_code, message, ...facts}}` (its contract), or a plain detail. A 429 is said as what it
+ * is, never as "AIAIC did not accept this", which points at what they did (the audit of 1 Nov 2026, F30): `refused` is AIAIC's
+ * `X-AIAIC-Refused`, `server_busy` where the heavy slots were full for everyone.
+ */
+export function refusalOf(status: number, body: unknown, refused?: string | null): AiaicProblem {
+  if (status === 429)
+    return problem(refused === "server_busy" ? "aiaic_server_busy" : "aiaic_busy", { status });
   const detail =
     body && typeof body === "object" ? (body as Record<string, unknown>)["detail"] : undefined;
   if (detail && typeof detail === "object" && !Array.isArray(detail)) {
@@ -224,7 +231,11 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
         }),
       };
     }
-    if (!res.ok) return { ok: false, problem: refusalOf(res.status, json) };
+    if (!res.ok)
+      return {
+        ok: false,
+        problem: refusalOf(res.status, json, res.headers.get("x-aiaic-refused")),
+      };
     return { ok: true, data: json as T };
   }
   return { ok: false, problem: problem("aiaic_unavailable") };
@@ -992,28 +1003,54 @@ export async function transportEstimate(q: EstimateInput): Promise<AiaicResult<T
   );
 }
 
-/**
- * GET /storage/verdict: store or sell now, and the nearest public warehouses by name (contract section 21); only its
- * declared parameters are sent, and an answer is kept for a while, like the transport card's.
- */
-export async function storageVerdict(q: {
+/** What a storage question asks: the card and the plan read the same boxes. */
+export type StorageAsk = {
   crop: string;
   district: string;
   state: string;
   quantity_q?: number | undefined;
   taluka?: string | undefined;
   lang: string;
-}): Promise<AiaicResult<StorageVerdict>> {
-  const query: Query = {
-    crop: q.crop,
-    district: q.district,
-    state: q.state,
-    quantity_q: q.quantity_q,
-    taluka: q.taluka,
-    lang: q.lang,
-  };
+  /** What the farmer said of a loan: for the plan, and for that one answer. */
+  loan_due_in_days?: number | undefined;
+};
+
+const storageQuery = (q: StorageAsk): Query => ({
+  crop: q.crop,
+  district: q.district,
+  state: q.state,
+  quantity_q: q.quantity_q,
+  taluka: q.taluka,
+  lang: q.lang,
+});
+
+/**
+ * GET /storage/verdict: store or sell now, and the nearest public warehouses by name (contract section 21); only its
+ * declared parameters are sent, and an answer is kept for a while, like the transport card's.
+ */
+export async function storageVerdict(q: StorageAsk): Promise<AiaicResult<StorageVerdict>> {
+  const query = storageQuery(q);
   return keptTransport(`storage:${JSON.stringify(query)}`, () =>
     call<StorageVerdict>({ path: "/storage/verdict", query, as: "person" }),
+  );
+}
+
+/**
+ * GET /storage/plan: the storage page's whole answer, the verdict card with the key tiles, the prices by month and by year,
+ * the wastage and the cold stores around it (contract section 33). The same boxes as the card, kept the same way: its
+ * road distances are the same paid routes. What she said of a loan is used for this answer only, as the page tells her: an answer
+ * read with one is not kept here, even for a while.
+ */
+export async function storagePlan(q: StorageAsk): Promise<AiaicResult<StoragePlan>> {
+  const query = storageQuery(q);
+  if (q.loan_due_in_days)
+    return call<StoragePlan>({
+      path: "/storage/plan",
+      query: { ...query, loan_due_in_days: q.loan_due_in_days },
+      as: "person",
+    });
+  return keptTransport(`storage-plan:${JSON.stringify(query)}`, () =>
+    call<StoragePlan>({ path: "/storage/plan", query, as: "person" }),
   );
 }
 

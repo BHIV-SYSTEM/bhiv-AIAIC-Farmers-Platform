@@ -1,0 +1,637 @@
+{
+ "what": "Real answers of a local AIAIC API on a _test database. Samples: never shown to a farmer.",
+ "by": "reports/storage_2026-10-31/record_storage_samples.py",
+ "server": "reports/storage_2026-10-31/run_aiaic_on_the_price_slice.py",
+ "database": "aiaic_st31_srv_test",
+ "prices": "the committed price slice (Agmarknet, newest day 2026-09-25), judged as of price_clock",
+ "trace": "taken out of every answer: the id of the request that asked",
+ "tree": {
+  "commit": "48ea29997876749642bd668835f04a7505332417",
+  "engine_changed_since": false
+ },
+ "files": {
+  "storage_plan_wheat_nashik_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "wheat",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "7d545d03153e28e5b2719dbbde0f7008371bff7809af43573b7ba85438725e37",
+   "bytes": 46327
+  },
+  "storage_plan_wheat_nashik_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "wheat",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "717b4b1d26d1b6da89d2c2ae11e8e76092c3b10b4f993f95b1ffb747046f590a",
+   "bytes": 55644
+  },
+  "storage_plan_wheat_nashik_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "wheat",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "fd2943bd881d510e6a3c8df1cf74c8b76d804e7324a6941be7113f42dae2fdcd",
+   "bytes": 55169
+  },
+  "storage_plan_onion_nashik_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "onion",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "7062e434ab3781031629409d1e735519ee7525f48b20c462cb4493b0f1652c4a",
+   "bytes": 34851
+  },
+  "storage_plan_onion_nashik_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "onion",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "197813c56917bbd1329a3e9adab9a94cc1f87e33b4340db394ce2491067c7532",
+   "bytes": 41594
+  },
+  "storage_plan_onion_nashik_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "onion",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "522a0f02b1ce6a46f6a9299d78d13109c10210994db325875ac1b4355dcbcdce",
+   "bytes": 41110
+  },
+  "storage_plan_soybean_nashik_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "soybean",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "c947120865a5e2a259938ea93c3103c4c2872c3f8789bf06eb2f5455a01e2da2",
+   "bytes": 46666
+  },
+  "storage_plan_soybean_nashik_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "soybean",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "c51f7b3069673950f4e8945fddb46207079038cc3d83f6cfcdc7e2a1b2f5bec2",
+   "bytes": 56185
+  },
+  "storage_plan_soybean_nashik_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "soybean",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "107d7277e40755002ffa8cba6d8e1cf89941a4bc2641455dba62d5528832c4e8",
+   "bytes": 55628
+  },
+  "storage_plan_mataki_sangli_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "ca641c10a676fa49ffd0191db4eb02446d00ef8463ddaa7a629bec3a4ea75754",
+   "bytes": 43820
+  },
+  "storage_plan_mataki_sangli_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "4a4cce9f9f251ca39f743489f382eb6bd72972f6b6c441b609f57cd960e80a3a",
+   "bytes": 53424
+  },
+  "storage_plan_mataki_sangli_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "fbf38b02bfa175be1dfe39222ceb707e2d74913b3b276a13283e367cce73a855",
+   "bytes": 52938
+  },
+  "storage_plan_tomato_nashik_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "tomato",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "c7d80cb6797a286a94eab74161599372a43a4227d5c2560c16ad213eb2e5f37c",
+   "bytes": 32130
+  },
+  "storage_plan_tomato_nashik_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "tomato",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "ece4a85d446636755425d2e607cd0d06cd08f0416fd75e543dad376f56178b89",
+   "bytes": 37863
+  },
+  "storage_plan_tomato_nashik_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "tomato",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "c163696848c1fe36ada0b5b7d0ab8984400623593619d96174aa91679b8df476",
+   "bytes": 37435
+  },
+  "storage_plan_refused_cow.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "cow",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 400,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "e8ee4275aab3fb2e2be9af881e0fc782c06c70bc7979fa6de6af2486711ea965",
+   "bytes": 348,
+   "same_body_in": [
+    "mr",
+    "hi"
+   ]
+  },
+  "storage_plan_refused_saffron.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "saffron",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 404,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "02bab6329e48ba6f2661060a1039756f6c6135569803f5eaa0fc3b30e8b66eaf",
+   "bytes": 227,
+   "same_body_in": [
+    "mr",
+    "hi"
+   ]
+  },
+  "wdra_warehouses_mh_en.sample.json": {
+   "route": "GET /places/wdra-warehouses",
+   "request": {
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "10a21993446724ac83a5459094999e8babc29f82786d901c0f45aeae2fdad6e9",
+   "bytes": 85600
+  },
+  "wdra_warehouses_mh_mr.sample.json": {
+   "route": "GET /places/wdra-warehouses",
+   "request": {
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "a6d0800e1e2e92aa5a99995a6679a935f4e7e3fb8883482282e699f482611cce",
+   "bytes": 89311
+  },
+  "wdra_warehouses_mh_hi.sample.json": {
+   "route": "GET /places/wdra-warehouses",
+   "request": {
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "e678ae7c7b792488e1bae7333daf1f7c2c48c37632136f82d70444e42de37cf5",
+   "bytes": 89413
+  },
+  "storage_plan_wheat_nashik_prices_too_old_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "wheat",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-11-02",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "5ee103d4eb23bb7ecaa1d5d8d6c6040cf1129d162ff18f6ef379180acbbeb6c8",
+   "bytes": 40581
+  },
+  "storage_plan_wheat_nashik_prices_too_old_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "wheat",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-11-02",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "cd378c1d78baaaa4f955acd6e1f9baaf42439fe93fe8db800c225f1a628ffbae",
+   "bytes": 47540
+  },
+  "storage_plan_wheat_nashik_prices_too_old_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "wheat",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-11-02",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "b720984c2b24725ae704da47d7b9b7ad66fab14743ef46dca05d47c9572a29ec",
+   "bytes": 47200
+  },
+  "storage_plan_lentil_nashik_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "lentil",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "76a4001bd4373cdc122bcca696e7212ba9273563ce37b0516c07267591a41200",
+   "bytes": 32551
+  },
+  "storage_plan_lentil_nashik_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "lentil",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "c89ae2c690d17bbf583b4d61c354d00777c82b93c69a59656b21d15fb0c66ce9",
+   "bytes": 38233
+  },
+  "storage_plan_lentil_nashik_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "lentil",
+    "district": "Nashik",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "eed37209328201e7817e67a745b2615e0efdb401c6333714950a185d54195f85",
+   "bytes": 37997
+  },
+  "storage_plan_groundnut_datia_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "groundnut",
+    "district": "Datia",
+    "state": "mp",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "f3ee3c08221f421a0097e44017eb14e4b8a8242a37ba1eb905c7faaea28eaffd",
+   "bytes": 29710
+  },
+  "storage_plan_groundnut_datia_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "groundnut",
+    "district": "Datia",
+    "state": "mp",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "424790c9f084ac1f1086945a51ce320e107b140162fc24e367c3ea87d19bf62c",
+   "bytes": 38253
+  },
+  "storage_plan_groundnut_datia_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "groundnut",
+    "district": "Datia",
+    "state": "mp",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "66f66b4d80ef32b345c686dc24c23dc8231059a4ec48552c7427e192b28615ed",
+   "bytes": 37801
+  },
+  "storage_plan_mataki_sangli_loan_60_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "en",
+    "loan_due_in_days": 60
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "fed8037213323ae94714b7da7b0bef7d9a3ed3b06c0a75c2368c18c91c2693b0",
+   "bytes": 42299
+  },
+  "storage_plan_mataki_sangli_loan_60_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "mr",
+    "loan_due_in_days": 60
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "8d37e616bc26047e692a4babb7707cc25ae5bfbb1e4f7da7d3e62701d2e8b9de",
+   "bytes": 51567
+  },
+  "storage_plan_mataki_sangli_loan_60_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "hi",
+    "loan_due_in_days": 60
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "3b404b3045520156b81574bf71364f3be809de898869ab3c3ba758ec7e19a0ae",
+   "bytes": 51012
+  },
+  "storage_plan_mataki_sangli_loan_30_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "en",
+    "loan_due_in_days": 30
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "d3ac8ace759212434b56b3006d13e0da8426e7baec8bf540fc97f680ba21a2d5",
+   "bytes": 39768
+  },
+  "storage_plan_mataki_sangli_loan_30_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "mr",
+    "loan_due_in_days": 30
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "476e25e6f01988ae4300882bd3b26c8a5a88a7ab1c60c51f584287a3784d0717",
+   "bytes": 47443
+  },
+  "storage_plan_mataki_sangli_loan_30_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "mataki",
+    "district": "Sangli",
+    "state": "mh",
+    "lang": "hi",
+    "loan_due_in_days": 30
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "57468a9b221c70f78e4348f3d8dfed0307ccfbd17d427b09c21fd7d5b6cfafba",
+   "bytes": 46955
+  },
+  "storage_plan_tur_akola_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "tur",
+    "district": "Akola",
+    "state": "mh",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "9b40b645cfb9cb1042fcefbc4257964eee5ea8978286ce555562a4b058452320",
+   "bytes": 46047
+  },
+  "storage_plan_tur_akola_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "tur",
+    "district": "Akola",
+    "state": "mh",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "f4aec12f007682c79d2e1a14ff18f190a8c183206578ce3ea978f021945f5f6e",
+   "bytes": 54993
+  },
+  "storage_plan_tur_akola_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "tur",
+    "district": "Akola",
+    "state": "mh",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:24e2894efe97a7cd945b7f5c107ad35a(5306)",
+   "sha256": "8084db450a6ac72ee24fac38f94b22006b1f67bbc04c14db88ecc86442b91e74",
+   "bytes": 54641
+  },
+  "storage_plan_cotton_dhar_en.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "cotton",
+    "district": "Dhar",
+    "state": "mp",
+    "lang": "en"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "1eb0bea48a9e7e43c8285e35f05e8528c636b84ec6046e06a99d676cf8c7ce62",
+   "bytes": 33671
+  },
+  "storage_plan_cotton_dhar_mr.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "cotton",
+    "district": "Dhar",
+    "state": "mp",
+    "lang": "mr"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "2ba3a3bd2c33263d348c60518feada7ffecc66c37355801dc44a4b3d07f005b1",
+   "bytes": 42118
+  },
+  "storage_plan_cotton_dhar_hi.sample.json": {
+   "route": "GET /storage/plan",
+   "request": {
+    "crop": "cotton",
+    "district": "Dhar",
+    "state": "mp",
+    "lang": "hi"
+   },
+   "status": 200,
+   "price_clock": "2026-09-29",
+   "today": "2026-11-02",
+   "evidence": "sha256c:7db871d574cfdb6240d587b9c55a8acf(3798)",
+   "sha256": "e261c50326970b4394ff24249b12aee2d74a9ac06dfdf10b774b3bbdf5627c24",
+   "bytes": 41920
+  }
+ }
+}

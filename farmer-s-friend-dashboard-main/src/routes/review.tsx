@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ClipboardCheck, ClipboardCopy } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { FarmGate } from "@/components/farm/aiaic/FarmGate";
 import { LoadingBlock } from "@/components/farm/StateBlock";
+import { useAddressNames } from "@/lib/aiaic-address";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
 import { supabase } from "@/integrations/supabase/client";
 import { loadPlantResult } from "@/lib/farm-storage";
@@ -32,9 +34,19 @@ export const Route = createFileRoute("/review")({
 });
 
 function ReviewPage() {
-  const { t } = useI18n();
+  const search = Route.useSearch();
+  return (
+    <FarmGate search={search}>
+      <ReviewPacket />
+    </FarmGate>
+  );
+}
+
+function ReviewPacket() {
+  const { t, lang } = useI18n();
   const search = Route.useSearch();
   const services = parseServices(search.services);
+  const place = useAddressNames(search, lang as "en" | "mr" | "hi");
   const query = useQuery(intelligenceQueryOptions(search));
 
   const [copied, setCopied] = useState(false);
@@ -67,6 +79,7 @@ function ReviewPage() {
     ...(search.crop ? { crop: search.crop } : {}),
     ...(search.mandi ? { mandi: search.mandi } : {}),
     ...(search.land ? { land: search.land } : {}),
+    ...(search.state ? { state: search.state } : {}),
     services: services.join(","),
   };
 
@@ -98,11 +111,11 @@ function ReviewPage() {
       <dl className="mt-4 rounded-2xl border-2 border-border bg-card p-4 text-base">
         <div className="flex flex-wrap gap-x-2">
           <dt className="font-bold">{t("ask.district")}:</dt>
-          <dd>{search.region || t("ask.district.any")}</dd>
+          <dd>{place.district || t("ask.district.any")}</dd>
         </div>
         <div className="mt-1 flex flex-wrap gap-x-2">
           <dt className="font-bold">{t("ask.crop")}:</dt>
-          <dd>{search.crop || t("ask.crop.any")}</dd>
+          <dd>{place.crop || t("ask.crop.any")}</dd>
         </div>
         <div className="mt-1 flex flex-wrap gap-x-2">
           <dt className="font-bold">{t("review.base")}:</dt>

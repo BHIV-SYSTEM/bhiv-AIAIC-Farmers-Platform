@@ -18,6 +18,7 @@ export function BottomNav() {
     currentPath.startsWith("/ask") ||
     currentPath.startsWith("/result") ||
     currentPath.startsWith("/advice") ||
+    currentPath.startsWith("/storage") ||
     currentPath.startsWith("/review");
 
   const isListingsActive = currentPath.startsWith("/listing");

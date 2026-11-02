@@ -391,6 +391,8 @@ export const APP_PROBLEMS = [
   "aiaic_account_not_practice",
   "aiaic_unavailable",
   "aiaic_answer_unreadable",
+  "aiaic_busy",
+  "aiaic_server_busy",
 ] as const;
 
 export function problem(
@@ -1333,12 +1335,28 @@ export type StorageWarehouse = {
 };
 
 /** AIAIC's storage verdict card: store or sell now, and the nearest public warehouses by name (section 21). */
+/** How sure AIAIC is of a verdict: its band, the farmer's word for it and a sentence for each reason, in the language asked. */
+export type StorageConfidence = {
+  band: string;
+  text: string;
+  label: string;
+  reasons: string[];
+};
+
 export type StorageVerdict = {
   lang: string;
+  /** The quintals the trip was priced for: the farmer's, or AIAIC's labelled example of 10. */
+  quantity_q?: number | null;
   verdict: {
     code: string;
     word: string;
     text: string;
+    /** The colour AIAIC shows it in (`good`, `warn`, `neutral`): a store below medium confidence is never `good`. */
+    tone?: string;
+    /** Which way the figures lean, `store` or `sell_now`, said as a directive or as Not sure; what is meant for a farmer who might store reads this, never `code`. */
+    leans?: string | null;
+    /** How sure AIAIC is of this verdict, and why: always shown with it. */
+    confidence?: StorageConfidence | null;
     months_text: string | null;
     warehouse: StorageWarehouse | null;
     net_gain_per_q: { text: string | null } | null;
@@ -1352,6 +1370,118 @@ export type StorageVerdict = {
   wdra_others: { text: string | null } | null;
   sources: { text: string | null }[];
   attribution: { text: string; url?: string }[];
+};
+
+/** One key tile of a storage plan: every word AIAIC's own, in the language asked (`tone`: good, warn or neutral). */
+export type StorageIndicator = {
+  key: string;
+  label: string;
+  value: string;
+  note: string | null;
+  tone: string;
+};
+
+/** A month of the district's prices; a month AIAIC does not hold is left out, never filled. */
+export type StorageMonth = {
+  month: number;
+  name: string;
+  short: string;
+  usual_rs: number;
+  low_rs: number;
+  high_rs: number;
+  n_years: number;
+  years: string;
+};
+
+/** A year of the district's prices, oldest first; `partial`: the archives do not reach the end of that year. */
+export type StorageYear = {
+  year: number;
+  partial: boolean;
+  average_rs: number;
+  high_rs: number;
+  high_month: number | null;
+  low_rs: number;
+  low_month: number | null;
+  n_months: number;
+  n_days: number;
+};
+
+/** The month usually highest or lowest, with AIAIC's sentence for it. */
+export type StorageMonthSaid = { month: number; name: string; usual_rs: number; text: string };
+
+export type StoragePrices = {
+  now: {
+    rs_per_q: number;
+    text: string;
+    day: string | null;
+    against: string | null;
+    against_text: string | null;
+    /** True for a price from outside the district: it is never drawn on the district's months. */
+    outside?: boolean;
+    whose_text?: string | null;
+  } | null;
+  months: StorageMonth[];
+  years: StorageYear[];
+  best_month: StorageMonthSaid | null;
+  lowest_month: StorageMonthSaid | null;
+  held: boolean;
+  headline: string | null;
+  note: string | null;
+  sources: { what: string; text: string | null }[];
+};
+
+export type StorageWastage = {
+  kind: string;
+  headline: string | null;
+  published: { text: string | null }[];
+};
+
+/** A cold-storage project an organisation holds, nearest first (a person's is counted, never named). */
+export type StorageColdStore = {
+  name: string;
+  capacity_text: string | null;
+  year_sanctioned: string | null;
+  year_text: string | null;
+  where_text: string | null;
+};
+
+/** The cold stores near the district. `rate_text` says AIAIC holds no rate for these stores: it must be shown. */
+export type StorageColdStores = {
+  headline: string | null;
+  near: StorageColdStore[];
+  not_named_text: string | null;
+  rate_text: string | null;
+  caveat: string | null;
+  source: string | null;
+};
+
+/** AIAIC's question about a loan, in the language asked: a tap on a choice asks the plan again with its `due_in_days`. */
+export type StorageLoanAsk = {
+  question: string;
+  note: string;
+  due_in_days: number | null;
+  choices: { due_in_days: number; text: string }[];
+  clear: string;
+};
+
+/**
+ * AIAIC's storage plan (GET /storage/plan, AIAIC_BACKEND_CONTRACT.md section 33): everything the step-by-step storage page
+ * shows, in one call. `card` is the storage verdict card, unchanged; every sentence and figure is AIAIC's, in the language
+ * asked, so this app and AIAIC's dashboard and portal show one answer. Only what the page shows is typed.
+ */
+export type StoragePlan = {
+  lang: string;
+  lang_note?: string | null;
+  district_shown: string | null;
+  crop_shown: string | null;
+  card: StorageVerdict | null;
+  indicators: StorageIndicator[];
+  prices: StoragePrices | null;
+  /** The one question that reaches the loan guard: there under a store verdict, or while a loan is set. */
+  loan?: StorageLoanAsk | null;
+  wastage: StorageWastage | null;
+  cold_storages: StorageColdStores | null;
+  pending_native_review: boolean;
 };
 
 // ------------------------------------------------------------------------------- 28 Oct 2026: AIAIC's new answers
