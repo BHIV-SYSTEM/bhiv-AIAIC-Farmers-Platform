@@ -2065,6 +2065,15 @@ test("S74 one tap on /advice: every line of the fold is the card's, in the reade
   ok(!spoken.includes("Sell now"), "the read-out and the share say the card too");
   ok(spoken.includes(String(card.answer_headline)), "its headline");
   ok(spoken.includes(String(card.summary?.action?.text)), "its action");
+  const read = sourceOf("src/components/farm/DashboardSummary.tsx");
+  ok(
+    read.includes("adviceText(item, label, t, lang, cards?.find("),
+    "/result's read-out says the cards too",
+  );
+  ok(
+    sourceOf("src/routes/result.tsx").includes("cards={farmerAdviceQuery.data?.cards}"),
+    "and is handed them",
+  );
   const noCard = adviceText(item, "x", t, "en");
   ok(noCard.includes("Sell now (no storage declared)."), "no card: the engine's words, as before");
 });

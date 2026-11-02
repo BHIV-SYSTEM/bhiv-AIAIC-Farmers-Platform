@@ -4,6 +4,7 @@ import { ClipboardList, LayoutDashboard, Phone } from "lucide-react";
 import { AdviceActions } from "@/components/farm/AdviceActions";
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
 import { adviceText } from "@/lib/advice-text";
+import type { FarmerAdviceCard } from "@/lib/farmer-advice.functions";
 import {
   confidenceLevel,
   type ServiceResult,
@@ -32,12 +33,15 @@ export function DashboardSummary({
   land,
   updatedAt,
   search,
+  cards,
 }: {
   results: ServiceResult[];
   subject: string;
   land?: string | undefined;
   updatedAt: string;
   search: { region?: string; crop?: string; mandi?: string; land?: string; services?: string };
+  /** The cards of `/farmer/advice`, in the reader's language: what the read-out says where there is one (F40). */
+  cards?: FarmerAdviceCard[] | undefined;
 }) {
   const { t, lang } = useI18n();
   const items = flattenResults(results);
@@ -67,7 +71,13 @@ export function DashboardSummary({
   const combinedText = items
     .map(({ item, service }, i) => {
       const label = `${i + 1}. ${t(`service.${service}`)}`;
-      return adviceText(item, label, t, lang);
+      return adviceText(
+        item,
+        label,
+        t,
+        lang,
+        cards?.find((c) => c.service === service),
+      );
     })
     .join("\n\n---\n\n");
 

@@ -312,6 +312,7 @@ function ResultAnswer() {
                   land={held.land}
                   updatedAt={updatedAt}
                   search={linkSearch}
+                  cards={farmerAdviceQuery.data?.cards}
                 />
               </div>
             ) : null}
