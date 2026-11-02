@@ -1445,7 +1445,7 @@ export type StorageColdStore = {
   where_text: string | null;
 };
 
-/** The cold stores near the district. `rate_text` always says that no rate is published: it must be shown. */
+/** The cold stores near the district. `rate_text` says AIAIC holds no rate for these stores: it must be shown. */
 export type StorageColdStores = {
   headline: string | null;
   near: StorageColdStore[];
