@@ -275,8 +275,7 @@ export const AIAIC_EN: Dict = {
     "The AIAIC account set on this server is a real farmer's. A guest's selling screens use only AIAIC's practice account.",
   "aiaic.problem.aiaic_unavailable": "AIAIC is not answering right now. Nothing was changed.",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC's answer could not be read. Try again.",
-  "aiaic.problem.aiaic_busy":
-    "Too many requests from here just now. Wait a minute and try again.",
+  "aiaic.problem.aiaic_busy": "Too many requests from here just now. Wait a minute and try again.",
   "aiaic.problem.aiaic_server_busy":
     "The server is busy with other people’s requests just now, so this one was not started. Try again in a moment.",
   // push 4b (25 Oct 2026): her account, the Help tab, and the refusals they meet
@@ -2359,8 +2358,7 @@ export const AIAIC_HI: Dict = {
     "इस सर्वर पर दिया गया AIAIC खाता असली किसान का है। अतिथि के लिए बिक्री की स्क्रीन सिर्फ़ AIAIC का अभ्यास खाता इस्तेमाल करती हैं।",
   "aiaic.problem.aiaic_unavailable": "AIAIC अभी जवाब नहीं दे रहा। कुछ भी नहीं बदला।",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC का जवाब पढ़ा नहीं जा सका। फिर से कोशिश करें।",
-  "aiaic.problem.aiaic_busy":
-    "यहाँ से अभी बहुत अनुरोध आए हैं। एक मिनट रुककर फिर से कोशिश करें।",
+  "aiaic.problem.aiaic_busy": "यहाँ से अभी बहुत अनुरोध आए हैं। एक मिनट रुककर फिर से कोशिश करें।",
   "aiaic.problem.aiaic_server_busy":
     "सर्वर अभी दूसरे लोगों के अनुरोधों में व्यस्त है, इसलिए यह अनुरोध शुरू नहीं हुआ। थोड़ी देर में फिर से कोशिश करें।",
   // push 4b (25 Oct 2026): her account, the Help tab, and the refusals they meet
