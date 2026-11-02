@@ -1915,6 +1915,55 @@ test("S70 a Madhya Pradesh farmer's state reaches AIAIC, so /advice and /review 
     ok(sourceOf(page).includes("intelligenceQueryOptions(search)"), `${page}: the one reader`);
 });
 
+test("S72 every link from a farm page to a farm page carries the state, so a farmer in Dhar is never read as Maharashtra's (F35)", () => {
+  const FARM_PAGES = "/result|/advice/\\$service|/review|/storage|/ask";
+  const links = new RegExp(`<Link\\b[^>]*?\\bto="(${FARM_PAGES})"[\\s\\S]*?>`, "g");
+  // a page's own links; home holds no address of its own, and its two plain links open on the saved farm, which holds the state
+  const files = [
+    "src/routes/review.tsx",
+    "src/routes/result.tsx",
+    "src/routes/advice.$service.tsx",
+    "src/routes/storage.tsx",
+    "src/routes/ask.tsx",
+    "src/routes/index.tsx",
+    "src/components/farm/DashboardSummary.tsx",
+    "src/components/farm/RecommendationCard.tsx",
+    "src/components/farm/aiaic/AnswerAtAGlance.tsx",
+  ];
+  /** The object a link's `search` names: written in place, or the page's own `const`. A component that is handed `search` passes it whole. */
+  const carriesState = (source: string, tag: string, file: string) => {
+    const at = tag.indexOf("search={");
+    if (at < 0) return file === "src/routes/index.tsx";
+    const value = tag.slice(at + "search={".length);
+    const name = value.match(/^(\w+)\}/)?.[1];
+    if (name === "search") return true;
+    if (name) {
+      const start = source.indexOf(`const ${name} = {`);
+      ok(start >= 0, `${file}: no const ${name}`);
+      return /\bstate\b/.test(source.slice(start, source.indexOf("};", start)));
+    }
+    return value.startsWith("{ ...search") || /\bstate\b/.test(value);
+  };
+  let seen = 0;
+  for (const file of files) {
+    const source = sourceOf(file);
+    for (const m of source.matchAll(links)) {
+      seen += 1;
+      // `[^>]` stops at an arrow or a `=>` in the tag: the whole tag runs to the next line that closes it
+      const end = source.indexOf("\n", source.indexOf("className", m.index));
+      ok(
+        carriesState(source, source.slice(m.index, end), file),
+        `${file}: a link to ${m[1]} drops the state`,
+      );
+    }
+  }
+  ok(seen >= 12, `only ${seen} links were read`);
+  ok(
+    /state,?\s/.test(sourceOf("src/routes/ask.tsx").split('to: "/result"')[1] ?? ""),
+    "/ask's move to /result",
+  );
+});
+
 test("S71 the card under an answer prints the names the page holds, never the answer's raw keys (F11)", () => {
   const card = sourceOf("src/components/farm/RecommendationCard.tsx");
   ok(!card.includes("item.subject"), "no raw key");

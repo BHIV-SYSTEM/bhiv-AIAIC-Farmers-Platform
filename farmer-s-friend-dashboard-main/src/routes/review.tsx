@@ -79,6 +79,7 @@ function ReviewPacket() {
     ...(search.crop ? { crop: search.crop } : {}),
     ...(search.mandi ? { mandi: search.mandi } : {}),
     ...(search.land ? { land: search.land } : {}),
+    ...(search.state ? { state: search.state } : {}),
     services: services.join(","),
   };
 
