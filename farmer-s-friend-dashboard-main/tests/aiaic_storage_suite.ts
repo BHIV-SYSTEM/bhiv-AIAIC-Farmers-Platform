@@ -2067,7 +2067,7 @@ test("S74 one tap on /advice: every line of the fold is the card's, in the reade
   ok(spoken.includes(String(card.summary?.action?.text)), "its action");
   const read = sourceOf("src/components/farm/DashboardSummary.tsx");
   ok(
-    read.includes("adviceText(item, label, t, lang, cards?.find("),
+    /adviceText\(\s*item,\s*label,\s*t,\s*lang,\s*cards\?\.find\(/.test(read),
     "/result's read-out says the cards too",
   );
   ok(
