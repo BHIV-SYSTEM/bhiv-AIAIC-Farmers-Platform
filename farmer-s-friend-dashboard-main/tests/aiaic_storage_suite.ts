@@ -2063,7 +2063,8 @@ test("S74 one tap on /advice: every line of the fold is the card's, in the reade
   const t = (key: string) => key;
   const spoken = adviceText(item, "x", t, "mr", card);
   ok(!spoken.includes("Sell now"), "the read-out and the share say the card too");
-  ok(spoken.includes(card.answer_headline), "its headline");
+  ok(spoken.includes(String(card.answer_headline)), "its headline");
+  ok(spoken.includes(String(card.summary?.action?.text)), "its action");
   const noCard = adviceText(item, "x", t, "en");
   ok(noCard.includes("Sell now (no storage declared)."), "no card: the engine's words, as before");
 });

@@ -251,11 +251,11 @@ export function ItemDetail({
   /** Her crop and district as the lists call them; empty until read. */
   cropShown: string;
   districtShown: string;
-  /** The fold open from the start: what the page shows after one tap, for the suite to read. */
+  /** The folds open from the start: what the page shows after its two taps, for the suite to read. */
   opened?: boolean;
 }) {
   const { t, lang } = useI18n();
-  const [showTechnical, setShowTechnical] = useState(false);
+  const [showTechnical, setShowTechnical] = useState(opened);
 
   const abstained = isAbstention(item) || matchedCard?.abstained === true;
   const level = confidenceLevel(item);
