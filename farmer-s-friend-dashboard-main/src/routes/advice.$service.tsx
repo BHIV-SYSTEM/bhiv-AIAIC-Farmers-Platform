@@ -33,7 +33,7 @@ import {
 
 import { AdviceActions } from "@/components/farm/AdviceActions";
 import { FeedbackBlock } from "@/components/farm/FeedbackBlock";
-import { adviceText, summaryLine } from "@/lib/advice-text";
+import { adviceLimits, adviceText, adviceWhy, summaryLine } from "@/lib/advice-text";
 import { isTechnicalLine, recommendationLabel } from "@/lib/aiaic-labels";
 import { SERVICE_ICON } from "@/lib/service-icons";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
@@ -223,7 +223,7 @@ function AdviceAnswer() {
   );
 }
 
-function ItemDetail({
+export function ItemDetail({
   item,
   service,
   farm,
@@ -233,6 +233,7 @@ function ItemDetail({
   distress = false,
   cropShown,
   districtShown,
+  opened = false,
 }: {
   item: IntelligenceItem;
   service: Service;
@@ -250,6 +251,8 @@ function ItemDetail({
   /** Her crop and district as the lists call them; empty until read. */
   cropShown: string;
   districtShown: string;
+  /** The fold open from the start: what the page shows after one tap, for the suite to read. */
+  opened?: boolean;
 }) {
   const { t, lang } = useI18n();
   const [showTechnical, setShowTechnical] = useState(false);
@@ -257,15 +260,12 @@ function ItemDetail({
   const abstained = isAbstention(item) || matchedCard?.abstained === true;
   const level = confidenceLevel(item);
 
-  // Combine explainability lines from technical engine and confirmed /farmer/advice card
-  const cardWhy = matchedCard?.why || [];
-  const lines = cardWhy.length ? cardWhy : (item.explainability ?? []);
+  // The card's own lines, in her language; `item`'s only where no card came (F40)
+  const lines = adviceWhy(matchedCard, item);
   const simple = lines.filter((line) => !isTechnicalLine(line));
-  const technical = (item.explainability ?? []).filter((line) => isTechnicalLine(line));
+  const technical = lines.filter((line) => isTechnicalLine(line));
   const sources = item.sources_used ?? [];
-  const limits = matchedCard?.read_these_first?.length
-    ? [...matchedCard.read_these_first, ...(item.known_unknowns ?? [])]
-    : (item.known_unknowns ?? []);
+  const limits = adviceLimits(matchedCard, item);
   const observed = matchedCard?.as_of || observedAt(item);
   const age = observed ? daysOld(observed) : null;
   const subject = [cropShown, districtShown].filter(Boolean).join(" • ");
@@ -278,7 +278,7 @@ function ItemDetail({
     undefined;
   const serviceLabel = t(`service.${service}`);
   const headline = matchedCard?.answer_headline || recommendationLabel(item.recommendation, lang);
-  const spoken = adviceText(item, serviceLabel, t, lang);
+  const spoken = adviceText(item, serviceLabel, t, lang, matchedCard);
   const decisionId =
     matchedCard?.reference || item.decision_id || item.supporting_evidence?.decision_id;
 
@@ -299,6 +299,7 @@ function ItemDetail({
         service={service}
         subject={subject}
         askAHuman={askAHuman}
+        defaultExpanded={opened}
       >
         {/* Full Recommendation Detail */}
         <section aria-labelledby="rec-heading">

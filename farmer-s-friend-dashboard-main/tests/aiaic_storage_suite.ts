@@ -82,6 +82,9 @@ import {
   type FarmSearch,
 } from "../src/lib/aiaic-query";
 import { fetchService } from "../src/lib/aiaic.functions";
+import { adviceLimits, adviceText, adviceWhy } from "../src/lib/advice-text";
+import type { FarmerAdviceResponse } from "../src/lib/farmer-advice.functions";
+import type { IntelligenceItem } from "../src/lib/aiaic-types";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
@@ -91,6 +94,7 @@ import type { CropItem, DistrictItem } from "../src/lib/places.functions";
 import { Route as SaleRoute } from "../src/routes/listing.new";
 import { Route as OrdersRoute } from "../src/routes/orders.index";
 import { Route as StorageRoute } from "../src/routes/storage";
+import { ItemDetail } from "../src/routes/advice.$service";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.join(here, "fixtures", "aiaic");
@@ -1992,6 +1996,76 @@ test("S73 a tap on a district takes focus and the screen to the chosen line, and
       DICTS[lang]["aiaic.store.where.chosen"],
       `${lang}: the line says what it is, to a screen reader`,
     );
+});
+
+test("S74 one tap on /advice: every line of the fold is the card's, in the reader's language, on a warning above all (F40)", () => {
+  const advice = recorded<FarmerAdviceResponse>("farmer_advice_onion_nashik_mr_named");
+  const held = advice.cards?.find((c) => c.service === "storage");
+  ok(held?.what_we_do_not_know?.length, "the recording holds the card's lines");
+  // this recording is older than F11, which put the one note `checked_note` in the reader's language; AIAIC's own tests hold that line
+  const card = { ...held, checked_note: undefined };
+  // TEST DATA: what /intelligence/storage writes, in English, whatever the page's language (these are its lines of the audit's own walk)
+  const item = {
+    service: "storage",
+    recommendation: "SELL_NOW",
+    recommendation_detail: "Sell now (no storage declared).",
+    explainability: [
+      "Sell now: you have no storage on record.",
+      "3. decision:sell_now_vs_store: rule A1 fired for this answer",
+    ],
+    known_unknowns: [
+      "YOU WERE NOT ASKED WHETHER YOU CAN STORE. This answer assumes you cannot.",
+      "IF YOU CAN STORE, THIS IS NOT YOUR ANSWER.",
+      "No loan context provided",
+      "Engine runs on UNCALIBRATED illustrative defaults",
+    ],
+    sources_used: [],
+    calibrated: false,
+  } as unknown as IntelligenceItem;
+  const html = pageIn(
+    "mr",
+    createElement(ItemDetail, {
+      item,
+      service: "storage",
+      farm: { region: "Nashik", crop: "onion", state: "mh" },
+      matchedCard: card,
+      cropShown: "कांदा",
+      districtShown: "नाशिक",
+      opened: true,
+    }),
+  );
+  const said = textsOf(html);
+  for (const line of [...(item.known_unknowns ?? []), ...(item.explainability ?? [])])
+    ok(!said.includes(line), `English from /intelligence on a Marathi page: ${line}`);
+  for (const line of card.what_we_do_not_know ?? [])
+    ok(said.includes(line), `a warning is lost: ${line}`);
+  const whole = /[A-Za-z]{2,}(?:[\s,:;'"()/-]+[A-Za-z]{2,}){3,}/;
+  const devanagari = /[\u0900-\u097f]/;
+  assert.deepEqual(
+    said.filter((line) => whole.test(line) && !devanagari.test(line)),
+    [],
+    "whole English lines in the open fold",
+  );
+
+  assert.equal(
+    new Set(adviceLimits(card, item)).size,
+    adviceLimits(card, item).length,
+    "each warning once",
+  );
+  assert.deepEqual(adviceWhy(card, item), card.why, "the card's reasons");
+  assert.deepEqual(
+    adviceLimits(undefined, item),
+    item.known_unknowns,
+    "no card came: a warning is never lost with it",
+  );
+  assert.deepEqual(adviceWhy(undefined, item), item.explainability);
+
+  const t = (key: string) => key;
+  const spoken = adviceText(item, "x", t, "mr", card);
+  ok(!spoken.includes("Sell now"), "the read-out and the share say the card too");
+  ok(spoken.includes(card.answer_headline), "its headline");
+  const noCard = adviceText(item, "x", t, "en");
+  ok(noCard.includes("Sell now (no storage declared)."), "no card: the engine's words, as before");
 });
 
 test("S71 the card under an answer prints the names the page holds, never the answer's raw keys (F11)", () => {

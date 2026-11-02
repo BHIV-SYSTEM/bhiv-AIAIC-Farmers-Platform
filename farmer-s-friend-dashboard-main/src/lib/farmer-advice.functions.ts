@@ -36,6 +36,7 @@ export type FarmerAdviceCard = {
   service: string;
   answer_headline: string;
   read_these_first?: string[] | undefined;
+  what_we_do_not_know?: string[] | undefined;
   why?: string[] | undefined;
   as_of?: string | undefined;
   reference?: string | undefined;
@@ -118,6 +119,9 @@ export const getFarmerAdvice = createServerFn({ method: "GET" })
             service: typeof c.service === "string" ? c.service : "",
             answer_headline: typeof c.answer_headline === "string" ? c.answer_headline : "",
             read_these_first: Array.isArray(c.read_these_first) ? c.read_these_first : undefined,
+            what_we_do_not_know: Array.isArray(c.what_we_do_not_know)
+              ? c.what_we_do_not_know
+              : undefined,
             why: Array.isArray(c.why) ? c.why : undefined,
             as_of: typeof c.as_of === "string" ? c.as_of : undefined,
             reference: typeof c.reference === "string" ? c.reference : undefined,
