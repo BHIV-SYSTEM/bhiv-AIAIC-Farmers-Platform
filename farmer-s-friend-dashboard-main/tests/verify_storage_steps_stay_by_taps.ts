@@ -234,6 +234,60 @@ async function walk(version: Json, slow: boolean) {
   page.close();
 }
 
+/**
+ * A tap removes the button it landed on, and the long list under a scrolled page (F39): focus fell to the body, and for a district low in
+ * the list the chosen line stood above the screen with the taluka's label under the sticky header. The list's own places, top and bottom.
+ */
+async function aTapShowsWhatItChose(version: Json, position: "first" | "last" | number) {
+  const label = `district ${position} in the list`;
+  const page = await openPhone(version, false);
+  await page.send("Page.navigate", { url: `${BASE}/storage` });
+  await until(
+    page,
+    "the districts",
+    `${q('[data-testid="store-districts"] button')} !== null`,
+    60000,
+  );
+  const all = `[...document.querySelectorAll('[data-testid="store-districts"] button')]`;
+  const at =
+    position === "last"
+      ? `${all}.at(-1)`
+      : position === "first"
+        ? `${all}[0]`
+        : `${all}[${position}]`;
+  await tap(page, at);
+  await until(page, "the chosen line", `${q('[data-testid="store-place-chosen"]')} !== null`);
+  await sleep(500);
+  const seen = await page.js<Record<string, number | boolean>>(`(() => {
+    const chosen = ${q('[data-testid="store-place-chosen"]')}.getBoundingClientRect();
+    const box = ${q('[data-testid="aiaic-taluka"]')}.getBoundingClientRect();
+    const next = ${q('[data-testid="store-place-next"]')}.getBoundingClientRect();
+    const head = document.querySelector("header")?.getBoundingClientRect().bottom ?? 0;
+    return { focused: document.activeElement === ${q('[data-testid="store-place-chosen"]')}, head,
+      chosenTop: chosen.top, boxBottom: box.bottom, nextBottom: next.bottom, height: window.innerHeight };
+  })()`);
+  check(seen["focused"], `${label}: focus stands on the chosen line`);
+  check(
+    Number(seen["chosenTop"]) >= Number(seen["head"]),
+    `${label}: the chosen line is below the sticky header (${seen["chosenTop"]} from ${seen["head"]})`,
+  );
+  check(
+    Number(seen["nextBottom"]) <= Number(seen["height"]),
+    `${label}: the taluka and Next are on the screen (Next ends at ${seen["nextBottom"]} of ${seen["height"]})`,
+  );
+  await tap(page, q('[data-testid="store-place-other"]'));
+  await until(page, "the list again", `${q('[data-testid="store-districts"] button')} !== null`);
+  await sleep(400);
+  const back = await page.js<Record<string, number | boolean>>(`(() => {
+    const line = ${q('[data-testid="store-district-label"]')};
+    return { focused: document.activeElement === line, top: line.getBoundingClientRect().top,
+      head: document.querySelector("header")?.getBoundingClientRect().bottom ?? 0 };
+  })()`);
+  check(back["focused"], `${label}: Another district takes focus to the list`);
+  check(Number(back["top"]) >= Number(back["head"]), `${label}: and its line is on the screen`);
+  page.close();
+}
+
 async function crisisStillTakesThePage(version: Json) {
   const page = await openPhone(version, false);
   await page.send("Page.navigate", {
@@ -277,6 +331,8 @@ async function main() {
     if (!version) throw new Error("Chrome did not answer");
     await walk(version, false);
     await walk(version, true);
+    for (const position of ["first", 17, 23, 29, "last"] as const)
+      await aTapShowsWhatItChose(version, position);
     await crisisStillTakesThePage(version);
     console.log(`\n${failures.length ? `${failures.length} FAILED` : "all held"}`);
     code = failures.length ? 1 : 0;

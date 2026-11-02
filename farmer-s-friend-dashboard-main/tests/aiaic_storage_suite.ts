@@ -1964,6 +1964,36 @@ test("S72 every link from a farm page to a farm page carries the state, so a far
   );
 });
 
+test("S73 a tap on a district takes focus and the screen to the chosen line, and Another district to the list (F39)", () => {
+  const steps = sourceOf("src/components/farm/aiaic/storage/StorageSteps.tsx").replace(
+    /\r\n/g,
+    "\n",
+  );
+  ok(steps.includes("line?.focus({ preventScroll: true });"), "focus goes to the line");
+  ok(steps.includes('line?.scrollIntoView({ block: "start" });'), "and the screen with it");
+  ok(
+    /ref=\{chosenLine\}\s+tabIndex=\{-1\}\s+className="[^"]*scroll-mt-24/.test(steps),
+    "the chosen line clears the sticky header",
+  );
+  ok(
+    /ref=\{listLine\}\s+tabIndex=\{-1\}\s+className="[^"]*scroll-mt-24/.test(steps),
+    "and the list's own line",
+  );
+  ok(
+    /onClick=\{\(\) => \{\s+moved\.current = true;\s+setTapped\(true\);/.test(steps),
+    "a tap moves",
+  );
+  ok(
+    /onClick=\{\(\) => \{\s+moved\.current = true;\s+setTapped\(false\);/.test(steps),
+    "and so does Another district",
+  );
+  for (const lang of ["en", "mr", "hi"] as const)
+    ok(
+      DICTS[lang]["aiaic.store.where.chosen"],
+      `${lang}: the line says what it is, to a screen reader`,
+    );
+});
+
 test("S71 the card under an answer prints the names the page holds, never the answer's raw keys (F11)", () => {
   const card = sourceOf("src/components/farm/RecommendationCard.tsx");
   ok(!card.includes("item.subject"), "no raw key");

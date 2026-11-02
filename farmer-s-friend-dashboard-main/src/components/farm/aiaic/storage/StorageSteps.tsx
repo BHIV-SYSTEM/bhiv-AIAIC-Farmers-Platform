@@ -250,20 +250,39 @@ export function PlaceStep({
 }) {
   const { t } = useI18n();
   const [tapped, setTapped] = useState(false);
+  // A TAP HERE REMOVES THE BUTTON IT LANDED ON, AND THE LIST UNDER A SCROLLED PAGE (the audit of 1 Nov 2026, F39): focus fell to the body,
+  // nobody was told what happened, and for a district low in the list the chosen line stood above the screen with the taluka's label under
+  // the sticky header. So a person's tap takes focus and the screen to what stands now; opening the page moves nothing.
+  const chosenLine = useRef<HTMLParagraphElement | null>(null);
+  const listLine = useRef<HTMLParagraphElement | null>(null);
+  const moved = useRef(false);
+  useEffect(() => {
+    if (!moved.current) return;
+    moved.current = false;
+    const line = chosenLine.current ?? listLine.current;
+    line?.focus({ preventScroll: true });
+    line?.scrollIntoView({ block: "start" });
+  }, [tapped]);
   if (tapped && choice.region)
     return (
       <>
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border-2 border-primary bg-primary/5 px-3.5 py-2">
           <p
-            className="flex min-w-0 items-center gap-2 break-words text-lg font-extrabold text-foreground"
+            ref={chosenLine}
+            tabIndex={-1}
+            className="flex min-w-0 scroll-mt-24 items-center gap-2 break-words text-lg font-extrabold text-foreground outline-none"
             data-testid="store-place-chosen"
           >
             <Check aria-hidden className="size-5 shrink-0 text-primary" />
+            <span className="sr-only">{t("aiaic.store.where.chosen")} </span>
             {districtName}
           </p>
           <button
             type="button"
-            onClick={() => setTapped(false)}
+            onClick={() => {
+              moved.current = true;
+              setTapped(false);
+            }}
             className="inline-flex min-h-11 items-center rounded-xl border-2 border-border bg-background px-3 text-sm font-bold text-foreground hover:bg-muted"
             data-testid="store-place-other"
           >
@@ -298,7 +317,14 @@ export function PlaceStep({
           />
         ))}
       </div>
-      <p className="text-lg font-bold text-foreground">{t("ask.district")}</p>
+      <p
+        ref={listLine}
+        tabIndex={-1}
+        className="scroll-mt-24 text-lg font-bold text-foreground outline-none"
+        data-testid="store-district-label"
+      >
+        {t("ask.district")}
+      </p>
       <ListState
         read={districts}
         reading={t("aiaic.store.where.reading")}
@@ -319,6 +345,7 @@ export function PlaceStep({
               label={d.name}
               pressed={sameName(d.key, choice.region)}
               onClick={() => {
+                moved.current = true;
                 setTapped(true);
                 onDistrict(d.key);
               }}
