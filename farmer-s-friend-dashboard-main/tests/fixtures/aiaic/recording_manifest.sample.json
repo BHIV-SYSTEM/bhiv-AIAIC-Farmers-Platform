@@ -6,7 +6,7 @@
  "prices": "the committed price slice (Agmarknet, newest day 2026-09-25), judged as of price_clock",
  "trace": "taken out of every answer: the id of the request that asked",
  "tree": {
-  "commit": "3ce808247cda74a1c2f420587195c1b591e1cf55",
+  "commit": "48ea29997876749642bd668835f04a7505332417",
   "engine_changed_since": false
  },
  "files": {
