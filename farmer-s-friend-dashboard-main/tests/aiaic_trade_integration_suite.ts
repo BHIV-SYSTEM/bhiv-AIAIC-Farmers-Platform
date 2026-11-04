@@ -26,6 +26,7 @@ import {
 } from "@tanstack/react-router";
 import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
+import ts from "typescript";
 
 import { NotRefreshedLine, ProblemCard } from "../src/components/farm/aiaic/AiaicBits";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
@@ -3731,6 +3732,54 @@ test("A53 AN-3 her money's send in her own language and on her card: in Marathi 
   const html = inApp(moneyCardOf(more, unfixed));
   assert.ok(html.includes('data-testid="aiaic-from-aiaic"'), "her money's card shows");
   assert.ok(html.includes('data-testid="aiaic-destination-form"'), "with the form for it");
+});
+
+test("A54 AN-4 no screen of her sale names Razorpay by its own words: no string or JSX text of the AIAIC components says it, any case, but AIAIC's codes listed here", () => {
+  // AIAIC's code strings a component may hold that are never shown as words, each with why. None is held today: Route's
+  // words name Razorpay only from the dictionaries (ROUTE_ONLY, A47), never from a component.
+  const ALLOWED: Record<string, string> = {};
+  for (const [code, why] of Object.entries(ALLOWED))
+    assert.ok(/^[a-z_]+$/.test(code) && why.trim().length > 20, `${code}: a code, with its reason`);
+  const files: string[] = [];
+  const walk = (dir: string): void => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true }))
+      if (e.isDirectory()) walk(path.join(dir, e.name));
+      else if (e.name.endsWith(".tsx")) files.push(path.join(dir, e.name));
+  };
+  walk(path.join(APP, "src", "components", "farm", "aiaic"));
+  assert.ok(files.length >= 30, `only ${files.length} components`);
+  let read = 0;
+  const named: string[] = [];
+  for (const file of files) {
+    // the compiler's own reading: comments are no part of it; every string, template part and JSX text is
+    const source = ts.createSourceFile(
+      file,
+      fs.readFileSync(file, "utf-8"),
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX,
+    );
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isStringLiteralLike(node) ||
+        ts.isTemplateHead(node) ||
+        ts.isTemplateMiddle(node) ||
+        ts.isTemplateTail(node) ||
+        ts.isJsxText(node)
+      ) {
+        read += 1;
+        const text = node.text;
+        if (/razorpay/i.test(text) && !Object.hasOwn(ALLOWED, text)) {
+          const line = source.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+          named.push(`${path.relative(APP, file)}:${line} ${JSON.stringify(text.trim())}`);
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+  }
+  assert.ok(read > 3000, `only ${read} strings read`);
+  assert.deepEqual(named, [], "a component names Razorpay in its own words");
 });
 
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
