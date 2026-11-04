@@ -5330,7 +5330,7 @@ test("A63 RC2-3 words in her bank boxes reach the distress scan first though not
   }
 });
 
-test("A64 RC3-1 nothing on either payout form keeps her press from the distress scan: Save opens by the shared rule alone over her words as she typed them, busy is her press's own, and the browser's own validation never refuses her press", () => {
+test("A64 RC3-1 nothing on either payout form keeps her press from the distress scan: Save opens by the shared rule alone over her words as she typed them, her press goes straight to the shared press, busy is her press's own, and the browser's own validation never refuses her press", () => {
   // each form as the TypeScript compiler reads it (`compiledForm`). AN-1's harm (a crisis typed in her own script never
   // reaches the scan, and no helplines show) came back with every suite green through one expression: in Save's disabled
   // (the re-check's X08, X09), a validity message set as she types (X23) or a pattern on a box (X24), the browser then
@@ -5343,12 +5343,18 @@ test("A64 RC3-1 nothing on either payout form keeps her press from the distress 
       save: ["!ready", "busy", "scan.scanning"],
       rule: "destinationSaveOpen",
       ready: "destinationSaveOpen(typed)",
+      // her press: the shared press over her form, with the scan asked in her language
+      press: "pressDestination",
+      pressArgs: ["typed"],
+      lang: "activeLang",
       // what the rule and her press read: each box's state, as its own property of `typed`
       into: "typed",
-      typed: { upi: "upi", name: "name", account: "account", ifsc: "ifsc" } as Record<
-        string,
-        string
-      >,
+      typed: {
+        upi: "upi",
+        name: "name",
+        account: "account",
+        ifsc: "ifsc",
+      } as Record<string, string>,
       // no box cuts what she types
       cut: {} as Record<string, string>,
     },
@@ -5358,6 +5364,9 @@ test("A64 RC3-1 nothing on either payout form keeps her press from the distress 
       save: ["busy", "scan.scanning", "!payoutSaveOpen(details,consent)"],
       rule: "payoutSaveOpen",
       ready: null,
+      press: "pressPayout",
+      pressArgs: ["details", "consent"],
+      lang: "scanLang",
       into: "details",
       typed: {
         name: "name_on_pan",
@@ -5458,7 +5467,68 @@ test("A64 RC3-1 nothing on either payout form keeps her press from the distress 
         importedFrom(scan.expression) === "@/lib/aiaic-scan",
       `${form.file}: scan is the shared hook (its state: A58)`,
     );
-    // 2. busy is her press's own: a state of the form's, set only inside her press
+    // 2. her press goes straight to the shared press over her form as typed: send clears the form's problem and the
+    // scan's state, then awaits pressDestination or pressPayout of @/lib/aiaic-trade (A52, A58, A60 and A63 run them),
+    // handed the shared scan's refuse and readFirst and the form's give; nothing in it can end her press unread
+    const sent = declOf("send")?.initializer;
+    assert.ok(sent && ts.isArrowFunction(sent) && ts.isBlock(sent.body), `${form.file}: send`);
+    const steps = sent.body.statements;
+    assert.deepEqual(
+      steps.map((s, i) => (i < 2 ? flat(s) : ts.SyntaxKind[s.kind])),
+      ["setProblem(null);", "scan.reset();", "ExpressionStatement"],
+      `${form.file}: her press clears the form's problem and the scan's state, then the shared press, and nothing else`,
+    );
+    const last = steps[2];
+    const awaited =
+      last && ts.isExpressionStatement(last) && ts.isAwaitExpression(last.expression)
+        ? last.expression.expression
+        : undefined;
+    assert.ok(
+      awaited && ts.isCallExpression(awaited) && ts.isIdentifier(awaited.expression),
+      `${form.file}: her press awaits the shared press`,
+    );
+    assert.equal(awaited.expression.text, form.press, `${form.file}: the shared press`);
+    assert.equal(
+      importedFrom(awaited.expression),
+      "@/lib/aiaic-trade",
+      `${form.file}: ${form.press} is the shared press`,
+    );
+    const wired = awaited.arguments[awaited.arguments.length - 1];
+    assert.deepEqual(
+      awaited.arguments.slice(0, -1).map(flat),
+      form.pressArgs,
+      `${form.file}: the shared press over her form as typed`,
+    );
+    assert.ok(
+      wired && ts.isObjectLiteralExpression(wired),
+      `${form.file}: what the press is handed`,
+    );
+    const handed = new Map(
+      wired.properties.map((p) => [
+        ts.isSpreadAssignment(p) ? "..." : p.name.getText(source),
+        ts.isPropertyAssignment(p) ? flat(p.initializer) : ts.SyntaxKind[p.kind],
+      ]),
+    );
+    assert.deepEqual(
+      [...handed.keys()].sort(),
+      ["give", "readFirst", "refuse"],
+      `${form.file}: the press is handed refuse, readFirst and give, nothing else`,
+    );
+    assert.ok(
+      handed.get("refuse")?.startsWith(`(words,refusal)=>scan.refuse(words,${form.lang},refusal,`),
+      `${form.file}: refuse is the shared scan's, her words read before the refusal is said`,
+    );
+    assert.equal(
+      handed.get("readFirst"),
+      `(words)=>scan.readFirst(words,${form.lang},give)`,
+      `${form.file}: readFirst is the shared scan's, then give`,
+    );
+    assert.equal(
+      handed.get("give"),
+      "ShorthandPropertyAssignment",
+      `${form.file}: give is the form's own`,
+    );
+    // 3. busy is her press's own: a state of the form's, set only inside her press
     const busy = own.get("busy")?.decl;
     assert.ok(
       busy &&
@@ -5476,7 +5546,7 @@ test("A64 RC3-1 nothing on either payout form keeps her press from the distress 
       [],
       `${form.file}: busy set only inside her press`,
     );
-    // 3. her words reach the rule and her press as she typed them: outside her press and her own box, each box's state is
+    // 4. her words reach the rule and her press as she typed them: outside her press and her own box, each box's state is
     // read only as itself, once, the value of its own property of `typed` (Cashfree) or `details` (Route)
     const into = declOf(form.into)?.initializer;
     assert.ok(into, `${form.file}: ${form.into}`);
@@ -5514,7 +5584,7 @@ test("A64 RC3-1 nothing on either payout form keeps her press from the distress 
       [],
       `${form.file}: what she typed is read outside her press and her box only as itself, into ${form.into}`,
     );
-    // 4. the browser's own validation never refuses her press: no box carries a rule of the browser's, or a type but text
+    // 5. the browser's own validation never refuses her press: no box carries a rule of the browser's, or a type but text
     // or a tick, and none cuts what she types but as today; nothing is spread onto an element or handed a ref; no element
     // handles an event but a button's click, the form's submit and a box's change (each only keeps what she types: A62);
     // and nothing in the form's file sets or asks a validity of the browser's
