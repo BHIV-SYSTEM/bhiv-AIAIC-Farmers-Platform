@@ -419,7 +419,12 @@ export function FromAiaicCard({
       </dl>
       <ol className="mt-3 space-y-1.5">
         {steps.map((s) => (
-          <li key={s.key} className="flex items-center gap-2 text-sm font-bold text-foreground">
+          <li
+            key={s.key}
+            className="flex items-center gap-2 text-sm font-bold text-foreground"
+            data-step={s.key}
+            data-state={s.done ? "done" : "todo"}
+          >
             {s.done ? (
               <CheckCircle2 className="size-5 text-primary" aria-hidden />
             ) : (

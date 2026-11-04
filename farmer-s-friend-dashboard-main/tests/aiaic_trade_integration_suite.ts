@@ -29,7 +29,7 @@ import { renderToString } from "react-dom/server";
 
 import { NotRefreshedLine, ProblemCard } from "../src/components/farm/aiaic/AiaicBits";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
-import { DestinationForm } from "../src/components/farm/aiaic/FromAiaicCard";
+import { DestinationForm, FromAiaicCard } from "../src/components/farm/aiaic/FromAiaicCard";
 import { GroupOfferSteps, GroupSaleSteps } from "../src/components/farm/aiaic/GroupPages";
 import {
   GroupStepsLine,
@@ -3627,6 +3627,110 @@ test("A52 AN-1 her words in a payout form reach the distress scan before any ref
     payments.includes("!payoutSaveOpen(details, consent)"),
     "Route: Save opens on her words",
   );
+});
+
+/** Her money's card as the order page gives it: AIAIC's facts of her order and of her records (`AiaicOrderDetail`). */
+function moneyCardOf(mine: AiaicMine, order: AiaicOrder) {
+  const her = mine as AiaicMine & {
+    x_destination?: XDestination | null;
+    collect_then_pay?: boolean;
+    x_notice?: XNotice | null;
+  };
+  return createElement(FromAiaicCard, {
+    money: (order as { from_aiaic?: FromAiaic | null }).from_aiaic,
+    dest: her.x_destination,
+    collectThenPay: her.collect_then_pay === true,
+    notice: her.x_notice,
+  });
+}
+
+test("A53 AN-3 her money's send in her own language and on her card: in Marathi and Hindi only `processed` says it reached her bank, the card ticks it only then, and a sale AIAIC collects asks where it goes", () => {
+  // AIAIC's real answer (record_trip_and_payout_answers.py, Cashfree stood in for): her send on its way. Each other
+  // state is said through the same dictionaries (the states are AIAIC's: A48)
+  const sending = (mineOf("collect_mine_processing").orders[0] as { from_aiaic?: FromAiaic | null })
+    .from_aiaic?.sending;
+  assert.ok(sending, "the recording holds AIAIC's send");
+  const rs = rupees(sending.amount_inr);
+  const STATES = [
+    "requesting",
+    "queued",
+    "pending",
+    "processing",
+    "processed",
+    "failed",
+    "rejected",
+    "reversed",
+    "cancelled",
+    "recorded",
+    "no_answer",
+  ];
+  // the words each language says them with, pinned as its dictionary writes them
+  const REACHED = {
+    en: "reached your bank",
+    mr: "तुमच्या बँकेत पोहोचले",
+    hi: "आपके बैंक में पहुँचे",
+  };
+  const NOT_YET = {
+    en: "it has not reached you yet",
+    mr: "ते अजून तुमच्यापर्यंत पोहोचलेले नाहीत",
+    hi: "ये अभी आप तक नहीं पहुँचे हैं",
+  };
+  for (const lang of LANGS) {
+    const line = (status: string) => wordsIn(lang)(`aiaic.money.status.${status}`, { rs });
+    const processed = line("processed");
+    assert.ok(processed.includes(REACHED[lang]), `${lang} processed: "${processed}"`);
+    for (const status of STATES.filter((s) => s !== "processed")) {
+      assert.notEqual(line(status), processed, `${lang} ${status} is said as processed`);
+      assert.ok(!line(status).includes(REACHED[lang]), `${lang} ${status}: "${line(status)}"`);
+    }
+    for (const status of ["queued", "pending"])
+      assert.ok(line(status).includes(NOT_YET[lang]), `${lang} ${status}: "${line(status)}"`);
+  }
+  // her sale's card (rendered as the order page gives it): "It reaches your bank" ticked only on processed
+  const cardRupees = (n: number | null | undefined) =>
+    `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  for (const [name, reached] of [
+    ["collect_mine_processing", false],
+    ["collect_mine_processed", true],
+  ] as const) {
+    const mine = mineOf(name);
+    const order = mine.orders[0] as AiaicOrder;
+    const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic;
+    assert.equal(
+      fa?.sending?.status,
+      reached ? "processed" : "processing",
+      `${name}: AIAIC's state`,
+    );
+    for (const lang of LANGS) {
+      const html = inApp(moneyCardOf(mine, order), lang);
+      const state = (step: string) =>
+        html.match(new RegExp(`data-step="${step}" data-state="(\\w+)"`))?.[1];
+      assert.equal(state("buyer_paid"), "done", `${name} ${lang}: the buyer paid`);
+      assert.equal(state("sending"), "done", `${name} ${lang}: AIAIC sends it`);
+      assert.equal(state("reached"), reached ? "done" : "todo", `${name} ${lang}: reached`);
+      const said = wordsIn(lang)(`aiaic.money.status.${fa?.sending?.status}`, {
+        rs: cardRupees(fa?.sending?.amount_inr),
+      });
+      assert.ok(html.includes(escHtml(said)), `${name} ${lang}: the send's own line "${said}"`);
+    }
+  }
+  // a sale AIAIC collects, then pays her, with no link that fixed her money yet and no destination of hers: AIAIC's
+  // real answer (record_buyer_portal_answers.py); her card shows and asks where her money goes
+  const more = mineOf("buyer_farmer_mine_more_time") as AiaicMine & {
+    collect_then_pay?: boolean;
+    x_destination?: XDestination | null;
+  };
+  assert.equal(more.collect_then_pay, true, "AIAIC collects, then pays her (as it answered)");
+  assert.equal(more.x_destination ?? null, null, "no destination of hers yet");
+  const unfixed = more.orders.find((o) => {
+    const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
+    return fa && !fa.fixed_by_link && o.order_state !== "cancelled";
+  });
+  assert.ok(unfixed, "the recording holds a sale no link fixed yet");
+  assert.equal(needsDestination(unfixed, more), true, "her one thing to do: say where it goes");
+  const html = inApp(moneyCardOf(more, unfixed));
+  assert.ok(html.includes('data-testid="aiaic-from-aiaic"'), "her money's card shows");
+  assert.ok(html.includes('data-testid="aiaic-destination-form"'), "with the form for it");
 });
 
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
