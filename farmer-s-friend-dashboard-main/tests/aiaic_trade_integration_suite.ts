@@ -24,7 +24,6 @@ import {
   createRootRoute,
   createRouter,
 } from "@tanstack/react-router";
-import { runWithStartContext } from "@tanstack/start-storage-context";
 import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 import ts from "typescript";
@@ -142,11 +141,9 @@ import {
   newsShown,
   tradeFactsOf,
   tradeNoticeLine,
-  type AccountOutcome,
   type Notice,
   type TradeNoticeKind,
 } from "../src/lib/aiaic-account";
-import { scanFirst } from "../src/lib/aiaic-account.functions";
 import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
 import { giveMyDestination } from "../src/lib/aiaic-trade.functions";
@@ -155,6 +152,15 @@ import * as identity from "../src/lib/aiaic-identity.server";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
 import { commissionSentence } from "../src/lib/business";
 import { pricingOf } from "../src/lib/aiaic-trade";
+
+import {
+  CRISIS_EN,
+  CRISIS_HI,
+  CRISIS_MR,
+  TEST_BANK,
+  askScanFirst,
+  inProcess,
+} from "./aiaic_shared_scan";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.join(here, "fixtures", "aiaic");
@@ -3433,52 +3439,8 @@ test("A51 the policies name Cashfree as AIAIC's payment processor and its refund
 
 // ------------- A and B, the audit of 4 Nov 2026 on the Cashfree switch (AN-1 to AN-7): each fix checked by what she reads
 
-/** AIAIC's own crisis phrases, COPIED from crisis tests that exist (a crisis test set needs people: none is written here).
- * Hindi and English: CRISIS_HI and CRISIS_EN of AIAIC's engine/tests/test_every_route_reads_its_own_boxes_behind_the_middleware.py;
- * Marathi: AIAIC's engine/tests/test_farmer_distress_path.py, also this app's tests/aiaic_storage_suite.ts (S46). */
-const CRISIS_HI = "मुझे मरना है";
-const CRISIS_EN = "I want to die";
-const CRISIS_MR = "मी आत्महत्या करणार";
-/** Cashfree's public test account and IFSC (its data-to-test page, as B20): a stand-in, never a person's. */
-const TEST_BANK = { account: "026291800001191", ifsc: "YESB0000262" };
 /** The helplines of AIAIC's real crisis answer (safety_check_crisis.json), as her crisis card says them. */
 const HELPLINES = ["14416", "1800-891-4416", "1800-180-1551"];
-
-/**
- * ONE OF THIS APP'S SERVER FUNCTIONS, RUN IN THIS PROCESS AS A PAGE CALLS IT (the re-check of 4 Nov 2026, RC2-1): Start's
- * RPC round trip, which only the Vite plugin builds, is stood in for by one function middleware (`runWithStartContext`
- * hands it to the function as Start's own options do) that runs the function's OWN validator on what the page sends,
- * then its OWN handler (a server function run without the plugin keeps its handler as `extractedFn`). Nothing of the
- * function is copied or replaced. `"validator"`: only what its validator lets through, and its handler is never run.
- */
-async function inProcess(fn: unknown, data: unknown, run: "validator" | "handler" = "handler") {
-  const rpc = {
-    options: {
-      client: async (ctx: Record<string, unknown>) => {
-        const validator = ctx["inputValidator"];
-        const handler = ctx["extractedFn"];
-        assert.ok(
-          typeof validator === "function" && typeof handler === "function",
-          "the server function's own validator and handler",
-        );
-        const valid = (validator as (d: unknown) => unknown)(ctx["data"]);
-        const result =
-          run === "validator"
-            ? valid
-            : await (handler as (p: unknown) => Promise<unknown>)({ data: valid, context: {} });
-        return { ...ctx, result };
-      },
-    },
-  };
-  return runWithStartContext({ startOptions: { functionMiddleware: [rpc] } } as never, () =>
-    (fn as (opts: { data: unknown }) => Promise<unknown>)({ data }),
-  );
-}
-
-/** The scan as every page asks it (`useServerFn(scanFirst)` in the shared hook, and the address check): the REAL
- * `scanFirst` server function of aiaic-account.functions.ts, its validator and its handler, in this process. */
-const askScanFirst: AskTheScan = async ({ data }) =>
-  (await inProcess(scanFirst, data)) as AccountOutcome;
 
 test("A52 AN-1 her words in a payout form reach the distress scan before any refusal of this phone: Save opens on any words, a crisis gets the helplines, her own script gets the letters refusal only after the scan", async () => {
   // AIAIC's real crisis answer (POST /safety/check, recorded by AIAIC's recorder): its middleware answers every route in
