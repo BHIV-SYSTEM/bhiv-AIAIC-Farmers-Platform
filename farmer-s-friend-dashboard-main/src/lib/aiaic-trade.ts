@@ -2168,14 +2168,21 @@ export function askDiffPct(price: number, ask: number | null | undefined): numbe
  * Whether her one thing to do on a group sale's order is to give AIAIC her UPI ID or bank account: her sale stands
  * (AIAIC attaches her money's facts whatever the order's state, `farmer_payout.her_money`, so a sale called off is
  * never asked; the audit of 30 Oct 2026, AUD-2), AIAIC sends her money (it collects, then pays her; or the link's fee
- * is fixed), it holds no destination of hers, and her money has not reached her.
+ * is fixed), it holds no destination of hers, or only one given to an earlier provider (`destinationGivenBefore`:
+ * AIAIC's send through Cashfree refuses it, `destination_other_provider`; the audit of 4 Nov 2026, AN-6), and her money
+ * has not reached her.
  */
 export function needsDestination(order: AiaicOrder, mine: AiaicMine): boolean {
   if (order.order_state === "cancelled") return false;
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
   const dest = (mine as { x_destination?: XDestination | null }).x_destination ?? null;
   const collectThenPay = (mine as { collect_then_pay?: boolean }).collect_then_pay === true;
-  return Boolean(fa && (collectThenPay || fa.fixed_by_link) && !dest && fa.steps?.reached !== true);
+  return Boolean(
+    fa &&
+    (collectThenPay || fa.fixed_by_link) &&
+    (!dest || destinationGivenBefore(dest)) &&
+    fa.steps?.reached !== true,
+  );
 }
 
 /**

@@ -3828,6 +3828,51 @@ test("A55 AN-5 an AIAIC not yet on its Cashfree release: each RazorpayX refusal 
   );
 });
 
+test("A56 AN-6 a group sale asks her to give her details again when they went to an earlier provider, whose details AIAIC's send through Cashfree refuses", () => {
+  // AIAIC's real answer: her group order, AIAIC collects then pays her, no destination of hers yet
+  const mine = mineOf("connected_farmer_mine_journey");
+  const order = mine.orders.find((o) => o.pool);
+  assert.ok(order?.pool, "her group order");
+  const offer = findOffer(mine, order.offer_id)?.offer ?? null;
+  // her destination as AIAIC's Cashfree branch answers it (collect_mine_processing): given to Cashfree; and DERIVED in
+  // memory, only its `provider` changed, as AIAIC says one given to the earlier provider
+  const cashfree = (mineOf("collect_mine_processing") as { x_destination?: XDestination | null })
+    .x_destination;
+  assert.ok(cashfree?.ready && cashfree.provider === "cashfree", "AIAIC's Cashfree destination");
+  const earlier: XDestination = { ...cashfree, provider: "razorpay" };
+  const withDest = (dest: XDestination | null) => ({ ...mine, x_destination: dest }) as AiaicMine;
+  const page = (dest: XDestination | null) =>
+    inApp(
+      createElement(GroupSaleSteps, {
+        order,
+        data: { mine: withDest(dest), cropNames: {}, districtNames: {} },
+        group: groupView(order.pool as AiaicPool, offer, order),
+        crop: "Onion",
+        buyer: "A buyer",
+        prices: {
+          pricePerQ: order.price_per_q,
+          amount: order.amount_inr,
+          ask: null,
+          mandi: null,
+          reading: false,
+        },
+      }),
+    );
+  const asked = 'data-testid="aiaic-gs-give-destination"';
+  assert.equal(needsDestination(order, withDest(null)), true, "no destination: asked");
+  assert.ok(page(null).includes(asked), "no destination: the page asks");
+  assert.equal(destinationGivenBefore(earlier), true);
+  assert.equal(needsDestination(order, withDest(earlier)), true, "an earlier provider's: asked");
+  assert.ok(page(earlier).includes(asked), "an earlier provider's: the page asks again");
+  assert.equal(needsDestination(order, withDest(cashfree)), false, "Cashfree's own: not asked");
+  assert.ok(!page(cashfree).includes(asked), "Cashfree's own: the page does not ask");
+  assert.equal(
+    needsDestination({ ...order, order_state: "cancelled" }, withDest(earlier)),
+    false,
+    "never on a sale called off",
+  );
+});
+
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
   const s = await standIn();
   try {
