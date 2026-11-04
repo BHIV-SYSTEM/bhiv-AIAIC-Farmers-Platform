@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 import { CrisisCard, CrisisFirst } from "./CrisisFirst";
 
-/** ONE small chip for what kind of records these are: practice (AIAIC's practice account), TEST (Razorpay test
- * keys) or the app's own demo store. Never a paragraph. */
+/** ONE small chip for what kind of records these are: practice (AIAIC's practice account), TEST (the payments
+ * provider's test keys) or the app's own demo store. Never a paragraph. */
 export function ModeChip({ kind }: { kind: "practice" | "test" | "local" }) {
   const { t } = useI18n();
   const Icon = kind === "local" ? Database : FlaskConical;

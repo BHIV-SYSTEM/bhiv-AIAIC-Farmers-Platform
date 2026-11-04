@@ -24,6 +24,7 @@ import {
   payoutDetailsProblem,
   quintalWords,
   quintals,
+  routeCardShown,
   rupees,
   type AiaicCommission,
   type AiaicProblem,
@@ -63,7 +64,14 @@ export function AiaicPayments() {
           <>
             <Totals data={data} />
             <EachSale data={data} />
-            <PayoutAccountCard block={data.mine.payout_account} notice={data.mine.payout_notice} />
+            {/* Razorpay Route's card only where AIAIC wires Route (4 Nov 2026: Cashfree is its provider; her money then
+                comes through AIAIC's own send, given and said on her sale's page) */}
+            {routeCardShown(data.mine.payout_account) ? (
+              <PayoutAccountCard
+                block={data.mine.payout_account}
+                notice={data.mine.payout_notice}
+              />
+            ) : null}
           </>
         )}
       </WithMine>
@@ -179,9 +187,9 @@ const TEST_VALUES = {
 };
 
 /**
- * Where her money goes (her Razorpay Route account, through AIAIC): its state in AIAIC's words, and, when AIAIC
- * offers it here, the form to give it. The details pass through this app's server to AIAIC and on to Razorpay; this
- * app keeps none of them, and the form forgets them once sent.
+ * Where her money goes through Razorpay Route (her Route account, through AIAIC), shown only where AIAIC wires Route
+ * (`routeCardShown`): its state in AIAIC's words, and, when AIAIC offers it here, the form to give it. The details pass
+ * through this app's server to AIAIC and on to Razorpay; this app keeps none of them, and the form forgets them once sent.
  */
 function PayoutAccountCard({
   block,

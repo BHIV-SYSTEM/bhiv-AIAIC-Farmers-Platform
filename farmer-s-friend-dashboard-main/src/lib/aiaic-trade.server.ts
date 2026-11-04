@@ -468,6 +468,8 @@ const PAYOUT_KEYS = [
   "say",
   "can_create",
   "can_withdraw",
+  // 4 Nov 2026: false when AIAIC does not wire Razorpay Route (Cashfree is its provider): nothing of Route is shown
+  "wired",
 ] as const;
 
 /**
@@ -518,7 +520,8 @@ function noticeOf(
   if (typeof r["version"] !== "string") return null;
   return { version: r["version"], en: lines(r["en"]), mr: lines(r["mr"]), hi: lines(r["hi"]) };
 }
-const X_DEST_KEYS = ["kind", "hint", "status", "ready"] as const;
+// 4 Nov 2026: `provider`, the name of the payments provider her details went to ("cashfree"), so her words name it
+const X_DEST_KEYS = ["kind", "hint", "status", "ready", "provider"] as const;
 
 export function mineForBrowser(raw: unknown): AiaicMine {
   const r = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
@@ -886,8 +889,9 @@ export type PayoutAccountInput = {
 };
 
 /**
- * Her payout details go to AIAIC, which sends them to Razorpay and keeps none of them: this server passes them on in
- * the request's memory only, never logs them, never keeps them, and says back only AIAIC's account state.
+ * Her payout details for Razorpay Route (only where AIAIC wires Route: its `payout_account.wired`) go to AIAIC, which
+ * sends them to Razorpay and keeps none of them: this server passes them on in the request's memory only, never logs
+ * them, never keeps them, and says back only AIAIC's account state.
  */
 export async function givePayoutAccount(
   key: string,
@@ -1240,14 +1244,24 @@ export async function giveDestination(
 }
 
 /** POST /farmer/trade/payout-destination/end: she removes her UPI ID or bank account by her own press (audit of 28 Oct
- * 2026, PRIVACY-04); AIAIC asks RazorpayX to switch them off. `closure`: `done` once RazorpayX said so, else
- * `to_be_asked` (a person finishes it). */
+ * 2026, PRIVACY-04); AIAIC asks the payments provider that holds them (since 4 Nov 2026 Cashfree) to delete them.
+ * `closure`: `done` once the provider said so, else `to_be_asked` (a person finishes it). `provider`: the provider's
+ * name as AIAIC gives it on the ended destination (a name, never an id), or null. */
 export async function endDestination(
   key: string,
-): Promise<AiaicResult<{ closure: string | null }>> {
+): Promise<AiaicResult<{ closure: string | null; provider: string | null }>> {
   if (!herSession()) return { ok: false, problem: problem("sign_in_to_sell") };
   const r = await write<Record<string, unknown>>("/farmer/trade/payout-destination/end", key, {});
   if (!r.ok) return r;
   const closure = r.data["closure"];
-  return { ok: true, data: { closure: typeof closure === "string" ? closure : null } };
+  const dest = r.data["destination"];
+  const provider =
+    dest && typeof dest === "object" ? (dest as Record<string, unknown>)["provider"] : null;
+  return {
+    ok: true,
+    data: {
+      closure: typeof closure === "string" ? closure : null,
+      provider: typeof provider === "string" ? provider : null,
+    },
+  };
 }

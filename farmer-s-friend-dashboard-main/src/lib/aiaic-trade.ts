@@ -325,7 +325,19 @@ export type PayoutAccountBlock = {
   say: AiaicSay;
   can_create: boolean;
   can_withdraw: boolean;
+  /** False when AIAIC does not wire Razorpay Route at all (4 Nov 2026: Cashfree is its provider): nothing of Route is
+   * offered, said or shown. Absent from an AIAIC not yet updated. */
+  wired?: boolean | undefined;
 };
+
+/**
+ * Whether the Payments page shows the card of her Razorpay Route account (`payout_account`): not when AIAIC says Route is
+ * not wired (`wired: false`), as AIAIC shows nothing of Route then (its design, C1) and sends her money through its own
+ * send instead (her sale's "Your money" card); an AIAIC that does not say keeps the card as before.
+ */
+export function routeCardShown(block: PayoutAccountBlock | null | undefined): boolean {
+  return block?.wired !== false;
+}
 
 export type PayoutNotice = { version: string; en: string[]; mr: string[]; hi: string[] };
 
@@ -538,9 +550,10 @@ export function handedOver(order: AiaicOrder): boolean {
 
 /**
  * The five steps of one sale, the transaction in order: agreed -> paid by the buyer -> handed over -> delivered ->
- * her money. Each is read from AIAIC's own states, never assumed: "paid" only on Razorpay's verified word
- * (`payment_state`), her money only on Razorpay's word about her share (`settlement_state`), and "sent" is never
- * "received" (only `settled` is done).
+ * her money. Each is read from AIAIC's own states, never assumed: "paid" only on the payment provider's verified word
+ * (`payment_state`), and "sent" is never "received". Her money: where AIAIC collects and then sends it to her
+ * (`from_aiaic`, since 4 Nov 2026 through Cashfree Payouts), AIAIC's own steps (done only once it reached her bank, on the
+ * provider's word); else Razorpay Route's word about her share (`settlement_state`: only `settled` is done).
  */
 export function saleSteps(order: AiaicOrder): SaleStep[] {
   const cancelled = order.order_state === "cancelled";
@@ -566,8 +579,18 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
         ? "now"
         : "todo";
   const settlement = order.money?.settlement_state ?? order.settlement_state ?? "not_connected";
-  const money: StepState =
-    settlement === "settled"
+  // AIAIC collects, then sends her money (its own steps; an AIAIC that does not say them: only that the buyer paid)
+  const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
+  const own = fa ? (fa.steps ?? { buyer_paid: fa.buyer_paid, sent: false, reached: false }) : null;
+  const money: StepState = own
+    ? own.reached
+      ? "done"
+      : cancelled
+        ? "stopped"
+        : own.sent || own.buyer_paid
+          ? "now"
+          : "todo"
+    : settlement === "settled"
       ? "done"
       : settlement === "failed" || settlement === "reversed" || settlement === "partially_reversed"
         ? "stopped"
@@ -605,7 +628,7 @@ export function paymentLine(order: AiaicOrder): { key: string; state: string; no
 
 /**
  * A SENTENCE IS NEVER SHOWN WITH A HOLE IN IT (as AIAIC's own web and phone say it, their `WITHOUT`): a fact AIAIC did
- * not send (an amount she did not say, the last characters of a bank account Razorpay gave none of) is said by the
+ * not send (an amount she did not say, the last characters of a bank account Razorpay Route gave none of) is said by the
  * same sentence without it. Each key lists the facts ITS sentence here prints (this app's buyer sentence names no
  * reference, so only his amount).
  */
@@ -966,9 +989,13 @@ export function listingOfOrder(mine: AiaicMine, order: AiaicOrder): AiaicListing
   return mine.listings.find((l) => l.listing_id === order.listing_id) ?? null;
 }
 
-/** Money summed over her orders, for the payments page's bars: what was agreed, what buyers paid (Razorpay's
- * verified word), what was sent to her and what settled (Razorpay's word about her share). Called-off orders are
- * left out of "agreed". */
+/** Money summed over her orders, for the payments page's bars: what was agreed, what buyers paid (the payment
+ * provider's verified word, `payment_state`), what was sent to her and what reached her bank. Her money moves one of two
+ * ways, each counted by AIAIC's own facts: through Razorpay Route (`money.settlement_state`: sent when transferred or
+ * released, in her bank when settled, Razorpay's word about her share), or AIAIC collects and then sends it to her
+ * (`from_aiaic.steps`, since 4 Nov 2026 through Cashfree Payouts: sent for a send on its way or a transfer AIAIC's team
+ * recorded by hand, in her bank only on the provider's word that it reached it). Called-off orders are left out of
+ * "agreed". */
 export function moneyTotals(orders: AiaicOrder[]): {
   agreed: number;
   paidByBuyers: number;
@@ -987,6 +1014,11 @@ export function moneyTotals(orders: AiaicOrder[]): {
     const share = o.money?.share_inr ?? 0;
     if (s === "transferred" || s === "released" || s === "settled") sentToHer += share;
     if (s === "settled") settled += share;
+    // AIAIC collects, then sends her money (its own steps): the send's own amount, else the link's figure for her
+    const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
+    const toHer = fa?.sending?.amount_inr ?? fa?.to_her_inr ?? 0;
+    if (fa?.steps?.sent === true) sentToHer += toHer;
+    if (fa?.steps?.reached === true) settled += toHer;
   }
   const r = (n: number) => Math.round(n * 100) / 100;
   return {
@@ -1603,7 +1635,44 @@ export type XDestination = {
   hint: string;
   status: string;
   ready: boolean;
+  /** The payments provider her details were given to, as AIAIC names it (4 Nov 2026: "cashfree"; an older one
+   * "razorpay"); absent from an AIAIC not yet updated. A name, never an id. */
+  provider?: string | null | undefined;
 };
+
+/**
+ * THE PAYMENTS PROVIDER'S NAME, ONLY AS AIAIC NAMES IT (4 Nov 2026: Cashfree is AIAIC's provider; Razorpay is kept but not
+ * wired, and RazorpayX, its payouts product, is gone). AIAIC's own code to the name her words print; null for a code this
+ * app does not name (an older provider's details, an AIAIC that names none): her sentence then names no provider
+ * (`providerKey`), so a Cashfree payment is never said as Razorpay's and nothing is guessed.
+ */
+export function providerName(code: string | null | undefined): string | null {
+  return code === "cashfree" ? "Cashfree" : null;
+}
+
+/** The key a sentence that names her money's provider is said with: `key` filled with the name AIAIC gave
+ * (`providerName`), else the same sentence without it (`<key>_any`). */
+export function providerKey(
+  key: string,
+  code: string | null | undefined,
+): { key: string; values: Record<string, string> } {
+  const name = providerName(code);
+  return name ? { key, values: { provider: name } } : { key: `${key}_any`, values: {} };
+}
+
+/** Her details were given to a provider AIAIC no longer sends through (AIAIC's own rule, `destination_other_provider`:
+ * its send through Cashfree refuses them), so she is asked to give them again. An AIAIC that names no provider: not
+ * said. */
+export function destinationGivenBefore(dest: XDestination | null | undefined): boolean {
+  return Boolean(dest?.ready && typeof dest.provider === "string" && dest.provider !== "cashfree");
+}
+
+/** CASHFREE TAKES A NAME OF LETTERS AND SPACES ONLY (AIAIC's `cashfree.name_ok`, as its refusal
+ * `account_name_letters_only` says): English letters and single spaces, 2 to 100, a letter first and last. Checked here
+ * so she is told at once; AIAIC checks again, and only its answer counts. Never changed for her. */
+export function destinationNameOk(name: string): boolean {
+  return /^[A-Za-z][A-Za-z ]{0,98}[A-Za-z]$/.test(name.split(/\s+/).filter(Boolean).join(" "));
+}
 /** Her offer weighed against the mandi (`GET /farmer/trade/offers/{id}/compare`). */
 /** Which side leaves her more, and by how much (the server's figures: never a sum or a sign worked out here). */
 type ForHer = { more: "offer" | "mandi"; per_q: Rs; total: Rs } | null;
@@ -1735,7 +1804,7 @@ const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v)
  * HER OWN SALE IS READ FIRST (the audit of 30 Oct 2026, AUD-2): AIAIC calls one order of a group off on its own
  * (`cancel_order`), so a sale called off is said once, on the step where her sale stood, with AIAIC's reason
  * (`cancel_reason_code`); it is never "still gathering" or "your own sale stays", and it asks nothing of her.
- * 5. PAID: her money as AIAIC says it (`from_aiaic.steps`: reached; else Razorpay's word: settled), now while the buyer
+ * 5. PAID: her money as AIAIC says it (`from_aiaic.steps`: reached; else Razorpay Route's word: settled), now while the buyer
  *    paid and her money moves; the page adds AIAIC's own sentence for her money.
  */
 export function groupView(

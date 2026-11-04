@@ -7,9 +7,11 @@
  * AIAIC's commission and 18% GST on it); then each step as AIAIC says it (`steps`: a transfer the team recorded by hand
  * is "sent", never "reached"), with a TEST mark when no real money moved. The order's own link decides whether the card
  * shows, not today's setting. Her UPI ID or bank account is given here by her own press, after the notice AIAIC holds
- * (`x_notice`, in her language; its version and the language are said back with her press); it goes to Razorpay and
- * AIAIC keeps only a masked hint. She removes it here by her own press too, and AIAIC asks RazorpayX to switch it off
- * (the audit of 28 Oct 2026: MONEY-07, -11; PRIVACY-03, -04, -05, -14).
+ * (`x_notice`, in her language; its version and the language are said back with her press); it goes to AIAIC's payments
+ * provider (since 4 Nov 2026 Cashfree, as AIAIC names it: `x_destination.provider`) and AIAIC keeps only a masked hint.
+ * She removes it here by her own press too, and AIAIC asks that provider to delete it (the audit of 28 Oct 2026:
+ * MONEY-07, -11; PRIVACY-03, -04, -05, -14). A bank account's name is Cashfree's rule: letters and spaces only, said
+ * before she presses, never changed for her (AIAIC's `account_name_letters_only`).
  */
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,7 +19,12 @@ import { CheckCircle2, Circle, IndianRupee, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 import type { FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
-import { sendingSaid } from "@/lib/aiaic-trade";
+import {
+  destinationGivenBefore,
+  destinationNameOk,
+  providerKey,
+  sendingSaid,
+} from "@/lib/aiaic-trade";
 import { endMyDestination, giveMyDestination } from "@/lib/aiaic-trade.functions";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -54,14 +61,15 @@ function NoticeText({ notice }: { notice: XNotice }) {
   );
 }
 
-function RemoveDestination() {
+/** Her press to remove her details; each sentence names the provider AIAIC names for them (`providerKey`), else none. */
+function RemoveDestination({ provider }: { provider: string | null | undefined }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const fn = useServerFn(endMyDestination);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
-  const [said, setSaid] = useState<string | null>(null);
+  const [said, setSaid] = useState<ReturnType<typeof providerKey> | null>(null);
   const remove = async () => {
     setBusy(true);
     setProblem(null);
@@ -69,11 +77,17 @@ function RemoveDestination() {
     setBusy(false);
     setAsking(false);
     if (r.ok) {
-      setSaid(r.data.closure === "done" ? "aiaic.dest.removed" : "aiaic.dest.removed_pending");
+      setSaid(
+        providerKey(
+          r.data.closure === "done" ? "aiaic.dest.removed" : "aiaic.dest.removed_pending",
+          r.data.provider ?? provider,
+        ),
+      );
       await qc.invalidateQueries({ queryKey: ["aiaic-mine"] });
     } else setProblem(r.problem);
   };
-  if (said) return <p className="text-sm font-bold text-foreground">{t(said)}</p>;
+  if (said) return <p className="text-sm font-bold text-foreground">{t(said.key, said.values)}</p>;
+  const ask = providerKey("aiaic.dest.remove_ask", provider);
   return (
     <div className="space-y-2">
       {asking ? (
@@ -81,7 +95,7 @@ function RemoveDestination() {
           className="space-y-2 rounded-xl border-2 border-border p-3"
           data-testid="aiaic-dest-remove-ask"
         >
-          <p className="text-sm font-semibold text-foreground">{t("aiaic.dest.remove_ask")}</p>
+          <p className="text-sm font-semibold text-foreground">{t(ask.key, ask.values)}</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -164,16 +178,26 @@ export function DestinationForm({
           </button>
         </div>
         {largeAmount && dest.kind === "upi_id" ? tooLarge : null}
-        <RemoveDestination />
+        {destinationGivenBefore(dest) ? (
+          <p className="text-sm font-bold text-amber-900" data-testid="aiaic-dest-given-before">
+            {t("aiaic.dest.given_before")}
+          </p>
+        ) : null}
+        <RemoveDestination provider={dest.provider} />
       </div>
     );
   }
+  // the name on a bank account: Cashfree's rule, said before she presses (AIAIC checks it again)
+  const nameBroken = kind === "bank_account" && name.trim() !== "" && !destinationNameOk(name);
   const ready =
     Boolean(notice) &&
     agreed &&
     (kind === "upi_id"
       ? upi.includes("@")
-      : name.trim().length >= 4 && account.length >= 5 && ifsc.length === 11);
+      : name.trim().length >= 4 &&
+        destinationNameOk(name) &&
+        account.length >= 5 &&
+        ifsc.length === 11);
   const send = async () => {
     if (!notice) return;
     setBusy(true);
@@ -253,11 +277,21 @@ export function DestinationForm({
           <label className="block text-sm font-bold">
             {t("aiaic.dest.name")}
             <input
-              className={INPUT}
+              className={cn(INPUT, nameBroken && "border-destructive")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoComplete="off"
+              aria-invalid={nameBroken}
             />
+            <span
+              className={cn(
+                "mt-1 block text-xs font-semibold",
+                nameBroken ? "text-destructive" : "text-muted-foreground",
+              )}
+              data-testid="aiaic-dest-name-rule"
+            >
+              {t("aiaic.dest.name_rule")}
+            </span>
           </label>
           <label className="block text-sm font-bold">
             {t("aiaic.dest.account")}
