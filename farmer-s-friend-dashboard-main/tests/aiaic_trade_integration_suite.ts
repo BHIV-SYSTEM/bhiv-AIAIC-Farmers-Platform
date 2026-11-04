@@ -3048,9 +3048,12 @@ test("B19 her sale's news through this server: one per offer (the newest, more t
 
 /** The lines that are Razorpay Route's own (a share of hers carried by the buyer's link, her Route account): they name
  * Razorpay, and show only on Route's own facts (`money.say` of a Route payout, the Route card while AIAIC wires Route). */
-/** The five RazorpayX refusal codes an AIAIC not yet on its Cashfree release still answers her form with (the audit of
- * 4 Nov 2026, AN-5): kept with words that name no provider until AIAIC's Cashfree release is live, then removed. */
+/** The seven RazorpayX refusal codes an AIAIC not yet on its Cashfree release still answers her form with (the audit of
+ * 4 Nov 2026, AN-5; the re-check, RC-4): kept with words that name no provider until AIAIC's Cashfree release is live,
+ * then removed. */
 const OLD_RAZORPAYX_KEYS = [
+  "aiaic.refused.razorpayx_keys_incomplete",
+  "aiaic.refused.razorpayx_keys_other_mode",
   "aiaic.refused.razorpayx_not_configured",
   "aiaic.refused.razorpayx_live_not_approved",
   "aiaic.refused.razorpayx_refused",
@@ -3104,7 +3107,7 @@ test("A47 her money's provider is named only as AIAIC names it: Cashfree where i
     const lines = Object.entries(DICTS[lang]).filter(([k]) => k.startsWith("aiaic."));
     for (const [k, v] of lines) {
       assert.ok(!/razorpayx/i.test(v), `${lang} ${k}: names RazorpayX`);
-      // a key may name it only as one of the five codes an AIAIC not yet switched answers (AN-5)
+      // a key may name it only as one of the seven codes an AIAIC not yet switched answers (AN-5, RC-4)
       assert.ok(
         !/razorpayx/i.test(k) || OLD_RAZORPAYX_KEYS.includes(k),
         `${lang} ${k}: a RazorpayX key`,
@@ -3816,8 +3819,17 @@ test("A54 AN-4 no screen of her sale names Razorpay by its own words: no string 
 });
 
 test("A55 AN-5 an AIAIC not yet on its Cashfree release: each RazorpayX refusal it answers is said in en, mr and hi by what it means for her, with no raw code and no provider named", () => {
-  // the codes AIAIC's main branch answers her form with (its trade/razorpayx.py `refusal`, trade/farmer_payout.py)
-  assert.equal(OLD_RAZORPAYX_KEYS.length, 5);
+  // the codes AIAIC's main branch answers her form with: its trade/razorpayx.py `refusal()` (keys_incomplete,
+  // not_configured, keys_other_mode, live_not_approved), returned by trade/farmer_payout.py `_destination_refusal`, and
+  // that file's own (refused, no_answer, ip_not_allowlisted), as read at origin/main 7f5d04f (the re-check, RC-4)
+  assert.equal(OLD_RAZORPAYX_KEYS.length, 7);
+  for (const code of ["keys_incomplete", "keys_other_mode"])
+    for (const lang of LANGS)
+      assert.equal(
+        DICTS[lang][`aiaic.refused.razorpayx_${code}`],
+        DICTS[lang]["aiaic.refused.razorpayx_not_configured"],
+        `${lang} ${code}: said as AIAIC's other configuration refusals are`,
+      );
   for (const key of OLD_RAZORPAYX_KEYS) {
     const code = key.slice("aiaic.refused.".length);
     for (const lang of LANGS) {

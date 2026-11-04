@@ -123,11 +123,11 @@ holds:
 
 - What reads as before: with no `provider`, her destination's words name no provider; with no `wired`, Route's card shows
   as it did; with no `provider` or `model` in its pricing, the commission sentence is the older one.
-- What does not: its five RazorpayX refusals (`razorpayx_not_configured`, `razorpayx_live_not_approved`,
-  `razorpayx_refused`, `razorpayx_no_answer`, `razorpayx_ip_not_allowlisted`) are kept here with words that name no
-  provider, only for that time, and are removed once AIAIC's Cashfree release is live; but this app's Pricing, Privacy
-  and Refund pages already name Cashfree as AIAIC's payment processor and its refund time, which that AIAIC does not
-  use.
+- What does not: its seven RazorpayX refusals (`razorpayx_keys_incomplete`, `razorpayx_not_configured`,
+  `razorpayx_keys_other_mode`, `razorpayx_live_not_approved`, `razorpayx_refused`, `razorpayx_no_answer`,
+  `razorpayx_ip_not_allowlisted`) are kept here with words that name no provider, only for that time, and are removed
+  once AIAIC's Cashfree release is live; but this app's Pricing, Privacy and Refund pages already name Cashfree as
+  AIAIC's payment processor and its refund time, which that AIAIC does not use.
 
 The recorded answers the tests replay (`tests/fixtures/aiaic/`) are recorded again from AIAIC's branch by one command;
 `trade_recording_manifest.json` beside them names the AIAIC commit they came from and that command.

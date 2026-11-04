@@ -171,8 +171,14 @@ export const AIAIC_EN: Dict = {
     "Cashfree did not accept AIAIC's server just now (a setting AIAIC's team must change): your details were not taken. Try again later.",
   "aiaic.refused.cashfree_details_already_registered":
     "Cashfree already holds these details under another AIAIC record: nothing new was made. Ask a person from AIAIC to check it.",
-  // AN-5 (the audit of 4 Nov 2026): an AIAIC not yet on its Cashfree release still answers her form with these five
-  // RazorpayX codes; each is said by what it means for her, naming no provider. REMOVE once AIAIC's Cashfree release is live.
+  // AN-5 (the audit of 4 Nov 2026; the re-check, RC-4): an AIAIC not yet on its Cashfree release still answers her form
+  // with these seven RazorpayX codes (its razorpayx.refusal(): keys half set, not set up, keys in the other mode, live not
+  // approved; then refused, no answer, an address not allowed); each is said by what it means for her, naming no
+  // provider. REMOVE once AIAIC's Cashfree release is live.
+  "aiaic.refused.razorpayx_keys_incomplete":
+    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
+  "aiaic.refused.razorpayx_keys_other_mode":
+    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
   "aiaic.refused.razorpayx_not_configured":
     "AIAIC cannot take payment details here yet: the team will ask you when it can.",
   "aiaic.refused.razorpayx_live_not_approved":
@@ -1244,8 +1250,14 @@ export const AIAIC_MR: Dict = {
     "Cashfree ने आत्ता AIAIC चा सर्व्हर स्वीकारला नाही (AIAIC च्या टीमला बदलायची एक सेटिंग): तुमचे तपशील घेतले गेले नाहीत. नंतर पुन्हा प्रयत्न करा.",
   "aiaic.refused.cashfree_details_already_registered":
     "Cashfree कडे हे तपशील AIAIC च्या दुसऱ्या नोंदीखाली आधीच आहेत: नवे काहीही केले गेले नाही. AIAIC च्या व्यक्तीला हे तपासायला सांगा.",
-  // AN-5 (the audit of 4 Nov 2026): an AIAIC not yet on its Cashfree release still answers her form with these five
-  // RazorpayX codes; each is said by what it means for her, naming no provider. REMOVE once AIAIC's Cashfree release is live.
+  // AN-5 (the audit of 4 Nov 2026; the re-check, RC-4): an AIAIC not yet on its Cashfree release still answers her form
+  // with these seven RazorpayX codes (its razorpayx.refusal(): keys half set, not set up, keys in the other mode, live not
+  // approved; then refused, no answer, an address not allowed); each is said by what it means for her, naming no
+  // provider. REMOVE once AIAIC's Cashfree release is live.
+  "aiaic.refused.razorpayx_keys_incomplete":
+    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
+  "aiaic.refused.razorpayx_keys_other_mode":
+    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
   "aiaic.refused.razorpayx_not_configured":
     "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
   "aiaic.refused.razorpayx_live_not_approved":
@@ -2314,8 +2326,14 @@ export const AIAIC_HI: Dict = {
     "Cashfree ने अभी AIAIC का सर्वर स्वीकार नहीं किया (AIAIC की टीम को बदलनी एक सेटिंग): आपकी जानकारी नहीं ली गई। बाद में फिर कोशिश करें।",
   "aiaic.refused.cashfree_details_already_registered":
     "Cashfree के पास यह जानकारी AIAIC के किसी दूसरे रिकॉर्ड में पहले से है: कुछ नया नहीं बनाया गया। AIAIC के किसी व्यक्ति से इसकी जाँच करने को कहें।",
-  // AN-5 (the audit of 4 Nov 2026): an AIAIC not yet on its Cashfree release still answers her form with these five
-  // RazorpayX codes; each is said by what it means for her, naming no provider. REMOVE once AIAIC's Cashfree release is live.
+  // AN-5 (the audit of 4 Nov 2026; the re-check, RC-4): an AIAIC not yet on its Cashfree release still answers her form
+  // with these seven RazorpayX codes (its razorpayx.refusal(): keys half set, not set up, keys in the other mode, live not
+  // approved; then refused, no answer, an address not allowed); each is said by what it means for her, naming no
+  // provider. REMOVE once AIAIC's Cashfree release is live.
+  "aiaic.refused.razorpayx_keys_incomplete":
+    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
+  "aiaic.refused.razorpayx_keys_other_mode":
+    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
   "aiaic.refused.razorpayx_not_configured":
     "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
   "aiaic.refused.razorpayx_live_not_approved":
