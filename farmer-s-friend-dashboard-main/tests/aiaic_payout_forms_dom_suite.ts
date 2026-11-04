@@ -933,6 +933,282 @@ function suite(app: App, window: Window & typeof globalThis) {
       ),
     );
   });
+
+  // ---------------------------------------- what she gives is what its server function's own validator takes
+  /**
+   * EVERY FIELD OF BOTH FORMS AGAINST ITS SERVER FUNCTION'S OWN VALIDATOR (aiaic-trade.functions.ts: `giveMyDestination`
+   * for the Cashfree form, `givePayoutAccount` for Route's; the re-check of 4 Nov 2026, round 3's observation): each
+   * field's boundary values, typed into the real form with every other field valid and her tick on, then tapped. The
+   * phone's rule and the validator agree: what the phone gives, the validator takes (a validator's refusal reaches her
+   * as "AIAIC is not answering", a refusal AIAIC never made); what the validator would refuse, the phone refuses after
+   * the scan, in its own existing words. Each validator's own bounds are then read from it directly, on one taken press
+   * with that field at its bound and one past it.
+   */
+  type Edge = { typed: string; then: "taken" | { refused: string }; sent?: string };
+  const agree =
+    (
+      form: Case["form"],
+      kind: Kind,
+      field: Box | "pan",
+      valid: Partial<Record<Box | "pan", string>>,
+      edges: Edge[],
+      bounds: { key: string; most: number; least?: number },
+      langs: Lang[] = ["en"],
+    ) =>
+    async () => {
+      const fn = form === "cashfree" ? "giveMyDestination" : "givePayoutAccount";
+      let taken: Record<string, unknown> | null = null;
+      for (const lang of langs)
+        for (const edge of edges) {
+          const what = `${JSON.stringify(edge.typed.length > 40 ? `${edge.typed.slice(0, 20)}... (${edge.typed.length})` : edge.typed)} in ${lang}`;
+          await inStart(async () => {
+            const f = await pressFilled(form, lang, kind, { ...valid, [field]: edge.typed });
+            try {
+              const shown = f.scope().textContent ?? "";
+              assert.ok(
+                !shown.includes(words(lang, "aiaic.problem.aiaic_unavailable")),
+                `${what}: never "AIAIC is not answering" for a refusal AIAIC never made`,
+              );
+              for (const g of seen.given)
+                assert.ok(
+                  g.taken,
+                  `${what}: given, and its own validator refused it: ${g.refusal}`,
+                );
+              if (edge.then === "taken") {
+                assert.deepEqual(seen.events, ["give"], `${what}: given at once`);
+                assert.equal(seen.given[0]?.fn, fn);
+                if (edge.sent !== undefined)
+                  assert.equal(
+                    seen.given[0]?.sent[bounds.key],
+                    edge.sent,
+                    `${what}: sent as checked`,
+                  );
+                taken = seen.given[0]?.sent ?? null;
+              } else refusedAfterScan(f, edge.then.refused);
+            } finally {
+              await f.unmount();
+            }
+          });
+        }
+      // the validator's own bounds, read from it: one taken press with the field at its bound, and one past it
+      assert.ok(taken, "one press of these was taken");
+      const at = (n: number) => ({
+        ...(taken as Record<string, unknown>),
+        [bounds.key]: "x".repeat(n),
+      });
+      const own = named[fn];
+      await shared.inProcess(own, at(bounds.most), "validator");
+      await assert.rejects(
+        shared.inProcess(own, at(bounds.most + 1), "validator"),
+        `${fn}'s validator takes ${bounds.key} of ${bounds.most} at most`,
+      );
+      if (bounds.least !== undefined) {
+        await shared.inProcess(own, at(bounds.least), "validator");
+        await assert.rejects(
+          shared.inProcess(own, at(bounds.least - 1), "validator"),
+          `${fn}'s validator takes ${bounds.key} of ${bounds.least} at least`,
+        );
+      }
+    };
+  const cf = (code: string) => ({ refused: words("en", `aiaic.refused.${code}`) });
+  const rt = (field: string) => ({ refused: routeSaid("en", field) });
+  const cashfreeBank = {
+    name: CASHFREE_VALID.name,
+    account: CASHFREE_VALID.account,
+    ifsc: CASHFREE_VALID.ifsc,
+  };
+  const routeBank = {
+    name: ROUTE_VALID.name,
+    pan: ROUTE_VALID.pan,
+    account: ROUTE_VALID.account,
+    ifsc: ROUTE_VALID.ifsc,
+  };
+  const routeUpi = { name: ROUTE_VALID.name, pan: ROUTE_VALID.pan, upi: ROUTE_VALID.upi };
+  const upiOf = (n: number) => `${"a".repeat(n - 4)}@upi`;
+  const routeUpiOf = (n: number) => `${"a".repeat(256)}@${"b".repeat(n - 257)}`;
+
+  test(
+    "V01 Cashfree name: the phone gives only what giveMyDestination's validator takes; her words go joined by single spaces, as Cashfree's rule read them",
+    agree(
+      "cashfree",
+      "bank",
+      "name",
+      cashfreeBank,
+      [
+        { typed: "A".repeat(100), then: "taken" },
+        { typed: "A".repeat(101), then: cf("account_name_letters_only") },
+        {
+          typed: `Recording${" ".repeat(120)}Farmer`,
+          then: "taken",
+          sent: "Recording Farmer",
+        },
+        {
+          typed: `${" ".repeat(60)}Recording Farmer${" ".repeat(60)}`,
+          then: "taken",
+          sent: "Recording Farmer",
+        },
+        {
+          typed: `${"A".repeat(50)}${" ".repeat(100)}${"B".repeat(49)}`,
+          then: "taken",
+          sent: `${"A".repeat(50)} ${"B".repeat(49)}`,
+        },
+      ],
+      { key: "name", most: 120 },
+    ),
+  );
+  test(
+    "V02 Cashfree account: the phone gives only what giveMyDestination's validator takes",
+    agree(
+      "cashfree",
+      "bank",
+      "account",
+      cashfreeBank,
+      [
+        { typed: "9".repeat(35), then: "taken" },
+        { typed: "9".repeat(36), then: cf("account_number_not_valid") },
+        { typed: "99999 ".repeat(7).trim(), then: "taken", sent: "9".repeat(35) },
+        { typed: ACCOUNT_41, then: cf("account_number_not_valid") },
+      ],
+      { key: "account_number", most: 40 },
+    ),
+  );
+  test(
+    "V03 Cashfree IFSC: the phone gives only what giveMyDestination's validator takes",
+    agree(
+      "cashfree",
+      "bank",
+      "ifsc",
+      cashfreeBank,
+      [
+        { typed: CASHFREE_VALID.ifsc, then: "taken" },
+        { typed: `   ${CASHFREE_VALID.ifsc}   `, then: "taken", sent: CASHFREE_VALID.ifsc },
+        { typed: CASHFREE_VALID.ifsc.slice(0, 10), then: cf("ifsc_not_valid") },
+        { typed: `${CASHFREE_VALID.ifsc}0`, then: cf("ifsc_not_valid") },
+      ],
+      { key: "ifsc", most: 20 },
+    ),
+  );
+  test(
+    "V04 Cashfree UPI ID: the phone refuses, after the scan, one longer than giveMyDestination's validator takes",
+    agree(
+      "cashfree",
+      "upi",
+      "upi",
+      {},
+      [
+        { typed: upiOf(300), then: "taken" },
+        { typed: upiOf(301), then: cf("upi_id_not_valid") },
+        { typed: `  ${upiOf(300)}  `, then: "taken", sent: upiOf(300) },
+        { typed: CASHFREE_VALID.upi, then: "taken" },
+        { typed: "no-at-sign", then: cf("upi_id_not_valid") },
+      ],
+      { key: "upi_id", most: 300 },
+    ),
+  );
+  test(
+    "V05 Cashfree, the rest of her press (its key, AIAIC's notice version, her language, the kind, her tick): taken in en, mr and hi",
+    agree(
+      "cashfree",
+      "bank",
+      "name",
+      cashfreeBank,
+      [{ typed: CASHFREE_VALID.name, then: "taken" }],
+      { key: "notice_version", most: 40, least: 3 },
+      ["en", "mr", "hi"],
+    ),
+  );
+  test(
+    "V06 Route name on PAN: the phone gives only what givePayoutAccount's validator takes; her words go as its rule read them",
+    agree(
+      "route",
+      "bank",
+      "name",
+      routeBank,
+      [
+        { typed: "A".repeat(100), then: "taken" },
+        { typed: "A".repeat(101), then: rt("name_on_pan") },
+        { typed: `Practice${" ".repeat(120)}Payee`, then: "taken", sent: "Practice Payee" },
+        { typed: "Ab", then: "taken" },
+        { typed: "A", then: rt("name_on_pan") },
+      ],
+      { key: "name_on_pan", most: 100, least: 2 },
+    ),
+  );
+  test(
+    "V07 Route PAN: the phone gives only what givePayoutAccount's validator takes",
+    agree(
+      "route",
+      "bank",
+      "pan",
+      routeBank,
+      [
+        { typed: ROUTE_VALID.pan, then: "taken" },
+        { typed: ROUTE_VALID.pan.toLowerCase(), then: "taken", sent: ROUTE_VALID.pan },
+        { typed: ROUTE_VALID.pan.slice(0, 9), then: rt("pan") },
+      ],
+      { key: "pan", most: 20, least: 10 },
+    ),
+  );
+  test(
+    "V08 Route account: the phone gives only what givePayoutAccount's validator takes",
+    agree(
+      "route",
+      "bank",
+      "account",
+      routeBank,
+      [
+        { typed: "9".repeat(20), then: "taken" },
+        { typed: "9".repeat(21), then: rt("account_number") },
+        { typed: "0001-2345-6789", then: "taken", sent: "000123456789" },
+        { typed: "9".repeat(41), then: rt("account_number") },
+      ],
+      { key: "account_number", most: 40 },
+    ),
+  );
+  test(
+    "V09 Route IFSC: the phone gives only what givePayoutAccount's validator takes; the IFSC goes as its rule read it, its spaces out",
+    agree(
+      "route",
+      "bank",
+      "ifsc",
+      routeBank,
+      [
+        { typed: ROUTE_VALID.ifsc, then: "taken" },
+        { typed: "RECT 0000001", then: "taken", sent: ROUTE_VALID.ifsc },
+        { typed: Array.from(ROUTE_VALID.ifsc).join(" "), then: "taken", sent: ROUTE_VALID.ifsc },
+        { typed: ROUTE_VALID.ifsc.slice(0, 10), then: rt("ifsc") },
+      ],
+      { key: "ifsc", most: 20 },
+    ),
+  );
+  test(
+    "V10 Route UPI ID: the phone refuses, after the scan, one longer than givePayoutAccount's validator takes",
+    agree(
+      "route",
+      "upi",
+      "upi",
+      routeUpi,
+      [
+        { typed: routeUpiOf(300), then: "taken" },
+        { typed: routeUpiOf(301), then: rt("upi_id") },
+        { typed: routeUpiOf(321), then: rt("upi_id") },
+        { typed: ROUTE_VALID.upi, then: "taken" },
+      ],
+      { key: "upi_id", most: 300 },
+    ),
+  );
+  test(
+    "V11 Route, the rest of her press (its key, AIAIC's notice version, her language, the destination, her tick): taken in en, mr and hi",
+    agree(
+      "route",
+      "bank",
+      "name",
+      routeBank,
+      [{ typed: ROUTE_VALID.name, then: "taken" }],
+      { key: "notice_version", most: 20, least: 3 },
+      ["en", "mr", "hi"],
+    ),
+  );
   return learn;
 }
 

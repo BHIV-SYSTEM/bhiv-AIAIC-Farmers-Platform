@@ -31,6 +31,7 @@ import { problemShown, useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import type { DestinationTyped, FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
 import {
   destinationGivenBefore,
+  destinationName,
   destinationSaveOpen,
   pressDestination,
   pressed,
@@ -221,7 +222,8 @@ export function DestinationForm({
         ? { kind, upi_id: upi.trim() }
         : {
             kind,
-            name: name.trim(),
+            // as Cashfree's rule read it: her words joined by single spaces (AIAIC joins them so too)
+            name: destinationName(name),
             // the box keeps her spaces, so her words reach the scan as typed; AIAIC gets the number without them
             account_number: account.replace(/\s/g, ""),
             ifsc: ifsc.trim().toUpperCase(),

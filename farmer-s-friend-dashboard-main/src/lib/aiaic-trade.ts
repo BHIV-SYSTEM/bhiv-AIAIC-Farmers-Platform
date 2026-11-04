@@ -1052,10 +1052,15 @@ const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 const ACCOUNT_RE = /^[0-9A-Z]{5,20}$/;
 const UPI_RE = /^[A-Za-z0-9._-]{2,256}@[A-Za-z]{2,64}$/;
 const NAME_RE = /^[A-Za-z][A-Za-z .'-]{0,98}[A-Za-z.]$/;
+/** THE LONGEST UPI ID THIS SERVER TAKES (the validators of `givePayoutAccount` and `giveMyDestination` read this very
+ * number): both payout forms refuse a longer one after the scan, so no press of hers meets a validator's refusal,
+ * which would be said as AIAIC not answering (the re-check of 4 Nov 2026, round 3's observation). */
+export const UPI_ID_MOST = 300;
 
 /**
  * The same checks AIAIC makes (its `trade/payouts.py`), so she is told at once which box to correct; the field is
- * named, never the value. AIAIC checks again, and only AIAIC's answer counts.
+ * named, never the value. AIAIC checks again, and only AIAIC's answer counts. Never more than this server takes: a
+ * UPI ID of `UPI_ID_MOST` characters at most (AIAIC's own shape allows 321).
  */
 export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
   const pan = d.pan.replace(/\s+/g, "").toUpperCase();
@@ -1069,7 +1074,8 @@ export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
     if (d.upi_id) return "upi_id";
     return null;
   }
-  if (!UPI_RE.test((d.upi_id ?? "").trim())) return "upi_id";
+  const upi = (d.upi_id ?? "").trim();
+  if (!UPI_RE.test(upi) || upi.length > UPI_ID_MOST) return "upi_id";
   if (d.account_number || d.ifsc) return "account_number";
   return null;
 }
@@ -1742,11 +1748,19 @@ export function destinationGivenBefore(dest: XDestination | null | undefined): b
   return Boolean(dest?.ready && typeof dest.provider === "string" && dest.provider !== "cashfree");
 }
 
+/** The name on her bank account as Cashfree's rule reads it (`destinationNameOk`) and as it goes to AIAIC: her words
+ * joined by single spaces, as AIAIC joins them. So what her press gives is what was checked, and this server's validator
+ * never refuses a name the phone gave (said as AIAIC not answering, which it never was: the re-check of 4 Nov 2026,
+ * round 3's observation). */
+export function destinationName(name: string): string {
+  return name.split(/\s+/).filter(Boolean).join(" ");
+}
+
 /** CASHFREE TAKES A NAME OF LETTERS AND SPACES ONLY (AIAIC's `cashfree.name_ok`, as its refusal
  * `account_name_letters_only` says): English letters and single spaces, 2 to 100, a letter first and last. Checked here
  * so she is told at once; AIAIC checks again, and only its answer counts. Never changed for her. */
 export function destinationNameOk(name: string): boolean {
-  return /^[A-Za-z][A-Za-z ]{0,98}[A-Za-z]$/.test(name.split(/\s+/).filter(Boolean).join(" "));
+  return /^[A-Za-z][A-Za-z ]{0,98}[A-Za-z]$/.test(destinationName(name));
 }
 
 /** Her UPI ID or bank account form as typed, before anything is sent (`notice`: AIAIC sent the notice she agrees to). */
@@ -1788,8 +1802,8 @@ export const DESTINATION_ACCOUNT_RE = /^[A-Za-z0-9]{5,35}$/;
  * What this phone would refuse her form for, in the form's order, by AIAIC's own codes (worded in en, mr and hi), or
  * null: the form then goes to AIAIC, whose crisis middleware reads every body first. The name by Cashfree's rule
  * (`destinationNameOk`) and 4 characters at least, the account by AIAIC's own rule (`DESTINATION_ACCOUNT_RE`) on the
- * number without its spaces, as AIAIC gets it, the IFSC by its length trimmed, a UPI ID by its @, then her tick on
- * AIAIC's notice. Said only after her words were read for distress.
+ * number without its spaces, as AIAIC gets it, the IFSC by its length trimmed, a UPI ID by its @ and by the length this
+ * server takes (`UPI_ID_MOST`), then her tick on AIAIC's notice. Said only after her words were read for distress.
  */
 export function destinationRefusal(f: DestinationTyped): string | null {
   if (f.kind === "bank_account") {
@@ -1798,7 +1812,7 @@ export function destinationRefusal(f: DestinationTyped): string | null {
     if (!DESTINATION_ACCOUNT_RE.test(f.account.replace(/\s/g, "")))
       return "account_number_not_valid";
     if (f.ifsc.trim().length !== 11) return "ifsc_not_valid";
-  } else if (!f.upi.includes("@")) return "upi_id_not_valid";
+  } else if (!f.upi.includes("@") || f.upi.trim().length > UPI_ID_MOST) return "upi_id_not_valid";
   if (!f.notice || !f.agreed) return "payout_consent_required";
   return null;
 }

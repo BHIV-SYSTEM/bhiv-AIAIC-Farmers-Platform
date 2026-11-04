@@ -288,8 +288,12 @@ function PayoutAccountCard({
             destination,
             pan: pan.replace(/\s+/g, "").toUpperCase(),
             name_on_pan: name.replace(/\s+/g, " ").trim(),
+            // each box as the phone's rule read it (`payoutDetailsProblem`), so this server's validator takes it
             ...(destination === "bank_account"
-              ? { account_number: account.replace(/[\s-]+/g, ""), ifsc: ifsc.trim().toUpperCase() }
+              ? {
+                  account_number: account.replace(/[\s-]+/g, ""),
+                  ifsc: ifsc.replace(/\s+/g, "").toUpperCase(),
+                }
               : { upi_id: upi.trim() }),
           },
         }),
