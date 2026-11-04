@@ -108,8 +108,11 @@ product, is gone. This app follows what AIAIC's answers say, field by field; not
   the box, never as a lock on Save. Save opens on any words in the box, and a press this phone would refuse (that rule,
   a length, her tick) has her words read by AIAIC's distress scan first, as the registration form does (the platform's
   rule D-105): a crisis gets the helplines, anything else AIAIC's refusal by its code (`account_name_letters_only`).
-  Every code AIAIC's Cashfree branch answers her form with (`cashfree_*`, `live_keys_no_rehearsal`, ...) has words in
-  English, Marathi and Hindi (drafts for a native reader).
+  Words typed in the account or IFSC box are read with it: the account box's words once its digits, spaces and hyphens
+  are taken out, the IFSC box when it is not in an IFSC's shape; a well-formed account number or IFSC never goes to the
+  scan. The account box keeps the spaces she types (AIAIC gets the number without them), and the IFSC box cuts nothing
+  off at 11. Every code AIAIC's Cashfree branch answers her form with (`cashfree_*`, `live_keys_no_rehearsal`, ...)
+  has words in English, Marathi and Hindi (drafts for a native reader).
 - **Razorpay Route's card** on the Payments page shows only while AIAIC wires Route (`payout_account.wired`); Route's
   own lines keep naming Razorpay and show only on Route's own facts.
 - **The policy pages** (Pricing, Privacy, Refund) name Cashfree as AIAIC's payment processor, the collect-then-pay flow,

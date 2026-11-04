@@ -85,6 +85,7 @@ import {
   mineReadEvery,
   mineShown,
   pressKeyHolder,
+  bankBoxWords,
   destinationGivenBefore,
   destinationNameOk,
   destinationRefusal,
@@ -4213,6 +4214,137 @@ test("A59 RC-2 the bank name's hint never depends on what she typed: one element
     "as every box",
   );
   assert.equal(attribute(box, "aria-invalid"), undefined, "never marked wrong");
+});
+
+test("A60 RC-3 words typed in her account or IFSC box reach the distress scan before any refusal, on both payout forms; a well-formed account number or IFSC never goes to the scan", async () => {
+  // what her bank boxes hold that cannot be her bank's details, and only that
+  assert.deepEqual(
+    bankBoxWords(TEST_BANK.account, TEST_BANK.ifsc),
+    [],
+    "a well-formed account and IFSC",
+  );
+  assert.deepEqual(
+    bankBoxWords("0262 9180-0001 191", " yesb0000262 "),
+    [],
+    "typed apart, small letters",
+  );
+  assert.deepEqual(bankBoxWords("०२६२ ९१८० ०००१ १९१", ""), [], "Devanagari digits are digits");
+  assert.deepEqual(
+    bankBoxWords(CRISIS_HI, ""),
+    [CRISIS_HI],
+    "her words in the account box, as typed",
+  );
+  assert.deepEqual(
+    bankBoxWords(`${TEST_BANK.account} ${CRISIS_MR} 42`, ""),
+    [CRISIS_MR],
+    "her words, never the digits beside them",
+  );
+  assert.deepEqual(bankBoxWords("", CRISIS_MR), [CRISIS_MR], "her words in the IFSC box");
+  // an IFSC not in its shape is read as typed (a bank branch's code, public); a well-formed one never is
+  assert.deepEqual(bankBoxWords("", "YESB000026"), ["YESB000026"]);
+  assert.deepEqual(bankBoxWords(undefined, undefined), []);
+  // Save opens on words in either box (no rule of this phone keeps them from the scan), never on digits alone
+  const empty: DestinationTyped = {
+    kind: "bank_account",
+    upi: "",
+    name: "",
+    account: "",
+    ifsc: "",
+    agreed: false,
+    notice: true,
+  };
+  assert.equal(destinationSaveOpen({ ...empty, account: CRISIS_HI }), true, "the account box");
+  assert.equal(destinationSaveOpen({ ...empty, ifsc: CRISIS_MR }), true, "the IFSC box");
+  assert.equal(destinationSaveOpen({ ...empty, ...TEST_BANK }), false, "an account and an IFSC");
+  const routeEmpty = {
+    destination: "bank_account" as const,
+    pan: "",
+    name_on_pan: "",
+    account_number: "",
+    ifsc: "",
+  };
+  const none = { agreed: false, readNotice: false, notice: true };
+  assert.equal(payoutSaveOpen({ ...routeEmpty, account_number: CRISIS_MR }, none), true, "Route");
+  assert.equal(payoutSaveOpen({ ...routeEmpty, ifsc: CRISIS_HI }, none), true, "Route's IFSC");
+  assert.equal(
+    payoutSaveOpen(
+      { ...routeEmpty, account_number: TEST_BANK.account, ifsc: TEST_BANK.ifsc },
+      none,
+    ),
+    false,
+    "Route: an account and an IFSC",
+  );
+  // the account's length is counted as AIAIC gets it, its spaces left out
+  const complete: DestinationTyped = {
+    kind: "bank_account",
+    upi: "",
+    name: "Recording Farmer",
+    ...TEST_BANK,
+    agreed: true,
+    notice: true,
+  };
+  assert.equal(destinationRefusal(complete), null);
+  assert.equal(destinationRefusal({ ...complete, account: "0262 9180 0001 191" }), null, "apart");
+  assert.equal(destinationRefusal({ ...complete, account: "1 2 3 4" }), "account_number_not_valid");
+  // a press with her words in each box, on both forms: read first with the name, never the bank's own details
+  const route = {
+    destination: "bank_account" as const,
+    pan: "AAAPZ4321K",
+    name_on_pan: "Practice Payee Testname",
+    account_number: "000123456789",
+    ifsc: "RECT0000001",
+  };
+  const given = { agreed: true, readNotice: true, notice: true };
+  const { bench, press, restore } = scanBench();
+  try {
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_MR, "mr"],
+    ] as const) {
+      const cashfree: [string, DestinationTyped][] = [
+        ["the account box, no IFSC", { ...complete, account: words, ifsc: "" }],
+        ["the account box, not ticked", { ...complete, account: words, agreed: false }],
+        ["the IFSC box, the account filled", { ...complete, ifsc: words }],
+        ["the IFSC box, no account", { ...complete, ifsc: words, account: "" }],
+      ];
+      for (const [where, typed] of cashfree) {
+        const what = `${lang} ${where}`;
+        const refusal = destinationRefusal(typed);
+        assert.ok(refusal, `${what}: this phone would refuse it`);
+        const { said, html } = await press(destinationWords(typed), lang, refusal);
+        assert.deepEqual(bench.texts, [`Recording Farmer. ${words}`], `${what}: read first`);
+        assert.equal(said, null, `${what}: no refusal said`);
+        crisisCardOnly(html, lang, refusal, what);
+      }
+      const routes: [string, typeof route][] = [
+        ["Route's account box", { ...route, account_number: words }],
+        ["Route's IFSC box", { ...route, ifsc: words }],
+      ];
+      for (const [where, typed] of routes) {
+        const what = `${lang} ${where}`;
+        const refusal = payoutFormRefusal(typed, given);
+        assert.ok(refusal, `${what}: this phone would refuse it`);
+        const { said, html } = await press(payoutWords(typed), lang, refusal);
+        assert.deepEqual(bench.texts, [`Practice Payee Testname. ${words}`], `${what}: read first`);
+        assert.equal(said, null, `${what}: no refusal said`);
+        crisisCardOnly(html, lang, refusal, what);
+      }
+    }
+    // not a crisis: an IFSC not in its shape is read, then refused in its own words; the account number never read
+    bench.reply = { distress: false };
+    const typo = { ...complete, ifsc: "YESB000026" };
+    const { said } = await press(destinationWords(typo), "en", destinationRefusal(typo) ?? "");
+    assert.deepEqual(bench.texts, ["Recording Farmer. YESB000026"]);
+    assert.equal(said?.code, "ifsc_not_valid");
+  } finally {
+    restore();
+  }
+  // the boxes keep what she types: the account box its spaces (AIAIC gets the number without them), no IFSC box cut at 11
+  const card = sourceOf("FromAiaicCard.tsx");
+  assert.ok(card.includes("onChange={(e) => setAccount(e.target.value)}"), "the account box");
+  assert.ok(card.includes('account_number: account.replace(/\\s/g, ""),'), "AIAIC's number");
+  for (const file of ["FromAiaicCard.tsx", "AiaicPayments.tsx"])
+    assert.ok(!sourceOf(file).includes("maxLength={11}"), `${file}: the IFSC box cuts nothing`);
 });
 
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {

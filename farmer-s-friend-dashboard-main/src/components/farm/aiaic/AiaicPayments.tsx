@@ -424,9 +424,9 @@ function PayoutAccountCard({
                 </label>
                 <label className="block text-xs font-bold text-foreground">
                   {t("aiaic.field.ifsc")}
+                  {/* nothing cut off at 11: words typed here reach the scan whole (RC-3) */}
                   <input
                     value={ifsc}
-                    maxLength={11}
                     onChange={(e) => setIfsc(e.target.value.toUpperCase())}
                     className={cn(input(badField === "ifsc"), "font-mono uppercase")}
                   />

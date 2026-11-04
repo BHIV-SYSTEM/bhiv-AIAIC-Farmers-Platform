@@ -1077,10 +1077,34 @@ export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
 /** Her press on Route's form: she opened AIAIC's notice and ticked that she agrees, and AIAIC sent one. */
 export type PayoutConsent = { agreed: boolean; readNotice: boolean; notice: boolean };
 
-/** The words in Route's free boxes (the name on her PAN; a UPI ID typed as words), read for distress before any
- * refusal (the audit of 4 Nov 2026, AN-1; D-105), as on the Cashfree form (`destinationWords`). */
+/**
+ * NO BOX IS BLIND TO A PERSON IN CRISIS, AND NO WELL-FORMED NUMBER GOES TO THE SCAN (the re-check of 4 Nov 2026, RC-3;
+ * AIAIC's own rule for its boxes, its audit F10). What her account box and her IFSC box hold that cannot be her bank's
+ * details, for the distress scan: the account box once every digit (of any script), space and hyphen is taken out, when
+ * anything is left (her words, with the spaces between them kept and the digits gone); the IFSC box as typed when it is
+ * not in an IFSC's shape. An account number or an IFSC as it should be is never sent to the scan.
+ */
+export function bankBoxWords(
+  account: string | null | undefined,
+  ifsc: string | null | undefined,
+): string[] {
+  const words: string[] = [];
+  // digits, spaces and hyphens out, one space kept between her words
+  const left = (account ?? "").replace(/[\p{Nd}\s-]+/gu, " ").trim();
+  if (left) words.push(left);
+  const code = (ifsc ?? "").trim();
+  if (code && !IFSC_RE.test(code.replace(/\s+/g, "").toUpperCase())) words.push(code);
+  return words;
+}
+
+/** The words in Route's free boxes (the name on her PAN; a UPI ID typed as words; what her account and IFSC boxes hold
+ * that cannot be her bank's details, `bankBoxWords`), read for distress before any refusal (the audit of 4 Nov 2026,
+ * AN-1; D-105), as on the Cashfree form (`destinationWords`). */
 export function payoutWords(d: PayoutDetailsIn): string {
-  return [d.name_on_pan, d.destination === "upi_id" ? d.upi_id : ""]
+  return [
+    d.name_on_pan,
+    ...(d.destination === "upi_id" ? [d.upi_id] : bankBoxWords(d.account_number, d.ifsc)),
+  ]
     .map((b) => (b ?? "").trim())
     .filter(Boolean)
     .join(". ");
@@ -1719,12 +1743,16 @@ export type DestinationTyped = {
 
 /**
  * NO RULE OF THIS PHONE KEEPS HER WORDS FROM THE DISTRESS SCAN (the audit of 4 Nov 2026, AN-1; the platform's rule
- * D-105: nothing answers a person in crisis before the scan does). The words in her form's free box: the name on her
- * bank account, or what she typed as a UPI ID. Save can be pressed whenever it holds any (`destinationSaveOpen`), and a
- * press this phone would refuse has them read for distress first (`pressDestination`).
+ * D-105: nothing answers a person in crisis before the scan does). The words in her form's boxes: the name on her bank
+ * account with what her account and IFSC boxes hold that cannot be her bank's details (`bankBoxWords`, the re-check's
+ * RC-3), or what she typed as a UPI ID. Save can be pressed whenever there are any (`destinationSaveOpen`), and a press
+ * this phone would refuse has them read for distress first (`pressDestination`).
  */
 export function destinationWords(f: DestinationTyped): string {
-  return (f.kind === "bank_account" ? f.name : f.upi).trim();
+  return (f.kind === "bank_account" ? [f.name, ...bankBoxWords(f.account, f.ifsc)] : [f.upi])
+    .map((b) => b.trim())
+    .filter(Boolean)
+    .join(". ");
 }
 
 /** Save can be pressed whenever her box holds any words: no rule of this phone keeps them from the scan. */
@@ -1735,15 +1763,16 @@ export function destinationSaveOpen(f: DestinationTyped): boolean {
 /**
  * What this phone would refuse her form for, in the form's order, by AIAIC's own codes (worded in en, mr and hi), or
  * null: the form then goes to AIAIC, whose crisis middleware reads every body first. The name by Cashfree's rule
- * (`destinationNameOk`) and 4 characters at least, the account and the IFSC by their lengths, a UPI ID by its @, then
- * her tick on AIAIC's notice. Said only after her words were read for distress.
+ * (`destinationNameOk`) and 4 characters at least, the account and the IFSC by their lengths as AIAIC gets them (the
+ * account without its spaces, the IFSC trimmed), a UPI ID by its @, then her tick on AIAIC's notice. Said only after her
+ * words were read for distress.
  */
 export function destinationRefusal(f: DestinationTyped): string | null {
   if (f.kind === "bank_account") {
     if (!destinationNameOk(f.name)) return "account_name_letters_only";
     if (f.name.trim().length < 4) return "account_name_not_valid";
-    if (f.account.length < 5) return "account_number_not_valid";
-    if (f.ifsc.length !== 11) return "ifsc_not_valid";
+    if (f.account.replace(/\s/g, "").length < 5) return "account_number_not_valid";
+    if (f.ifsc.trim().length !== 11) return "ifsc_not_valid";
   } else if (!f.upi.includes("@")) return "upi_id_not_valid";
   if (!f.notice || !f.agreed) return "payout_consent_required";
   return null;
