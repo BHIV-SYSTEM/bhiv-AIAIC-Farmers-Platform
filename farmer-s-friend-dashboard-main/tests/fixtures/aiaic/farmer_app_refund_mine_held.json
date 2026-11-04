@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-10-23T20:00:47+00:00",
+    "at": "2026-11-04T13:46:49+00:00",
     "status": 200,
     "replay": null,
     "signed_in": true,
@@ -10,7 +10,7 @@
       "params": null,
       "body": null
     },
-    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer, real records on this test database), her order paid through a payment link with Razorpay STOOD IN FOR on this machine and LIVE-MODE TEST-ONLY KEYS AND THE LIVE APPROVAL SET FOR THIS RECORDING ONLY (her app orders are real, so only live keys make a link for them; no request reached Razorpay; no money). On every real server live payments are not approved. Replayed by the web and phone tests, never edited by hand."
+    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer, real records on this test database), their order paid through a payment link with Razorpay STOOD IN FOR on this machine and LIVE-MODE TEST-ONLY KEYS AND THE LIVE APPROVAL SET FOR THIS RECORDING ONLY (their app orders are real, so only live keys make a link for them; no request reached Razorpay; no money). On every real server live payments are not approved. Replayed by the web and phone tests, never edited by hand. Razorpay is NAMED IN-PROCESS for this recording (AIAIC_PAYMENT_PROVIDER=razorpay): kept but not wired since 4 Nov 2026, when Cashfree became the server's default provider."
   },
   "answer": {
     "tenant_id": "rec-farmer",
@@ -21,7 +21,7 @@
     "practice": false,
     "practice_note": null,
     "party": {
-      "party_id": "frm_29fc30009f6b324d74e6",
+      "party_id": "frm_b952cba6bc2a5f99a193",
       "kind": "farmer",
       "buyer_type": null,
       "tenant_id": "rec-farmer",
@@ -29,20 +29,20 @@
       "district": "Nashik",
       "state": "maharashtra",
       "consent_given": true,
-      "consent_basis": "given by the farmer herself in the AIAIC app, signed in, when she listed her produce",
+      "consent_basis": "given by the farmer themselves in the AIAIC app, signed in, when they listed their produce",
       "consent_withdrawn_at": null,
       "interests": {},
       "synthetic": false,
-      "trace_id": "e3e5a140219b49a283d2b0bc9ad5d875",
-      "created_at": "2026-10-23T20:00:45.972223+00:00",
+      "trace_id": "e9467a16c77644289a8de2dff2b906fa",
+      "created_at": "2026-11-04T13:46:42.142319+00:00",
       "from_the_app": true
     },
     "listings": [
       {
-        "listing_id": "lst_bb93150bdc78e9329363",
-        "lot_id": "lot_d83684f0c826de127ce3",
+        "listing_id": "lst_0b2b1f5d619692e86da9",
+        "lot_id": "lot_46f5e2f0a6ea243730a7",
         "tenant_id": "rec-farmer",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -55,6 +55,7 @@
         "available_to": null,
         "district": "Nashik",
         "state": "maharashtra",
+        "taluka": null,
         "status": "sold",
         "reference_price": {
           "crop": "onion",
@@ -135,15 +136,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": false,
-        "trace_id": "fd3d76578f7a4240b4ec3fb2284a1a29",
-        "created_at": "2026-10-23T20:00:47.226236+00:00",
-        "updated_at": "2026-10-23T20:00:47.328928+00:00",
+        "trace_id": "bf65b121c203428a8ca36de140f2d79a",
+        "created_at": "2026-11-04T13:46:47.542187+00:00",
+        "updated_at": "2026-11-04T13:46:47.948674+00:00",
         "offers": [
           {
-            "offer_id": "ofr_df1b0328eaff5690154b",
+            "offer_id": "ofr_beb81abd993eea9df3b8",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_bb93150bdc78e9329363",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_0b2b1f5d619692e86da9",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3945.0,
             "quantity_q": 5.0,
             "delivery_terms": "Handed over at the Pimpalgaon collection point",
@@ -152,9 +153,10 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "e9dac4b546de4ebc8d5f6bcc4da867bd",
-            "created_at": "2026-10-23T20:00:47.302077+00:00",
-            "updated_at": "2026-10-23T20:00:47.328928+00:00",
+            "trace_id": "61a4e03c391e4d3e9ef4b6a747ba80f8",
+            "created_at": "2026-11-04T13:46:47.860905+00:00",
+            "updated_at": "2026-11-04T13:46:47.948674+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -180,15 +182,18 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           }
-        ]
+        ],
+        "pooled_in": null,
+        "group_plan": null
       },
       {
-        "listing_id": "lst_2c91f8877d858472dc1e",
-        "lot_id": "lot_d836aa97b5e00c5597bf",
+        "listing_id": "lst_064b067a4c6ea99b261d",
+        "lot_id": "lot_2202b16916b4e617b4fb",
         "tenant_id": "rec-farmer",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -201,6 +206,7 @@
         "available_to": null,
         "district": "Nashik",
         "state": "maharashtra",
+        "taluka": null,
         "status": "sold",
         "reference_price": {
           "crop": "onion",
@@ -281,15 +287,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": false,
-        "trace_id": "5b5b2ecc63b9495b97eb85a787d661fc",
-        "created_at": "2026-10-23T20:00:47.098452+00:00",
-        "updated_at": "2026-10-23T20:00:47.200659+00:00",
+        "trace_id": "ea28160540bf4c38a2a42a3f2426cc77",
+        "created_at": "2026-11-04T13:46:46.953787+00:00",
+        "updated_at": "2026-11-04T13:46:47.408005+00:00",
         "offers": [
           {
-            "offer_id": "ofr_514bcf2eba9d98def031",
+            "offer_id": "ofr_c951ac75f40cb0579982",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_2c91f8877d858472dc1e",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_064b067a4c6ea99b261d",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3945.0,
             "quantity_q": 5.0,
             "delivery_terms": "Delivered by the farmer to the buyer's Pune yard",
@@ -298,9 +304,10 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "4becea12acaa4e1a97a451b35cd536a0",
-            "created_at": "2026-10-23T20:00:47.175388+00:00",
-            "updated_at": "2026-10-23T20:00:47.200659+00:00",
+            "trace_id": "70082558cdb14b238db0a022b8c97c97",
+            "created_at": "2026-11-04T13:46:47.300676+00:00",
+            "updated_at": "2026-11-04T13:46:47.408005+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -326,15 +333,18 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           }
-        ]
+        ],
+        "pooled_in": null,
+        "group_plan": null
       },
       {
-        "listing_id": "lst_a65ab02f30b633381bb2",
-        "lot_id": "lot_e2e2aa80c9dc17dbf023",
+        "listing_id": "lst_64f5272366dcfe2391ec",
+        "lot_id": "lot_6753b098affeece115e4",
         "tenant_id": "rec-farmer",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -347,6 +357,7 @@
         "available_to": null,
         "district": "Nashik",
         "state": "maharashtra",
+        "taluka": null,
         "status": "sold",
         "reference_price": {
           "crop": "onion",
@@ -427,15 +438,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": false,
-        "trace_id": "0261a868dc524e809ebeaf4cb7adab13",
-        "created_at": "2026-10-23T20:00:46.732422+00:00",
-        "updated_at": "2026-10-23T20:00:47.004007+00:00",
+        "trace_id": "17329191be5043be9125487a23bd943c",
+        "created_at": "2026-11-04T13:46:45.389536+00:00",
+        "updated_at": "2026-11-04T13:46:46.540489+00:00",
         "offers": [
           {
-            "offer_id": "ofr_5060c9ac26b4ac6b847f",
+            "offer_id": "ofr_1e025645913aa12b49a3",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_a65ab02f30b633381bb2",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_64f5272366dcfe2391ec",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3950.0,
             "quantity_q": 6.0,
             "delivery_terms": "The buyer collects from the farm within 3 days",
@@ -444,9 +455,10 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "02575dc013654b9aad17c2f8784bbe7f",
-            "created_at": "2026-10-23T20:00:46.814527+00:00",
-            "updated_at": "2026-10-23T20:00:46.921098+00:00",
+            "trace_id": "e0d2437146c24a378f5f6981e7e5435a",
+            "created_at": "2026-11-04T13:46:45.747452+00:00",
+            "updated_at": "2026-11-04T13:46:46.144723+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -472,13 +484,14 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           },
           {
-            "offer_id": "ofr_3da2dc41bf3cfe28be91",
+            "offer_id": "ofr_e20e0dcd1d181b595467",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_a65ab02f30b633381bb2",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_64f5272366dcfe2391ec",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3970.0,
             "quantity_q": 6.0,
             "delivery_terms": "The buyer collects from the farm within 3 days",
@@ -487,9 +500,10 @@
             "status": "withdrawn",
             "closed_reason": "lot_sold",
             "synthetic": false,
-            "trace_id": "3a331eb98d1b45aa90b198334ba93cc6",
-            "created_at": "2026-10-23T20:00:46.852657+00:00",
-            "updated_at": "2026-10-23T20:00:47.004007+00:00",
+            "trace_id": "02aa1a91367b4c0db9384900b80b9642",
+            "created_at": "2026-11-04T13:46:45.892527+00:00",
+            "updated_at": "2026-11-04T13:46:46.540489+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -515,13 +529,14 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           },
           {
-            "offer_id": "ofr_2dd52d2cf06f93c33267",
+            "offer_id": "ofr_e5ddaa2603aa7db0dfa0",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_a65ab02f30b633381bb2",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_64f5272366dcfe2391ec",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3960.0,
             "quantity_q": 4.0,
             "delivery_terms": "The buyer collects from the farm within 3 days",
@@ -530,9 +545,10 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "7fb20fa11f894ccb96fd4e68a7ac7899",
-            "created_at": "2026-10-23T20:00:46.892108+00:00",
-            "updated_at": "2026-10-23T20:00:47.004007+00:00",
+            "trace_id": "47e971d70e014622a10ebbc55dc13eea",
+            "created_at": "2026-11-04T13:46:46.049904+00:00",
+            "updated_at": "2026-11-04T13:46:46.540489+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -558,15 +574,18 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           }
-        ]
+        ],
+        "pooled_in": null,
+        "group_plan": null
       },
       {
-        "listing_id": "lst_7f30190b478ae8717a12",
-        "lot_id": "lot_9a141e691280af5f01c6",
+        "listing_id": "lst_72177065fede904c3932",
+        "lot_id": "lot_2a085c5b5b30dee55156",
         "tenant_id": "rec-farmer",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -579,6 +598,7 @@
         "available_to": null,
         "district": "Nashik",
         "state": "maharashtra",
+        "taluka": null,
         "status": "open",
         "reference_price": {
           "crop": "onion",
@@ -659,15 +679,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": false,
-        "trace_id": "dae469f65c784e2d8112b34b1905c44e",
-        "created_at": "2026-10-23T20:00:46.382748+00:00",
-        "updated_at": "2026-10-23T20:00:46.511925+00:00",
+        "trace_id": "334aaf70afc64af1a0db641a6e64228f",
+        "created_at": "2026-11-04T13:46:43.873418+00:00",
+        "updated_at": "2026-11-04T13:46:44.426291+00:00",
         "offers": [
           {
-            "offer_id": "ofr_48ff10f8eabfc1bc92d7",
+            "offer_id": "ofr_674ac2537929a36cd510",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_7f30190b478ae8717a12",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_72177065fede904c3932",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3955.0,
             "quantity_q": 5.0,
             "delivery_terms": "The buyer collects from the farm within 3 days",
@@ -676,9 +696,10 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "7831d2fd6c224bfeabe453e52e298ac1",
-            "created_at": "2026-10-23T20:00:46.458342+00:00",
-            "updated_at": "2026-10-23T20:00:46.484809+00:00",
+            "trace_id": "2a05d3b7f2d146fea784e34bd1ac192e",
+            "created_at": "2026-11-04T13:46:44.206640+00:00",
+            "updated_at": "2026-11-04T13:46:44.292487+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -704,24 +725,26 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           },
           {
-            "offer_id": "ofr_94075fcb26bfccd35cbf",
+            "offer_id": "ofr_717da0f9dbb229d0e2ee",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_7f30190b478ae8717a12",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_72177065fede904c3932",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3940.0,
             "quantity_q": 5.0,
             "delivery_terms": "The buyer collects from the farm within 3 days",
             "terms_code": "buyer_collects",
-            "valid_until": "2026-10-24",
+            "valid_until": "2026-11-04",
             "status": "open",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "e641baea1aba4c9a9ff42144672fa18b",
-            "created_at": "2026-10-23T20:00:46.575846+00:00",
-            "updated_at": "2026-10-23T20:00:46.575846+00:00",
+            "trace_id": "fab78243fe24466ea93233b8532cf25f",
+            "created_at": "2026-11-04T13:46:44.666418+00:00",
+            "updated_at": "2026-11-04T13:46:44.666418+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": true,
             "why_not_accept": null,
@@ -744,15 +767,18 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           }
-        ]
+        ],
+        "pooled_in": null,
+        "group_plan": null
       },
       {
-        "listing_id": "lst_b68d4f292b9edb706538",
-        "lot_id": "lot_5508ec7d55008564b50b",
+        "listing_id": "lst_14c7c04b005094aa9b27",
+        "lot_id": "lot_ef596e781b7fc249f664",
         "tenant_id": "rec-farmer",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -765,6 +791,7 @@
         "available_to": null,
         "district": "Nashik",
         "state": "maharashtra",
+        "taluka": null,
         "status": "sold",
         "reference_price": {
           "crop": "onion",
@@ -845,15 +872,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": false,
-        "trace_id": "e3e5a140219b49a283d2b0bc9ad5d875",
-        "created_at": "2026-10-23T20:00:45.972223+00:00",
-        "updated_at": "2026-10-23T20:00:46.222239+00:00",
+        "trace_id": "e9467a16c77644289a8de2dff2b906fa",
+        "created_at": "2026-11-04T13:46:42.142319+00:00",
+        "updated_at": "2026-11-04T13:46:43.249390+00:00",
         "offers": [
           {
-            "offer_id": "ofr_c5925e399ee14b846e2b",
+            "offer_id": "ofr_aef764df77144a8c6662",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_b68d4f292b9edb706538",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_14c7c04b005094aa9b27",
+            "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
             "price_per_q": 3980.0,
             "quantity_q": 10.0,
             "delivery_terms": "The buyer collects from the farm within 3 days",
@@ -862,9 +889,10 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "ec4dc6d21d944b9d953719017c9a34d4",
-            "created_at": "2026-10-23T20:00:46.173002+00:00",
-            "updated_at": "2026-10-23T20:00:46.222239+00:00",
+            "trace_id": "b89962865bae461188cb912815a27569",
+            "created_at": "2026-11-04T13:46:42.995969+00:00",
+            "updated_at": "2026-11-04T13:46:43.249390+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -890,21 +918,24 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           }
-        ]
+        ],
+        "pooled_in": null,
+        "group_plan": null
       }
     ],
     "orders": [
       {
-        "order_id": "ord_b5a40d472da3bee89b38",
-        "transaction_id": "txn_6193742f47c2cb2498f7",
+        "order_id": "ord_6a1af2741bdda0abd2e8",
+        "transaction_id": "txn_40091af41065b197d364",
         "tenant_id": "rec-farmer",
-        "offer_id": "ofr_df1b0328eaff5690154b",
-        "listing_id": "lst_bb93150bdc78e9329363",
-        "lot_id": "lot_d83684f0c826de127ce3",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
-        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "offer_id": "ofr_beb81abd993eea9df3b8",
+        "listing_id": "lst_0b2b1f5d619692e86da9",
+        "lot_id": "lot_46f5e2f0a6ea243730a7",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
+        "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -924,9 +955,10 @@
         "payment_route": "razorpay_route",
         "payout_timing": "in_advance_held",
         "synthetic": false,
-        "trace_id": "daf96c7a8f6f4c6e8366c56716688db3",
-        "created_at": "2026-10-23T20:00:47.328928+00:00",
-        "updated_at": "2026-10-23T20:00:47.641430+00:00",
+        "trace_id": "0f1a3d2babb94501b12f417aebef032a",
+        "created_at": "2026-11-04T13:46:47.948674+00:00",
+        "updated_at": "2026-11-04T13:46:49.064609+00:00",
+        "pool_id": null,
         "buyer_name": "Recorded buyer (a recording, no real business)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
@@ -970,7 +1002,16 @@
           "held_until": null,
           "test_mode": false,
           "fee_line_key": "farmer.money.fee_on_top",
-          "onward": "This link carries the farmer's share to her payout account at Razorpay (Razorpay Route): when the buyer pays, Razorpay sends her share there, and the buyer pays the payment fee on top. What reached her is said only on Razorpay's own word (settlement_state)."
+          "onward": "This link carries the farmer's share to their payout account at Razorpay (Razorpay Route): when the buyer pays, Razorpay sends the farmer's share there, and the buyer pays the payment fee on top. What reached the farmer is said only on Razorpay's own word (settlement_state).",
+          "commission": {
+            "set": false,
+            "bps": null,
+            "percent": null,
+            "payer": null,
+            "commission_inr": null,
+            "price_inr": 19725.0,
+            "she_receives_inr": 19725.0
+          }
         },
         "contact": {
           "state": "off",
@@ -1013,17 +1054,20 @@
           "can_change_number": false,
           "can_stop": false,
           "can_report": false
-        }
+        },
+        "pooled": null,
+        "pool": null,
+        "from_aiaic": null
       },
       {
-        "order_id": "ord_a9dcd2ba82551a43e860",
-        "transaction_id": "txn_70ee01aae3d7292e2a8e",
+        "order_id": "ord_1f2324e1f99d4861a5f6",
+        "transaction_id": "txn_02d8be4db04e10dc5394",
         "tenant_id": "rec-farmer",
-        "offer_id": "ofr_514bcf2eba9d98def031",
-        "listing_id": "lst_2c91f8877d858472dc1e",
-        "lot_id": "lot_d836aa97b5e00c5597bf",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
-        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "offer_id": "ofr_c951ac75f40cb0579982",
+        "listing_id": "lst_064b067a4c6ea99b261d",
+        "lot_id": "lot_2202b16916b4e617b4fb",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
+        "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -1043,9 +1087,10 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": false,
-        "trace_id": "0cafade5391a433599ff77613fa30e03",
-        "created_at": "2026-10-23T20:00:47.200659+00:00",
-        "updated_at": "2026-10-23T20:00:47.200659+00:00",
+        "trace_id": "5e0224e2a2b54940afcf4eccaae2741b",
+        "created_at": "2026-11-04T13:46:47.408005+00:00",
+        "updated_at": "2026-11-04T13:46:47.408005+00:00",
+        "pool_id": null,
         "buyer_name": "Recorded buyer (a recording, no real business)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
@@ -1058,7 +1103,7 @@
         "payment": {
           "state": "not_connected",
           "link_made": false,
-          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay her onward from it, and settlement stays not connected for this order.",
+          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay the farmer from it, and settlement stays not connected for this order.",
           "refund_owed_inr": null,
           "refund_note": null
         },
@@ -1115,17 +1160,20 @@
           "can_change_number": false,
           "can_stop": false,
           "can_report": false
-        }
+        },
+        "pooled": null,
+        "pool": null,
+        "from_aiaic": null
       },
       {
-        "order_id": "ord_934a992313dff1bcdefe",
-        "transaction_id": "txn_016a1eaab206d08cb35b",
+        "order_id": "ord_47e304e8f02dca5e02c0",
+        "transaction_id": "txn_f3790ea9c4cfad772406",
         "tenant_id": "rec-farmer",
-        "offer_id": "ofr_2dd52d2cf06f93c33267",
-        "listing_id": "lst_a65ab02f30b633381bb2",
-        "lot_id": "lot_e2e2aa80c9dc17dbf023",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
-        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "offer_id": "ofr_e5ddaa2603aa7db0dfa0",
+        "listing_id": "lst_64f5272366dcfe2391ec",
+        "lot_id": "lot_6753b098affeece115e4",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
+        "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -1145,9 +1193,10 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": false,
-        "trace_id": "14c417fead5848bab73aa9b070d3c108",
-        "created_at": "2026-10-23T20:00:47.004007+00:00",
-        "updated_at": "2026-10-23T20:00:47.004007+00:00",
+        "trace_id": "5743784200d54551b1f507d56ab9d36b",
+        "created_at": "2026-11-04T13:46:46.540489+00:00",
+        "updated_at": "2026-11-04T13:46:46.540489+00:00",
+        "pool_id": null,
         "buyer_name": "Recorded buyer (a recording, no real business)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
@@ -1160,7 +1209,7 @@
         "payment": {
           "state": "not_connected",
           "link_made": false,
-          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay her onward from it, and settlement stays not connected for this order.",
+          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay the farmer from it, and settlement stays not connected for this order.",
           "refund_owed_inr": null,
           "refund_note": null
         },
@@ -1217,17 +1266,20 @@
           "can_change_number": false,
           "can_stop": false,
           "can_report": false
-        }
+        },
+        "pooled": null,
+        "pool": null,
+        "from_aiaic": null
       },
       {
-        "order_id": "ord_a4d445e236356b7c85dc",
-        "transaction_id": "txn_11dd2e816dd338d60d05",
+        "order_id": "ord_59cf2b288ee87b6397b3",
+        "transaction_id": "txn_ef3958d22a2baa358c39",
         "tenant_id": "rec-farmer",
-        "offer_id": "ofr_5060c9ac26b4ac6b847f",
-        "listing_id": "lst_a65ab02f30b633381bb2",
-        "lot_id": "lot_e2e2aa80c9dc17dbf023",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
-        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "offer_id": "ofr_1e025645913aa12b49a3",
+        "listing_id": "lst_64f5272366dcfe2391ec",
+        "lot_id": "lot_6753b098affeece115e4",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
+        "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -1247,9 +1299,10 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": false,
-        "trace_id": "6ef398d25d724fb7bd07a24c4836100d",
-        "created_at": "2026-10-23T20:00:46.921098+00:00",
-        "updated_at": "2026-10-23T20:00:46.921098+00:00",
+        "trace_id": "94c2cc8c550e4d86ac3607fd80069071",
+        "created_at": "2026-11-04T13:46:46.144723+00:00",
+        "updated_at": "2026-11-04T13:46:46.144723+00:00",
+        "pool_id": null,
         "buyer_name": "Recorded buyer (a recording, no real business)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
@@ -1262,7 +1315,7 @@
         "payment": {
           "state": "not_connected",
           "link_made": false,
-          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay her onward from it, and settlement stays not connected for this order.",
+          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay the farmer from it, and settlement stays not connected for this order.",
           "refund_owed_inr": null,
           "refund_note": null
         },
@@ -1319,17 +1372,20 @@
           "can_change_number": false,
           "can_stop": false,
           "can_report": false
-        }
+        },
+        "pooled": null,
+        "pool": null,
+        "from_aiaic": null
       },
       {
-        "order_id": "ord_27d4fe37d0a4ebd10fd7",
-        "transaction_id": "txn_e381f0315beb893dd34c",
+        "order_id": "ord_0c7402b0d8d9c3fd3e6f",
+        "transaction_id": "txn_9c376666621f912646d1",
         "tenant_id": "rec-farmer",
-        "offer_id": "ofr_48ff10f8eabfc1bc92d7",
-        "listing_id": "lst_7f30190b478ae8717a12",
-        "lot_id": "lot_9a141e691280af5f01c6",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
-        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "offer_id": "ofr_674ac2537929a36cd510",
+        "listing_id": "lst_72177065fede904c3932",
+        "lot_id": "lot_2a085c5b5b30dee55156",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
+        "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -1349,9 +1405,10 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": false,
-        "trace_id": "d70f55baab934003a249514838906361",
-        "created_at": "2026-10-23T20:00:46.484809+00:00",
-        "updated_at": "2026-10-23T20:00:46.511925+00:00",
+        "trace_id": "628566ddfb52461fa3d39043d42bff68",
+        "created_at": "2026-11-04T13:46:44.292487+00:00",
+        "updated_at": "2026-11-04T13:46:44.426291+00:00",
+        "pool_id": null,
         "buyer_name": "Recorded buyer (a recording, no real business)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
@@ -1362,7 +1419,7 @@
         "payment": {
           "state": "not_connected",
           "link_made": false,
-          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay her onward from it, and settlement stays not connected for this order.",
+          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay the farmer from it, and settlement stays not connected for this order.",
           "refund_owed_inr": null,
           "refund_note": null
         },
@@ -1419,17 +1476,20 @@
           "can_change_number": false,
           "can_stop": false,
           "can_report": false
-        }
+        },
+        "pooled": null,
+        "pool": null,
+        "from_aiaic": null
       },
       {
-        "order_id": "ord_8f970da17287a216126d",
-        "transaction_id": "txn_059364b3557eb5b8e396",
+        "order_id": "ord_6eb89bacd293d63bccf0",
+        "transaction_id": "txn_57db673655a1602d469f",
         "tenant_id": "rec-farmer",
-        "offer_id": "ofr_c5925e399ee14b846e2b",
-        "listing_id": "lst_b68d4f292b9edb706538",
-        "lot_id": "lot_5508ec7d55008564b50b",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
-        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "offer_id": "ofr_aef764df77144a8c6662",
+        "listing_id": "lst_14c7c04b005094aa9b27",
+        "lot_id": "lot_ef596e781b7fc249f664",
+        "farmer_id": "frm_b952cba6bc2a5f99a193",
+        "buyer_id": "byr_69e82a8b30b3f1b7f0cf",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -1449,16 +1509,17 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": false,
-        "trace_id": "71766886e21945cbb9b2029cc963fece",
-        "created_at": "2026-10-23T20:00:46.222239+00:00",
-        "updated_at": "2026-10-23T20:00:46.250436+00:00",
+        "trace_id": "3fea3eefc9874853ac0d84f57297e236",
+        "created_at": "2026-11-04T13:46:43.249390+00:00",
+        "updated_at": "2026-11-04T13:46:43.452950+00:00",
+        "pool_id": null,
         "buyer_name": "Recorded buyer (a recording, no real business)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
         "fulfilment": [
           {
-            "event_id": "ful_4e649e9a7203f2e84196",
-            "order_id": "ord_8f970da17287a216126d",
+            "event_id": "ful_8658c1e7dd5d723bd983",
+            "order_id": "ord_6eb89bacd293d63bccf0",
             "stage": "pickup",
             "status": "done",
             "reference": null,
@@ -1468,12 +1529,12 @@
             },
             "evidence_kind": "operator_observed",
             "simulated": false,
-            "trace_id": "db28f1f6e19a40f08721ff49cdc72655",
-            "created_at": "2026-10-23T20:00:46.250436+00:00"
+            "trace_id": "bbdfb1345c324b63b7f1dcfea4f6f25d",
+            "created_at": "2026-11-04T13:46:43.452950+00:00"
           },
           {
-            "event_id": "ful_40af20ccb16ee6d5f08d",
-            "order_id": "ord_8f970da17287a216126d",
+            "event_id": "ful_b4e62893da69cd1fc5d1",
+            "order_id": "ord_6eb89bacd293d63bccf0",
             "stage": "delivery_exception",
             "status": "done",
             "reference": null,
@@ -1484,8 +1545,8 @@
             },
             "evidence_kind": "operator_observed",
             "simulated": false,
-            "trace_id": "7d9624b0f57247c7ad12ed8be8968211",
-            "created_at": "2026-10-23T20:00:46.360658+00:00"
+            "trace_id": "a9b7244b0b64495b9e541d9d1fc13813",
+            "created_at": "2026-11-04T13:46:43.826436+00:00"
           }
         ],
         "reconciliation": null,
@@ -1497,7 +1558,7 @@
         "payment": {
           "state": "not_connected",
           "link_made": false,
-          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay her onward from it, and settlement stays not connected for this order.",
+          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay the farmer from it, and settlement stays not connected for this order.",
           "refund_owed_inr": null,
           "refund_note": null
         },
@@ -1554,7 +1615,10 @@
           "can_change_number": false,
           "can_stop": false,
           "can_report": false
-        }
+        },
+        "pooled": null,
+        "pool": null,
+        "from_aiaic": null
       }
     ],
     "payout_account": {
@@ -1563,7 +1627,7 @@
       "test_mode": false,
       "test_values_only": false,
       "account": {
-        "payout_account_id": "pac_063fe004592e39239da7",
+        "payout_account_id": "pac_d5996577fc1d5875cf14",
         "provider": "razorpay_route",
         "status": "created",
         "refused_code": null,
@@ -1576,7 +1640,7 @@
         "requirement_codes": [],
         "name_check": "matched_by_rule",
         "consent_notice_version": "pn-0b66a47d1399",
-        "consent_given_at": "2026-10-23T20:00:47.495411+00:00",
+        "consent_given_at": "2026-11-04T13:46:48.721209+00:00",
         "consent_basis": "in_app_self",
         "consent_how": null,
         "consent_read_in": "mr",
@@ -1584,8 +1648,8 @@
         "provider_closure": null,
         "test_mode": false,
         "synthetic": false,
-        "created_at": "2026-10-23T20:00:47.495411+00:00",
-        "updated_at": "2026-10-23T20:00:47.539788+00:00",
+        "created_at": "2026-11-04T13:46:48.721209+00:00",
+        "updated_at": "2026-11-04T13:46:48.862052+00:00",
         "error_code": null,
         "why": null,
         "ready": true,
@@ -1667,6 +1731,35 @@
         }
       }
     },
+    "x_destination": null,
+    "collect_then_pay": false,
+    "x_notice": {
+      "version": "xn-6a2d2946c683",
+      "en": [
+        "Where AIAIC sends your sale money: your consent",
+        "To send you the money from your sale, AIAIC gives Cashfree (Cashfree Payments, AIAIC's payment service) your UPI ID, or your bank account number with its IFSC and your name as on that account (letters and spaces only).",
+        "AIAIC keeps only Cashfree's reference and a short reminder: the last 4 digits of an account, or the first 2 letters and the bank of a UPI ID. AIAIC never keeps your account number, IFSC, UPI ID or name.",
+        "Cashfree keeps your details under its own terms; agreeing here includes agreeing to them.",
+        "To remove them: press Remove in your app, or tell a person from AIAIC, in person or in the app. AIAIC then asks Cashfree to delete them and sends nothing new to them; money already being sent for a sale goes on under that sale's own rule.",
+        "Questions or a complaint: not named yet."
+      ],
+      "mr": [
+        "AIAIC तुमच्या विक्रीचे पैसे कुठे पाठवते: तुमची संमती",
+        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, Cashfree (AIAIC ची पैसे पाठवण्याची सेवा) ला तुमचा UPI आयडी, किंवा तुमचा बँक खाते क्रमांक, त्याचा IFSC आणि त्या खात्यावर असलेले तुमचे नाव (फक्त अक्षरे आणि रिकाम्या जागा) देते.",
+        "AIAIC फक्त Cashfree चा संदर्भ आणि एक छोटी आठवण ठेवते: खात्याचे शेवटचे 4 अंक, किंवा UPI आयडीची पहिली 2 अक्षरे आणि बँक. तुमचा खाते क्रमांक, IFSC, UPI आयडी किंवा नाव AIAIC कधीही ठेवत नाही.",
+        "Cashfree तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
+        "ही माहिती काढून टाकण्यासाठी: तुमच्या अॅपमध्ये काढा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष भेटून किंवा अॅपमध्ये सांगा. त्यानंतर AIAIC, Cashfree ला ती हटवायला सांगते आणि तिथे नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवले जात असलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
+        "प्रश्न किंवा तक्रार: अजून ठरलेले नाही."
+      ],
+      "hi": [
+        "AIAIC आपकी बिक्री का पैसा कहाँ भेजता है: आपकी सहमति",
+        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, Cashfree (AIAIC की भुगतान सेवा) को आपकी UPI आईडी, या आपका बैंक खाता नंबर, उसका IFSC और उस खाते पर दर्ज आपका नाम (केवल अक्षर और खाली जगह) देता है।",
+        "AIAIC केवल Cashfree का संदर्भ और एक छोटी याद रखता है: खाते के आख़िरी 4 अंक, या UPI आईडी के पहले 2 अक्षर और बैंक। आपका खाता नंबर, IFSC, UPI आईडी या नाम AIAIC कभी नहीं रखता।",
+        "Cashfree आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों पर भी सहमति है।",
+        "इसे हटाने के लिए: अपने ऐप में हटाएँ दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC, Cashfree से इसे मिटाने को कहता है और वहाँ नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा जा रहा पैसा उस बिक्री के नियम से आगे बढ़ता है।",
+        "प्रश्न या शिकायत: अभी तय नहीं।"
+      ]
+    },
     "payout_notice": {
       "version": "pn-0b66a47d1399",
       "en": [
@@ -1694,9 +1787,9 @@
         "प्रश्न या शिकायत: अभी तय नहीं।"
       ]
     },
-    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. Settlement moves only on Razorpay's word about her share, sent to her payout account (Razorpay Route) by a link that carries it, the buyer paying the payment fee on top; a link that does not carry her share does not pay her onward. Her mobile number is kept only for an order where she asked an AIAIC person to call her, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
+    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. Settlement moves only on Razorpay's word about the farmer's share, sent to their payout account (Razorpay Route) by a link that carries it, the buyer paying the payment fee on top; a link that does not carry their share does not pay them onward. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "0c19e388d4ba418295bce28383ac1a45",
+      "request_id": "bfb2e9981e504004a40a7820326cf7d9",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

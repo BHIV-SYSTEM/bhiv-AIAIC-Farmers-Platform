@@ -281,8 +281,12 @@ test("A4 her money's sentence is AIAIC's key, with rupees and India's day filled
   assert.equal(said.key, "aiaic.farmer.money.settled");
   assert.equal(said.values["amount"], "₹79,600");
   assert.equal(said.values["utr"], "UTRRECORDING01");
-  // settled_at 2026-10-23T20:00:50+00:00 is 01:30 on 24 Oct in India
-  assert.equal(said.values["day"], "2026-10-24");
+  // the day is India's day of AIAIC's own time (the recording's, so read from it: UTC+5:30, as below)
+  const at = String(settled.money?.say?.values["day"] ?? "");
+  const india = new Date(Date.parse(at) + 330 * 60_000).toISOString().slice(0, 10);
+  assert.ok(/^\d{4}-\d{2}-\d{2}T/.test(at), `AIAIC's time: "${at}"`);
+  assert.equal(said.values["day"], india);
+  assert.equal(dayOf("2026-10-23T20:00:50+00:00"), "2026-10-24", "01:30 on 24 Oct in India");
   assert.equal(dayOf("2026-10-23T18:29:59+00:00"), "2026-10-23");
   assert.equal(dayOf("2026-10-23T18:30:00+00:00"), "2026-10-24");
   assert.equal(rupees(20261.36), "₹20,261.36");
@@ -655,24 +659,46 @@ test("A16 ANN-1 a sentence never shows a hole: a fact AIAIC did not send is said
 
 test("A17 ENG-01 'Did the buyer pay you?' only where the money is outside AIAIC or her produce was handed over", () => {
   const en = wordsIn("en");
-  const fresh = mineOf("payout_mine_offered").orders.find((o) => o.money?.can_report) as AiaicOrder;
-  assert.ok(fresh, "the recording's practice order AIAIC takes her word on");
-  assert.equal(fresh.order_state, "accepted");
-  assert.equal(fresh.payment.link_made, false);
+  // AIAIC's real answer: her practice order just accepted, no link yet; AIAIC takes no word of hers there while it can
+  // still make the buyer's link (its own rule since the push 2 audit, ENG-01: `link_still_possible`)
+  const fresh = mineOf("payout_mine_offered").orders.find(
+    (o) => o.order_state === "accepted" && !o.payment.link_made,
+  ) as AiaicOrder;
+  assert.ok(fresh, "the recording's practice order, just accepted, no link yet");
+  assert.equal(
+    fresh.money?.can_report,
+    false,
+    "AIAIC takes no word of hers while it can make the link",
+  );
+  assert.equal(fresh.money?.why_not_report?.code, "link_still_possible", "AIAIC's own reason");
   assert.equal(
     asksHerWord(fresh),
     false,
     "just accepted, no link yet: no question (a 'Not yet' closes the link)",
   );
   assert.equal(moneyCard(en, fresh), null, "and no money card on that order");
+  // where AIAIC takes her word (`can_report`), the question still waits for her produce to be handed over
+  const takes = {
+    ...fresh,
+    money: {
+      ...(fresh.money as NonNullable<AiaicOrder["money"]>),
+      can_report: true,
+      why_not_report: null,
+    },
+  };
+  assert.equal(asksHerWord(takes), false, "her word taken, nothing handed over: no question yet");
   const step = (stage: string) => ({ stage, status: "done", created_at: fresh.created_at });
-  const handed = { ...fresh, fulfilment: [step("pickup")] };
+  const handed = { ...takes, fulfilment: [step("pickup")] };
   assert.equal(asksHerWord(handed), true, "handed over: she is asked");
   assert.deepEqual(moneyCard(en, handed), {
     line: DICTS.en["aiaic.farmer.money.direct.ask"],
     asks: true,
   });
-  assert.equal(asksHerWord({ ...fresh, fulfilment: [step("delivery_exception")] }), false);
+  assert.equal(
+    asksHerWord({ ...takes, fulfilment: [step("delivery_exception")] }),
+    false,
+    "a problem on the way is no handover",
+  );
   const direct = client
     .mineForBrowser(DERIVED.answer)
     .orders.find((o) => o.money?.route === "direct") as AiaicOrder;
@@ -1842,7 +1868,12 @@ test("B13 ANN-1 her 'I got the money' goes with no amount, and AIAIC's answer to
   try {
     settings(s.url, USER, PASSWORD);
     asHer(s);
-    const order = "ord_6e5c6a9c56d2cb56fce7";
+    // the order of the derived answer her report is about (an operator recorded it paid outside AIAIC: `direct`)
+    const order =
+      client
+        .mineForBrowser(DERIVED.answer)
+        .orders.find((o) => o.money?.say?.key === "farmer.money.direct.said_got")?.order_id ?? "";
+    assert.ok(order.startsWith("ord_"), `the derived answer's order: "${order}"`);
     assert.equal((await client.reportPayment(newPressKey(), order, "received")).ok, true);
     const sent = s.posts.find((p) => p.path === `/farmer/trade/orders/${order}/payment-report`);
     assert.deepEqual(sent?.body, { what: "received" }, "she said no amount: none is sent");

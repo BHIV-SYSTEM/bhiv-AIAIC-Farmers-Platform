@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "POST /farmer/trade/payout-account",
-    "at": "2026-10-23T20:00:50+00:00",
+    "at": "2026-11-04T13:46:56+00:00",
     "status": 200,
     "replay": "false",
     "signed_in": true,
@@ -18,12 +18,12 @@
         "upi_id_sent": true
       }
     },
-    "note": "A real answer of the real route on a *_test database: rehearsal records (a practice account's own sale in the app, tenant rec-farmer, or an operator's rehearsal farmer, tenant rec-nashik), her share in the buyer's link through Razorpay Route with Razorpay STOOD IN FOR on this machine (TEST keys; no request reached Razorpay; no money; the fee rule, the cooling time and the hold cap set for this recording only). A request that carried her payout details is kept WITHOUT them. Replayed by the web and phone tests, never edited by hand."
+    "note": "A real answer of the real route on a *_test database: rehearsal records (a practice account's own sale in the app, tenant rec-farmer, or an operator's rehearsal farmer, tenant rec-nashik), their share in the buyer's link through Razorpay Route with Razorpay STOOD IN FOR on this machine (TEST keys; no request reached Razorpay; no money; the fee rule, the cooling time and the hold cap set for this recording only). A request that carried their payout details is kept WITHOUT them. Replayed by the web and phone tests, never edited by hand. Razorpay is NAMED IN-PROCESS for this recording (AIAIC_PAYMENT_PROVIDER=razorpay): kept but not wired since 4 Nov 2026, when Cashfree became the server's default provider."
   },
   "answer": {
-    "party_id": "frm_3c4e526b8b4d7e46fe58",
+    "party_id": "frm_880391d6d87d3d7e222f",
     "account": {
-      "payout_account_id": "pac_8fef36d0ce1b8de0db90",
+      "payout_account_id": "pac_ac73104b9c0ea4100783",
       "provider": "razorpay_route",
       "status": "created",
       "refused_code": null,
@@ -36,7 +36,7 @@
       "requirement_codes": [],
       "name_check": "matched_by_rule",
       "consent_notice_version": "pn-0b66a47d1399",
-      "consent_given_at": "2026-10-23T20:00:50.147267+00:00",
+      "consent_given_at": "2026-11-04T13:46:55.942520+00:00",
       "consent_basis": "in_app_self",
       "consent_how": null,
       "consent_read_in": "hi",
@@ -44,18 +44,18 @@
       "provider_closure": null,
       "test_mode": true,
       "synthetic": true,
-      "created_at": "2026-10-23T20:00:50.147267+00:00",
-      "updated_at": "2026-10-23T20:00:50.180762+00:00",
+      "created_at": "2026-11-04T13:46:55.942520+00:00",
+      "updated_at": "2026-11-04T13:46:55.981374+00:00",
       "error_code": null,
       "why": null,
       "ready": false,
       "why_not_ready": {
         "code": "account_under_review",
-        "why": "Razorpay is still reviewing her payout account: no money is sent to it yet."
+        "why": "Razorpay is still reviewing the farmer's payout account: no money is sent to it yet."
       }
     },
     "trace": {
-      "request_id": "82abd7b683594426a0c1f2368f5dbd24",
+      "request_id": "bf096405eded4e5abc964f18373349f8",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",
