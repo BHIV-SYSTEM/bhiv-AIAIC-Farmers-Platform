@@ -1074,6 +1074,32 @@ export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
   return null;
 }
 
+/** Her press on Route's form: she opened AIAIC's notice and ticked that she agrees, and AIAIC sent one. */
+export type PayoutConsent = { agreed: boolean; readNotice: boolean; notice: boolean };
+
+/** The words in Route's free boxes (the name on her PAN; a UPI ID typed as words), read for distress before any
+ * refusal (the audit of 4 Nov 2026, AN-1; D-105), as on the Cashfree form (`destinationWords`). */
+export function payoutWords(d: PayoutDetailsIn): string {
+  return [d.name_on_pan, d.destination === "upi_id" ? d.upi_id : ""]
+    .map((b) => (b ?? "").trim())
+    .filter(Boolean)
+    .join(". ");
+}
+
+/** Route's Save can be pressed whenever its free boxes hold words, else once she opened and agreed to the notice. */
+export function payoutSaveOpen(d: PayoutDetailsIn, c: PayoutConsent): boolean {
+  return payoutWords(d) !== "" || (c.agreed && c.readNotice && c.notice);
+}
+
+/** What this phone would refuse Route's form for: the box it names (`payoutDetailsProblem`), else her consent
+ * (`payout_consent_required`), or null. Said only after her words were read for distress. */
+export function payoutFormRefusal(d: PayoutDetailsIn, c: PayoutConsent): string | null {
+  return (
+    payoutDetailsProblem(d) ??
+    (c.agreed && c.readNotice && c.notice ? null : "payout_consent_required")
+  );
+}
+
 // ------------------------------------------------------------------------------------------------ transport
 
 export type TransportAttribution = { text: string; url: string };
@@ -1678,6 +1704,59 @@ export function destinationGivenBefore(dest: XDestination | null | undefined): b
  * so she is told at once; AIAIC checks again, and only its answer counts. Never changed for her. */
 export function destinationNameOk(name: string): boolean {
   return /^[A-Za-z][A-Za-z ]{0,98}[A-Za-z]$/.test(name.split(/\s+/).filter(Boolean).join(" "));
+}
+
+/** Her UPI ID or bank account form as typed, before anything is sent (`notice`: AIAIC sent the notice she agrees to). */
+export type DestinationTyped = {
+  kind: "upi_id" | "bank_account";
+  upi: string;
+  name: string;
+  account: string;
+  ifsc: string;
+  agreed: boolean;
+  notice: boolean;
+};
+
+/**
+ * NO RULE OF THIS PHONE KEEPS HER WORDS FROM THE DISTRESS SCAN (the audit of 4 Nov 2026, AN-1; the platform's rule
+ * D-105: nothing answers a person in crisis before the scan does). The words in her form's free box: the name on her
+ * bank account, or what she typed as a UPI ID. Save can be pressed whenever it holds any (`destinationSaveOpen`), and a
+ * press this phone would refuse has them read for distress first (`pressDestination`).
+ */
+export function destinationWords(f: DestinationTyped): string {
+  return (f.kind === "bank_account" ? f.name : f.upi).trim();
+}
+
+/** Save can be pressed whenever her box holds any words: no rule of this phone keeps them from the scan. */
+export function destinationSaveOpen(f: DestinationTyped): boolean {
+  return destinationWords(f) !== "";
+}
+
+/**
+ * What this phone would refuse her form for, in the form's order, by AIAIC's own codes (worded in en, mr and hi), or
+ * null: the form then goes to AIAIC, whose crisis middleware reads every body first. The name by Cashfree's rule
+ * (`destinationNameOk`) and 4 characters at least, the account and the IFSC by their lengths, a UPI ID by its @, then
+ * her tick on AIAIC's notice. Said only after her words were read for distress.
+ */
+export function destinationRefusal(f: DestinationTyped): string | null {
+  if (f.kind === "bank_account") {
+    if (!destinationNameOk(f.name)) return "account_name_letters_only";
+    if (f.name.trim().length < 4) return "account_name_not_valid";
+    if (f.account.length < 5) return "account_number_not_valid";
+    if (f.ifsc.length !== 11) return "ifsc_not_valid";
+  } else if (!f.upi.includes("@")) return "upi_id_not_valid";
+  if (!f.notice || !f.agreed) return "payout_consent_required";
+  return null;
+}
+
+/** One press of Save (D-105): a form this phone would refuse goes to the distress scan first (`refuse`, with her words
+ * and the refusal to say if they are not a crisis), and only a form it would not refuse goes to AIAIC (`give`). */
+export async function pressDestination(
+  f: DestinationTyped,
+  run: { refuse: (words: string, refusal: string) => Promise<void>; give: () => Promise<void> },
+): Promise<void> {
+  const refusal = destinationRefusal(f);
+  return refusal ? run.refuse(destinationWords(f), refusal) : run.give();
 }
 /** Her offer weighed against the mandi (`GET /farmer/trade/offers/{id}/compare`). */
 /** Which side leaves her more, and by how much (the server's figures: never a sum or a sign worked out here). */

@@ -17,11 +17,19 @@ import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { createElement } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  RouterContextProvider,
+  createMemoryHistory,
+  createRootRoute,
+  createRouter,
+} from "@tanstack/react-router";
+import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 
-import { NotRefreshedLine } from "../src/components/farm/aiaic/AiaicBits";
+import { NotRefreshedLine, ProblemCard } from "../src/components/farm/aiaic/AiaicBits";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
+import { DestinationForm } from "../src/components/farm/aiaic/FromAiaicCard";
 import { GroupOfferSteps, GroupSaleSteps } from "../src/components/farm/aiaic/GroupPages";
 import {
   GroupStepsLine,
@@ -77,11 +85,21 @@ import {
   pressKeyHolder,
   destinationGivenBefore,
   destinationNameOk,
+  destinationRefusal,
+  destinationSaveOpen,
+  destinationWords,
+  payoutFormRefusal,
+  payoutSaveOpen,
+  payoutWords,
+  pressDestination,
   providerKey,
   providerName,
   routeCardShown,
+  type DestinationTyped,
   type XDestination,
+  type XNotice,
 } from "../src/lib/aiaic-trade";
+import { scanThenRefuse, type AskTheScan } from "../src/lib/aiaic-scan";
 import {
   GROUP_STEPS,
   OFFER_CLOSED_REASONS,
@@ -560,7 +578,9 @@ test("A11 every new line is in en, mr and hi, with the same blanks, and mr/hi ca
       const line = DICTS[lang][key];
       assert.ok(line, `${lang} has no ${key}`);
       assert.equal(blanks(line), blanks(DICTS.en[key] ?? ""), `${lang} ${key}: other blanks`);
-      const words = line.replace(/\{[a-z_]+\}/g, "").match(/[A-Za-z]+/g) ?? [];
+      // the bank name's hint shows the letters themselves, "(A-Z)" (the audit of 4 Nov 2026, AN-1): that line only
+      const own = key === "aiaic.dest.name_rule" ? line.replace("(A-Z)", "") : line;
+      const words = own.replace(/\{[a-z_]+\}/g, "").match(/[A-Za-z]+/g) ?? [];
       for (const w of words) assert.ok(LATIN_ALLOWED.has(w), `${lang} ${key}: English word "${w}"`);
     }
   }
@@ -1480,6 +1500,9 @@ type StandIn = {
   wrongPassword: boolean;
   expireNext: boolean;
   distressOnWrite: boolean;
+  /** Every write answered with AIAIC's real crisis answer (safety_check_crisis.json): its middleware answers every
+   * route in that one shape, before the route's own rules. */
+  crisisRecorded: boolean;
   /** The fixture GET /farmer/trade answers with, when set (else by `practice`). */
   mine: string | null;
   /** The fixture GET /transport/nearby-mandis answers with. */
@@ -1518,6 +1541,7 @@ async function standIn(): Promise<StandIn> {
     wrongPassword: false,
     expireNext: false,
     distressOnWrite: false,
+    crisisRecorded: false,
     mine: null,
     nearby: "transport_nearby_nashik",
     compare: "offer_compare_depends_on_sharing",
@@ -1596,6 +1620,7 @@ async function standIn(): Promise<StandIn> {
       if (req.method === "POST") {
         const key = req.headers["idempotency-key"];
         s.posts.push({ path: u.pathname, key: typeof key === "string" ? key : undefined, body });
+        if (s.crisisRecorded) return send(200, answer("safety_check_crisis"));
         if (s.distressOnWrite) {
           return send(200, {
             distress: true,
@@ -3031,6 +3056,24 @@ const ROUTE_ONLY = [
 const sourceOf = (file: string) =>
   fs.readFileSync(path.join(APP, "src", "components", "farm", "aiaic", file), "utf-8");
 
+/** A router for a part of a page rendered on the server (its links and server functions need one; nothing is loaded). */
+const appRouter = createRouter({
+  routeTree: createRootRoute(),
+  history: createMemoryHistory({ initialEntries: ["/"] }),
+});
+/** A part of a page rendered on the server as the app holds it (a router, a query cache, the reader's language), its
+ * texts joined. Nothing is asked of AIAIC by a render: a server function runs only on a press. */
+const inApp = (el: ReactElement, lang: (typeof LANGS)[number] = "en") =>
+  renderToString(
+    createElement(RouterContextProvider, {
+      router: appRouter as never,
+      children: createElement(QueryClientProvider, {
+        client: new QueryClient(),
+        children: createElement(I18nProvider, { initialLang: lang, children: el }),
+      }),
+    }),
+  ).replaceAll("<!-- -->", "");
+
 test("A47 her money's provider is named only as AIAIC names it: Cashfree where it says so, none where it names none, RazorpayX nowhere", () => {
   for (const lang of LANGS) {
     const lines = Object.entries(DICTS[lang]).filter(([k]) => k.startsWith("aiaic."));
@@ -3230,7 +3273,10 @@ test("A49 her details' refusals on AIAIC's Cashfree branch are worded in en, mr 
   for (const [name, ok] of NAMES) assert.equal(destinationNameOk(name), ok, `"${name}"`);
   const card = sourceOf("FromAiaicCard.tsx");
   assert.ok(card.includes('t("aiaic.dest.name_rule")'), "the rule is said beside the name box");
-  assert.ok(card.includes("destinationNameOk(name)"), "a name that breaks it is said at once");
+  assert.ok(
+    !card.includes("destinationNameOk("),
+    "the rule never locks Save: a name that breaks it is refused after the distress scan (AN-1: A52)",
+  );
   for (const lang of LANGS)
     assert.ok(DICTS[lang]["aiaic.dest.name_rule"], `${lang} says the name's rule`);
 });
@@ -3342,6 +3388,247 @@ test("A51 the policies name Cashfree as AIAIC's payment processor and its refund
   );
 });
 
+// ------------- A and B, the audit of 4 Nov 2026 on the Cashfree switch (AN-1 to AN-7): each fix checked by what she reads
+
+/** AIAIC's own crisis phrases, COPIED from crisis tests that exist (a crisis test set needs people: none is written here).
+ * Hindi and English: CRISIS_HI and CRISIS_EN of AIAIC's engine/tests/test_every_route_reads_its_own_boxes_behind_the_middleware.py;
+ * Marathi: AIAIC's engine/tests/test_farmer_distress_path.py, also this app's tests/aiaic_storage_suite.ts (S46). */
+const CRISIS_HI = "मुझे मरना है";
+const CRISIS_EN = "I want to die";
+const CRISIS_MR = "मी आत्महत्या करणार";
+/** Cashfree's public test account and IFSC (its data-to-test page, as B20): a stand-in, never a person's. */
+const TEST_BANK = { account: "026291800001191", ifsc: "YESB0000262" };
+/** The helplines of AIAIC's real crisis answer (safety_check_crisis.json), as her crisis card says them. */
+const HELPLINES = ["14416", "1800-891-4416", "1800-180-1551"];
+
+test("A52 AN-1 her words in a payout form reach the distress scan before any refusal of this phone: Save opens on any words, a crisis gets the helplines, her own script gets the letters refusal only after the scan", async () => {
+  // AIAIC's real crisis answer (POST /safety/check, recorded by AIAIC's recorder): its middleware answers every route in
+  // this one shape. The scan is this server's own read of it (`scanFirst`), with fetch answered here: nothing leaves.
+  const crisisAnswer = answer<Record<string, unknown>>("safety_check_crisis");
+  const realFetch = globalThis.fetch;
+  const log: string[] = [];
+  let scanAnswer: Record<string, unknown> = crisisAnswer;
+  globalThis.fetch = (async (url: string | URL | Request) => {
+    log.push(`asked ${new URL(String(url)).pathname}`);
+    return new Response(JSON.stringify(scanAnswer), { status: 200 });
+  }) as typeof fetch;
+  // the scan as the page asks it (`scanFirst`'s server function: AIAIC's crisis card, or a clean read)
+  const ask: AskTheScan = async ({ data }) => {
+    const crisis = await account.scanFirst(data);
+    return crisis ? { ok: false, code: "crisis", crisis } : { ok: true };
+  };
+  const seen: { card: AiaicProblem | null } = { card: null };
+  const said = {
+    crisis: (crisis: AiaicProblem["crisis"]) => {
+      log.push("crisis card");
+      seen.card = problem("crisis", { crisis });
+    },
+    say: (code: string) => log.push(`refused ${code}`),
+  };
+  // one press of Save on her UPI ID or bank account form, as the card wires it (`pressDestination`)
+  const press = (typed: DestinationTyped, lang: (typeof LANGS)[number]) =>
+    pressDestination(typed, {
+      refuse: (words, refusal) => scanThenRefuse(ask, words, lang, refusal, said),
+      give: async () => {
+        log.push("sent to AIAIC");
+      },
+    });
+  const helplinesShown = (what: string) => {
+    const html = inApp(createElement(ProblemCard, { problem: seen.card ?? problem("none") }));
+    assert.ok(html.includes("data-crisis"), `${what}: the crisis card`);
+    for (const phone of HELPLINES) assert.ok(html.includes(phone), `${what}: helpline ${phone}`);
+    assert.ok(
+      !html.includes(enSaid("aiaic.refused.account_name_letters_only")),
+      `${what}: no refusal`,
+    );
+  };
+  try {
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_MR, "mr"],
+    ] as const)
+      for (const boxes of [TEST_BANK, { account: "", ifsc: "" }])
+        for (const agreed of [true, false]) {
+          const typed: DestinationTyped = {
+            kind: "bank_account",
+            upi: "",
+            name: words,
+            ...boxes,
+            agreed,
+            notice: true,
+          };
+          const what = `"${words}", account and IFSC ${boxes.account ? "filled" : "empty"}, ticked ${agreed}`;
+          assert.equal(destinationSaveOpen(typed), true, `${what}: Save can be pressed`);
+          assert.equal(
+            destinationRefusal(typed),
+            "account_name_letters_only",
+            `${what}: refused here`,
+          );
+          log.length = 0;
+          seen.card = null;
+          await press(typed, lang);
+          assert.deepEqual(
+            log,
+            ["asked /safety/check", "crisis card"],
+            `${what}: the scan first, then the crisis card, and no refusal`,
+          );
+          helplinesShown(what);
+        }
+    // a name in her own script that is not a crisis: the letters refusal, said only after the scan read it
+    scanAnswer = { distress: false };
+    const own: DestinationTyped = {
+      kind: "bank_account",
+      upi: "",
+      name: "सुनीता पाटील",
+      ...TEST_BANK,
+      agreed: true,
+      notice: true,
+    };
+    assert.equal(destinationSaveOpen(own), true, "her own script: Save can be pressed");
+    log.length = 0;
+    await press(own, "mr");
+    assert.deepEqual(log, ["asked /safety/check", "refused account_name_letters_only"]);
+    for (const lang of LANGS) {
+      const refusal = DICTS[lang]["aiaic.refused.account_name_letters_only"] ?? "";
+      assert.ok(
+        refusal && refusal !== DICTS[lang]["aiaic.dest.name_rule"],
+        `${lang}: its own words`,
+      );
+    }
+    // the same words in the UPI ID box: read first too (the box's rule is its @)
+    scanAnswer = crisisAnswer;
+    const upi: DestinationTyped = { ...own, kind: "upi_id", upi: CRISIS_HI };
+    assert.equal(destinationWords(upi), CRISIS_HI);
+    assert.equal(destinationSaveOpen(upi), true, "the UPI ID box: Save can be pressed");
+    log.length = 0;
+    await press(upi, "hi");
+    assert.deepEqual(log, ["asked /safety/check", "crisis card"], "the UPI ID box: read first");
+    // nothing typed: nothing to read, and the form is not complete
+    assert.equal(destinationSaveOpen({ ...own, name: "   " }), false, "no words: Save waits");
+    // a form this phone would not refuse goes to AIAIC, whose middleware reads every body first (B21)
+    const complete: DestinationTyped = { ...own, name: "Recording Farmer" };
+    assert.equal(destinationRefusal(complete), null);
+    log.length = 0;
+    await press(complete, "en");
+    assert.deepEqual(
+      log,
+      ["sent to AIAIC"],
+      "no scan of this phone's: AIAIC's middleware reads it",
+    );
+    // every other rule of this phone is a refusal said after the scan, in AIAIC's own codes (worded in en, mr and hi)
+    const refusals: [DestinationTyped, string][] = [
+      [{ ...complete, name: "Ram" }, "account_name_not_valid"],
+      [{ ...complete, account: "1234" }, "account_number_not_valid"],
+      [{ ...complete, ifsc: "YESB000026" }, "ifsc_not_valid"],
+      [{ ...complete, agreed: false }, "payout_consent_required"],
+      [{ ...complete, notice: false }, "payout_consent_required"],
+      [{ ...complete, kind: "upi_id", upi: "no-at-sign" }, "upi_id_not_valid"],
+    ];
+    for (const [typed, code] of refusals) {
+      assert.equal(destinationRefusal(typed), code, code);
+      for (const lang of LANGS) assert.ok(DICTS[lang][`aiaic.refused.${code}`], `${lang} ${code}`);
+    }
+    // ROUTE's form (its card shows only where AIAIC wires Route): the name on her PAN, read first in the same order
+    const route = {
+      destination: "bank_account" as const,
+      pan: "",
+      name_on_pan: CRISIS_HI,
+      account_number: "",
+      ifsc: "",
+    };
+    const none = { agreed: false, readNotice: false, notice: true };
+    assert.equal(
+      payoutSaveOpen(route, none),
+      true,
+      "Route: Save opens on her words, ticked or not",
+    );
+    assert.equal(payoutFormRefusal(route, none), "pan", "Route: refused here");
+    log.length = 0;
+    await scanThenRefuse(ask, payoutWords(route), "hi", payoutFormRefusal(route, none) ?? "", said);
+    assert.deepEqual(log, ["asked /safety/check", "crisis card"], "Route: the scan first");
+    assert.equal(
+      payoutSaveOpen({ ...route, name_on_pan: " " }, none),
+      false,
+      "Route: nothing typed",
+    );
+    const given = { agreed: true, readNotice: true, notice: true };
+    assert.equal(
+      payoutSaveOpen({ ...route, name_on_pan: "" }, given),
+      true,
+      "Route: ticked, as before",
+    );
+    const good = {
+      destination: "bank_account" as const,
+      pan: "AAAPZ4321K",
+      name_on_pan: "Practice Payee Testname",
+      account_number: "000123456789",
+      ifsc: "RECT0000001",
+    };
+    assert.equal(payoutFormRefusal(good, given), null, "Route: complete, to AIAIC");
+    assert.equal(
+      payoutFormRefusal(good, { ...given, readNotice: false }),
+      "payout_consent_required",
+    );
+    assert.equal(
+      payoutWords({ ...good, destination: "upi_id", upi_id: CRISIS_MR }),
+      `Practice Payee Testname. ${CRISIS_MR}`,
+      "Route: a UPI ID typed as words is read too",
+    );
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  // the card: the rule a plain hint under the box, always there; Save by her words; the press through the scan
+  const notice = (mineOf("collect_mine_paid") as { x_notice?: XNotice | null }).x_notice;
+  assert.ok(notice, "the recording holds AIAIC's notice");
+  for (const lang of LANGS) {
+    const html = inApp(
+      createElement(DestinationForm, { dest: null, notice, largeAmount: true }),
+      lang,
+    );
+    const hint = html.match(/<span id="aiaic-dest-name-rule" class="([^"]*)"[^>]*>([^<]*)</);
+    assert.ok(hint, `${lang}: the hint under the name box`);
+    assert.equal(
+      hint[2],
+      escHtml(DICTS[lang]["aiaic.dest.name_rule"] ?? "?"),
+      `${lang}: its words`,
+    );
+    assert.ok(
+      hint[1].includes("text-muted-foreground") && !hint[1].includes("destructive"),
+      `${lang}: plain, never red`,
+    );
+    assert.ok(!html.includes("aria-invalid"), `${lang}: no box marked wrong before a press`);
+  }
+  assert.ok(
+    DICTS.en["aiaic.dest.name_rule"]?.includes("English letters (A-Z)") &&
+      DICTS.en["aiaic.dest.name_rule"]?.includes("passbook"),
+    "the hint names the letters and the passbook",
+  );
+  const card = sourceOf("FromAiaicCard.tsx");
+  assert.ok(
+    card.includes("useScanBeforeRefusing()"),
+    "the card asks the registration form's own scan",
+  );
+  assert.ok(card.includes("const ready = destinationSaveOpen(typed);"), "Save opens on her words");
+  assert.ok(
+    /pressDestination\(typed, \{\s*refuse: \(words, refusal\) =>\s*scan\.refuse\(words, activeLang, refusal,/.test(
+      card,
+    ),
+    "a press this phone would refuse goes through the scan",
+  );
+  assert.ok(card.includes('scan.inCrisis ? problemOf("crisis"'), "the scan's crisis card is shown");
+  const payments = sourceOf("AiaicPayments.tsx");
+  const routeSend = payments.slice(payments.indexOf("const send = async () => {"));
+  assert.ok(
+    routeSend.indexOf("scan.refuse(payoutWords(details)") > 0 &&
+      routeSend.indexOf("scan.refuse(payoutWords(details)") < routeSend.indexOf("giveFn("),
+    "Route: the scan before anything is said or sent",
+  );
+  assert.ok(
+    payments.includes("!payoutSaveOpen(details, consent)"),
+    "Route: Save opens on her words",
+  );
+});
+
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
   const s = await standIn();
   try {
@@ -3382,6 +3669,53 @@ test("B20 her details through this server: a name Cashfree refuses is said by AI
       const line = wordsIn(lang)(said.key, said.values);
       assert.ok(line.includes("Cashfree") && !HOLE.test(line), `${lang}: "${line}"`);
     }
+  } finally {
+    await s.close();
+  }
+});
+
+test("B21 AN-1 a form this phone would not refuse goes to AIAIC, whose crisis middleware answers first: the helplines on her form", async () => {
+  const s = await standIn();
+  try {
+    settings(s.url, USER, PASSWORD);
+    asHer(s);
+    s.crisisRecorded = true;
+    // AIAIC's own English crisis phrase: English letters and spaces, so no rule of this phone refuses it
+    const typed: DestinationTyped = {
+      kind: "bank_account",
+      upi: "",
+      name: CRISIS_EN,
+      ...TEST_BANK,
+      agreed: true,
+      notice: true,
+    };
+    assert.equal(
+      destinationRefusal(typed),
+      null,
+      "no rule of this phone refuses it: it goes to AIAIC",
+    );
+    const r = await client.giveDestination(newPressKey(), {
+      agreed: true,
+      notice_version: "xn-standin00",
+      read_in: "en",
+      kind: "bank_account",
+      name: typed.name,
+      account_number: typed.account,
+      ifsc: typed.ifsc,
+    });
+    assert.equal(
+      r.ok ? null : r.problem.code,
+      "crisis",
+      "AIAIC's crisis card, before its own rules",
+    );
+    const html = inApp(createElement(ProblemCard, { problem: r.ok ? problem("none") : r.problem }));
+    assert.ok(html.includes("data-crisis"), "the crisis card on her form");
+    for (const phone of HELPLINES) assert.ok(html.includes(phone), `helpline ${phone}`);
+    assert.equal(
+      s.posts.filter((p) => p.path === "/farmer/trade/payout-destination").length,
+      1,
+      "her press reached AIAIC once",
+    );
   } finally {
     await s.close();
   }

@@ -122,7 +122,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.dest.upi_one_lakh":
     "Your amount is ₹1,00,000 or more: a UPI ID cannot receive it in one payment. Give a bank account instead.",
   "aiaic.dest.name": "Name as in the bank",
-  "aiaic.dest.name_rule": "English letters and spaces only, as on your bank account.",
+  "aiaic.dest.name_rule": "English letters (A-Z) and spaces only, as printed on your passbook.",
   "aiaic.dest.account": "Account number",
   "aiaic.dest.ifsc": "IFSC (11 letters and numbers)",
   "aiaic.dest.agree": "I have read the notice above and I agree.",
@@ -1182,7 +1182,8 @@ export const AIAIC_MR: Dict = {
   "aiaic.dest.upi_one_lakh":
     "तुमची रक्कम ₹1,00,000 किंवा जास्त आहे: यूपीआय आयडीवर ती एका पेमेंटमध्ये येऊ शकत नाही. त्याऐवजी बँक खाते द्या.",
   "aiaic.dest.name": "बँकेतील नाव",
-  "aiaic.dest.name_rule": "फक्त इंग्रजी अक्षरे आणि रिकाम्या जागा, तुमच्या बँक खात्यावर आहे तसे.",
+  "aiaic.dest.name_rule":
+    "फक्त इंग्रजी अक्षरे (A-Z) आणि रिकाम्या जागा, तुमच्या पासबुकवर छापले आहे तसे.",
   "aiaic.dest.account": "खाते क्रमांक",
   "aiaic.dest.ifsc": "आयएफएससी (11 अक्षरे व अंक)",
   "aiaic.dest.agree": "वरील सूचना मी वाचली आणि मला मान्य आहे.",
@@ -2241,7 +2242,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.dest.upi_one_lakh":
     "आपकी राशि ₹1,00,000 या ज़्यादा है: यूपीआई आईडी पर यह एक भुगतान में नहीं आ सकती। इसके बजाय बैंक खाता दें।",
   "aiaic.dest.name": "बैंक में दर्ज नाम",
-  "aiaic.dest.name_rule": "केवल अंग्रेज़ी अक्षर और खाली जगह, जैसा आपके बैंक खाते पर है।",
+  "aiaic.dest.name_rule": "केवल अंग्रेज़ी अक्षर (A-Z) और खाली जगह, जैसा आपकी पासबुक पर छपा है।",
   "aiaic.dest.account": "खाता संख्या",
   "aiaic.dest.ifsc": "आईएफ़एससी (11 अक्षर और अंक)",
   "aiaic.dest.agree": "ऊपर की सूचना मैंने पढ़ी और मुझे मंज़ूर है।",

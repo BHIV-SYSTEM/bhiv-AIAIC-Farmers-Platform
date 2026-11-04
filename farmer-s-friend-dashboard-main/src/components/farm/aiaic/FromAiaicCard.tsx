@@ -10,18 +10,24 @@
  * (`x_notice`, in her language; its version and the language are said back with her press); it goes to AIAIC's payments
  * provider (since 4 Nov 2026 Cashfree, as AIAIC names it: `x_destination.provider`) and AIAIC keeps only a masked hint.
  * She removes it here by her own press too, and AIAIC asks that provider to delete it (the audit of 28 Oct 2026:
- * MONEY-07, -11; PRIVACY-03, -04, -05, -14). A bank account's name is Cashfree's rule: letters and spaces only, said
- * before she presses, never changed for her (AIAIC's `account_name_letters_only`).
+ * MONEY-07, -11; PRIVACY-03, -04, -05, -14). A bank account's name is Cashfree's rule: English letters and spaces
+ * only, said as a plain hint under the box, never changed for her (AIAIC's `account_name_letters_only`). NO RULE OF
+ * THIS PHONE KEEPS HER WORDS FROM THE DISTRESS SCAN (the audit of 4 Nov 2026, AN-1; the platform's rule D-105): Save
+ * can be pressed whenever her box holds words, and a press this phone would refuse has them read for distress first, as
+ * the registration form does; a crisis gets AIAIC's crisis card, anything else the refusal in AIAIC's own code.
  */
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Circle, IndianRupee, Loader2 } from "lucide-react";
 import { useState } from "react";
 
-import type { FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
+import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
+import type { DestinationTyped, FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
 import {
   destinationGivenBefore,
-  destinationNameOk,
+  destinationSaveOpen,
+  pressDestination,
+  problem as problemOf,
   providerKey,
   sendingSaid,
 } from "@/lib/aiaic-trade";
@@ -141,8 +147,10 @@ export function DestinationForm({
   largeAmount?: boolean;
 }) {
   const { t, lang } = useI18n();
+  const activeLang = lang === "mr" || lang === "hi" ? lang : "en";
   const qc = useQueryClient();
   const fn = useServerFn(giveMyDestination);
+  const scan = useScanBeforeRefusing();
   const [kind, setKind] = useState<"upi_id" | "bank_account">(
     largeAmount ? "bank_account" : "upi_id",
   );
@@ -187,21 +195,20 @@ export function DestinationForm({
       </div>
     );
   }
-  // the name on a bank account: Cashfree's rule, said before she presses (AIAIC checks it again)
-  const nameBroken = kind === "bank_account" && name.trim() !== "" && !destinationNameOk(name);
-  const ready =
-    Boolean(notice) &&
-    agreed &&
-    (kind === "upi_id"
-      ? upi.includes("@")
-      : name.trim().length >= 4 &&
-        destinationNameOk(name) &&
-        account.length >= 5 &&
-        ifsc.length === 11);
-  const send = async () => {
+  const typed: DestinationTyped = {
+    kind,
+    upi,
+    name,
+    account,
+    ifsc,
+    agreed,
+    notice: Boolean(notice),
+  };
+  // Save opens on any words in her box: no rule of this phone keeps them from the distress scan (AN-1, D-105)
+  const ready = destinationSaveOpen(typed);
+  const give = async () => {
     if (!notice) return;
     setBusy(true);
-    setProblem(null);
     const body =
       kind === "upi_id"
         ? { kind, upi_id: upi.trim() }
@@ -238,6 +245,19 @@ export function DestinationForm({
       }
     }
   };
+  // a press this phone would refuse: her words are read for distress BEFORE the refusal is said, as the registration
+  // form does (`useScanBeforeRefusing`); any other press goes to AIAIC, whose middleware reads every body first
+  const send = async () => {
+    setProblem(null);
+    scan.reset();
+    await pressDestination(typed, {
+      refuse: (words, refusal) =>
+        scan.refuse(words, activeLang, refusal, (code) => setProblem(problemOf(code))),
+      give,
+    });
+  };
+  // AIAIC's crisis card outranks everything (`ProblemCard` raises it to the page's gate)
+  const shown = scan.inCrisis ? problemOf("crisis", { crisis: scan.crisis }) : problem;
   return (
     <div
       className="space-y-3 rounded-2xl border-2 border-primary/40 p-3"
@@ -277,17 +297,16 @@ export function DestinationForm({
           <label className="block text-sm font-bold">
             {t("aiaic.dest.name")}
             <input
-              className={cn(INPUT, nameBroken && "border-destructive")}
+              className={INPUT}
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoComplete="off"
-              aria-invalid={nameBroken}
+              aria-describedby="aiaic-dest-name-rule"
             />
+            {/* Cashfree's rule as a plain hint, always the same: never red, never a lock on Save (AN-1) */}
             <span
-              className={cn(
-                "mt-1 block text-xs font-semibold",
-                nameBroken ? "text-destructive" : "text-muted-foreground",
-              )}
+              id="aiaic-dest-name-rule"
+              className="mt-1 block text-xs font-semibold text-muted-foreground"
               data-testid="aiaic-dest-name-rule"
             >
               {t("aiaic.dest.name_rule")}
@@ -326,14 +345,14 @@ export function DestinationForm({
         />
         {t("aiaic.dest.agree")}
       </label>
-      {problem ? <ProblemCard problem={problem} /> : null}
+      {shown ? <ProblemCard problem={shown} /> : null}
       <button
         type="button"
-        disabled={!ready || busy}
+        disabled={!ready || busy || scan.scanning}
         onClick={() => void send()}
         className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-lg font-extrabold text-primary-foreground disabled:opacity-50"
       >
-        {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : null}
+        {busy || scan.scanning ? <Loader2 className="size-5 animate-spin" aria-hidden /> : null}
         {t("aiaic.dest.save")}
       </button>
     </div>

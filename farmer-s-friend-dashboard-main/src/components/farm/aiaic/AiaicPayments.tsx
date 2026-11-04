@@ -14,6 +14,7 @@ import { useState } from "react";
 
 import { usePress } from "@/lib/aiaic-crisis";
 import { useMine } from "@/lib/aiaic-hooks";
+import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import {
   commissionParts,
   cropName,
@@ -21,7 +22,10 @@ import {
   moneyTotals,
   newPressKey,
   paymentLine,
-  payoutDetailsProblem,
+  payoutFormRefusal,
+  payoutSaveOpen,
+  payoutWords,
+  problem as problemOf,
   quintalWords,
   quintals,
   routeCardShown,
@@ -203,6 +207,7 @@ function PayoutAccountCard({
   const giveFn = useServerFn(givePayoutAccount);
   const withdrawFn = useServerFn(withdrawPayoutAccount);
   const press = usePress();
+  const scan = useScanBeforeRefusing();
   const [open, setOpen] = useState(false);
   const [readNotice, setReadNotice] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -242,20 +247,35 @@ function PayoutAccountCard({
 
   const said = moneySaid(t, "payout", block.say);
   const lines = notice ? (notice[lang as Lang] ?? notice.en) : [];
+  const details = {
+    destination,
+    pan,
+    name_on_pan: name,
+    ...(destination === "bank_account" ? { account_number: account, ifsc } : { upi_id: upi }),
+  };
+  const consent = { agreed, readNotice, notice: Boolean(notice) };
+  const scanLang = lang === "mr" || lang === "hi" ? lang : "en";
+  // AIAIC's crisis card outranks everything (`ProblemCard` raises it to the page's gate)
+  const shown = scan.inCrisis ? problemOf("crisis", { crisis: scan.crisis }) : problem;
 
   const send = async () => {
-    if (!notice) return;
-    const details = {
-      destination,
-      pan,
-      name_on_pan: name,
-      ...(destination === "bank_account" ? { account_number: account, ifsc } : { upi_id: upi }),
-    };
-    const bad = payoutDetailsProblem(details);
-    setBadField(bad);
-    if (bad) return;
-    setBusy(true);
     setProblem(null);
+    scan.reset();
+    // a press this phone would refuse: her words are read for distress BEFORE the refusal is said (the audit of
+    // 4 Nov 2026, AN-1; D-105), as the registration form does; only then the box it names, or her tick
+    const refusal = payoutFormRefusal(details, consent);
+    if (refusal) {
+      await scan.refuse(payoutWords(details), scanLang, refusal, (code) => {
+        if (code === "payout_consent_required") {
+          setBadField(null);
+          setProblem(problemOf(code));
+        } else setBadField(code);
+      });
+      return;
+    }
+    setBadField(null);
+    if (!notice) return;
+    setBusy(true);
     const r = await press(() =>
       giveFn({
         data: {
@@ -310,7 +330,7 @@ function PayoutAccountCard({
         {block.test_values_only ? <ModeChip kind="test" /> : null}
       </div>
       {said ? <p className="text-base font-bold text-foreground">{said}</p> : null}
-      {problem ? <ProblemCard problem={problem} /> : null}
+      {shown ? <ProblemCard problem={shown} /> : null}
 
       {block.can_create ? (
         open ? (
@@ -454,7 +474,7 @@ function PayoutAccountCard({
             <div className="flex gap-2">
               <button
                 type="submit"
-                disabled={busy || !agreed || !readNotice || !notice}
+                disabled={busy || scan.scanning || !payoutSaveOpen(details, consent)}
                 className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground disabled:opacity-60"
               >
                 {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : null}
