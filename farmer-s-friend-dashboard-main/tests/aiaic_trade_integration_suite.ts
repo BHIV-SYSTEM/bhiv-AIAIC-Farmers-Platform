@@ -4644,9 +4644,149 @@ test("A61 RC2-1 every page that takes the shared scan shows its crisis card on t
     assert.ok(users.includes(page), `${page}: read`);
 });
 
-test("A62 RC2-2 nothing on either payout form says a refusal while she types: what she types is read only by its own box, Save's enablement and the press, and a refusal shows only through what her press left", () => {
-  // each form as the TypeScript compiler reads it, names resolved by its checker (the re-check's S08: a red refusal
-  // line under the name box while she types; S09: the name's label turning red; both passed every suite)
+/**
+ * A PAYOUT FORM AS THE TYPESCRIPT COMPILER READS IT (A62, A64), each name resolved by its checker: the form's component,
+ * every node of its body, its own names (its state, what it makes, its press handlers) by their declarations, its press
+ * handlers (those of `send`, `give` and `stop` it declares; `send` is her press), and Save, the one button her press runs
+ * from (its onClick, or the form's onSubmit for a submit button), with Save's `disabled`.
+ */
+function compiledForm(form: { file: string; component: string }) {
+  const file = path.join(APP, "src", "components", "farm", "aiaic", form.file);
+  const options: ts.CompilerOptions = {
+    jsx: ts.JsxEmit.ReactJSX,
+    noResolve: true,
+    noLib: true,
+    types: [],
+  };
+  const program = ts.createProgram([file], options, ts.createCompilerHost(options, true));
+  const checker = program.getTypeChecker();
+  const source = program.getSourceFile(file);
+  assert.ok(source, form.file);
+  const at = (n: ts.Node) =>
+    `${form.file}:${source.getLineAndCharacterOfPosition(n.getStart(source)).line + 1}`;
+  const all: ts.Node[] = [];
+  const collect = (n: ts.Node): void => {
+    all.push(n);
+    ts.forEachChild(n, collect);
+  };
+  collect(source);
+  const component = all.find(
+    (n): n is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(n) && n.name?.text === form.component,
+  );
+  assert.ok(component?.body, `${form.file}: ${form.component}`);
+  const body = component.body;
+  const inside = (n: ts.Node, container: ts.Node) => {
+    for (let p: ts.Node | undefined = n; p; p = p.parent) if (p === container) return true;
+    return false;
+  };
+  const ownerOf = (n: ts.Node) => {
+    for (let p = n.parent; p; p = p.parent) if (ts.isFunctionLike(p)) return p;
+    return undefined;
+  };
+  const nodes = all.filter((n) => inside(n, body));
+  const symbolOf = (id: ts.Identifier) =>
+    ts.isShorthandPropertyAssignment(id.parent) && id.parent.name === id
+      ? checker.getShorthandAssignmentValueSymbol(id.parent)
+      : checker.getSymbolAtLocation(id);
+  // the component's own names (its state, what it makes, its press handlers), by their declarations
+  const own = new Map<string, { symbol: ts.Symbol; decl: ts.Node }>();
+  for (const n of nodes)
+    if (
+      (ts.isVariableDeclaration(n) || ts.isBindingElement(n)) &&
+      ts.isIdentifier(n.name) &&
+      ownerOf(n) === component
+    ) {
+      const s = checker.getSymbolAtLocation(n.name);
+      if (s) own.set(n.name.text, { symbol: s, decl: n });
+    }
+  const refs = (s: ts.Symbol) =>
+    nodes.filter(
+      (n): n is ts.Identifier =>
+        ts.isIdentifier(n) &&
+        !(
+          (ts.isVariableDeclaration(n.parent) || ts.isBindingElement(n.parent)) &&
+          n.parent.name === n
+        ) &&
+        symbolOf(n) === s,
+    );
+  const tagOf = (el: ts.JsxOpeningLikeElement) => el.tagName.getText(source);
+  const attrOf = (el: ts.JsxOpeningLikeElement, name: string) =>
+    el.attributes.properties.find(
+      (a): a is ts.JsxAttribute => ts.isJsxAttribute(a) && a.name.getText(source) === name,
+    );
+  // the attribute a node sits in, and its element
+  const attrAround = (n: ts.Node) => {
+    for (let p = n.parent; p && p !== body; p = p.parent) {
+      if (ts.isJsxAttribute(p)) return p;
+      if (ts.isJsxElement(p) || ts.isJsxSelfClosingElement(p) || ts.isJsxFragment(p)) return null;
+    }
+    return null;
+  };
+  const elementOf = (a: ts.JsxAttribute) => a.parent.parent;
+  // her press (the form has those of these it declares)
+  const PRESS = ["send", "give", "stop"];
+  const presses = PRESS.filter((p) => own.has(p)).map((p) => {
+    const d = own.get(p)?.decl;
+    assert.ok(
+      d && ts.isVariableDeclaration(d) && d.initializer && ts.isArrowFunction(d.initializer),
+      `${form.file}: ${p} is a press handler`,
+    );
+    return { name: p, symbol: own.get(p)?.symbol, body: d.initializer };
+  });
+  assert.ok(
+    presses.some((p) => p.name === "send"),
+    `${form.file}: her press`,
+  );
+  const inPress = (n: ts.Node) => presses.some((p) => inside(n, p.body));
+  // Save: the button her press runs from (its onClick, or the form's onSubmit for a submit button)
+  const send = own.get("send")?.symbol;
+  const runsSend = (a: ts.JsxAttribute | undefined) =>
+    a !== undefined &&
+    nodes.some((n) => ts.isIdentifier(n) && inside(n, a) && symbolOf(n) === send);
+  const formOf = (el: ts.Node) => {
+    for (let p = el.parent; p && p !== body; p = p.parent)
+      if (ts.isJsxElement(p) && tagOf(p.openingElement) === "form") return p.openingElement;
+    return undefined;
+  };
+  const saves = nodes.filter(
+    (n): n is ts.JsxOpeningLikeElement =>
+      (ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
+      tagOf(n) === "button" &&
+      (runsSend(attrOf(n, "onClick")) ||
+        (attrOf(n, "type")?.initializer?.getText(source) === '"submit"' &&
+          runsSend(attrOf(formOf(n) ?? n, "onSubmit")))),
+  );
+  assert.equal(saves.length, 1, `${form.file}: one Save`);
+  const saveOpen = attrOf(saves[0] as ts.JsxOpeningLikeElement, "disabled");
+  assert.ok(saveOpen, `${form.file}: Save's enablement`);
+  return {
+    source,
+    checker,
+    at,
+    all,
+    component,
+    body,
+    nodes,
+    inside,
+    ownerOf,
+    symbolOf,
+    own,
+    refs,
+    tagOf,
+    attrOf,
+    attrAround,
+    elementOf,
+    presses,
+    inPress,
+    saveOpen,
+  };
+}
+
+test("A62 RC2-2 RC3-1 nothing on either payout form says a refusal while she types: what she types is read only by its own box, Save's enablement and the press, each box only keeps it, and a refusal shows only through what her press left", () => {
+  // each form as the TypeScript compiler reads it (`compiledForm`), names resolved by its checker (the re-check's S08: a
+  // red refusal line under the name box while she types; S09: the name's label turning red; X06 and X07: the name box's
+  // onChange also setting a validity message of the browser's, or a red line of its own; each passed every suite)
   const FORMS = [
     {
       file: "FromAiaicCard.tsx",
@@ -4661,123 +4801,35 @@ test("A62 RC2-2 nothing on either payout form says a refusal while she types: wh
       made: ["details"],
     },
   ];
-  // her press (each form has those of these it declares), and the problem only a press may leave
-  const PRESS = ["send", "give", "stop"];
+  // the problem only a press may leave
   const SETTERS = ["setProblem", "setBadField"];
   for (const form of FORMS) {
-    const file = path.join(APP, "src", "components", "farm", "aiaic", form.file);
-    const options: ts.CompilerOptions = {
-      jsx: ts.JsxEmit.ReactJSX,
-      noResolve: true,
-      noLib: true,
-      types: [],
-    };
-    const program = ts.createProgram([file], options, ts.createCompilerHost(options, true));
-    const checker = program.getTypeChecker();
-    const source = program.getSourceFile(file);
-    assert.ok(source, form.file);
-    const at = (n: ts.Node) =>
-      `${form.file}:${source.getLineAndCharacterOfPosition(n.getStart(source)).line + 1}`;
-    const all: ts.Node[] = [];
-    const collect = (n: ts.Node): void => {
-      all.push(n);
-      ts.forEachChild(n, collect);
-    };
-    collect(source);
-    const component = all.find(
-      (n): n is ts.FunctionDeclaration =>
-        ts.isFunctionDeclaration(n) && n.name?.text === form.component,
-    );
-    assert.ok(component?.body, `${form.file}: ${form.component}`);
-    const body = component.body;
-    const inside = (n: ts.Node, container: ts.Node) => {
-      for (let p: ts.Node | undefined = n; p; p = p.parent) if (p === container) return true;
-      return false;
-    };
-    const ownerOf = (n: ts.Node) => {
-      for (let p = n.parent; p; p = p.parent) if (ts.isFunctionLike(p)) return p;
-      return undefined;
-    };
-    const nodes = all.filter((n) => inside(n, body));
-    const symbolOf = (id: ts.Identifier) =>
-      ts.isShorthandPropertyAssignment(id.parent) && id.parent.name === id
-        ? checker.getShorthandAssignmentValueSymbol(id.parent)
-        : checker.getSymbolAtLocation(id);
-    // the component's own names (its state, what it makes, its press handlers), by their declarations
-    const own = new Map<string, { symbol: ts.Symbol; decl: ts.Node }>();
-    for (const n of nodes)
-      if (
-        (ts.isVariableDeclaration(n) || ts.isBindingElement(n)) &&
-        ts.isIdentifier(n.name) &&
-        ownerOf(n) === component
-      ) {
-        const s = checker.getSymbolAtLocation(n.name);
-        if (s) own.set(n.name.text, { symbol: s, decl: n });
-      }
-    const refs = (s: ts.Symbol) =>
-      nodes.filter(
-        (n): n is ts.Identifier =>
-          ts.isIdentifier(n) &&
-          !(
-            (ts.isVariableDeclaration(n.parent) || ts.isBindingElement(n.parent)) &&
-            n.parent.name === n
-          ) &&
-          symbolOf(n) === s,
-      );
-    const tagOf = (el: ts.JsxOpeningLikeElement) => el.tagName.getText(source);
-    const attrOf = (el: ts.JsxOpeningLikeElement, name: string) =>
-      el.attributes.properties.find(
-        (a): a is ts.JsxAttribute => ts.isJsxAttribute(a) && a.name.getText(source) === name,
-      );
-    // the attribute a node sits in, and its element
-    const attrAround = (n: ts.Node) => {
-      for (let p = n.parent; p && p !== body; p = p.parent) {
-        if (ts.isJsxAttribute(p)) return p;
-        if (ts.isJsxElement(p) || ts.isJsxSelfClosingElement(p) || ts.isJsxFragment(p)) return null;
-      }
-      return null;
-    };
-    const elementOf = (a: ts.JsxAttribute) => a.parent.parent;
+    const {
+      source,
+      checker,
+      at,
+      component,
+      body,
+      nodes,
+      inside,
+      ownerOf,
+      symbolOf,
+      own,
+      refs,
+      tagOf,
+      attrOf,
+      attrAround,
+      elementOf,
+      presses,
+      inPress,
+      saveOpen,
+    } = compiledForm(form);
     const shownOnPage = (n: ts.Node) => {
       for (let p = n.parent; p && p !== body; p = p.parent)
         if (ts.isJsxExpression(p) && (ts.isJsxElement(p.parent) || ts.isJsxFragment(p.parent)))
           return true;
       return false;
     };
-    const presses = PRESS.filter((p) => own.has(p)).map((p) => {
-      const d = own.get(p)?.decl;
-      assert.ok(
-        d && ts.isVariableDeclaration(d) && d.initializer && ts.isArrowFunction(d.initializer),
-        `${form.file}: ${p} is a press handler`,
-      );
-      return { name: p, symbol: own.get(p)?.symbol, body: d.initializer };
-    });
-    assert.ok(
-      presses.some((p) => p.name === "send"),
-      `${form.file}: her press`,
-    );
-    const inPress = (n: ts.Node) => presses.some((p) => inside(n, p.body));
-    // Save: the button her press runs from (its onClick, or the form's onSubmit for a submit button)
-    const send = own.get("send")?.symbol;
-    const runsSend = (a: ts.JsxAttribute | undefined) =>
-      a !== undefined &&
-      nodes.some((n) => ts.isIdentifier(n) && inside(n, a) && symbolOf(n) === send);
-    const formOf = (el: ts.Node) => {
-      for (let p = el.parent; p && p !== body; p = p.parent)
-        if (ts.isJsxElement(p) && tagOf(p.openingElement) === "form") return p.openingElement;
-      return undefined;
-    };
-    const saves = nodes.filter(
-      (n): n is ts.JsxOpeningLikeElement =>
-        (ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
-        tagOf(n) === "button" &&
-        (runsSend(attrOf(n, "onClick")) ||
-          (attrOf(n, "type")?.initializer?.getText(source) === '"submit"' &&
-            runsSend(attrOf(formOf(n) ?? n, "onSubmit")))),
-    );
-    assert.equal(saves.length, 1, `${form.file}: one Save`);
-    const saveOpen = attrOf(saves[0] as ts.JsxOpeningLikeElement, "disabled");
-    assert.ok(saveOpen, `${form.file}: Save's enablement`);
     // 1. what she typed, and anything made from it, read only by its own box, Save's enablement and her press
     const typed = new Map<ts.Symbol, string>();
     for (const v of form.typed) {
@@ -4851,20 +4903,70 @@ test("A62 RC2-2 nothing on either payout form says a refusal while she types: wh
       [],
       `${form.file}: what she types is read only by its own box, Save's enablement and her press (no className, aria-*, role or JSX text)`,
     );
-    for (const v of form.typed) {
+    for (const v of form.typed)
       assert.ok(boxes.has(v), `${form.file}: ${v} is its own box's value`);
-      const box = nodes.find(
-        (n): n is ts.JsxSelfClosingElement =>
-          ts.isJsxSelfClosingElement(n) &&
-          tagOf(n) === "input" &&
-          attrOf(n, "value")?.initializer?.getText(source) === `{${v}}`,
-      );
-      const setter = `set${v.charAt(0).toUpperCase()}${v.slice(1)}`;
+    // 1b. every box on the form is one of her boxes or her tick, and each only keeps what she types or ticks: its onChange
+    // is its own state's setter alone, of what she typed (upper-cased for a code) or of her tick, so nothing else runs
+    // while she types (the re-check of 4 Nov 2026, RC3-1 and RC3-2: an onChange that also set a validity message of the
+    // browser's, or a state of the form's own shown as a red line, passed every suite)
+    const setterOf = (state: string) => {
+      const d = own.get(state)?.decl;
+      const pair =
+        d && ts.isBindingElement(d) && ts.isArrayBindingPattern(d.parent) ? d.parent : undefined;
+      const declared = pair?.parent;
+      const second = pair?.elements[1];
+      return pair?.elements[0] === d &&
+        declared !== undefined &&
+        ts.isVariableDeclaration(declared) &&
+        declared.initializer !== undefined &&
+        ts.isCallExpression(declared.initializer) &&
+        declared.initializer.expression.getText(source) === "useState" &&
+        second !== undefined &&
+        ts.isBindingElement(second) &&
+        ts.isIdentifier(second.name)
+        ? { name: second.name.text, symbol: checker.getSymbolAtLocation(second.name) }
+        : undefined;
+    };
+    const kept: string[] = [];
+    for (const box of nodes.filter(
+      (n): n is ts.JsxOpeningLikeElement =>
+        (ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
+        ["input", "textarea", "select"].includes(tagOf(n)),
+    )) {
+      const tick = attrOf(box, "type")?.initializer?.getText(source) === '"checkbox"';
+      const holds = attrOf(box, tick ? "checked" : "value")?.initializer?.getText(source);
+      const state = tick
+        ? holds === "{agreed}"
+          ? "agreed"
+          : undefined
+        : form.typed.find((v) => holds === `{${v}}`);
+      const setter = state === undefined ? undefined : setterOf(state);
+      const init = attrOf(box, "onChange")?.initializer;
+      const change = init && ts.isJsxExpression(init) ? init.expression : undefined;
+      const said = change ? change.getText(source).replace(/\s+/g, "") : "none";
+      const keeps =
+        tagOf(box) === "input" &&
+        setter !== undefined &&
+        setter.symbol !== undefined &&
+        change !== undefined &&
+        ts.isArrowFunction(change) &&
+        ts.isCallExpression(change.body) &&
+        ts.isIdentifier(change.body.expression) &&
+        symbolOf(change.body.expression) === setter.symbol &&
+        (tick ? ["e.target.checked"] : ["e.target.value", "e.target.value.toUpperCase()"]).some(
+          (what) => said === `(e)=>${setter.name}(${what})`,
+        );
       assert.ok(
-        box && (attrOf(box, "onChange")?.initializer?.getText(source) ?? "").includes(`${setter}(`),
-        `${form.file}: ${v}'s box keeps what she types (${setter})`,
+        keeps,
+        `${at(box)} a box that only keeps what she types (her boxes ${form.typed.join(", ")} and her tick): its onChange is its own setter alone, not ${said}`,
       );
+      if (state !== undefined) kept.push(state);
     }
+    assert.deepEqual(
+      kept.sort(),
+      [...form.typed, "agreed"].sort(),
+      `${form.file}: each of her boxes, and her tick, once`,
+    );
     for (const m of form.made) assert.ok(made.includes(m), `${form.file}: ${m} is made from it`);
     assert.ok(saveReads.length > 0, `${form.file}: Save opens on what she typed`);
     // 2. the problem a form shows is left only by her press
@@ -5161,6 +5263,243 @@ test("A63 RC2-3 words in her bank boxes reach the distress scan first though not
     assert.ok(
       html.includes(escHtml(DICTS[lang]["aiaic.problem.aiaic_unavailable"] ?? "?")),
       `${lang}: the failure line a throw is said as`,
+    );
+  }
+});
+
+test("A64 RC3-1 nothing on either payout form keeps her press from the distress scan: Save opens by the shared rule alone over her words as she typed them, busy is her press's own, and the browser's own validation never refuses her press", () => {
+  // each form as the TypeScript compiler reads it (`compiledForm`). AN-1's harm (a crisis typed in her own script never
+  // reaches the scan, and no helplines show) came back with every suite green through one expression: in Save's disabled
+  // (the re-check's X08, X09), a validity message set as she types (X23) or a pattern on a box (X24), the browser then
+  // refusing to submit Route's form. The forms are right today; this holds them so
+  const FORMS = [
+    {
+      file: "FromAiaicCard.tsx",
+      component: "DestinationForm",
+      // Save waits only on the shared rule over her form (`ready`), on her press, and while the scan is asked
+      save: ["!ready", "busy", "scan.scanning"],
+      rule: "destinationSaveOpen",
+      ready: "destinationSaveOpen(typed)",
+      // what the rule and her press read: each box's state, as its own property of `typed`
+      into: "typed",
+      typed: { upi: "upi", name: "name", account: "account", ifsc: "ifsc" } as Record<
+        string,
+        string
+      >,
+      // no box cuts what she types
+      cut: {} as Record<string, string>,
+    },
+    {
+      file: "AiaicPayments.tsx",
+      component: "PayoutAccountCard",
+      save: ["busy", "scan.scanning", "!payoutSaveOpen(details,consent)"],
+      rule: "payoutSaveOpen",
+      ready: null,
+      into: "details",
+      typed: {
+        name: "name_on_pan",
+        pan: "pan",
+        account: "account_number",
+        ifsc: "ifsc",
+        upi: "upi_id",
+      } as Record<string, string>,
+      // the PAN box keeps a PAN's 10 characters, as today (her words are not read from it)
+      cut: { pan: "{10}" } as Record<string, string>,
+    },
+  ];
+  // the browser's own rules a box can carry: a form with a box that breaks one is not submitted, so her press never runs
+  const BROWSER_RULES = ["required", "pattern", "min", "max", "step", "minlength"];
+  // the browser's own validity, set or asked from code
+  const VALIDITY = ["setCustomValidity", "reportValidity", "checkValidity", "requestSubmit"];
+  for (const form of FORMS) {
+    const {
+      source,
+      checker,
+      at,
+      all,
+      nodes,
+      inside,
+      symbolOf,
+      own,
+      refs,
+      tagOf,
+      attrOf,
+      attrAround,
+      elementOf,
+      inPress,
+      saveOpen,
+    } = compiledForm(form);
+    const flat = (n: ts.Node) => n.getText(source).replace(/\s+/g, "");
+    // a name the form imports under its own name, and where from
+    const importedFrom = (id: ts.Identifier) => {
+      const d = checker.getSymbolAtLocation(id)?.declarations?.[0];
+      if (!d || !ts.isImportSpecifier(d) || (d.propertyName ?? d.name).text !== id.text)
+        return undefined;
+      const from = d.parent.parent.parent.moduleSpecifier;
+      return ts.isStringLiteral(from) ? from.text : undefined;
+    };
+    const declOf = (name: string) => {
+      const d = own.get(name)?.decl;
+      return d && ts.isVariableDeclaration(d) ? d : undefined;
+    };
+    // 1. Save's disabled is the shared rule alone: its `||` operands exactly these, and every name in it the form's own
+    // or the rule imported from @/lib/aiaic-trade (which opens on any words in her boxes: A52, A60)
+    const disabled = saveOpen.initializer;
+    assert.ok(
+      disabled && ts.isJsxExpression(disabled) && disabled.expression,
+      `${form.file}: Save's disabled`,
+    );
+    const operands = (e: ts.Expression): ts.Expression[] => {
+      while (ts.isParenthesizedExpression(e)) e = e.expression;
+      return ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.BarBarToken
+        ? [...operands(e.left), ...operands(e.right)]
+        : [e];
+    };
+    assert.deepEqual(
+      operands(disabled.expression).map(flat).sort(),
+      [...form.save].sort(),
+      `${at(saveOpen)} Save waits only on ${form.save.join(" || ")}`,
+    );
+    for (const n of nodes)
+      if (
+        ts.isIdentifier(n) &&
+        inside(n, disabled) &&
+        !(ts.isPropertyAccessExpression(n.parent) && n.parent.name === n)
+      )
+        assert.ok(
+          (own.has(n.text) && own.get(n.text)?.symbol === symbolOf(n)) ||
+            (n.text === form.rule && importedFrom(n) === "@/lib/aiaic-trade"),
+          `${at(n)} ${n.text} in Save's disabled: the form's own, or the shared rule`,
+        );
+    if (form.ready) {
+      // Cashfree's `ready`: the shared rule over her form as typed, and nothing else
+      const ready = declOf("ready")?.initializer;
+      assert.equal(
+        ready ? flat(ready) : "",
+        form.ready,
+        `${form.file}: ready is the shared rule over her form, nothing else`,
+      );
+      assert.ok(ready && ts.isCallExpression(ready) && ts.isIdentifier(ready.expression));
+      assert.equal(
+        importedFrom(ready.expression),
+        "@/lib/aiaic-trade",
+        `${form.file}: ${form.rule} is the shared rule`,
+      );
+    }
+    const scan = declOf("scan")?.initializer;
+    assert.ok(
+      scan &&
+        ts.isCallExpression(scan) &&
+        ts.isIdentifier(scan.expression) &&
+        flat(scan) === "useScanBeforeRefusing()" &&
+        importedFrom(scan.expression) === "@/lib/aiaic-scan",
+      `${form.file}: scan is the shared hook (its state: A58)`,
+    );
+    // 2. busy is her press's own: a state of the form's, set only inside her press
+    const busy = own.get("busy")?.decl;
+    assert.ok(
+      busy &&
+        ts.isBindingElement(busy) &&
+        ts.isArrayBindingPattern(busy.parent) &&
+        flat(busy.parent.parent) === "[busy,setBusy]=useState(false)",
+      `${form.file}: busy is a state of the form's own`,
+    );
+    const setBusy = own.get("setBusy")?.symbol;
+    assert.ok(setBusy, `${form.file}: setBusy`);
+    assert.deepEqual(
+      refs(setBusy)
+        .filter((r) => !inPress(r))
+        .map(at),
+      [],
+      `${form.file}: busy set only inside her press`,
+    );
+    // 3. her words reach the rule and her press as she typed them: outside her press and her own box, each box's state is
+    // read only as itself, once, the value of its own property of `typed` (Cashfree) or `details` (Route)
+    const into = declOf(form.into)?.initializer;
+    assert.ok(into, `${form.file}: ${form.into}`);
+    const elsewhere: string[] = [];
+    for (const [v, prop] of Object.entries(form.typed)) {
+      const s = own.get(v)?.symbol;
+      assert.ok(s, `${form.file}: the box ${v}`);
+      let carried = 0;
+      for (const r of refs(s)) {
+        if (inPress(r)) continue;
+        const attr = attrAround(r);
+        if (
+          attr &&
+          attr.name.getText(source) === "value" &&
+          tagOf(elementOf(attr)) === "input" &&
+          attr.initializer !== undefined &&
+          flat(attr.initializer) === `{${v}}`
+        )
+          continue; // its own box
+        const p = r.parent;
+        const itself =
+          (ts.isShorthandPropertyAssignment(p) && p.name === r && prop === v) ||
+          (ts.isPropertyAssignment(p) && p.initializer === r && p.name.getText(source) === prop);
+        if (itself && inside(r, into)) carried += 1;
+        else elsewhere.push(`${at(r)} ${v}`);
+      }
+      assert.equal(
+        carried,
+        1,
+        `${form.file}: ${v} reaches ${form.into} as she typed it, as its ${prop}`,
+      );
+    }
+    assert.deepEqual(
+      elsewhere,
+      [],
+      `${form.file}: what she typed is read outside her press and her box only as itself, into ${form.into}`,
+    );
+    // 4. the browser's own validation never refuses her press: no box carries a rule of the browser's, or a type but text
+    // or a tick, and none cuts what she types but as today; nothing is spread onto an element or handed a ref; no element
+    // handles an event but a button's click, the form's submit and a box's change (each only keeps what she types: A62);
+    // and nothing in the form's file sets or asks a validity of the browser's
+    const refused: string[] = [];
+    for (const el of nodes.filter(
+      (n): n is ts.JsxOpeningLikeElement =>
+        ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n),
+    )) {
+      const tag = tagOf(el);
+      const box = ["input", "textarea", "select"].includes(tag);
+      for (const a of el.attributes.properties) {
+        if (!ts.isJsxAttribute(a)) {
+          refused.push(`${at(a)} something spread onto a <${tag}>`);
+          continue;
+        }
+        const name = a.name.getText(source);
+        const value = a.initializer ? flat(a.initializer) : "";
+        if (name === "ref") refused.push(`${at(a)} a ref on a <${tag}>`);
+        else if (
+          /^on[a-z]/i.test(name) &&
+          !(
+            (name === "onClick" && tag === "button") ||
+            (name === "onSubmit" && tag === "form") ||
+            (name === "onChange" && tag === "input")
+          )
+        )
+          refused.push(`${at(a)} ${name} on a <${tag}>`);
+        else if (box && BROWSER_RULES.includes(name.toLowerCase()))
+          refused.push(`${at(a)} ${name} on a box`);
+        else if (box && name === "type" && !['"text"', '"checkbox"'].includes(value))
+          refused.push(`${at(a)} type=${value} on a box`);
+        else if (box && name.toLowerCase() === "maxlength") {
+          const holds = attrOf(el, "value")?.initializer;
+          const v = Object.keys(form.typed).find(
+            (t) => holds !== undefined && flat(holds) === `{${t}}`,
+          );
+          if (v === undefined || form.cut[v] !== value || name !== "maxLength")
+            refused.push(`${at(a)} ${name}=${value} cuts what she types`);
+        }
+      }
+    }
+    for (const n of all)
+      if ((ts.isIdentifier(n) || ts.isStringLiteralLike(n)) && VALIDITY.includes(n.text))
+        refused.push(`${at(n)} ${n.text}`);
+    assert.deepEqual(
+      refused,
+      [],
+      `${form.file}: the browser's own validation never refuses her press, and nothing but a press and her boxes' own setters handles what she does`,
     );
   }
 });
