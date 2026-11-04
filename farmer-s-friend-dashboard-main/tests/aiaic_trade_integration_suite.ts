@@ -4783,7 +4783,7 @@ function compiledForm(form: { file: string; component: string }) {
   };
 }
 
-test("A62 RC2-2 RC3-1 nothing on either payout form says a refusal while she types: what she types is read only by its own box, Save's enablement and the press, each box only keeps it, and a refusal shows only through what her press left", () => {
+test("A62 RC2-2 RC3-1 RC3-2 nothing on either payout form says a refusal while she types: what she types is read only by its own box, Save's enablement and the press, each box only keeps it, nothing else of the form's changes while she types, and a refusal shows only through what her press left", () => {
   // each form as the TypeScript compiler reads it (`compiledForm`), names resolved by its checker (the re-check's S08: a
   // red refusal line under the name box while she types; S09: the name's label turning red; X06 and X07: the name box's
   // onChange also setting a validity message of the browser's, or a red line of its own; each passed every suite)
@@ -4976,6 +4976,69 @@ test("A62 RC2-2 RC3-1 nothing on either payout form says a refusal while she typ
       if (s) for (const r of refs(s)) if (!inPress(r)) outside.push(`${at(r)} ${name}`);
     }
     assert.deepEqual(outside, [], `${form.file}: a problem set outside her press`);
+    // 2b. nothing of the form's own changes while she types but what she typed: every setter of its state (useState) runs
+    // only in her press, a button's onClick, the form's onSubmit, a box's onChange (its own setter alone: 1b), or a helper
+    // of the form's that only these run (Route's `clear`); never in an effect or as the form renders (the re-check of
+    // 4 Nov 2026, RC3-2: a state set while she types, shown as a red line)
+    const pressedBy = (a: ts.JsxAttribute) => {
+      const tag = tagOf(elementOf(a));
+      const name = a.name.getText(source);
+      return (
+        (name === "onClick" && tag === "button") ||
+        (name === "onSubmit" && tag === "form") ||
+        (name === "onChange" && tag === "input")
+      );
+    };
+    const helperOf = (n: ts.Node) => {
+      for (let p = n.parent; p && p !== body; p = p.parent)
+        if (
+          ts.isVariableDeclaration(p) &&
+          ownerOf(p) === component &&
+          ts.isIdentifier(p.name) &&
+          p.initializer !== undefined &&
+          ts.isArrowFunction(p.initializer)
+        )
+          return p;
+      return undefined;
+    };
+    const onPress = (n: ts.Node, seen: Set<ts.Node>): boolean => {
+      if (inPress(n)) return true;
+      const attr = attrAround(n);
+      if (attr) return pressedBy(attr);
+      const helper = helperOf(n);
+      if (!helper || seen.has(helper)) return false;
+      seen.add(helper);
+      const s = checker.getSymbolAtLocation(helper.name);
+      const uses = s ? refs(s) : [];
+      return uses.length > 0 && uses.every((u) => onPress(u, seen));
+    };
+    const stateSetters = [...own.entries()].filter(([, { decl }]) => {
+      const pair = ts.isBindingElement(decl) ? decl.parent : undefined;
+      const declared = pair?.parent;
+      return (
+        pair !== undefined &&
+        ts.isArrayBindingPattern(pair) &&
+        pair.elements[1] === decl &&
+        declared !== undefined &&
+        ts.isVariableDeclaration(declared) &&
+        declared.initializer !== undefined &&
+        ts.isCallExpression(declared.initializer) &&
+        declared.initializer.expression.getText(source) === "useState"
+      );
+    });
+    assert.ok(
+      stateSetters.some(([name]) => name === "setBusy"),
+      `${form.file}: the form's own state`,
+    );
+    const whileTyping: string[] = [];
+    for (const [name, { symbol }] of stateSetters)
+      for (const r of refs(symbol))
+        if (!onPress(r, new Set())) whileTyping.push(`${at(r)} ${name}`);
+    assert.deepEqual(
+      whileTyping,
+      [],
+      `${form.file}: a state of the form's set while she types, not by her press or her own box`,
+    );
     // 3. her press runs only from a press (a click, a submit), or from her press itself
     for (const p of presses)
       for (const r of refs(p.symbol as ts.Symbol)) {
