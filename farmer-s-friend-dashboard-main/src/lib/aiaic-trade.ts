@@ -1124,6 +1124,22 @@ export function payoutFormRefusal(d: PayoutDetailsIn, c: PayoutConsent): string 
   );
 }
 
+/** One press of Route's Save, in the Cashfree form's order (`pressDestination`): a form this phone would refuse goes to
+ * the distress scan first (`refuse`); a form it would not refuse whose bank boxes hold words goes to the scan first too
+ * (`readFirst`: AIAIC gets the account without its spaces and hyphens; the re-check of 4 Nov 2026, RC2-3); a form whose
+ * bank boxes hold only her bank's details goes to AIAIC (`give`). */
+export async function pressPayout(
+  d: PayoutDetailsIn,
+  c: PayoutConsent,
+  run: PressRun,
+): Promise<void> {
+  const refusal = payoutFormRefusal(d, c);
+  if (refusal) return run.refuse(payoutWords(d), refusal);
+  if (d.destination === "bank_account" && bankBoxWords(d.account_number, d.ifsc).length > 0)
+    return run.readFirst(payoutWords(d));
+  return run.give();
+}
+
 // ------------------------------------------------------------------------------------------------ transport
 
 export type TransportAttribution = { text: string; url: string };
@@ -1760,32 +1776,49 @@ export function destinationSaveOpen(f: DestinationTyped): boolean {
   return destinationWords(f) !== "";
 }
 
+/** AIAIC'S OWN RULE FOR THE ACCOUNT NUMBER IT SENDS HER MONEY TO (its trade/farmer_payout.py `_ACCOUNT`): 5 to 35
+ * letters and digits. The Cashfree form holds the number to it as AIAIC gets it, its spaces taken out, so her press never
+ * sends more than AIAIC takes (the re-check of 4 Nov 2026, RC2-3). */
+export const DESTINATION_ACCOUNT_RE = /^[A-Za-z0-9]{5,35}$/;
+
 /**
  * What this phone would refuse her form for, in the form's order, by AIAIC's own codes (worded in en, mr and hi), or
  * null: the form then goes to AIAIC, whose crisis middleware reads every body first. The name by Cashfree's rule
- * (`destinationNameOk`) and 4 characters at least, the account and the IFSC by their lengths as AIAIC gets them (the
- * account without its spaces, the IFSC trimmed), a UPI ID by its @, then her tick on AIAIC's notice. Said only after her
- * words were read for distress.
+ * (`destinationNameOk`) and 4 characters at least, the account by AIAIC's own rule (`DESTINATION_ACCOUNT_RE`) on the
+ * number without its spaces, as AIAIC gets it, the IFSC by its length trimmed, a UPI ID by its @, then her tick on
+ * AIAIC's notice. Said only after her words were read for distress.
  */
 export function destinationRefusal(f: DestinationTyped): string | null {
   if (f.kind === "bank_account") {
     if (!destinationNameOk(f.name)) return "account_name_letters_only";
     if (f.name.trim().length < 4) return "account_name_not_valid";
-    if (f.account.replace(/\s/g, "").length < 5) return "account_number_not_valid";
+    if (!DESTINATION_ACCOUNT_RE.test(f.account.replace(/\s/g, "")))
+      return "account_number_not_valid";
     if (f.ifsc.trim().length !== 11) return "ifsc_not_valid";
   } else if (!f.upi.includes("@")) return "upi_id_not_valid";
   if (!f.notice || !f.agreed) return "payout_consent_required";
   return null;
 }
 
+/** One press of a payout form's Save, as the form wires it: `refuse` (her words to the scan, then the refusal),
+ * `readFirst` (her words to the scan, then `give`) and `give` (her form to AIAIC). */
+export type PressRun = {
+  refuse: (words: string, refusal: string) => Promise<void>;
+  readFirst: (words: string) => Promise<void>;
+  give: () => Promise<void>;
+};
+
 /** One press of Save (D-105): a form this phone would refuse goes to the distress scan first (`refuse`, with her words
- * and the refusal to say if they are not a crisis), and only a form it would not refuse goes to AIAIC (`give`). */
-export async function pressDestination(
-  f: DestinationTyped,
-  run: { refuse: (words: string, refusal: string) => Promise<void>; give: () => Promise<void> },
-): Promise<void> {
+ * and the refusal to say if they are not a crisis); a form it would not refuse whose bank boxes hold words goes to the
+ * scan first too (`readFirst`: AIAIC gets the account without its spaces, and its own reader misses her words joined;
+ * the re-check of 4 Nov 2026, RC2-3); a form whose bank boxes hold only her bank's details goes to AIAIC (`give`), whose
+ * middleware reads the name in its body first. */
+export async function pressDestination(f: DestinationTyped, run: PressRun): Promise<void> {
   const refusal = destinationRefusal(f);
-  return refusal ? run.refuse(destinationWords(f), refusal) : run.give();
+  if (refusal) return run.refuse(destinationWords(f), refusal);
+  if (f.kind === "bank_account" && bankBoxWords(f.account, f.ifsc).length > 0)
+    return run.readFirst(destinationWords(f));
+  return run.give();
 }
 /** Her offer weighed against the mandi (`GET /farmer/trade/offers/{id}/compare`). */
 /** Which side leaves her more, and by how much (the server's figures: never a sum or a sign worked out here). */

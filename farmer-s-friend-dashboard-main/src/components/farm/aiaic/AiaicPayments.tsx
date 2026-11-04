@@ -22,9 +22,8 @@ import {
   moneyTotals,
   newPressKey,
   paymentLine,
-  payoutFormRefusal,
   payoutSaveOpen,
-  payoutWords,
+  pressPayout,
   problem as problemOf,
   quintalWords,
   quintals,
@@ -271,40 +270,33 @@ function PayoutAccountCard({
   // AIAIC's crisis card outranks everything (`ProblemCard` raises it to the page's gate)
   const shown = problemShown(scan, problem);
 
-  const send = async () => {
-    setProblem(null);
-    scan.reset();
-    // a press this phone would refuse: her words are read for distress BEFORE the refusal is said (the audit of
-    // 4 Nov 2026, AN-1; D-105), as the registration form does; only then the box it names, or her tick
-    const refusal = payoutFormRefusal(details, consent);
-    if (refusal) {
-      await scan.refuse(payoutWords(details), scanLang, refusal, (code) => {
-        if (code === "payout_consent_required") {
-          setBadField(null);
-          setProblem(problemOf(code));
-        } else setBadField(code);
-      });
-      return;
-    }
+  const give = async () => {
     setBadField(null);
     if (!notice) return;
     setBusy(true);
-    const r = await press(() =>
-      giveFn({
-        data: {
-          key: newPressKey(),
-          notice_version: notice.version,
-          shown_in: lang,
-          agreed: true,
-          destination,
-          pan: pan.replace(/\s+/g, "").toUpperCase(),
-          name_on_pan: name.replace(/\s+/g, " ").trim(),
-          ...(destination === "bank_account"
-            ? { account_number: account.replace(/[\s-]+/g, ""), ifsc: ifsc.trim().toUpperCase() }
-            : { upi_id: upi.trim() }),
-        },
-      }),
-    );
+    let r: Awaited<ReturnType<typeof giveFn>>;
+    try {
+      // a call that throws is said as the form's own failure line (`usePress`), and Save never spins for good (the
+      // re-check of 4 Nov 2026, RC2-3)
+      r = await press(() =>
+        giveFn({
+          data: {
+            key: newPressKey(),
+            notice_version: notice.version,
+            shown_in: lang,
+            agreed: true,
+            destination,
+            pan: pan.replace(/\s+/g, "").toUpperCase(),
+            name_on_pan: name.replace(/\s+/g, " ").trim(),
+            ...(destination === "bank_account"
+              ? { account_number: account.replace(/[\s-]+/g, ""), ifsc: ifsc.trim().toUpperCase() }
+              : { upi_id: upi.trim() }),
+          },
+        }),
+      );
+    } finally {
+      setBusy(false);
+    }
     if (r.ok) {
       clear();
       setOpen(false);
@@ -313,8 +305,26 @@ function PayoutAccountCard({
       const field = r.problem.facts?.["field"];
       if (typeof field === "string") setBadField(field);
     }
-    setBusy(false);
     await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
+  };
+
+  const send = async () => {
+    setProblem(null);
+    scan.reset();
+    // a press this phone would refuse, or one whose bank boxes hold words: her words are read for distress BEFORE
+    // anything is said or sent (the audit of 4 Nov 2026, AN-1; the re-check, RC2-3; D-105), as the registration form
+    // does; only then the box it names, her tick, or her details to AIAIC
+    await pressPayout(details, consent, {
+      refuse: (words, refusal) =>
+        scan.refuse(words, scanLang, refusal, (code) => {
+          if (code === "payout_consent_required") {
+            setBadField(null);
+            setProblem(problemOf(code));
+          } else setBadField(code);
+        }),
+      readFirst: (words) => scan.readFirst(words, scanLang, give),
+      give,
+    });
   };
 
   const stop = async () => {

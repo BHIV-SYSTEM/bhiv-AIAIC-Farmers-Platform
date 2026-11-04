@@ -17,6 +17,9 @@
  * the registration form does; a crisis gets AIAIC's crisis card, anything else the refusal in AIAIC's own code. Words
  * in the account or IFSC box are read too, never a well-formed account number or IFSC (the re-check, RC-3): the account
  * box keeps the spaces she types (they leave the number only when it goes to AIAIC), and the IFSC box cuts nothing off.
+ * A press whose bank boxes hold words has them read first even when nothing here would refuse it (AIAIC's own reader
+ * misses them once the number's spaces are gone), and the account is held to AIAIC's own rule after the scan, so a
+ * press never sends more than AIAIC takes (the re-check, RC2-3).
  */
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -29,6 +32,7 @@ import {
   destinationGivenBefore,
   destinationSaveOpen,
   pressDestination,
+  pressed,
   problem as problemOf,
   providerKey,
   sendingSaid,
@@ -221,17 +225,25 @@ export function DestinationForm({
             account_number: account.replace(/\s/g, ""),
             ifsc: ifsc.trim().toUpperCase(),
           };
-    const r = await fn({
-      data: {
-        key: newKey(),
-        agreed: true,
-        replace: Boolean(dest),
-        notice_version: notice.version,
-        read_in: lang === "mr" || lang === "hi" ? lang : "en",
-        ...body,
-      },
-    });
-    setBusy(false);
+    let r: Awaited<ReturnType<typeof fn>>;
+    try {
+      // a call that throws (this server not reached, an input it refuses) is said as the form's own failure line, AIAIC
+      // not answering (`pressed`), and Save never spins for good (the re-check of 4 Nov 2026, RC2-3)
+      r = await pressed(() =>
+        fn({
+          data: {
+            key: newKey(),
+            agreed: true,
+            replace: Boolean(dest),
+            notice_version: notice.version,
+            read_in: lang === "mr" || lang === "hi" ? lang : "en",
+            ...body,
+          },
+        }),
+      );
+    } finally {
+      setBusy(false);
+    }
     if (r.ok) {
       setUpi("");
       setAccount("");
@@ -248,14 +260,16 @@ export function DestinationForm({
       }
     }
   };
-  // a press this phone would refuse: her words are read for distress BEFORE the refusal is said, as the registration
-  // form does (`useScanBeforeRefusing`); any other press goes to AIAIC, whose middleware reads every body first
+  // a press this phone would refuse, or one whose bank boxes hold words: her words are read for distress BEFORE the
+  // refusal is said or the form is sent, as the registration form does (`useScanBeforeRefusing`); a press with only her
+  // bank's details goes to AIAIC, whose middleware reads every body first
   const send = async () => {
     setProblem(null);
     scan.reset();
     await pressDestination(typed, {
       refuse: (words, refusal) =>
         scan.refuse(words, activeLang, refusal, (code) => setProblem(problemOf(code))),
+      readFirst: (words) => scan.readFirst(words, activeLang, give),
       give,
     });
   };

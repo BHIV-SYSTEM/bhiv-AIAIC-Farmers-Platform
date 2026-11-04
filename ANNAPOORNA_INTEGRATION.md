@@ -110,9 +110,13 @@ product, is gone. This app follows what AIAIC's answers say, field by field; not
   rule D-105): a crisis gets the helplines, anything else AIAIC's refusal by its code (`account_name_letters_only`).
   Words typed in the account or IFSC box are read with it: the account box's words once its digits, spaces and hyphens
   are taken out, the IFSC box when it is not in an IFSC's shape; a well-formed account number or IFSC never goes to the
-  scan. The account box keeps the spaces she types (AIAIC gets the number without them), and the IFSC box cuts nothing
-  off at 11. Every code AIAIC's Cashfree branch answers her form with (`cashfree_*`, `live_keys_no_rehearsal`, ...)
-  has words in English, Marathi and Hindi (drafts for a native reader).
+  scan. A press whose account or IFSC box holds words has them read first even when nothing here would refuse it
+  (AIAIC gets the number without its spaces, and its own reader misses her words joined); a press with only her bank's
+  details goes straight to AIAIC, whose middleware reads the name in its body. Route's form, where AIAIC wires it, does
+  the same. The account box keeps the spaces she types (AIAIC gets the number without them) and is held to AIAIC's own
+  rule (5 to 35 letters and digits) after the scan, so a press never sends more than AIAIC takes; the IFSC box cuts
+  nothing off at 11. Every code AIAIC's Cashfree branch answers her form with (`cashfree_*`, `live_keys_no_rehearsal`,
+  ...) has words in English, Marathi and Hindi (drafts for a native reader).
 - **Razorpay Route's card** on the Payments page shows only while AIAIC wires Route (`payout_account.wired`); Route's
   own lines keep naming Razorpay and show only on Route's own facts.
 - **The policy pages** (Pricing, Privacy, Refund) name Cashfree as AIAIC's payment processor, the collect-then-pay flow,

@@ -96,11 +96,13 @@ import {
   payoutSaveOpen,
   payoutWords,
   pressDestination,
+  pressPayout,
   providerKey,
   providerName,
   routeCardShown,
   sendingLine,
   type DestinationTyped,
+  type PressRun,
   type XDestination,
   type XNotice,
 } from "../src/lib/aiaic-trade";
@@ -109,6 +111,7 @@ import {
   formScan,
   problemShown,
   scanReducer,
+  scanThen,
   scanThenRefuse,
   useScanBeforeRefusing,
   type AskTheScan,
@@ -146,6 +149,7 @@ import {
 import { scanFirst } from "../src/lib/aiaic-account.functions";
 import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
+import { giveMyDestination } from "../src/lib/aiaic-trade.functions";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
@@ -3499,12 +3503,14 @@ test("A52 AN-1 her words in a payout form reach the distress scan before any ref
     say: (code: string) => log.push(`refused ${code}`),
   };
   // one press of Save on her UPI ID or bank account form, as the card wires it (`pressDestination`)
+  const give = async () => {
+    log.push("sent to AIAIC");
+  };
   const press = (typed: DestinationTyped, lang: (typeof LANGS)[number]) =>
     pressDestination(typed, {
       refuse: (words, refusal) => scanThenRefuse(ask, words, lang, refusal, said),
-      give: async () => {
-        log.push("sent to AIAIC");
-      },
+      readFirst: (words) => scanThen(ask, words, lang, { crisis: said.crisis, then: give }),
+      give,
     });
   const helplinesShown = (what: string) => {
     const html = inApp(createElement(ProblemCard, { problem: seen.card ?? problem("none") }));
@@ -3691,10 +3697,11 @@ test("A52 AN-1 her words in a payout form reach the distress scan before any ref
   // the scan's crisis card is what the card shows first (`problemShown`; its state and wiring: A58)
   assert.ok(card.includes("const shown = problemShown(scan, problem);"), "the scan's crisis card");
   const payments = sourceOf("AiaicPayments.tsx");
-  const routeSend = payments.slice(payments.indexOf("const send = async () => {"));
+  // Route's press is `pressPayout`, in the same order (the scan before anything is said or sent: A63 runs it)
   assert.ok(
-    routeSend.indexOf("scan.refuse(payoutWords(details)") > 0 &&
-      routeSend.indexOf("scan.refuse(payoutWords(details)") < routeSend.indexOf("giveFn("),
+    /pressPayout\(details, consent, \{\s*refuse: \(words, refusal\) =>\s*scan\.refuse\(words, scanLang, refusal,/.test(
+      payments,
+    ),
     "Route: the scan before anything is said or sent",
   );
   assert.ok(
@@ -4005,11 +4012,14 @@ function scanBench() {
       Record<string, unknown> | "unreachable",
     texts: [] as string[],
     scanningWhenAsked: [] as boolean[],
+    /** what a whole press did, in order (`pressForm`): "scan" each time the scan is asked, "give" when her form goes */
+    order: [] as string[],
     state: SCAN_START,
   };
   globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
     assert.equal(new URL(String(url)).pathname, "/safety/check", "only the scan is asked");
     bench.texts.push((JSON.parse(String(init?.body)) as { text: string }).text);
+    bench.order.push("scan");
     if (bench.reply === "unreachable") throw new TypeError("fetch failed");
     return new Response(JSON.stringify(bench.reply), { status: 200 });
   }) as typeof fetch;
@@ -4039,10 +4049,40 @@ function scanBench() {
       html: shown ? inApp(createElement(ProblemCard, { problem: shown }), lang) : "",
     };
   };
+  /** One whole press of Save as a payout form wires it (`pressDestination` or `pressPayout`, handed `refuse`, `readFirst`
+   * and `give` as the form hands them): `order` says what happened, in order (each scan asked, her form given), and her
+   * form is never sent anywhere; then what the form shows (`problemShown`), rendered. */
+  const pressForm = async (
+    lang: (typeof LANGS)[number],
+    run: (wired: PressRun) => Promise<void>,
+  ) => {
+    const said: { problem: AiaicProblem | null } = { problem: null };
+    bench.texts.length = 0;
+    bench.scanningWhenAsked.length = 0;
+    bench.order.length = 0;
+    const give = async () => {
+      bench.order.push("give");
+    };
+    handed().reset();
+    await run({
+      refuse: (words, refusal) =>
+        handed().refuse(words, lang, refusal, (code) => {
+          said.problem = problem(code);
+        }),
+      readFirst: (words) => handed().readFirst(words, lang, give),
+      give,
+    });
+    const shown = problemShown(handed(), said.problem);
+    return {
+      said: said.problem,
+      order: [...bench.order],
+      html: shown ? inApp(createElement(ProblemCard, { problem: shown }), lang) : "",
+    };
+  };
   const restore = () => {
     globalThis.fetch = realFetch;
   };
-  return { bench, handed, press, restore };
+  return { bench, handed, press, pressForm, restore };
 }
 
 /** What a form shows after a crisis: AIAIC's crisis card alone, with its three helplines, and no refusal of this phone. */
@@ -4218,9 +4258,11 @@ test("A58 RC-1 RC2-1 the crisis card a payout form shows is its scan's own state
   };
   inApp(createElement(Probe));
   assert.ok(first.scan, "the hook ran in the app's tree");
-  const { refuse, reset, ...state } = first.scan;
+  const { refuse, readFirst, reset, ...state } = first.scan;
   assert.deepEqual(state, SCAN_START, "it starts with no crisis and no scan asked");
-  assert.ok(typeof refuse === "function" && typeof reset === "function");
+  assert.ok(
+    typeof refuse === "function" && typeof readFirst === "function" && typeof reset === "function",
+  );
   // both payout forms show what problemShown gives, and only that, where their problem shows
   for (const file of ["FromAiaicCard.tsx", "AiaicPayments.tsx"]) {
     const form = sourceOf(file);
@@ -4826,6 +4868,226 @@ test("A62 RC2-2 nothing on either payout form says a refusal while she types: wh
     }
     assert.ok(cards > 0, `${form.file}: its problem card`);
     assert.deepEqual(lines, [], `${form.file}: a refusal said on the form but through her press`);
+  }
+});
+
+test("A63 RC2-3 words in her bank boxes reach the distress scan first though nothing here would refuse the form, on both payout forms: a crisis gets the helplines and nothing is sent; the account is held to AIAIC's own rule after the scan; Save never waits for good", async () => {
+  // AIAIC's own account rule (its trade/farmer_payout.py `_ACCOUNT`: 5 to 35 letters and digits), on the number as AIAIC
+  // gets it (its spaces taken out): the Cashfree form refuses, after the scan, exactly what AIAIC would not take
+  const complete: DestinationTyped = {
+    kind: "bank_account",
+    upi: "",
+    name: "Recording Farmer",
+    ...TEST_BANK,
+    agreed: true,
+    notice: true,
+  };
+  const ACCOUNT_41 = `${TEST_BANK.account}${TEST_BANK.account}02629180000`;
+  assert.equal(ACCOUNT_41.length, 41);
+  for (const [account, taken] of [
+    ["12345", true],
+    ["0262 9180 0001 191", true],
+    ["SB026291800001191", true],
+    ["9".repeat(35), true],
+    ["9".repeat(36), false],
+    [ACCOUNT_41, false],
+    ["1234", false],
+    ["०२६२९१८०००११९१", false],
+    ["0262-9180-0001", false],
+    [CRISIS_HI, false],
+    [CRISIS_MR, false],
+    [CRISIS_EN, true],
+  ] as const) {
+    assert.equal(
+      /^[A-Za-z0-9]{5,35}$/.test(account.replace(/\s/g, "")),
+      taken,
+      `"${account}": AIAIC's own rule`,
+    );
+    assert.equal(
+      destinationRefusal({ ...complete, account }),
+      taken ? null : "account_number_not_valid",
+      `"${account}": refused here as AIAIC would`,
+    );
+  }
+  // so her press never sends more than AIAIC takes, and this server's validator (40 at most) never throws on a press:
+  // the REAL giveMyDestination's validator, in this process (its handler never runs: nothing is asked of AIAIC)
+  const giving = (account_number: string) => ({
+    key: newPressKey(),
+    kind: "bank_account",
+    name: "Recording Farmer",
+    account_number,
+    ifsc: TEST_BANK.ifsc,
+    agreed: true,
+    replace: false,
+    notice_version: "xn-standin00",
+    read_in: "en",
+  });
+  const valid = (await inProcess(giveMyDestination, giving("9".repeat(35)), "validator")) as {
+    account_number?: string;
+  };
+  assert.equal(valid.account_number, "9".repeat(35), "the longest account AIAIC takes");
+  await assert.rejects(
+    inProcess(giveMyDestination, giving(ACCOUNT_41), "validator"),
+    "41 characters would throw in this server's validator: the form refuses them first",
+  );
+  // her despair typed, with its spaces, in the account box, every other box right, on both forms: her words go to the
+  // scan first and the crisis card shows; her form is never given. CRISIS_EN is the press no rule of this phone refuses
+  // (English letters; AIAIC's account rule takes it joined, and AIAIC's own reader misses it joined)
+  const route = {
+    destination: "bank_account" as const,
+    pan: "AAAPZ4321K",
+    name_on_pan: "Practice Payee Testname",
+    account_number: "000123456789",
+    ifsc: "RECT0000001",
+  };
+  const given = { agreed: true, readNotice: true, notice: true };
+  assert.equal(
+    destinationRefusal({ ...complete, account: CRISIS_EN }),
+    null,
+    "Cashfree: no refusal",
+  );
+  assert.equal(
+    payoutFormRefusal({ ...route, account_number: CRISIS_EN }, given),
+    null,
+    "Route: no refusal",
+  );
+  const { bench, handed, pressForm, restore } = scanBench();
+  try {
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_EN, "en"],
+      [CRISIS_MR, "mr"],
+    ] as const) {
+      const cashfree: DestinationTyped = { ...complete, account: words };
+      const cf = await pressForm(lang, (run) => pressDestination(cashfree, run));
+      const what = `Cashfree, ${lang} in the account box`;
+      assert.deepEqual(
+        bench.texts,
+        [`Recording Farmer. ${words}`],
+        `${what}: read first, as typed`,
+      );
+      assert.deepEqual(cf.order, ["scan"], `${what}: the scan, and her form never given`);
+      assert.equal(cf.said, null, `${what}: no refusal said`);
+      assert.equal(handed().scanning, false, `${what}: Save no longer waits`);
+      crisisCardOnly(
+        cf.html,
+        lang,
+        destinationRefusal(cashfree) ?? "account_number_not_valid",
+        what,
+      );
+      const routed = { ...route, account_number: words };
+      const rt = await pressForm(lang, (run) => pressPayout(routed, given, run));
+      const where = `Route, ${lang} in the account box`;
+      assert.deepEqual(
+        bench.texts,
+        [`Practice Payee Testname. ${words}`],
+        `${where}: read first, as typed`,
+      );
+      assert.deepEqual(rt.order, ["scan"], `${where}: the scan, and her details never given`);
+      assert.equal(rt.said, null, `${where}: no refusal said`);
+      crisisCardOnly(rt.html, lang, payoutFormRefusal(routed, given) ?? "account_number", where);
+    }
+    // a clean read: her form goes on after the scan; the account's letters were read, never its digits
+    bench.reply = { distress: false };
+    const lettered = "SB026291800001191";
+    const cfClean = await pressForm("en", (run) =>
+      pressDestination({ ...complete, account: lettered }, run),
+    );
+    assert.deepEqual(bench.texts, ["Recording Farmer. SB"], "Cashfree: the letters only");
+    assert.deepEqual(cfClean.order, ["scan", "give"], "Cashfree: the scan, then her form given");
+    const rtClean = await pressForm("en", (run) =>
+      pressPayout({ ...route, account_number: lettered }, given, run),
+    );
+    assert.deepEqual(bench.texts, ["Practice Payee Testname. SB"], "Route: the letters only");
+    assert.deepEqual(rtClean.order, ["scan", "give"], "Route: the scan, then her details given");
+    // a well-formed account and IFSC: given at once, no scan asked (AIAIC's middleware reads the name in the body)
+    const cfPlain = await pressForm("en", (run) => pressDestination(complete, run));
+    assert.deepEqual(cfPlain.order, ["give"], "Cashfree: given, no scan asked");
+    const rtPlain = await pressForm("en", (run) => pressPayout(route, given, run));
+    assert.deepEqual(rtPlain.order, ["give"], "Route: given, no scan asked");
+    // a 41-character account: refused after the scan (her name read, never the digits), never given; Save waits no more
+    const cfLong = await pressForm("en", (run) =>
+      pressDestination({ ...complete, account: ACCOUNT_41 }, run),
+    );
+    assert.deepEqual(bench.texts, ["Recording Farmer"], "Cashfree: her name read first");
+    assert.deepEqual(cfLong.order, ["scan"], "Cashfree: never given");
+    assert.equal(cfLong.said?.code, "account_number_not_valid", "Cashfree: then refused");
+    assert.equal(handed().scanning, false, "Cashfree: Save is not stuck");
+    const rtLong = await pressForm("en", (run) =>
+      pressPayout({ ...route, account_number: ACCOUNT_41 }, given, run),
+    );
+    assert.deepEqual(bench.texts, ["Practice Payee Testname"], "Route: her name read first");
+    assert.deepEqual(rtLong.order, ["scan"], "Route: never given");
+    assert.equal(rtLong.said?.code, "account_number", "Route: then its own box refusal");
+    assert.equal(handed().scanning, false, "Route: Save is not stuck");
+    // a scan that cannot be asked leaves her form given, as the shared scan leaves a refusal said (AIAIC's middleware
+    // then reads its body first, as before)
+    bench.reply = "unreachable";
+    const cfLost = await pressForm("en", (run) =>
+      pressDestination({ ...complete, account: lettered }, run),
+    );
+    assert.deepEqual(cfLost.order, ["scan", "give"]);
+    assert.equal(handed().scanning, false);
+  } finally {
+    restore();
+  }
+  // both forms wire it so: a press whose bank boxes hold words goes to the shared scan first, then to give
+  assert.ok(
+    sourceOf("FromAiaicCard.tsx").includes(
+      "readFirst: (words) => scan.readFirst(words, activeLang, give),",
+    ),
+    "Cashfree: readFirst",
+  );
+  assert.ok(
+    sourceOf("AiaicPayments.tsx").includes(
+      "readFirst: (words) => scan.readFirst(words, scanLang, give),",
+    ),
+    "Route: readFirst",
+  );
+  // give, on both forms: its call through `pressed` (a call that throws is said as the form's failure line, AIAIC not
+  // answering: A20) and Save's busy reset in a finally
+  for (const [file, call] of [
+    ["FromAiaicCard.tsx", "pressed("],
+    ["AiaicPayments.tsx", "press("],
+  ] as const) {
+    const source = ts.createSourceFile(
+      file,
+      sourceOf(file),
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX,
+    );
+    const gives: ts.ArrowFunction[] = [];
+    const tries: ts.TryStatement[] = [];
+    const visit = (n: ts.Node): void => {
+      if (
+        ts.isVariableDeclaration(n) &&
+        n.name.getText(source) === "give" &&
+        n.initializer &&
+        ts.isArrowFunction(n.initializer)
+      )
+        gives.push(n.initializer);
+      if (ts.isTryStatement(n) && gives.some((g) => n.pos >= g.pos && n.end <= g.end))
+        tries.push(n);
+      ts.forEachChild(n, visit);
+    };
+    visit(source);
+    assert.equal(gives.length, 1, `${file}: give`);
+    assert.ok(
+      tries.some(
+        (t) =>
+          t.tryBlock.getText(source).includes(call) &&
+          (t.finallyBlock?.getText(source) ?? "").includes("setBusy(false)"),
+      ),
+      `${file}: give calls through ${call.slice(0, -1)} and resets busy in a finally`,
+    );
+  }
+  for (const lang of LANGS) {
+    const html = inApp(createElement(ProblemCard, { problem: problem("aiaic_unavailable") }), lang);
+    assert.ok(
+      html.includes(escHtml(DICTS[lang]["aiaic.problem.aiaic_unavailable"] ?? "?")),
+      `${lang}: the failure line a throw is said as`,
+    );
   }
 });
 

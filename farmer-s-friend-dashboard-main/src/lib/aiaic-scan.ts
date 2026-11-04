@@ -12,15 +12,14 @@ export type AskTheScan = (q: { data: { text: string; lang: Lang } }) => Promise<
 
 /**
  * The scan's own order, with no React in it (the hook below runs it, and the tests run it as it is): what she typed goes
- * to the scan first; a crisis goes to `crisis` and nothing else is said; otherwise, or when the scan cannot be asked,
- * the refusal is said.
+ * to the scan first; a crisis goes to `crisis` and nothing else happens; otherwise, or when the scan cannot be asked,
+ * what comes next runs (`then`: the refusal said, or her form given).
  */
-export async function scanThenRefuse(
+export async function scanThen(
   ask: AskTheScan,
   words: string,
   lang: Lang,
-  refusal: string,
-  on: { crisis: (crisis: Crisis | null) => void; say: (code: string) => void },
+  on: { crisis: (crisis: Crisis | null) => void; then: () => void | Promise<void> },
 ): Promise<void> {
   if (words.trim()) {
     try {
@@ -30,10 +29,22 @@ export async function scanThenRefuse(
         return;
       }
     } catch {
-      /* the scan could not be asked: the refusal below is still said */
+      /* the scan could not be asked: what comes next still runs */
     }
   }
-  on.say(refusal);
+  await on.then();
+}
+
+/** The scan, then the refusal (`scanThen`): a crisis goes to `crisis` and nothing else is said; otherwise, or when the
+ * scan cannot be asked, the refusal is said. */
+export async function scanThenRefuse(
+  ask: AskTheScan,
+  words: string,
+  lang: Lang,
+  refusal: string,
+  on: { crisis: (crisis: Crisis | null) => void; say: (code: string) => void },
+): Promise<void> {
+  await scanThen(ask, words, lang, { crisis: on.crisis, then: () => on.say(refusal) });
 }
 
 /**
@@ -64,7 +75,7 @@ export function scanReducer(state: ScanState, event: ScanEvent): ScanState {
   }
 }
 
-/** What a form is handed by the hook: its scan's state, `refuse` and `reset`. */
+/** What a form is handed by the hook: its scan's state, `refuse`, `readFirst` and `reset`. */
 export type FormScan = ScanState & {
   /** Her words to the scan first: a crisis raises `inCrisis` and nothing else is said; otherwise `say(refusal)`. */
   refuse: (
@@ -73,33 +84,45 @@ export type FormScan = ScanState & {
     refusal: string,
     say: (code: string) => void,
   ) => Promise<void>;
+  /**
+   * Her words to the scan first though this phone refuses nothing (the re-check of 4 Nov 2026, RC2-3: words in her bank
+   * boxes, which AIAIC's own reader misses once the number goes to it without its spaces): a crisis raises `inCrisis`
+   * and nothing is sent; otherwise `then` (her form given).
+   */
+  readFirst: (words: string, lang: Lang, then: () => Promise<void>) => Promise<void>;
   /** A new press: the crisis card of the last one is no longer shown. */
   reset: () => void;
 };
 
 /**
  * The hook's whole behaviour, from its state and the one way to change it (`dispatch`: React's in the hook, the tests'
- * own holder in the tests): `refuse` marks the scan asked while `scanThenRefuse` runs, and a crisis raises `inCrisis`
- * with AIAIC's card.
+ * own holder in the tests): `refuse` and `readFirst` mark the scan asked while `scanThen` asks it, and a crisis raises
+ * `inCrisis` with AIAIC's card; what comes next (the refusal said, her form given) runs once the scan was asked.
  */
 export function formScan(
   state: ScanState,
   dispatch: (event: ScanEvent) => void,
   ask: AskTheScan,
 ): FormScan {
+  const first = async (words: string, lang: Lang, then: () => void | Promise<void>) => {
+    const next = { runs: false };
+    if (words.trim()) dispatch({ type: "asking" });
+    try {
+      await scanThen(ask, words, lang, {
+        crisis: (crisis) => dispatch({ type: "crisis", crisis }),
+        then: () => {
+          next.runs = true;
+        },
+      });
+    } finally {
+      dispatch({ type: "asked" });
+    }
+    if (next.runs) await then();
+  };
   return {
     ...state,
-    refuse: async (words, lang, refusal, say) => {
-      if (words.trim()) dispatch({ type: "asking" });
-      try {
-        await scanThenRefuse(ask, words, lang, refusal, {
-          crisis: (crisis) => dispatch({ type: "crisis", crisis }),
-          say,
-        });
-      } finally {
-        dispatch({ type: "asked" });
-      }
-    },
+    refuse: (words, lang, refusal, say) => first(words, lang, () => say(refusal)),
+    readFirst: first,
     reset: () => dispatch({ type: "reset" }),
   };
 }
@@ -118,8 +141,9 @@ export function problemShown(
 /**
  * BEFORE THIS PHONE REFUSES A FORM FOR ANYTHING ELSE (push 4b audit, R-03; the platform's rule D-105: nothing answers a
  * person in crisis before the scan does): what she typed is read for distress first, by AIAIC, which keeps nothing.
- * `refuse` shows the crisis card when her words read as distress (`inCrisis`), else says the refusal it was given. A
- * scan that cannot be asked (no network) leaves the refusal said. Its state is `scanReducer`'s and its behaviour
+ * `refuse` shows the crisis card when her words read as distress (`inCrisis`), else says the refusal it was given;
+ * `readFirst` the same, else gives her form. A scan that cannot be asked (no network) leaves the refusal said, or the
+ * form given (AIAIC's middleware then reads its body first, as before). Its state is `scanReducer`'s and its behaviour
  * `formScan`'s, nothing else: the tests run those two and pin these three lines.
  */
 export function useScanBeforeRefusing(): FormScan {
