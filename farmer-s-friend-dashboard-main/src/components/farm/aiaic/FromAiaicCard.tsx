@@ -21,7 +21,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Circle, IndianRupee, Loader2 } from "lucide-react";
 import { useState } from "react";
 
-import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
+import { problemShown, useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import type { DestinationTyped, FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
 import {
   destinationGivenBefore,
@@ -257,7 +257,7 @@ export function DestinationForm({
     });
   };
   // AIAIC's crisis card outranks everything (`ProblemCard` raises it to the page's gate)
-  const shown = scan.inCrisis ? problemOf("crisis", { crisis: scan.crisis }) : problem;
+  const shown = problemShown(scan, problem);
   return (
     <div
       className="space-y-3 rounded-2xl border-2 border-primary/40 p-3"

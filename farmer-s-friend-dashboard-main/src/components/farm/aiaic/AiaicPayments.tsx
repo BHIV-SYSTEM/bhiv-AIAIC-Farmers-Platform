@@ -14,7 +14,7 @@ import { useState } from "react";
 
 import { usePress } from "@/lib/aiaic-crisis";
 import { useMine } from "@/lib/aiaic-hooks";
-import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
+import { problemShown, useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import {
   commissionParts,
   cropName,
@@ -269,7 +269,7 @@ function PayoutAccountCard({
   const consent = { agreed, readNotice, notice: Boolean(notice) };
   const scanLang = lang === "mr" || lang === "hi" ? lang : "en";
   // AIAIC's crisis card outranks everything (`ProblemCard` raises it to the page's gate)
-  const shown = scan.inCrisis ? problemOf("crisis", { crisis: scan.crisis }) : problem;
+  const shown = problemShown(scan, problem);
 
   const send = async () => {
     setProblem(null);

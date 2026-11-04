@@ -102,7 +102,18 @@ import {
   type XDestination,
   type XNotice,
 } from "../src/lib/aiaic-trade";
-import { scanThenRefuse, type AskTheScan } from "../src/lib/aiaic-scan";
+import {
+  SCAN_START,
+  formScan,
+  problemShown,
+  scanReducer,
+  scanThenRefuse,
+  useScanBeforeRefusing,
+  type AskTheScan,
+  type FormScan,
+  type ScanEvent,
+  type ScanState,
+} from "../src/lib/aiaic-scan";
 import {
   GROUP_STEPS,
   OFFER_CLOSED_REASONS,
@@ -3636,7 +3647,8 @@ test("A52 AN-1 her words in a payout form reach the distress scan before any ref
     ),
     "a press this phone would refuse goes through the scan",
   );
-  assert.ok(card.includes('scan.inCrisis ? problemOf("crisis"'), "the scan's crisis card is shown");
+  // the scan's crisis card is what the card shows first (`problemShown`; its state and wiring: A58)
+  assert.ok(card.includes("const shown = problemShown(scan, problem);"), "the scan's crisis card");
   const payments = sourceOf("AiaicPayments.tsx");
   const routeSend = payments.slice(payments.indexOf("const send = async () => {"));
   assert.ok(
@@ -3920,6 +3932,220 @@ test("A57 AN-7 each sale's card on the Payments page says AIAIC's send of her mo
     sourceOf("AiaicPayments.tsx").includes("const sent = sendingLine(t, o);"),
     "EachSale says it",
   );
+});
+
+// ------------------------------- the re-check of 4 Nov 2026: what a payout form reads and shows, held as the form holds it
+
+/**
+ * A payout form's scan as the page holds it, with nothing leaving this machine: every `/safety/check` this server asks
+ * (`scanRead`, behind `scanFirst`'s own handler) is answered by AIAIC's recorded crisis answer (`reply`; its middleware
+ * answers every route in this one shape), a clean read, or nothing at all (`"unreachable"`); the form's state is kept as
+ * React's `useReducer` keeps it, through the hook's own reducer (`scanReducer`); and what the hook hands the form at each
+ * render is `formScan`'s. `texts`: what each scan was asked to read; `scanningWhenAsked`: whether the form said it was
+ * asking at the moment it asked.
+ */
+function scanBench() {
+  const realFetch = globalThis.fetch;
+  const bench = {
+    reply: answer<Record<string, unknown>>("safety_check_crisis") as
+      Record<string, unknown> | "unreachable",
+    texts: [] as string[],
+    scanningWhenAsked: [] as boolean[],
+    state: SCAN_START,
+  };
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    assert.equal(new URL(String(url)).pathname, "/safety/check", "only the scan is asked");
+    bench.texts.push((JSON.parse(String(init?.body)) as { text: string }).text);
+    if (bench.reply === "unreachable") throw new TypeError("fetch failed");
+    return new Response(JSON.stringify(bench.reply), { status: 200 });
+  }) as typeof fetch;
+  // `scanFirst`'s own handler (aiaic-account.functions.ts), over this server's read
+  const ask: AskTheScan = async ({ data }) => {
+    bench.scanningWhenAsked.push(bench.state.scanning);
+    const { read, crisis } = await account.scanRead(data);
+    if (crisis) return { ok: false, code: "crisis", crisis };
+    return read ? { ok: true } : { ok: false, code: "scan_not_read" };
+  };
+  const dispatch = (event: ScanEvent) => {
+    bench.state = scanReducer(bench.state, event);
+  };
+  /** What the hook hands the form at this render. */
+  const handed = (): FormScan => formScan(bench.state, dispatch, ask);
+  /** One press both payout forms make when this phone would refuse it: their own problem cleared, the scan reset, her
+   * words read first; then what the form shows (`problemShown`), rendered where it shows it. */
+  const press = async (words: string, lang: (typeof LANGS)[number], refusal: string) => {
+    const said: { problem: AiaicProblem | null } = { problem: null };
+    bench.texts.length = 0;
+    bench.scanningWhenAsked.length = 0;
+    handed().reset();
+    await handed().refuse(words, lang, refusal, (code) => {
+      said.problem = problem(code);
+    });
+    const shown = problemShown(handed(), said.problem);
+    return {
+      said: said.problem,
+      html: shown ? inApp(createElement(ProblemCard, { problem: shown }), lang) : "",
+    };
+  };
+  const restore = () => {
+    globalThis.fetch = realFetch;
+  };
+  return { bench, handed, press, restore };
+}
+
+/** What a form shows after a crisis: AIAIC's crisis card alone, with its three helplines, and no refusal of this phone. */
+function crisisCardOnly(
+  html: string,
+  lang: (typeof LANGS)[number],
+  refusal: string,
+  what: string,
+): void {
+  assert.ok(html.includes("data-crisis"), `${what}: the crisis card`);
+  for (const phone of HELPLINES) assert.ok(html.includes(phone), `${what}: helpline ${phone}`);
+  assert.equal(html.split('role="alert"').length - 1, 1, `${what}: one card, the crisis card`);
+  // the refusal's own line, where it is said as a card (Route's box refusals are said beside the box instead)
+  const line = DICTS[lang][`aiaic.refused.${refusal}`];
+  if (line) assert.ok(!html.includes(escHtml(line)), `${what}: no refusal`);
+}
+
+test("A58 RC-1 the crisis card a payout form shows is its scan's own state: AIAIC's recorded crisis answer, through the hook's own reducer and behaviour, shows the helplines and no refusal; a clean read says the refusal; a new press clears the card", async () => {
+  const { bench, handed, press, restore } = scanBench();
+  try {
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_MR, "mr"],
+    ] as const) {
+      // the Cashfree form: her crisis in the name box, the account and IFSC full or empty, ticked or not
+      for (const boxes of [TEST_BANK, { account: "", ifsc: "" }])
+        for (const agreed of [true, false]) {
+          const typed: DestinationTyped = {
+            kind: "bank_account",
+            upi: "",
+            name: words,
+            ...boxes,
+            agreed,
+            notice: true,
+          };
+          const what = `${lang}, account and IFSC ${boxes.account ? "filled" : "empty"}, ticked ${agreed}`;
+          const refusal = destinationRefusal(typed);
+          assert.ok(refusal, `${what}: this phone would refuse it`);
+          const { said, html } = await press(destinationWords(typed), lang, refusal);
+          assert.deepEqual(bench.texts, [words], `${what}: her words read first, and nothing else`);
+          assert.deepEqual(
+            bench.scanningWhenAsked,
+            [true],
+            `${what}: Save waits while it is asked`,
+          );
+          const now = handed();
+          assert.equal(now.inCrisis, true, `${what}: the form's state is the crisis`);
+          assert.equal(now.scanning, false, `${what}: the scan is no longer asked`);
+          assert.deepEqual(
+            now.crisis?.helplines.map((h) => h.phone),
+            HELPLINES,
+            `${what}: AIAIC's own helplines are kept`,
+          );
+          assert.equal(said, null, `${what}: no refusal said`);
+          crisisCardOnly(html, lang, refusal, what);
+        }
+      // Route's form: the name on her PAN, nothing else typed, not ticked
+      const route = {
+        destination: "bank_account" as const,
+        pan: "",
+        name_on_pan: words,
+        account_number: "",
+        ifsc: "",
+      };
+      const refusal = payoutFormRefusal(route, { agreed: false, readNotice: false, notice: true });
+      assert.equal(refusal, "pan", `Route ${lang}: this phone would refuse it`);
+      const { said, html } = await press(payoutWords(route), lang, refusal ?? "");
+      assert.deepEqual(bench.texts, [words], `Route ${lang}: her words read first`);
+      assert.equal(said, null, `Route ${lang}: no refusal said`);
+      crisisCardOnly(html, lang, refusal ?? "", `Route ${lang}`);
+    }
+    // a clean read: the refusal in its own words, and the last press's crisis card is gone (a new press resets it)
+    assert.equal(handed().inCrisis, true, "the last press was a crisis");
+    bench.reply = { distress: false };
+    const own: DestinationTyped = {
+      kind: "bank_account",
+      upi: "",
+      name: "सुनीता पाटील",
+      ...TEST_BANK,
+      agreed: true,
+      notice: true,
+    };
+    for (const lang of LANGS) {
+      const refusal = destinationRefusal(own) ?? "";
+      const { said, html } = await press(destinationWords(own), lang, refusal);
+      assert.deepEqual(bench.texts, ["सुनीता पाटील"], `${lang}: read first`);
+      assert.equal(said?.code, "account_name_letters_only", `${lang}: then refused`);
+      assert.equal(handed().inCrisis, false, `${lang}: no crisis now`);
+      assert.ok(!html.includes("data-crisis"), `${lang}: no crisis card`);
+      assert.ok(
+        html.includes(escHtml(DICTS[lang]["aiaic.refused.account_name_letters_only"] ?? "?")),
+        `${lang}: the refusal in its own words`,
+      );
+    }
+    // a scan that cannot be asked: the refusal is still said, never a crisis card, and Save does not wait for ever
+    bench.reply = "unreachable";
+    const lost = await press(CRISIS_HI, "hi", "account_name_letters_only");
+    assert.equal(lost.said?.code, "account_name_letters_only");
+    assert.equal(handed().scanning, false);
+    assert.ok(!lost.html.includes("data-crisis"));
+    // nothing typed: nothing is asked, and the refusal is said
+    const blank = await press("   ", "en", "payout_consent_required");
+    assert.deepEqual(bench.texts, [], "nothing typed: nothing asked");
+    assert.equal(blank.said?.code, "payout_consent_required");
+  } finally {
+    restore();
+  }
+  // the reducer itself: a crisis raises the state with AIAIC's card; a reset drops it; nothing else changes it
+  const card = { answer: null, message: null, helplines: [{ name: "Tele-MANAS", phone: "14416" }] };
+  const raised = scanReducer(SCAN_START, { type: "crisis", crisis: card });
+  assert.deepEqual(raised, { inCrisis: true, crisis: card, scanning: false });
+  assert.deepEqual(scanReducer(raised, { type: "reset" }), SCAN_START);
+  assert.equal(
+    scanReducer(SCAN_START, { type: "reset" }),
+    SCAN_START,
+    "nothing to drop: the same state",
+  );
+  assert.equal(
+    scanReducer(SCAN_START, { type: "asked" }),
+    SCAN_START,
+    "not asking: the same state",
+  );
+  assert.equal(problemShown(SCAN_START, null), null);
+  assert.equal(
+    problemShown(raised, problem("pan"))?.code,
+    "crisis",
+    "the crisis card before the form's own",
+  );
+  // the hook IS these parts: the reducer's state from React, formScan's behaviour, nothing else; rendered in the app, it
+  // hands the form the scan's starting state
+  const scanSource = fs.readFileSync(path.join(APP, "src", "lib", "aiaic-scan.ts"), "utf-8");
+  const hook = scanSource.slice(scanSource.indexOf("export function useScanBeforeRefusing"));
+  assert.equal(
+    hook.replace(/\s+/g, " ").trim(),
+    "export function useScanBeforeRefusing(): FormScan { const ask = useServerFn(scanFirst); const [state, dispatch] = useReducer(scanReducer, SCAN_START); return formScan(state, dispatch, ask); }",
+    "the hook is the reducer's state and formScan's behaviour, nothing else",
+  );
+  const first: { scan: FormScan | null } = { scan: null };
+  const Probe = () => {
+    first.scan = useScanBeforeRefusing();
+    return null;
+  };
+  inApp(createElement(Probe));
+  assert.ok(first.scan, "the hook ran in the app's tree");
+  const { refuse, reset, ...state } = first.scan;
+  assert.deepEqual(state, SCAN_START, "it starts with no crisis and no scan asked");
+  assert.ok(typeof refuse === "function" && typeof reset === "function");
+  // both payout forms show what problemShown gives, and only that, where their problem shows
+  for (const file of ["FromAiaicCard.tsx", "AiaicPayments.tsx"]) {
+    const form = sourceOf(file);
+    assert.ok(form.includes("const scan = useScanBeforeRefusing();"), `${file}: the shared hook`);
+    assert.ok(form.includes("const shown = problemShown(scan, problem);"), `${file}: problemShown`);
+    assert.ok(form.includes("{shown ? <ProblemCard problem={shown} /> : null}"), `${file}: shown`);
+    assert.ok(!form.includes("scan.inCrisis"), `${file}: no second reading of the crisis state`);
+  }
 });
 
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
