@@ -16,7 +16,8 @@
  *  (a) while she types, after each input event, nothing on the form changes but her boxes' own values and Save's
  *      enabled state (the form as the DOM holds it, its text and every alert or status region, against the empty form),
  *      and no box carries a validation message of the browser's;
- *  (b) Save is on the form, and open once any free box holds words, ticked or not;
+ *  (b) Save is on the form, and open once any free box holds words, ticked or not, with nothing on it or around it that
+ *      keeps her tap off it as far as the DOM says (jsdom does no layout: `inert`, `hidden`, a class that takes its taps);
  *  (c) her tap (a real click on Save, or the form's submit as the browser makes it) asks the scan FIRST, before her form
  *      is given to anything, in her chosen language, with her words as she typed them;
  *  (d) AIAIC's crisis card shows with its 3 helplines, no refusal is on screen, her form is never given, and Save is not
@@ -520,6 +521,29 @@ function suite(app: App, window: Window & typeof globalThis) {
     [...scope.querySelectorAll('[role="alert"], [role="status"], [aria-live]')].map(
       (r) => `${r.getAttribute("role") ?? "live"}: ${(r.textContent ?? "").trim()}`,
     );
+  /** What keeps her tap off Save, as far as the DOM can say (jsdom does no layout, and a script's `click()` reaches an
+   * element a browser would not let her tap): disabled (its own, or a fieldset's), or on Save or around it `inert`,
+   * `hidden`, `aria-hidden`, an inline style that hides it or takes its taps, or a class that does, read by its name. */
+  const NO_TAP = new Set(["hidden", "invisible", "pointer-events-none"]);
+  const untappable = (save: HTMLButtonElement): string[] => {
+    const why: string[] = [];
+    if (save.disabled || save.matches(":disabled")) why.push("disabled");
+    for (let e: Element | null = save; e; e = e.parentElement) {
+      const tag = `<${e.tagName.toLowerCase()}>`;
+      for (const a of ["inert", "hidden"]) if (e.hasAttribute(a)) why.push(`${a} on ${tag}`);
+      if (e.getAttribute("aria-hidden") === "true") why.push(`aria-hidden on ${tag}`);
+      const style = window.getComputedStyle(e);
+      if (
+        style.display === "none" ||
+        style.visibility === "hidden" ||
+        style.pointerEvents === "none"
+      )
+        why.push(`a style on ${tag} that hides it or takes its taps`);
+      for (const c of (e.getAttribute("class") ?? "").split(/\s+/))
+        if (NO_TAP.has(c)) why.push(`${c} on ${tag}`);
+    }
+    return why;
+  };
   /** (a) and (b), after each input event: against the empty form. */
   const watchTyping = (f: Opened, lang: Lang) => {
     const empty = {
@@ -561,9 +585,10 @@ function suite(app: App, window: Window & typeof globalThis) {
         const save = f.save();
         assert.ok(save, `${where}: Save is on her form`);
         if (open)
-          assert.ok(
-            !save.disabled && !save.matches(":disabled"),
-            `${where}: Save is open on her words`,
+          assert.deepEqual(
+            untappable(save),
+            [],
+            `${where}: Save is open on her words, and nothing keeps her tap off it`,
           );
       },
     };
@@ -614,6 +639,7 @@ function suite(app: App, window: Window & typeof globalThis) {
         seen.reset();
         const save = f.save();
         assert.ok(save, "Save is on her form");
+        assert.deepEqual(untappable(save), [], "her tap can reach Save");
         await tap(save);
         await settle();
         if (sentAsNow(c)) {
@@ -658,7 +684,7 @@ function suite(app: App, window: Window & typeof globalThis) {
         }
         const after = f.save();
         assert.ok(after, "Save is still on her form");
-        assert.ok(!after.disabled && !after.matches(":disabled"), "Save is not stuck");
+        assert.deepEqual(untappable(after), [], "Save is not stuck");
         assert.equal(after.querySelector(".animate-spin"), null, "Save does not spin");
       } finally {
         await f.unmount();
@@ -769,6 +795,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     seen.reset();
     const save = f.save();
     assert.ok(save, "Save is on her form");
+    assert.deepEqual(untappable(save), [], "her tap can reach Save");
     await tap(save);
     await settle();
     return f;
@@ -776,7 +803,7 @@ function suite(app: App, window: Window & typeof globalThis) {
   const notStuck = (f: Opened) => {
     const save = f.save();
     assert.ok(save, "Save is still on her form");
-    assert.ok(!save.disabled && !save.matches(":disabled"), "Save is not stuck");
+    assert.deepEqual(untappable(save), [], "Save is not stuck");
     assert.equal(save.querySelector(".animate-spin"), null, "Save does not spin");
   };
   /** Refused after the scan read her words (none of them a digit): the refusal said, never given, Save not stuck. */
