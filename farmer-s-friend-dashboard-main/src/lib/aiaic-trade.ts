@@ -2193,10 +2193,19 @@ export function needsDestination(order: AiaicOrder, mine: AiaicMine): boolean {
  */
 export function groupPaidWords(t: Words, order: AiaicOrder): string | null {
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
-  if (fa?.sending) {
-    // a state this app has no words for: the step's own words, never a key
-    const key = `aiaic.money.status.${sendingSaid(fa.sending)}`;
-    return t(key) === key ? null : t(key, { rs: rupees(fa.sending.amount_inr) });
-  }
+  if (fa?.sending) return sendingLine(t, order);
   return moneyCard(t, order)?.line ?? (order.payment.link_made ? t(paymentLine(order).key) : null);
+}
+
+/**
+ * AIAIC'S SEND OF HER MONEY ON ONE ORDER, IN THE SEND'S OWN STATE (`aiaic.money.status.<sendingSaid>`, with its amount):
+ * the line her group sale's page, her sales list and each sale's card on the Payments page say (the audit of 4 Nov 2026,
+ * AN-7: under Cashfree `money.say` is empty while AIAIC sends her money). Null when AIAIC sends nothing on it, or for a
+ * state this app has no words for (never a key).
+ */
+export function sendingLine(t: Words, order: AiaicOrder): string | null {
+  const sending = (order as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending ?? null;
+  if (!sending) return null;
+  const key = `aiaic.money.status.${sendingSaid(sending)}`;
+  return t(key) === key ? null : t(key, { rs: rupees(sending.amount_inr) });
 }

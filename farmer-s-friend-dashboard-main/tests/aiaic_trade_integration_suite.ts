@@ -29,6 +29,7 @@ import { renderToString } from "react-dom/server";
 import ts from "typescript";
 
 import { NotRefreshedLine, ProblemCard } from "../src/components/farm/aiaic/AiaicBits";
+import { EachSale } from "../src/components/farm/aiaic/AiaicPayments";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
 import { DestinationForm, FromAiaicCard } from "../src/components/farm/aiaic/FromAiaicCard";
 import { GroupOfferSteps, GroupSaleSteps } from "../src/components/farm/aiaic/GroupPages";
@@ -96,6 +97,7 @@ import {
   providerKey,
   providerName,
   routeCardShown,
+  sendingLine,
   type DestinationTyped,
   type XDestination,
   type XNotice,
@@ -3870,6 +3872,53 @@ test("A56 AN-6 a group sale asks her to give her details again when they went to
     needsDestination({ ...order, order_state: "cancelled" }, withDest(earlier)),
     false,
     "never on a sale called off",
+  );
+});
+
+test("A57 AN-7 each sale's card on the Payments page says AIAIC's send of her money in its own state, as her group sale's page does", () => {
+  const data = (mine: AiaicMine) => ({ mine, cropNames: {}, districtNames: {} });
+  const shown = 'data-testid="aiaic-payments-send"';
+  // AIAIC's real answers (Cashfree stood in for): her send on its way, and reached her bank
+  for (const [name, status] of [
+    ["collect_mine_processing", "processing"],
+    ["collect_mine_processed", "processed"],
+  ] as const) {
+    const mine = mineOf(name);
+    const order = mine.orders[0] as AiaicOrder;
+    const sending = (order as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending;
+    assert.equal(sending?.status, status, `${name}: AIAIC's state`);
+    assert.equal(order.money?.say ?? null, null, `${name}: AIAIC's money sentence is empty here`);
+    for (const lang of LANGS) {
+      const line = sendingLine(wordsIn(lang), order);
+      assert.equal(
+        line,
+        wordsIn(lang)(`aiaic.money.status.${status}`, { rs: rupees(sending?.amount_inr) }),
+        `${name} ${lang}: the send's own state`,
+      );
+      assert.equal(line, groupPaidWords(wordsIn(lang), order), "as her group sale's page says it");
+      const html = inApp(createElement(EachSale, { data: data(mine) }), lang);
+      const said = html.match(new RegExp(`${shown}>([^<]*)<`))?.[1];
+      assert.equal(said, escHtml(line ?? "?"), `${name} ${lang}: on its card`);
+    }
+  }
+  // the buyer paid and AIAIC sends nothing yet: no such line; a state with no words: none, never a key
+  assert.ok(
+    !inApp(createElement(EachSale, { data: data(mineOf("collect_mine_paid")) })).includes(shown),
+  );
+  const moving = mineOf("collect_mine_processing").orders[0] as AiaicOrder & {
+    from_aiaic: FromAiaic;
+  };
+  const unheard = {
+    ...moving,
+    from_aiaic: {
+      ...moving.from_aiaic,
+      sending: { ...moving.from_aiaic.sending, status: "a_state_not_held" },
+    },
+  } as AiaicOrder;
+  assert.equal(sendingLine(wordsIn("en"), unheard), null);
+  assert.ok(
+    sourceOf("AiaicPayments.tsx").includes("const sent = sendingLine(t, o);"),
+    "EachSale says it",
   );
 });
 

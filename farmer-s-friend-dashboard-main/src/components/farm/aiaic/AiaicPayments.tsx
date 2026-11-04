@@ -30,6 +30,7 @@ import {
   quintals,
   routeCardShown,
   rupees,
+  sendingLine,
   type AiaicCommission,
   type AiaicProblem,
   type MineForScreen,
@@ -119,7 +120,9 @@ function Totals({ data }: { data: MineForScreen }) {
   );
 }
 
-function EachSale({ data }: { data: MineForScreen }) {
+/** Each sale's card: what was agreed, the buyer's payment, AIAIC's own send of her money in its state (the audit of
+ * 4 Nov 2026, AN-7), AIAIC's sentence for her money, the commission. */
+export function EachSale({ data }: { data: MineForScreen }) {
   const { t } = useI18n();
   const orders = [...data.mine.orders].sort((a, b) => b.created_at.localeCompare(a.created_at));
   return (
@@ -132,6 +135,8 @@ function EachSale({ data }: { data: MineForScreen }) {
       ) : (
         orders.map((o) => {
           const said = moneySaid(t, "money", o.money?.say ?? null);
+          // AIAIC's own send, as her group sale's page says it: under Cashfree `money.say` is empty while AIAIC sends
+          const sent = sendingLine(t, o);
           return (
             <article
               key={o.order_id}
@@ -146,6 +151,14 @@ function EachSale({ data }: { data: MineForScreen }) {
                 </p>
               </div>
               <p className="text-sm font-semibold text-foreground">{t(paymentLine(o).key)}</p>
+              {sent ? (
+                <p
+                  className="text-sm font-semibold text-foreground"
+                  data-testid="aiaic-payments-send"
+                >
+                  {sent}
+                </p>
+              ) : null}
               {said ? <p className="text-sm text-foreground/85">{said}</p> : null}
               {o.money?.commission?.set ? (
                 <p className="text-xs font-semibold text-muted-foreground">
