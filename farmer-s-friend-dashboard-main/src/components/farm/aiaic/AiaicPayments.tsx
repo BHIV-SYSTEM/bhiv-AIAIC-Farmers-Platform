@@ -434,7 +434,7 @@ function PayoutAccountCard({
                 </label>
                 <label className="block text-xs font-bold text-foreground">
                   {t("aiaic.field.ifsc")}
-                  {/* nothing cut off at 11: words typed here reach the scan whole (RC-3) */}
+                  {/* nothing cut off at 11: words typed here reach the scan, never its digits (RC-3, RC2-4) */}
                   <input
                     value={ifsc}
                     onChange={(e) => setIfsc(e.target.value.toUpperCase())}

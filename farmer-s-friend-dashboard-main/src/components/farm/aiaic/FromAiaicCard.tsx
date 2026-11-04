@@ -15,8 +15,9 @@
  * THIS PHONE KEEPS HER WORDS FROM THE DISTRESS SCAN (the audit of 4 Nov 2026, AN-1; the platform's rule D-105): Save
  * can be pressed whenever her box holds words, and a press this phone would refuse has them read for distress first, as
  * the registration form does; a crisis gets AIAIC's crisis card, anything else the refusal in AIAIC's own code. Words
- * in the account or IFSC box are read too, never a well-formed account number or IFSC (the re-check, RC-3): the account
- * box keeps the spaces she types (they leave the number only when it goes to AIAIC), and the IFSC box cuts nothing off.
+ * in the account or IFSC box are read too, never a digit typed in either box or a well-formed IFSC (the re-check, RC-3,
+ * RC2-4): the account box keeps the spaces she types (they leave the number only when it goes to AIAIC), and the IFSC
+ * box cuts nothing off.
  * A press whose bank boxes hold words has them read first even when nothing here would refuse it (AIAIC's own reader
  * misses them once the number's spaces are gone), and the account is held to AIAIC's own rule after the scan, so a
  * press never sends more than AIAIC takes (the re-check, RC2-3).

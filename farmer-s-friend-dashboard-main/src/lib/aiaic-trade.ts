@@ -1078,22 +1078,25 @@ export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
 export type PayoutConsent = { agreed: boolean; readNotice: boolean; notice: boolean };
 
 /**
- * NO BOX IS BLIND TO A PERSON IN CRISIS, AND NO WELL-FORMED NUMBER GOES TO THE SCAN (the re-check of 4 Nov 2026, RC-3;
- * AIAIC's own rule for its boxes, its audit F10). What her account box and her IFSC box hold that cannot be her bank's
- * details, for the distress scan: the account box once every digit (of any script), space and hyphen is taken out, when
- * anything is left (her words, with the spaces between them kept and the digits gone); the IFSC box as typed when it is
- * not in an IFSC's shape. An account number or an IFSC as it should be is never sent to the scan.
+ * NO BOX IS BLIND TO A PERSON IN CRISIS, AND NO NUMBER OF HERS GOES TO THE SCAN (the re-check of 4 Nov 2026, RC-3 and
+ * RC2-4; AIAIC's own rule for its boxes, its audit F10). What her account box and her IFSC box hold that cannot be her
+ * bank's details, for the distress scan: each box once every digit (of any script), space and hyphen is taken out, when
+ * anything is left (her words, with one space kept between them and the digits gone); the IFSC box only when it is not
+ * in an IFSC's shape. No digit typed in either box (an account number typed in the IFSC box too), and no IFSC as it
+ * should be, is ever sent to the scan.
  */
 export function bankBoxWords(
   account: string | null | undefined,
   ifsc: string | null | undefined,
 ): string[] {
-  const words: string[] = [];
   // digits, spaces and hyphens out, one space kept between her words
-  const left = (account ?? "").replace(/[\p{Nd}\s-]+/gu, " ").trim();
+  const wordsIn = (box: string) => box.replace(/[\p{Nd}\s-]+/gu, " ").trim();
+  const words: string[] = [];
+  const left = wordsIn(account ?? "");
   if (left) words.push(left);
   const code = (ifsc ?? "").trim();
-  if (code && !IFSC_RE.test(code.replace(/\s+/g, "").toUpperCase())) words.push(code);
+  const inCode = wordsIn(code);
+  if (inCode && !IFSC_RE.test(code.replace(/\s+/g, "").toUpperCase())) words.push(inCode);
   return words;
 }
 

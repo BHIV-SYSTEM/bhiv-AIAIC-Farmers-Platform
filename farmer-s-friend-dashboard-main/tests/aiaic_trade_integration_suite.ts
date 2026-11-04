@@ -4340,7 +4340,7 @@ test("A59 RC-2 the bank name's hint never depends on what she typed: one element
   assert.equal(attribute(box, "aria-invalid"), undefined, "never marked wrong");
 });
 
-test("A60 RC-3 words typed in her account or IFSC box reach the distress scan before any refusal, on both payout forms; a well-formed account number or IFSC never goes to the scan", async () => {
+test("A60 RC-3 RC2-4 words typed in her account or IFSC box reach the distress scan before any refusal, on both payout forms; no digit typed in either box (an account number typed in the IFSC box too), and no well-formed IFSC, ever goes to the scan", async () => {
   // what her bank boxes hold that cannot be her bank's details, and only that
   assert.deepEqual(
     bankBoxWords(TEST_BANK.account, TEST_BANK.ifsc),
@@ -4364,8 +4364,24 @@ test("A60 RC-3 words typed in her account or IFSC box reach the distress scan be
     "her words, never the digits beside them",
   );
   assert.deepEqual(bankBoxWords("", CRISIS_MR), [CRISIS_MR], "her words in the IFSC box");
-  // an IFSC not in its shape is read as typed (a bank branch's code, public); a well-formed one never is
-  assert.deepEqual(bankBoxWords("", "YESB000026"), ["YESB000026"]);
+  // the IFSC box read as the account box is (the re-check, RC2-4): an IFSC not in its shape without its digits; a
+  // well-formed one never; an account number typed in it never, however it is typed
+  assert.deepEqual(bankBoxWords("", "YESB000026"), ["YESB"]);
+  for (const typed of [
+    TEST_BANK.account,
+    "000123456789",
+    "0262 9180-0001 191",
+    "०२६२ ९१८० ०००१ १९१",
+    ` ${TEST_BANK.account} `,
+  ])
+    assert.deepEqual(bankBoxWords("", typed), [], `"${typed}" in the IFSC box: nothing read`);
+  assert.deepEqual(
+    bankBoxWords("", `${CRISIS_MR} 42`),
+    [CRISIS_MR],
+    "her words in the IFSC box, never the digits beside them",
+  );
+  // the box upper-cases what she types: her words go to the scan so, with their spaces
+  assert.deepEqual(bankBoxWords("", CRISIS_EN.toUpperCase()), [CRISIS_EN.toUpperCase()]);
   assert.deepEqual(bankBoxWords(undefined, undefined), []);
   // Save opens on words in either box (no rule of this phone keeps them from the scan), never on digits alone
   const empty: DestinationTyped = {
@@ -4419,7 +4435,7 @@ test("A60 RC-3 words typed in her account or IFSC box reach the distress scan be
     ifsc: "RECT0000001",
   };
   const given = { agreed: true, readNotice: true, notice: true };
-  const { bench, press, restore } = scanBench();
+  const { bench, press, pressForm, restore } = scanBench();
   try {
     for (const [words, lang] of [
       [CRISIS_HI, "hi"],
@@ -4454,12 +4470,70 @@ test("A60 RC-3 words typed in her account or IFSC box reach the distress scan be
         crisisCardOnly(html, lang, refusal, what);
       }
     }
-    // not a crisis: an IFSC not in its shape is read, then refused in its own words; the account number never read
+    // AIAIC's English phrase in the IFSC box, upper-cased by the box, on both forms: read first with its spaces
+    const loud = CRISIS_EN.toUpperCase();
+    const cfLoud = await pressForm("en", (run) =>
+      pressDestination({ ...complete, ifsc: loud }, run),
+    );
+    assert.deepEqual(bench.texts, [`Recording Farmer. ${loud}`], "Cashfree's IFSC box: read first");
+    assert.deepEqual(cfLoud.order, ["scan"]);
+    crisisCardOnly(cfLoud.html, "en", "ifsc_not_valid", "Cashfree's IFSC box");
+    const rtLoud = await pressForm("en", (run) =>
+      pressPayout({ ...route, ifsc: loud }, given, run),
+    );
+    assert.deepEqual(
+      bench.texts,
+      [`Practice Payee Testname. ${loud}`],
+      "Route's IFSC box: read first",
+    );
+    assert.deepEqual(rtLoud.order, ["scan"]);
+    crisisCardOnly(rtLoud.html, "en", "ifsc", "Route's IFSC box");
+    // not a crisis: an IFSC not in its shape is read without its digits, then refused in its own words
     bench.reply = { distress: false };
     const typo = { ...complete, ifsc: "YESB000026" };
     const { said } = await press(destinationWords(typo), "en", destinationRefusal(typo) ?? "");
-    assert.deepEqual(bench.texts, ["Recording Farmer. YESB000026"]);
+    assert.deepEqual(bench.texts, ["Recording Farmer. YESB"]);
     assert.equal(said?.code, "ifsc_not_valid");
+    // an account number typed in the IFSC box (the re-check's cases, RC2-4), on both forms: refused after the scan,
+    // which reads her name and never the number
+    const mistyped: [string, DestinationTyped, string, string][] = [
+      [
+        "the account number in the IFSC box, the account box empty",
+        { ...complete, account: "", ifsc: TEST_BANK.account },
+        "Recording Farmer",
+        "account_number_not_valid",
+      ],
+      [
+        "the account number in both boxes",
+        { ...complete, ifsc: TEST_BANK.account },
+        "Recording Farmer",
+        "ifsc_not_valid",
+      ],
+      [
+        "the IFSC in the account box, the account number in the IFSC box",
+        { ...complete, account: TEST_BANK.ifsc, ifsc: TEST_BANK.account },
+        "Recording Farmer. YESB",
+        "ifsc_not_valid",
+      ],
+    ];
+    for (const [where, typed, read, code] of mistyped) {
+      const r = await pressForm("en", (run) => pressDestination(typed, run));
+      assert.deepEqual(bench.texts, [read], `Cashfree, ${where}: no digit of hers read`);
+      assert.deepEqual(r.order, ["scan"], `Cashfree, ${where}: read first, never given`);
+      assert.equal(r.said?.code, code, `Cashfree, ${where}: then refused`);
+    }
+    for (const [where, typed] of [
+      [
+        "the account number in the IFSC box",
+        { ...route, account_number: "", ifsc: "000123456789" },
+      ],
+      ["the account number in both boxes", { ...route, ifsc: "000123456789" }],
+    ] as const) {
+      const r = await pressForm("en", (run) => pressPayout(typed, given, run));
+      assert.deepEqual(bench.texts, ["Practice Payee Testname"], `Route, ${where}: no digit read`);
+      assert.deepEqual(r.order, ["scan"], `Route, ${where}: read first, never given`);
+      assert.ok(r.said, `Route, ${where}: then refused`);
+    }
   } finally {
     restore();
   }
