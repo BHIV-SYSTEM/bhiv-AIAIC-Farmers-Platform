@@ -248,6 +248,10 @@ export type AiaicPricing = {
     payer: string | null;
   };
   payment_fee_set: boolean;
+  /** The payments provider AIAIC uses now ("cashfree" since 4 Nov 2026), and how her money moves ("collect_then_pay":
+   * AIAIC collects, then pays her; "route"); null from an AIAIC that does not say. */
+  provider: string | null;
+  model: string | null;
 };
 
 /** AIAIC's pricing answer, field by field; null when it is not one (then the page says it could not be read). */
@@ -269,6 +273,8 @@ export function pricingOf(raw: unknown): AiaicPricing | null {
     },
     payment_fee_set:
       !!fee && typeof fee === "object" && (fee as Record<string, unknown>)["set"] === true,
+    provider: typeof r["provider"] === "string" ? r["provider"] : null,
+    model: typeof r["model"] === "string" ? r["model"] : null,
   };
 }
 

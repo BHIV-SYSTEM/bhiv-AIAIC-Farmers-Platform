@@ -27,7 +27,7 @@ export const BUSINESS = {
   /** The registered office's city: its courts hear disputes under the terms. */
   jurisdictionCity: "Mumbai",
   /** The day the page texts were last changed. */
-  lastUpdated: "26 October 2026",
+  lastUpdated: "4 November 2026",
 } as const;
 
 /** Krishi Sampada (AIAIC), where real sales and their payments are made. Its home page links all its own policies. */
@@ -96,6 +96,9 @@ export function commissionSentence(read: PricingRead): string {
     return "Reading AIAIC's current commission from Krishi Sampada (AIAIC)…";
   if (read.status === "failed") return NOT_READ;
   const c = read.pricing.commission;
+  // AIAIC collects, then pays (its own `model`; every Cashfree link since 4 Nov 2026): it then makes no link at all
+  if (!c.valid && read.pricing.model === "collect_then_pay")
+    return "AIAIC's commission setting is being corrected; until it is, Krishi Sampada (AIAIC) makes no payment link.";
   if (!c.valid)
     return (
       "AIAIC's commission setting is being corrected; until it is, Krishi Sampada (AIAIC) makes no payment " +

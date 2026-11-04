@@ -113,6 +113,8 @@ import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
+import { commissionSentence } from "../src/lib/business";
+import { pricingOf } from "../src/lib/aiaic-trade";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.join(here, "fixtures", "aiaic");
@@ -3275,6 +3277,69 @@ test("A50 Razorpay Route's card shows only where AIAIC wires Route; AIAIC's Cash
       `${name}: payout_account ${p.join(",")}`,
     );
   }
+});
+
+test("A51 the policies name Cashfree as AIAIC's payment processor and its refund time as AIAIC's own page states it; RazorpayX nowhere", () => {
+  const page = (name: string) =>
+    fs.readFileSync(path.join(APP, "src", "content", "policies", `${name}.md`), "utf-8");
+  for (const name of ["about", "contact", "pricing", "privacy", "refund", "terms"]) {
+    const text = page(name);
+    assert.ok(!/razorpayx/i.test(text), `${name} names RazorpayX`);
+    // Razorpay only as Razorpay Route's own form (shown only where AIAIC uses Route): never as AIAIC's processor
+    for (const line of text.split(/\r?\n/))
+      if (line.includes("Razorpay"))
+        assert.ok(
+          line.includes("Razorpay Route"),
+          `${name}: Razorpay named outside Route: "${line}"`,
+        );
+  }
+  for (const name of ["pricing", "privacy", "refund"])
+    assert.ok(page(name).includes("Cashfree"), `${name} names Cashfree`);
+  // AIAIC's own refund page (its Cashfree branch): "Cashfree states that a refund can take 7 to 10 business days"
+  assert.ok(page("refund").includes("7 to 10 business days"), "Cashfree's own refund time");
+  assert.ok(!/5 to 7/.test(page("refund")), "Razorpay's earlier refund time is gone");
+  assert.ok(
+    page("pricing").includes("Cashfree Payouts"),
+    "AIAIC pays her through Cashfree Payouts",
+  );
+  // only `- ` lists are read by the pages (policy-text.ts): no numbered line is left to run into a paragraph
+  for (const name of ["pricing", "privacy", "refund"])
+    assert.ok(!/^\d+\. /m.test(page(name)), `${name}: a numbered list the page cannot draw`);
+  // AIAIC's public pricing on its Cashfree branch (`payouts.public_pricing`): it names its provider and its model
+  const cashfree = pricingOf({
+    currency: "INR",
+    commission: { set: true, valid: false, bps: null, percent: null, payer: null },
+    payment_fee: { set: true, paid_by: "buyer", parts: null },
+    provider: "cashfree",
+    model: "collect_then_pay",
+    how: {},
+    example: null,
+  });
+  assert.deepEqual(
+    [cashfree?.provider, cashfree?.model],
+    ["cashfree", "collect_then_pay"],
+    "AIAIC's provider and model are read",
+  );
+  const collecting = commissionSentence({
+    status: "read",
+    pricing: cashfree as NonNullable<typeof cashfree>,
+  });
+  assert.ok(
+    collecting.endsWith("makes no payment link.") && !collecting.includes("share"),
+    `collect-then-pay, no Route share: "${collecting}"`,
+  );
+  const older = pricingOf({ commission: { set: true, valid: false }, payment_fee: { set: true } });
+  assert.deepEqual(
+    [older?.provider, older?.model],
+    [null, null],
+    "an AIAIC that does not say: none",
+  );
+  assert.ok(
+    commissionSentence({ status: "read", pricing: older as NonNullable<typeof older> }).includes(
+      "carries a farmer's share",
+    ),
+    "an older AIAIC's sentence stays as it was",
+  );
 });
 
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
