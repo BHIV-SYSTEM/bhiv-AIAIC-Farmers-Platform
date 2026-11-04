@@ -4148,6 +4148,73 @@ test("A58 RC-1 the crisis card a payout form shows is its scan's own state: AIAI
   }
 });
 
+test("A59 RC-2 the bank name's hint never depends on what she typed: one element straight under the name box, every attribute a fixed string, its only words the hint's own line", () => {
+  // the component as the compiler reads it: what the hint is cannot follow the form's state (R08 made its class do so)
+  const file = path.join(APP, "src", "components", "farm", "aiaic", "FromAiaicCard.tsx");
+  const source = ts.createSourceFile(
+    file,
+    fs.readFileSync(file, "utf-8"),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const attribute = (el: ts.JsxOpeningLikeElement, name: string) =>
+    el.attributes.properties.find(
+      (a): a is ts.JsxAttribute => ts.isJsxAttribute(a) && a.name.getText(source) === name,
+    );
+  const fixed = (el: ts.JsxOpeningLikeElement, name: string): string | null => {
+    const init = attribute(el, name)?.initializer;
+    return init && ts.isStringLiteral(init) ? init.text : null;
+  };
+  const hints: ts.JsxElement[] = [];
+  const visit = (node: ts.Node): void => {
+    if (ts.isJsxElement(node) && fixed(node.openingElement, "id") === "aiaic-dest-name-rule")
+      hints.push(node);
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  assert.equal(hints.length, 1, "one hint");
+  const hint = hints[0] as ts.JsxElement;
+  for (const a of hint.openingElement.attributes.properties) {
+    assert.ok(ts.isJsxAttribute(a), "nothing spread onto the hint");
+    assert.ok(
+      a.initializer && ts.isStringLiteral(a.initializer),
+      `${a.name.getText(source)}: a fixed string, never an expression`,
+    );
+  }
+  const cls = fixed(hint.openingElement, "className") ?? "";
+  assert.ok(
+    cls.includes("text-muted-foreground") && !/destructive|danger|red-/.test(cls),
+    `plain, never red: "${cls}"`,
+  );
+  assert.equal(attribute(hint.openingElement, "aria-invalid"), undefined, "never marked wrong");
+  // its only words are the hint's own line, by its own key
+  const kids = hint.children.filter((c) => !(ts.isJsxText(c) && c.containsOnlyTriviaWhiteSpaces));
+  assert.equal(kids.length, 1, "one child");
+  const only = kids[0];
+  assert.ok(only && ts.isJsxExpression(only) && only.expression, "a said line");
+  assert.equal(only.expression.getText(source), 't("aiaic.dest.name_rule")', "the hint's own line");
+  // straight in the name box's label, never inside a condition; the box beside it looks like every other box
+  const label = hint.parent;
+  assert.ok(
+    ts.isJsxElement(label) && label.openingElement.tagName.getText(source) === "label",
+    "straight in the name box's label",
+  );
+  const box = label.children.find(
+    (c): c is ts.JsxSelfClosingElement =>
+      ts.isJsxSelfClosingElement(c) && c.tagName.getText(source) === "input",
+  );
+  assert.ok(box, "the name box beside it");
+  assert.equal(fixed(box, "aria-describedby"), "aiaic-dest-name-rule", "the box names its hint");
+  assert.equal(attribute(box, "value")?.initializer?.getText(source), "{name}", "the name box");
+  assert.equal(
+    attribute(box, "className")?.initializer?.getText(source),
+    "{INPUT}",
+    "as every box",
+  );
+  assert.equal(attribute(box, "aria-invalid"), undefined, "never marked wrong");
+});
+
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
   const s = await standIn();
   try {
