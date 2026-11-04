@@ -85,6 +85,10 @@ is shown. Nothing to set.
 
 ## Cashfree, AIAIC's payment processor (since 4 Nov 2026)
 
+**Deploy order: this app's Cashfree words go live only after AIAIC's Cashfree release is live.** Deploy AIAIC's
+branch `payments-cashfree-2026-11-04` first, check it answers as below, then deploy this app. The other way round is not
+read as before (see the end of this section).
+
 AIAIC's payments moved to Cashfree on its branch `payments-cashfree-2026-11-04` (its design C1 to C10): the buyer pays
 AIAIC through a Cashfree payment link, and once the link is paid in full and her produce has left her, AIAIC sends the
 farmer her amount through Cashfree Payouts. Razorpay is kept in AIAIC's code but not wired; RazorpayX, Razorpay's payouts
@@ -100,14 +104,27 @@ product, is gone. This app follows what AIAIC's answers say, field by field; not
   covers a transfer held for an approval; on its way; reached her bank; did not go through or came back, on AIAIC's team's
   list). Only `processed` says it reached her bank. Her sale's step bar and the Payments page's totals count AIAIC's own
   send too.
-- **Her bank account's name**: Cashfree takes English letters and spaces only; the form says so beside the box and
-  says AIAIC's refusal (`account_name_letters_only`) by its code. Every code AIAIC's Cashfree branch answers her form
-  with (`cashfree_*`, `live_keys_no_rehearsal`, ...) has words in English, Marathi and Hindi (drafts for a native reader).
+- **Her bank account's name**: Cashfree takes English letters and spaces only; the form says so in a plain hint under
+  the box, never as a lock on Save. Save opens on any words in the box, and a press this phone would refuse (that rule,
+  a length, her tick) has her words read by AIAIC's distress scan first, as the registration form does (the platform's
+  rule D-105): a crisis gets the helplines, anything else AIAIC's refusal by its code (`account_name_letters_only`).
+  Every code AIAIC's Cashfree branch answers her form with (`cashfree_*`, `live_keys_no_rehearsal`, ...) has words in
+  English, Marathi and Hindi (drafts for a native reader).
 - **Razorpay Route's card** on the Payments page shows only while AIAIC wires Route (`payout_account.wired`); Route's
   own lines keep naming Razorpay and show only on Route's own facts.
 - **The policy pages** (Pricing, Privacy, Refund) name Cashfree as AIAIC's payment processor, the collect-then-pay flow,
   and the refund time as AIAIC's own Refund page states it (Cashfree's 7 to 10 business days).
 
-An AIAIC server not yet updated (no `provider`, no `wired`) is read as before. The recorded answers the tests replay
-(`tests/fixtures/aiaic/`) are recorded again from AIAIC's branch by one command; `trade_recording_manifest.json` beside
-them names the AIAIC commit they came from and that command.
+An AIAIC server not yet on its Cashfree release is **not** read as before everywhere, which is why the order above
+holds:
+
+- What reads as before: with no `provider`, her destination's words name no provider; with no `wired`, Route's card shows
+  as it did; with no `provider` or `model` in its pricing, the commission sentence is the older one.
+- What does not: its five RazorpayX refusals (`razorpayx_not_configured`, `razorpayx_live_not_approved`,
+  `razorpayx_refused`, `razorpayx_no_answer`, `razorpayx_ip_not_allowlisted`) are kept here with words that name no
+  provider, only for that time, and are removed once AIAIC's Cashfree release is live; but this app's Pricing, Privacy
+  and Refund pages already name Cashfree as AIAIC's payment processor and its refund time, which that AIAIC does not
+  use.
+
+The recorded answers the tests replay (`tests/fixtures/aiaic/`) are recorded again from AIAIC's branch by one command;
+`trade_recording_manifest.json` beside them names the AIAIC commit they came from and that command.

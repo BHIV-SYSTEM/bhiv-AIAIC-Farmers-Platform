@@ -3034,6 +3034,16 @@ test("B19 her sale's news through this server: one per offer (the newest, more t
 
 /** The lines that are Razorpay Route's own (a share of hers carried by the buyer's link, her Route account): they name
  * Razorpay, and show only on Route's own facts (`money.say` of a Route payout, the Route card while AIAIC wires Route). */
+/** The five RazorpayX refusal codes an AIAIC not yet on its Cashfree release still answers her form with (the audit of
+ * 4 Nov 2026, AN-5): kept with words that name no provider until AIAIC's Cashfree release is live, then removed. */
+const OLD_RAZORPAYX_KEYS = [
+  "aiaic.refused.razorpayx_not_configured",
+  "aiaic.refused.razorpayx_live_not_approved",
+  "aiaic.refused.razorpayx_refused",
+  "aiaic.refused.razorpayx_no_answer",
+  "aiaic.refused.razorpayx_ip_not_allowlisted",
+];
+
 const ROUTE_ONLY = [
   "aiaic.farmer.money.will_send_bank",
   "aiaic.farmer.money.will_send_bank_any",
@@ -3078,8 +3088,14 @@ const inApp = (el: ReactElement, lang: (typeof LANGS)[number] = "en") =>
 test("A47 her money's provider is named only as AIAIC names it: Cashfree where it says so, none where it names none, RazorpayX nowhere", () => {
   for (const lang of LANGS) {
     const lines = Object.entries(DICTS[lang]).filter(([k]) => k.startsWith("aiaic."));
-    for (const [k, v] of lines)
-      assert.ok(!/razorpayx/i.test(k + v), `${lang} ${k}: names RazorpayX`);
+    for (const [k, v] of lines) {
+      assert.ok(!/razorpayx/i.test(v), `${lang} ${k}: names RazorpayX`);
+      // a key may name it only as one of the five codes an AIAIC not yet switched answers (AN-5)
+      assert.ok(
+        !/razorpayx/i.test(k) || OLD_RAZORPAYX_KEYS.includes(k),
+        `${lang} ${k}: a RazorpayX key`,
+      );
+    }
     const razorpay = lines
       .filter(([, v]) => v.includes("Razorpay"))
       .map(([k]) => k)
@@ -3225,7 +3241,7 @@ test("A48 each state of her money's send through Cashfree is said in plain words
   }
 });
 
-test("A49 her details' refusals on AIAIC's Cashfree branch are worded in en, mr and hi; RazorpayX's codes are gone", () => {
+test("A49 her details' refusals on AIAIC's Cashfree branch are worded in en, mr and hi; RazorpayX's codes only as an AIAIC not yet switched answers them", () => {
   // the codes POST /farmer/trade/payout-destination answers on AIAIC's Cashfree branch (its trade/farmer_payout.py
   // `details`, `_destination_refusal`, `claim_destination`, `finish_destination`, and its route's own)
   const CODES = [
@@ -3256,9 +3272,11 @@ test("A49 her details' refusals on AIAIC's Cashfree branch are worded in en, mr 
       assert.ok(DICTS[lang][`aiaic.refused.${code}`], `${lang} has no words for ${code}`);
   for (const lang of LANGS)
     assert.deepEqual(
-      Object.keys(DICTS[lang]).filter((k) => k.startsWith("aiaic.refused.razorpayx_")),
-      [],
-      `${lang}: RazorpayX's codes are gone`,
+      Object.keys(DICTS[lang])
+        .filter((k) => k.startsWith("aiaic.refused.razorpayx_"))
+        .sort(),
+      [...OLD_RAZORPAYX_KEYS].sort(),
+      `${lang}: RazorpayX's codes only as an AIAIC not yet switched answers them (AN-5)`,
     );
   // a bank account's name, by Cashfree's rule as AIAIC checks it: letters and single spaces, 2 to 100, a letter at each end
   const NAMES: [string, boolean][] = [
@@ -3780,6 +3798,34 @@ test("A54 AN-4 no screen of her sale names Razorpay by its own words: no string 
   }
   assert.ok(read > 3000, `only ${read} strings read`);
   assert.deepEqual(named, [], "a component names Razorpay in its own words");
+});
+
+test("A55 AN-5 an AIAIC not yet on its Cashfree release: each RazorpayX refusal it answers is said in en, mr and hi by what it means for her, with no raw code and no provider named", () => {
+  // the codes AIAIC's main branch answers her form with (its trade/razorpayx.py `refusal`, trade/farmer_payout.py)
+  assert.equal(OLD_RAZORPAYX_KEYS.length, 5);
+  for (const key of OLD_RAZORPAYX_KEYS) {
+    const code = key.slice("aiaic.refused.".length);
+    for (const lang of LANGS) {
+      // the words her screen says for AIAIC's refusal (`ProblemCard`, as her form shows it)
+      const html = inApp(createElement(ProblemCard, { problem: problem(code) }), lang);
+      const said = html.match(/<p class="[^"]*">([^<]*)<\/p>/)?.[1] ?? "";
+      assert.equal(said, escHtml(DICTS[lang][key] ?? "?"), `${lang} ${code}: its own line`);
+      assert.ok(!said.includes(code) && !HOLE.test(said), `${lang} ${code}: "${said}"`);
+      assert.ok(!/razorpay|cashfree/i.test(said), `${lang} ${code}: names a provider: "${said}"`);
+      assert.notEqual(
+        said,
+        escHtml(wordsIn(lang)("aiaic.problem.other", { code })),
+        `${lang} ${code}: never the line for a code it has no words for`,
+      );
+    }
+  }
+  // the source marks them for removal once AIAIC's Cashfree release is live
+  const dict = fs.readFileSync(path.join(APP, "src", "lib", "i18n-aiaic.ts"), "utf-8");
+  assert.equal(
+    dict.split("REMOVE once AIAIC's Cashfree release is live").length - 1,
+    3,
+    "marked for removal in each language",
+  );
 });
 
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
