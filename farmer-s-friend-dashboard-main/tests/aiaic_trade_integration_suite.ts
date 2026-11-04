@@ -24,6 +24,7 @@ import {
   createRootRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { runWithStartContext } from "@tanstack/start-storage-context";
 import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 import ts from "typescript";
@@ -138,9 +139,11 @@ import {
   newsShown,
   tradeFactsOf,
   tradeNoticeLine,
+  type AccountOutcome,
   type Notice,
   type TradeNoticeKind,
 } from "../src/lib/aiaic-account";
+import { scanFirst } from "../src/lib/aiaic-account.functions";
 import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
 import * as client from "../src/lib/aiaic-trade.server";
@@ -3437,9 +3440,46 @@ const TEST_BANK = { account: "026291800001191", ifsc: "YESB0000262" };
 /** The helplines of AIAIC's real crisis answer (safety_check_crisis.json), as her crisis card says them. */
 const HELPLINES = ["14416", "1800-891-4416", "1800-180-1551"];
 
+/**
+ * ONE OF THIS APP'S SERVER FUNCTIONS, RUN IN THIS PROCESS AS A PAGE CALLS IT (the re-check of 4 Nov 2026, RC2-1): Start's
+ * RPC round trip, which only the Vite plugin builds, is stood in for by one function middleware (`runWithStartContext`
+ * hands it to the function as Start's own options do) that runs the function's OWN validator on what the page sends,
+ * then its OWN handler (a server function run without the plugin keeps its handler as `extractedFn`). Nothing of the
+ * function is copied or replaced. `"validator"`: only what its validator lets through, and its handler is never run.
+ */
+async function inProcess(fn: unknown, data: unknown, run: "validator" | "handler" = "handler") {
+  const rpc = {
+    options: {
+      client: async (ctx: Record<string, unknown>) => {
+        const validator = ctx["inputValidator"];
+        const handler = ctx["extractedFn"];
+        assert.ok(
+          typeof validator === "function" && typeof handler === "function",
+          "the server function's own validator and handler",
+        );
+        const valid = (validator as (d: unknown) => unknown)(ctx["data"]);
+        const result =
+          run === "validator"
+            ? valid
+            : await (handler as (p: unknown) => Promise<unknown>)({ data: valid, context: {} });
+        return { ...ctx, result };
+      },
+    },
+  };
+  return runWithStartContext({ startOptions: { functionMiddleware: [rpc] } } as never, () =>
+    (fn as (opts: { data: unknown }) => Promise<unknown>)({ data }),
+  );
+}
+
+/** The scan as every page asks it (`useServerFn(scanFirst)` in the shared hook, and the address check): the REAL
+ * `scanFirst` server function of aiaic-account.functions.ts, its validator and its handler, in this process. */
+const askScanFirst: AskTheScan = async ({ data }) =>
+  (await inProcess(scanFirst, data)) as AccountOutcome;
+
 test("A52 AN-1 her words in a payout form reach the distress scan before any refusal of this phone: Save opens on any words, a crisis gets the helplines, her own script gets the letters refusal only after the scan", async () => {
   // AIAIC's real crisis answer (POST /safety/check, recorded by AIAIC's recorder): its middleware answers every route in
-  // this one shape. The scan is this server's own read of it (`scanFirst`), with fetch answered here: nothing leaves.
+  // this one shape. The scan is the real `scanFirst` server function (`askScanFirst`), with fetch answered here:
+  // nothing leaves.
   const crisisAnswer = answer<Record<string, unknown>>("safety_check_crisis");
   const realFetch = globalThis.fetch;
   const log: string[] = [];
@@ -3448,11 +3488,8 @@ test("A52 AN-1 her words in a payout form reach the distress scan before any ref
     log.push(`asked ${new URL(String(url)).pathname}`);
     return new Response(JSON.stringify(scanAnswer), { status: 200 });
   }) as typeof fetch;
-  // the scan as the page asks it (`scanFirst`'s server function: AIAIC's crisis card, or a clean read)
-  const ask: AskTheScan = async ({ data }) => {
-    const crisis = await account.scanFirst(data);
-    return crisis ? { ok: false, code: "crisis", crisis } : { ok: true };
-  };
+  // the scan as the page asks it: the real `scanFirst` server function (AIAIC's crisis card, or a clean read)
+  const ask = askScanFirst;
   const seen: { card: AiaicProblem | null } = { card: null };
   const said = {
     crisis: (crisis: AiaicProblem["crisis"]) => {
@@ -3950,12 +3987,16 @@ test("A57 AN-7 each sale's card on the Payments page says AIAIC's send of her mo
 // ------------------------------- the re-check of 4 Nov 2026: what a payout form reads and shows, held as the form holds it
 
 /**
- * A payout form's scan as the page holds it, with nothing leaving this machine: every `/safety/check` this server asks
- * (`scanRead`, behind `scanFirst`'s own handler) is answered by AIAIC's recorded crisis answer (`reply`; its middleware
- * answers every route in this one shape), a clean read, or nothing at all (`"unreachable"`); the form's state is kept as
- * React's `useReducer` keeps it, through the hook's own reducer (`scanReducer`); and what the hook hands the form at each
- * render is `formScan`'s. `texts`: what each scan was asked to read; `scanningWhenAsked`: whether the form said it was
- * asking at the moment it asked.
+ * A payout form's scan as the page holds it, with nothing leaving this machine. The scan is asked through the REAL
+ * `scanFirst` server function (aiaic-account.functions.ts: its own validator, then its own handler over this server's
+ * `scanRead`), run in this process (`askScanFirst`: one function middleware stands in for Start's RPC round trip, which
+ * only the Vite plugin builds), exactly as the shared hook's `useServerFn(scanFirst)` calls it; so the crisis outcome
+ * the reducer and the selector are handed is the real function's. Every `/safety/check` it asks goes to `fetch`, which
+ * is replaced here: answered by AIAIC's recorded crisis answer (`reply`; its middleware answers every route in this one
+ * shape), a clean read, or nothing at all (`"unreachable"`). The form's state is kept as React's `useReducer` keeps it,
+ * through the hook's own reducer (`scanReducer`), and what the hook hands the form at each render is `formScan`'s.
+ * `texts`: what each scan was asked to read; `scanningWhenAsked`: whether the form said it was asking at the moment it
+ * asked.
  */
 function scanBench() {
   const realFetch = globalThis.fetch;
@@ -3972,12 +4013,10 @@ function scanBench() {
     if (bench.reply === "unreachable") throw new TypeError("fetch failed");
     return new Response(JSON.stringify(bench.reply), { status: 200 });
   }) as typeof fetch;
-  // `scanFirst`'s own handler (aiaic-account.functions.ts), over this server's read
-  const ask: AskTheScan = async ({ data }) => {
+  // the real `scanFirst` server function (aiaic-account.functions.ts), in this process: no copy of its handler
+  const ask: AskTheScan = async (q) => {
     bench.scanningWhenAsked.push(bench.state.scanning);
-    const { read, crisis } = await account.scanRead(data);
-    if (crisis) return { ok: false, code: "crisis", crisis };
-    return read ? { ok: true } : { ok: false, code: "scan_not_read" };
+    return askScanFirst(q);
   };
   const dispatch = (event: ScanEvent) => {
     bench.state = scanReducer(bench.state, event);
@@ -4021,9 +4060,40 @@ function crisisCardOnly(
   if (line) assert.ok(!html.includes(escHtml(line)), `${what}: no refusal`);
 }
 
-test("A58 RC-1 the crisis card a payout form shows is its scan's own state: AIAIC's recorded crisis answer, through the hook's own reducer and behaviour, shows the helplines and no refusal; a clean read says the refusal; a new press clears the card", async () => {
+test("A58 RC-1 RC2-1 the crisis card a payout form shows is its scan's own state: AIAIC's recorded crisis answer, through the real scanFirst server function, the hook's own reducer and behaviour, shows the helplines and no refusal; a clean read says the refusal; a new press clears the card", async () => {
   const { bench, handed, press, restore } = scanBench();
   try {
+    // what every form's scan is handed comes from the REAL server function (the re-check, RC2-1): AIAIC's recorded crisis
+    // answer as its crisis, with AIAIC's helplines; a clean read as clean; a scan that cannot be asked as not read
+    const real = await askScanFirst({ data: { text: CRISIS_HI, lang: "hi" } });
+    assert.deepEqual(
+      bench.texts,
+      [CRISIS_HI],
+      "the real function asked AIAIC's scan, once, with her words",
+    );
+    assert.equal(real.ok ? "ok" : real.code, "crisis", "the real function: a crisis");
+    assert.deepEqual(
+      !real.ok ? real.crisis?.helplines.map((h) => h.phone) : null,
+      HELPLINES,
+      "the real function: AIAIC's own helplines",
+    );
+    bench.reply = { distress: false };
+    assert.deepEqual(await askScanFirst({ data: { text: "सुनीता पाटील", lang: "mr" } }), {
+      ok: true,
+    });
+    bench.reply = "unreachable";
+    assert.deepEqual(await askScanFirst({ data: { text: CRISIS_HI, lang: "hi" } }), {
+      ok: false,
+      code: "scan_not_read",
+    });
+    // its own validator runs: more than AIAIC's scan takes is refused before anything is asked
+    bench.texts.length = 0;
+    await assert.rejects(
+      askScanFirst({ data: { text: "x".repeat(2001), lang: "en" } }),
+      "the real function's validator",
+    );
+    assert.deepEqual(bench.texts, [], "the validator refused it: nothing asked");
+    bench.reply = answer<Record<string, unknown>>("safety_check_crisis");
     for (const [words, lang] of [
       [CRISIS_HI, "hi"],
       [CRISIS_MR, "mr"],
@@ -4357,6 +4427,105 @@ test("A60 RC-3 words typed in her account or IFSC box reach the distress scan be
   assert.ok(card.includes('account_number: account.replace(/\\s/g, ""),'), "AIAIC's number");
   for (const file of ["FromAiaicCard.tsx", "AiaicPayments.tsx"])
     assert.ok(!sourceOf(file).includes("maxLength={11}"), `${file}: the IFSC box cuts nothing`);
+});
+
+test("A61 RC2-1 every page that takes the shared scan shows its crisis card on the scan's own state: a payout form through problemShown, every other page by a crisis branch that opens on inCrisis alone and shows AIAIC's card", () => {
+  // the compiler's reading of every file under src/ that takes the hook (the re-check's S06 and S07: a page whose crisis
+  // branch stopped reading the hook's state passed every suite)
+  const files: string[] = [];
+  const walk = (dir: string): void => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true }))
+      if (e.isDirectory()) walk(path.join(dir, e.name));
+      else if (/\.tsx?$/.test(e.name)) files.push(path.join(dir, e.name));
+  };
+  walk(path.join(APP, "src"));
+  // the `||` operands of a condition, its parentheses left out
+  const operands = (e: ts.Expression): ts.Expression[] => {
+    while (ts.isParenthesizedExpression(e)) e = e.expression;
+    return ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.BarBarToken
+      ? [...operands(e.left), ...operands(e.right)]
+      : [e];
+  };
+  const reads = (e: ts.Node, v: string, field: string) =>
+    ts.isPropertyAccessExpression(e) &&
+    ts.isIdentifier(e.expression) &&
+    e.expression.text === v &&
+    e.name.text === field;
+  const within = (root: ts.Node, found: (n: ts.Node) => boolean): boolean => {
+    let hit = false;
+    const visit = (n: ts.Node): void => {
+      if (hit) return;
+      if (found(n)) hit = true;
+      else ts.forEachChild(n, visit);
+    };
+    visit(root);
+    return hit;
+  };
+  const users: string[] = [];
+  for (const file of files) {
+    const text = fs.readFileSync(file, "utf-8");
+    if (!text.includes("useScanBeforeRefusing")) continue;
+    const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const takers: string[] = [];
+    const branches: ts.IfStatement[] = [];
+    const selected: string[] = [];
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isVariableDeclaration(node) &&
+        ts.isIdentifier(node.name) &&
+        node.initializer &&
+        ts.isCallExpression(node.initializer) &&
+        node.initializer.expression.getText(source) === "useScanBeforeRefusing"
+      )
+        takers.push(node.name.text);
+      if (ts.isIfStatement(node)) branches.push(node);
+      if (
+        ts.isCallExpression(node) &&
+        node.expression.getText(source) === "problemShown" &&
+        node.arguments[0] &&
+        ts.isIdentifier(node.arguments[0])
+      )
+        selected.push(node.arguments[0].text);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    const name = path.relative(APP, file).replaceAll("\\", "/");
+    for (const v of takers) {
+      users.push(name);
+      if (selected.includes(v)) continue; // a payout form: problemShown, crisis first (A58)
+      const crisisBranch = branches.some(
+        (b) =>
+          operands(b.expression).some((o) => reads(o, v, "inCrisis")) &&
+          within(b.thenStatement, (n) => reads(n, v, "crisis")) &&
+          within(
+            b.thenStatement,
+            (n) =>
+              ((ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
+                n.tagName.getText(source).includes("Crisis")) ||
+              (ts.isCallExpression(n) &&
+                n.expression.getText(source) === "problem" &&
+                n.arguments[0] !== undefined &&
+                ts.isStringLiteral(n.arguments[0]) &&
+                n.arguments[0].text === "crisis"),
+          ),
+      );
+      assert.ok(
+        crisisBranch,
+        `${name}: a crisis branch that opens on ${v}.inCrisis alone and shows AIAIC's card with ${v}.crisis`,
+      );
+    }
+  }
+  // every page that takes the hook today was read
+  for (const page of [
+    "src/components/farm/aiaic/AiaicPayments.tsx",
+    "src/components/farm/aiaic/FromAiaicCard.tsx",
+    "src/lib/aiaic-heard.ts",
+    "src/routes/help.index.tsx",
+    "src/routes/register.tsx",
+    "src/routes/signin.tsx",
+    "src/routes/storage.tsx",
+  ])
+    assert.ok(users.includes(page), `${page}: read`);
 });
 
 test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
