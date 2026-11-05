@@ -477,6 +477,56 @@ test("A7 the payments page's totals: agreed leaves out a called-off sale; sent a
   );
 });
 
+test('A65 "Sent to you" counts only money that has left AIAIC\'s account (the audit of 4 Nov 2026, AN-2): in AIAIC\'s own answers, a send Cashfree has queued, and one it holds for AIAIC\'s approval, are in neither "Sent to you" nor "In your bank"', () => {
+  type Send = NonNullable<FromAiaic["sending"]>;
+  /** AIAIC's money left its account: Cashfree took it (processing), it reached her bank (processed), or AIAIC's team
+   * recorded a bank transfer it made by hand (recorded). */
+  const LEFT = ["processing", "processed", "recorded"];
+  const cents = (n: number) => Math.round(n * 100) / 100;
+  for (const [name, held] of [
+    ["collect_mine_queued", "queued"],
+    ["collect_mine_approval_pending", "pending"],
+  ] as const) {
+    const orders = mineOf(name).orders;
+    const sends = orders
+      .map((o) => (o as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending)
+      .filter((s): s is Send => Boolean(s));
+    const waiting = sends.filter((s) => s.status === held);
+    assert.ok(waiting.length > 0, `${name}: AIAIC's answer holds a send at ${held}`);
+    assert.ok(
+      waiting.every((s) => s.amount_inr > 0),
+      `${name}: each ${held} send carries its amount`,
+    );
+    const sum = (keep: (s: Send) => boolean) =>
+      cents(sends.filter(keep).reduce((n, s) => n + s.amount_inr, 0));
+    const totals = moneyTotals(orders);
+    assert.equal(
+      totals.sentToHer,
+      sum((s) => LEFT.includes(s.status)),
+      `${name}: "Sent to you" is only what has left AIAIC's account, never a ${held} send`,
+    );
+    assert.equal(
+      totals.settled,
+      sum((s) => s.status === "processed"),
+      `${name}: "In your bank" is only what reached it`,
+    );
+    for (const o of orders) {
+      const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
+      if (fa?.sending?.status === held)
+        assert.deepEqual(
+          [fa.steps?.sent, fa.steps?.reached],
+          [false, false],
+          `${name}: AIAIC says a ${held} send neither sent nor reached`,
+        );
+    }
+  }
+  assert.equal(
+    moneyTotals(mineOf("collect_mine_queued").orders).sentToHer,
+    0,
+    "her one send queued: nothing sent to her yet",
+  );
+});
+
 test("A15 every code her screens word from AIAIC's answers has words in en, mr and hi", () => {
   const keys = new Set<string>();
   for (const name of MINE_FIXTURES) {
@@ -3241,16 +3291,31 @@ test("A48 each state of her money's send through Cashfree is said in plain words
       wordsIn("en")(`aiaic.money.status.${status}`, { rs }).includes("AIAIC team's list"),
       `${status}: on the team's list`,
     );
-  // her notices of the same send (AIAIC's real notices; a queued one too since Cashfree): each in its own words
+  // her notices of the same send (AIAIC's real notices), each in its own words, and none while Cashfree still holds her
+  // money: AIAIC tells her only once it has left its account (its notices.py PAID_TOLD, never `queued` or `pending`,
+  // narrowed after its audit's A-4 of 4 Nov 2026), though this very send was queued on its way (collect_mine_queued)
   type Row = { kind: string; body: Record<string, unknown> };
   const rows = answer<{ notifications: Row[] }>("notices_money_processed").notifications.filter(
     (n) => n.kind === "trade_farmer_paid",
   );
   const statuses = rows.map((r) => String(r.body["status"]));
-  for (const status of ["queued", "processing", "processed"])
+  for (const status of ["processing", "processed"])
     assert.ok(
       statuses.includes(status),
       `the recording holds a ${status} notice: ${statuses.join(", ")}`,
+    );
+  const queued = mineOf("collect_mine_queued").orders.find(
+    (o) => (o as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending?.status === "queued",
+  );
+  assert.ok(queued, "AIAIC recorded this send while Cashfree held it queued");
+  assert.ok(
+    rows.every((r) => r.body["order_id"] === queued.order_id),
+    "the notices are of that same send",
+  );
+  for (const status of ["queued", "pending"])
+    assert.ok(
+      !statuses.includes(status),
+      `no ${status} notice: her money had not left AIAIC's account (${statuses.join(", ")})`,
     );
   for (const r of rows) {
     assert.equal(r.body["rail"], "cashfree", "the notice's send went through Cashfree");
