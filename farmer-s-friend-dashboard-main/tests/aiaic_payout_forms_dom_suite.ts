@@ -13,18 +13,26 @@
  * For each form, every combination of: every box she can type words in (the name, the account, the IFSC, the UPI ID,
  * Route's name on PAN), each copied crisis phrase, her tick on and off, the other fields valid and empty, bank and UPI.
  * In every case:
- *  (a) while she types, after each input event, nothing on the form changes but her boxes' own values and Save's
- *      enabled state (the form as the DOM holds it, its text and every alert or status region, against the empty form),
- *      and no box carries a validation message of the browser's;
+ *  (a) while she types, after each input event and each move of her finger, nothing on the form changes but her boxes'
+ *      own values and Save's enabled state (the form as the DOM holds it, its text and every alert or status region,
+ *      against the empty form), and no box carries a validation message of the browser's. Her finger moves as on a
+ *      phone: each box takes the focus before she types in it, and Save before her tap, so the box she leaves gets blur
+ *      and focusout, and the form is read with her finger on Save, before her tap (the re-check of 5 Nov 2026, round 6:
+ *      RC6-2);
  *  (b) Save is on the form, and open once any free box holds words, ticked or not, with nothing on it or around it that
  *      keeps her tap off it as far as the DOM says (jsdom does no layout: `inert`, `hidden`, a class that takes its taps);
  *  (c) her tap (a real click on Save, or the form's submit as the browser makes it) asks the scan FIRST, before her form
  *      is given to anything, in her chosen language, with her words as she typed them;
  *  (d) AIAIC's crisis card SHOWS with its 3 helplines, each a link she can tap that dials it, with nothing on the card,
- *      on a helpline or around them that hides it or keeps her tap off it as far as the DOM says (a closed <details>
- *      among those); no refusal is on screen, her form is never given, and Save is not stuck, as she finds it: her
- *      second tap asks the scan again, first, and gets the card again, and with every other field valid and ticked her
- *      box corrected is given at once (the re-check of 5 Nov 2026, round 5: RC5-1, RC5-2).
+ *      on a helpline or around them that hides it or keeps her tap off it as far as the DOM says (a closed <details>,
+ *      a closed <dialog> or a popover among those), and the card itself in today's shape, its every element and
+ *      attribute as CrisisFirst.tsx draws it (round 6, RC6-1: what jsdom cannot see hidden, an element or attribute
+ *      added to the card, fails without being named); no refusal is on screen, her form is never given, and Save is
+ *      not stuck, as she finds it: her second tap asks the scan again, first, and gets the card again, and with every
+ *      other field valid and ticked her box corrected is given at once (the re-check of 5 Nov 2026, round 5: RC5-1,
+ *      RC5-2).
+ * She pauses (round 6, RC6-2): in P1 and P2 she waits PAUSE_MS after her last keystroke and (a) is read again, and
+ * PAUSE_MS after the card and (d) is read again.
  * The Cashfree form in each of its three states (round 5, RC5-3): her first destination (AIAIC's notice, none given
  * before); a replacement (a destination given before, as a recording holds it, and Change tapped: her tick is hers to
  * give again); and a form AIAIC sent no notice for (nothing to tick). Held fixed: `largeAmount` (false: her amount
@@ -355,16 +363,29 @@ function suite(app: App, window: Window & typeof globalThis) {
         await turn();
       });
   };
-  /** One input event, as her keyboard makes it: the box's value set through the browser's own setter. */
+  /** Her finger on an element, as a phone moves it (the re-check's round 6, RC6-2): the element she touches takes the
+   * focus, so the box she leaves gets blur and focusout. Where her finger already is, nothing moves. */
+  const land = async (el: Element) => {
+    if (document.activeElement === el) return;
+    await act(async () => {
+      (el as HTMLElement).focus();
+    });
+  };
+  /** One input event, as her keyboard makes it: her finger in the box first, then the box's value set through the
+   * browser's own setter. */
   const valueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")
     ?.set as (this: HTMLInputElement, v: string) => void;
   const input = async (box: HTMLInputElement, value: string) => {
+    await land(box);
     await act(async () => {
       valueSetter.call(box, value);
       box.dispatchEvent(new window.Event("input", { bubbles: true }));
     });
   };
+  /** Her tap: her finger lands (the focus moves to what she taps, as Chrome on Android moves it to a button), then the
+   * click. */
   const tap = async (el: Element) => {
+    await land(el);
     await act(async () => {
       (el as HTMLElement).click();
     });
@@ -622,7 +643,9 @@ function suite(app: App, window: Window & typeof globalThis) {
    * round 5, RC5-2), as far as the DOM can say (jsdom does no layout, and a script's `click()` reaches an element a
    * browser would not let her tap): disabled (its own, or a fieldset's), or on it or around it `inert`, `hidden`,
    * `aria-hidden`, an inline style that hides it or takes its taps, or a class that does, read by its name; or a closed
-   * <details> it is inside of, outside that details' own summary. A stylesheet rule other than those classes is not seen. */
+   * <details> it is inside of, outside that details' own summary; or a closed <dialog>, or a `popover` (a browser
+   * shows one only once it is opened, and jsdom shows it always: round 6, RC6-1). A stylesheet rule other than those
+   * classes is not seen. */
   const NO_TAP = new Set(["hidden", "invisible", "pointer-events-none"]);
   const untappable = (el: Element): string[] => {
     const why: string[] = [];
@@ -640,7 +663,8 @@ function suite(app: App, window: Window & typeof globalThis) {
       if (
         style.display === "none" ||
         style.visibility === "hidden" ||
-        style.pointerEvents === "none"
+        style.pointerEvents === "none" ||
+        style.opacity === "0"
       )
         why.push(`a style on ${tag} that hides it or takes its taps`);
       for (const c of (e.getAttribute("class") ?? "").split(/\s+/))
@@ -652,8 +676,44 @@ function suite(app: App, window: Window & typeof globalThis) {
         from !== [...e.children].find((k) => k.tagName === "SUMMARY")
       )
         why.push("inside a closed <details>, outside its summary");
+      if (e.tagName === "DIALOG" && !e.hasAttribute("open")) why.push("a closed <dialog>");
+      if (e.hasAttribute("popover")) why.push(`a popover on ${tag}, shown only once opened`);
     }
     return why;
+  };
+  /**
+   * AIAIC's crisis card as CrisisFirst.tsx draws it today (the re-check of 5 Nov 2026, round 6: RC6-1), its every element
+   * and attribute, its words aside: each round of the re-check found one more way a browser hides what jsdom shows (a
+   * closed <details>, then a popover), so the card is held to the shape that shows rather than to a list of what hides.
+   * An element, an attribute or a class added to the card, moved in it or changed on it fails here without being named
+   * (an overlay, a wrapper, an inline style, a popover); a change to the card is a change of this test, reviewed. Each
+   * helpline's `href` is held to the number it dials in `cardShown`, and the icon's own drawing (lucide's paths inside
+   * its <svg>) is left out. What stays out of reach: a stylesheet rule, and a class on an element around the card,
+   * which would hide her form and Save as well.
+   */
+  const CARD_SHAPE_HELPLINE =
+    '<a class="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-destructive px-3 text-center text-sm font-bold text-destructive-foreground" href>' +
+    '<svg aria-hidden="true" class="lucide lucide-phone-call size-4 shrink-0" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">' +
+    '<span class="break-words"></span>' +
+    "</a>";
+  const cardShape = (helplines: number) =>
+    '<div class="rounded-3xl border-2 border-destructive bg-danger-soft p-4 text-foreground shadow-md sm:p-5" data-crisis="" role="alert">' +
+    '<h2 class="text-lg font-extrabold sm:text-xl"></h2>' +
+    '<p class="mt-1 text-sm font-semibold"></p>' +
+    '<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">' +
+    CARD_SHAPE_HELPLINE.repeat(helplines) +
+    "</div>" +
+    "</div>";
+  /** An element as its shape: its tag, its attributes sorted (an `href` by its name alone), its child elements; no words. */
+  const shapeOf = (el: Element): string => {
+    const tag = el.tagName.toLowerCase();
+    const attrs = el
+      .getAttributeNames()
+      .sort()
+      .map((a) => (a === "href" ? " href" : ` ${a}="${el.getAttribute(a) ?? ""}"`))
+      .join("");
+    if (tag === "svg") return `<svg${attrs}>`;
+    return `<${tag}${attrs}>${[...el.children].map(shapeOf).join("")}</${tag}>`;
   };
   /** (d) AIAIC's crisis card SHOWN with its 3 helplines (the re-check's round 5, RC5-2): the card, and each helpline of
    * AIAIC's answer as a link she can tap that dials it, with nothing on either or around them that hides it or keeps
@@ -665,6 +725,11 @@ function suite(app: App, window: Window & typeof globalThis) {
       untappable(card),
       [],
       `${press}: the card is shown, nothing on it or around it hides it`,
+    );
+    assert.equal(
+      shapeOf(card),
+      cardShape(HELPLINES.length),
+      `${press}: the card is in today's shape, nothing added to it, moved in it or changed on it (RC6-1)`,
     );
     for (const phone of HELPLINES) {
       const link = [...card.querySelectorAll("a")].find((a) =>
@@ -748,6 +813,8 @@ function suite(app: App, window: Window & typeof globalThis) {
     state?: CashfreeState;
     /** her first tap's scan is answered after SLOW_MS */
     slow?: boolean;
+    /** she pauses PAUSE_MS after her last keystroke, and again with the card before her */
+    pause?: boolean;
   };
   /** Route's TEST values (AiaicPayments.tsx's own; AIAIC's recorder uses the same kind): never a person's. */
   const ROUTE_VALID = {
@@ -789,6 +856,8 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   /** When the screen is read while a slow scan is asked. */
   const WHILE_ASKED_MS = 300;
+  /** Her pause (the re-check's round 6, RC6-2): longer than a form's wait for her to stop typing (about 1 s). */
+  const PAUSE_MS = 1_500;
   const crisisCase = (c: Case) => async () => {
     const lang = LANG_OF[c.phrase];
     const phrase = PHRASE[c.phrase];
@@ -815,6 +884,16 @@ function suite(app: App, window: Window & typeof globalThis) {
           typing.check(`her ${c.box} box, typed`, true);
         }
         const typed = box.value;
+        if (c.pause) {
+          // she stops typing: nothing is said while she waits (RC6-2)
+          await wait(PAUSE_MS);
+          typing.check(`her ${c.box} box, then her pause of ${PAUSE_MS} ms`, true);
+        }
+        // her finger on Save, her box left (blur, focusout): nothing is said before her tap (RC6-2)
+        const reached = f.save();
+        assert.ok(reached, "Save is on her form");
+        await land(reached);
+        typing.check(`her finger on Save, her ${c.box} box left`, true);
         // her tap
         seen.reset();
         const save = f.save();
@@ -887,6 +966,16 @@ function suite(app: App, window: Window & typeof globalThis) {
           );
         };
         scanFirstThenCard("her tap");
+        if (c.pause) {
+          // she waits with the card before her: it stays shown, and still nothing is refused (RC6-2)
+          await wait(PAUSE_MS);
+          cardShown(f.scope(), `her tap, then ${PAUSE_MS} ms`);
+          assert.deepEqual(
+            refusalOnScreen(f.scope(), lang),
+            [],
+            `her tap, then ${PAUSE_MS} ms: no refusal is on screen`,
+          );
+        }
         if (c.gate) {
           // the page is the card alone: nothing of her form, and no Save to be stuck
           assert.equal(f.container.querySelector("input, form"), null, "the card stands alone");
@@ -1008,6 +1097,28 @@ function suite(app: App, window: Window & typeof globalThis) {
     );
   });
 
+  // she pauses (the re-check's round 6, RC6-2): each form, a phrase in the name box, the rest valid and ticked
+  const PAUSED: [Case["form"], Phrase][] = [
+    ["cashfree", "CRISIS_HI"],
+    ["route", "CRISIS_MR"],
+  ];
+  PAUSED.forEach(([form, phrase], i) => {
+    const c: Case = {
+      id: `P${i + 1}`,
+      form,
+      kind: "bank",
+      box: "name",
+      phrase,
+      ticked: true,
+      rest: "valid",
+      pause: true,
+    };
+    test(
+      `${c.id} she pauses ${PAUSE_MS} ms, ${FORM_SAID[form]} bank form, ${form === "route" ? "name on PAN" : "name"} box: ${phrase} (${LANG_OF[phrase]}), ticked, the rest valid: nothing is said while she waits; then ${outcome(c)}, and ${PAUSE_MS} ms on the card still shows and nothing is refused`,
+      crisisCase(c),
+    );
+  });
+
   // inside the app's own gate, a crisis in each box of each form: the page becomes the card alone
   const GATED: [Case["form"], Kind, Box, Phrase][] = [
     ["cashfree", "bank", "name", "CRISIS_MR"],
@@ -1115,6 +1226,11 @@ function suite(app: App, window: Window & typeof globalThis) {
       nothingNew("while she types");
     }
     const typed = box.value;
+    // her finger on Save, her box left: nothing new is said before her tap (RC6-2)
+    const reached = f.save();
+    assert.ok(reached, "Save is on her form");
+    await land(reached);
+    nothingNew("her finger on Save, her box left");
     seen.reset();
     const save = f.save();
     assert.ok(save, "Save is on her form");
