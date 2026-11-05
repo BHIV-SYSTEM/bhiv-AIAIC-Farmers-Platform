@@ -2,12 +2,12 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trip_and_payout_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-10-28T22:23:37+00:00",
+    "at": "2026-11-05T06:55:08+00:00",
     "status": 200,
     "request": {
       "params": {}
     },
-    "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Razorpay and RazorpayX stood in for on the recording machine, no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
+    "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Cashfree stood in for on the recording machine (its sandbox, test-only keys; one order's plain link made with Razorpay named and stood in for), no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
   },
   "answer": {
     "tenant_id": "rec-trip",
@@ -16,9 +16,9 @@
       "district": "Nashik"
     },
     "practice": true,
-    "practice_note": "This is a practice account: what it sells is kept as rehearsal data (synthetic, marked so on the operators' dashboard too). No real money moves for it: a payment link for its orders is made only with Razorpay's test keys. Nothing of it counts as a farmer's income.",
+    "practice_note": "This is a practice account: what it sells is kept as rehearsal data (synthetic, marked so on the operators' dashboard too). No real money moves for it: a payment link for its orders is made only with Cashfree's test keys. Nothing of it counts as a farmer's income.",
     "party": {
-      "party_id": "frm_13201bab7ec4f321134a",
+      "party_id": "frm_e1d0c762de8fc372a21f",
       "kind": "farmer",
       "buyer_type": null,
       "tenant_id": "rec-trip",
@@ -30,16 +30,16 @@
       "consent_withdrawn_at": null,
       "interests": {},
       "synthetic": true,
-      "trace_id": "110894bf8ee64d759bda940f2dad74d3",
-      "created_at": "2026-10-28T22:23:34.331312+00:00",
+      "trace_id": "2cbb05353e684a9d89687a3ba6e79baf",
+      "created_at": "2026-11-05T06:55:01.190167+00:00",
       "from_the_app": true
     },
     "listings": [
       {
-        "listing_id": "lst_6e1b355eff5e0408624c",
-        "lot_id": "lot_f279d2f84afba2a5da9a",
+        "listing_id": "lst_11a21f3b28d5bf54f0b6",
+        "lot_id": "lot_0201f6269ad197029ddf",
         "tenant_id": "rec-trip",
-        "farmer_id": "frm_13201bab7ec4f321134a",
+        "farmer_id": "frm_e1d0c762de8fc372a21f",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -133,15 +133,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": true,
-        "trace_id": "110894bf8ee64d759bda940f2dad74d3",
-        "created_at": "2026-10-28T22:23:34.331312+00:00",
-        "updated_at": "2026-10-28T22:23:37.324126+00:00",
+        "trace_id": "2cbb05353e684a9d89687a3ba6e79baf",
+        "created_at": "2026-11-05T06:55:01.190167+00:00",
+        "updated_at": "2026-11-05T06:55:08.334753+00:00",
         "offers": [
           {
-            "offer_id": "ofr_a5f153886da2ed43f1c6",
+            "offer_id": "ofr_818d4d6fdd17f6931b3f",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_6e1b355eff5e0408624c",
-            "buyer_id": "byr_b9a019b4867e918f48ce",
+            "listing_id": "lst_11a21f3b28d5bf54f0b6",
+            "buyer_id": "byr_48e239df2a3e637c0dad",
             "price_per_q": 2500.0,
             "quantity_q": 4.0,
             "delivery_terms": "as agreed",
@@ -150,9 +150,9 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "65a1391f968f4a0695b2eab4d60ceea6",
-            "created_at": "2026-10-28T22:23:37.113285+00:00",
-            "updated_at": "2026-10-28T22:23:37.324126+00:00",
+            "trace_id": "cf51056f76054f89a91c0267a9c0fba2",
+            "created_at": "2026-11-05T06:55:07.786381+00:00",
+            "updated_at": "2026-11-05T06:55:08.334753+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -180,10 +180,10 @@
             "pool": null
           },
           {
-            "offer_id": "ofr_b599c8d75d515c5ee36d",
+            "offer_id": "ofr_7d8dffead6533e14fbff",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_6e1b355eff5e0408624c",
-            "buyer_id": "byr_b9a019b4867e918f48ce",
+            "listing_id": "lst_11a21f3b28d5bf54f0b6",
+            "buyer_id": "byr_48e239df2a3e637c0dad",
             "price_per_q": 2500.0,
             "quantity_q": 4.0,
             "delivery_terms": "as agreed",
@@ -192,9 +192,9 @@
             "status": "withdrawn",
             "closed_reason": "lot_sold",
             "synthetic": true,
-            "trace_id": "259128c8fc3d42b8b2c1684118af14ef",
-            "created_at": "2026-10-28T22:23:37.226070+00:00",
-            "updated_at": "2026-10-28T22:23:37.324126+00:00",
+            "trace_id": "715f3bb609e6412ab54e77c4fa0029d4",
+            "created_at": "2026-11-05T06:55:08.132192+00:00",
+            "updated_at": "2026-11-05T06:55:08.334753+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -228,14 +228,14 @@
     ],
     "orders": [
       {
-        "order_id": "ord_16e609c629657f40c7ec",
-        "transaction_id": "txn_d43206a81c30aa436ab4",
+        "order_id": "ord_749349b08ea2b997cd77",
+        "transaction_id": "txn_f3ba168acd81b8933948",
         "tenant_id": "rec-trip",
-        "offer_id": "ofr_a5f153886da2ed43f1c6",
-        "listing_id": "lst_6e1b355eff5e0408624c",
-        "lot_id": "lot_f279d2f84afba2a5da9a",
-        "farmer_id": "frm_13201bab7ec4f321134a",
-        "buyer_id": "byr_b9a019b4867e918f48ce",
+        "offer_id": "ofr_818d4d6fdd17f6931b3f",
+        "listing_id": "lst_11a21f3b28d5bf54f0b6",
+        "lot_id": "lot_0201f6269ad197029ddf",
+        "farmer_id": "frm_e1d0c762de8fc372a21f",
+        "buyer_id": "byr_48e239df2a3e637c0dad",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -255,9 +255,9 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": true,
-        "trace_id": "6501847661674bb9b45d4dc18c334216",
-        "created_at": "2026-10-28T22:23:37.324126+00:00",
-        "updated_at": "2026-10-28T22:23:37.409784+00:00",
+        "trace_id": "21394295df10459888d529f1510f448f",
+        "created_at": "2026-11-05T06:55:08.334753+00:00",
+        "updated_at": "2026-11-05T06:55:08.458697+00:00",
         "pool_id": null,
         "buyer_name": "Recording Traders (test)",
         "buyer_type": "wholesaler",
@@ -284,7 +284,7 @@
           "can_report": false,
           "why_not_report": {
             "code": "payment_route_is_razorpay",
-            "why": "This order's money moves through Razorpay (money was taken, or a link that carries the farmer's share is live or being made): it is not changed here."
+            "why": "This order's money moves through Cashfree (money was taken, or a payment link is live or being made): it is not changed here."
           }
         },
         "contact": {
@@ -345,10 +345,10 @@
       }
     ],
     "payout_account": {
-      "offered": true,
+      "offered": false,
       "why_not_offered": null,
-      "test_mode": true,
-      "test_values_only": true,
+      "test_mode": null,
+      "test_values_only": false,
       "account": null,
       "say": {
         "key": "farmer.payout.none",
@@ -358,8 +358,9 @@
           "reason": null
         }
       },
-      "can_create": true,
-      "can_withdraw": false
+      "can_create": false,
+      "can_withdraw": false,
+      "wired": false
     },
     "contact_path": {
       "offered": true,
@@ -426,62 +427,36 @@
     "x_destination": null,
     "collect_then_pay": true,
     "x_notice": {
-      "version": "xn-da687b498a06",
+      "version": "xn-3900a20c8640",
       "en": [
         "Where AIAIC sends your sale money: your consent",
-        "To send you the money from your sale, AIAIC gives RazorpayX (Razorpay's payment service) your UPI ID, or your bank account number with its IFSC and your name as the bank holds it.",
-        "AIAIC keeps only RazorpayX's references and a short reminder: the last 4 digits of an account, or the first 2 letters and the bank of a UPI ID. AIAIC never keeps your account number, IFSC, UPI ID or name.",
-        "Razorpay keeps your details under its own terms; agreeing here includes agreeing to them.",
-        "To remove them: press Remove in your app, or tell a person from AIAIC, in person or in the app. AIAIC then asks RazorpayX to switch them off and sends nothing new to them; money already being sent for a sale goes on under that sale's own rule.",
+        "To send you the money from your sale, AIAIC gives Cashfree (Cashfree Payments, AIAIC's payment service) your UPI ID, or your bank account number with its IFSC and your name as on that account (English (A-Z) letters and spaces, as printed on your passbook).",
+        "AIAIC keeps only Cashfree's reference and a short reminder: the last 4 digits of an account, or the first 2 characters and the bank of a UPI ID. AIAIC never keeps your account number, IFSC, UPI ID or name.",
+        "Cashfree keeps your details under its own terms; agreeing here includes agreeing to them.",
+        "To remove them: press Remove in your app, or tell a person from AIAIC, in person or in the app. AIAIC then asks Cashfree to delete them and sends nothing new to them; money already being sent for a sale goes on under that sale's own rule.",
         "Questions or a complaint: not named yet."
       ],
       "mr": [
         "AIAIC तुमच्या विक्रीचे पैसे कुठे पाठवते: तुमची संमती",
-        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, RazorpayX (Razorpay ची पैसे पाठवण्याची सेवा) ला तुमचा UPI आयडी, किंवा तुमचा बँक खाते क्रमांक, त्याचा IFSC आणि बँकेकडे असलेले तुमचे नाव देते.",
-        "AIAIC फक्त RazorpayX चे संदर्भ आणि एक छोटी आठवण ठेवते: खात्याचे शेवटचे 4 अंक, किंवा UPI आयडीची पहिली 2 अक्षरे आणि बँक. तुमचा खाते क्रमांक, IFSC, UPI आयडी किंवा नाव AIAIC कधीही ठेवत नाही.",
-        "Razorpay तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
-        "ही माहिती काढून टाकण्यासाठी: तुमच्या अॅपमध्ये काढा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष भेटून किंवा अॅपमध्ये सांगा. त्यानंतर AIAIC, RazorpayX ला ती बंद करायला सांगते आणि तिथे नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवले जात असलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
+        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, Cashfree (AIAIC ची पैसे पाठवण्याची सेवा) ला तुमचा UPI आयडी, किंवा तुमचा बँक खाते क्रमांक, त्याचा IFSC आणि त्या खात्यावर असलेले तुमचे नाव (इंग्रजी (A-Z) अक्षरे आणि रिकाम्या जागा, तुमच्या पासबुकवर छापले आहे तसे) देते.",
+        "AIAIC फक्त Cashfree चा संदर्भ आणि एक छोटी आठवण ठेवते: खात्याचे शेवटचे 4 अंक, किंवा UPI आयडीची पहिली 2 चिन्हे आणि बँक. तुमचा खाते क्रमांक, IFSC, UPI आयडी किंवा नाव AIAIC कधीही ठेवत नाही.",
+        "Cashfree तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
+        "ही माहिती काढून टाकण्यासाठी: तुमच्या अॅपमध्ये काढा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष भेटून किंवा अॅपमध्ये सांगा. त्यानंतर AIAIC, Cashfree ला ती हटवायला सांगते आणि तिथे नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवले जात असलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
         "प्रश्न किंवा तक्रार: अजून ठरलेले नाही."
       ],
       "hi": [
         "AIAIC आपकी बिक्री का पैसा कहाँ भेजता है: आपकी सहमति",
-        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, RazorpayX (Razorpay की भुगतान सेवा) को आपकी UPI आईडी, या आपका बैंक खाता नंबर, उसका IFSC और बैंक में दर्ज आपका नाम देता है।",
-        "AIAIC केवल RazorpayX के संदर्भ और एक छोटी याद रखता है: खाते के आख़िरी 4 अंक, या UPI आईडी के पहले 2 अक्षर और बैंक। आपका खाता नंबर, IFSC, UPI आईडी या नाम AIAIC कभी नहीं रखता।",
-        "Razorpay आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों पर भी सहमति है।",
-        "इसे हटाने के लिए: अपने ऐप में हटाएँ दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC, RazorpayX से इसे बंद करने को कहता है और वहाँ नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा जा रहा पैसा उस बिक्री के नियम से आगे बढ़ता है।",
+        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, Cashfree (AIAIC की भुगतान सेवा) को आपकी UPI आईडी, या आपका बैंक खाता नंबर, उसका IFSC और उस खाते पर दर्ज आपका नाम (अंग्रेज़ी (A-Z) अक्षर और खाली जगह, जैसा आपकी पासबुक पर छपा है) देता है।",
+        "AIAIC केवल Cashfree का संदर्भ और एक छोटी याद रखता है: खाते के आख़िरी 4 अंक, या UPI आईडी के पहले 2 चिह्न और बैंक। आपका खाता नंबर, IFSC, UPI आईडी या नाम AIAIC कभी नहीं रखता।",
+        "Cashfree आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों पर भी सहमति है।",
+        "इसे हटाने के लिए: अपने ऐप में हटाएँ दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC, Cashfree से इसे मिटाने को कहता है और वहाँ नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा जा रहा पैसा उस बिक्री के नियम से आगे बढ़ता है।",
         "प्रश्न या शिकायत: अभी तय नहीं।"
       ]
     },
-    "payout_notice": {
-      "version": "pn-0b66a47d1399",
-      "en": [
-        "Your sale money through AIAIC: your consent",
-        "To send the money from your sales to you, AIAIC gives Razorpay, a payment company, your PAN, your name as on your PAN card, and your bank account number with its IFSC, or your UPI ID.",
-        "AIAIC keeps only Razorpay's reference for your account and the last 2 characters of a bank account number. AIAIC never keeps your PAN, your account number, your IFSC or your UPI ID.",
-        "Razorpay keeps your details under its own terms; agreeing here includes agreeing to them.",
-        "To withdraw: press Stop in your app, or tell a person from AIAIC, in person or in the app. AIAIC then sends no new money to this account; money already sent or held for a sale goes on under that sale's own rule.",
-        "Questions or a complaint: not named yet."
-      ],
-      "mr": [
-        "AIAIC मार्फत तुमच्या विक्रीचे पैसे: तुमची संमती",
-        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, Razorpay या पैसे पाठवणाऱ्या कंपनीला तुमचा PAN, तुमच्या PAN कार्डवरील नाव, आणि तुमचा बँक खाते क्रमांक व त्याचा IFSC, किंवा तुमचा UPI आयडी देते.",
-        "AIAIC फक्त तुमच्या खात्यासाठी Razorpay चा संदर्भ आणि बँक खाते क्रमांकाची शेवटची 2 अक्षरे ठेवते. तुमचा PAN, खाते क्रमांक, IFSC किंवा UPI आयडी AIAIC कधीही ठेवत नाही.",
-        "Razorpay तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
-        "संमती मागे घेण्यासाठी: तुमच्या अॅपमध्ये थांबवा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष किंवा अॅपमधून सांगा. त्यानंतर AIAIC या खात्यात नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवलेले किंवा राखून ठेवलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
-        "प्रश्न किंवा तक्रार: अजून ठरलेले नाही."
-      ],
-      "hi": [
-        "AIAIC के ज़रिए आपकी बिक्री का पैसा: आपकी सहमति",
-        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, Razorpay नाम की भुगतान कंपनी को आपका PAN, आपके PAN कार्ड पर लिखा नाम, और आपका बैंक खाता नंबर व उसका IFSC, या आपकी UPI आईडी देता है।",
-        "AIAIC केवल आपके खाते के लिए Razorpay का संदर्भ और बैंक खाता नंबर के आख़िरी 2 अक्षर रखता है। आपका PAN, खाता नंबर, IFSC या UPI आईडी AIAIC कभी नहीं रखता।",
-        "Razorpay आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों को भी सहमति देना है।",
-        "सहमति वापस लेने के लिए: अपने ऐप में रोकें दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC इस खाते में नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा गया या रोका गया पैसा उस बिक्री के नियम से आगे बढ़ता है।",
-        "प्रश्न या शिकायत: अभी तय नहीं।"
-      ]
-    },
-    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. AIAIC collects, then pays, on this server: the buyer pays their whole total, the payment fee with it, through a payment link into AIAIC's Razorpay account, and AIAIC sends the farmer their amount (the link's own figure) to their UPI ID or bank account through RazorpayX on an operator's press, once per order and only after their produce has left them, or AIAIC's team records a bank transfer it made by hand, with its UTR. Each order's from_aiaic says its step: sent for a send on its way or recorded by hand, reached only on RazorpayX's word. An order already paying through Razorpay Route keeps Route. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
+    "payout_notice": null,
+    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Cashfree's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. AIAIC collects, then pays, on this server: the buyer pays their whole total, the payment fee with it, through a Cashfree payment link into AIAIC's account, and AIAIC sends the farmer their amount (the link's own figure) to their UPI ID or bank account through Cashfree Payouts on an operator's press, once per order and only after their produce has left them, or AIAIC's team records a bank transfer it made by hand, with its UTR. Each order's from_aiaic says its step: being prepared, not sent yet, while Cashfree holds the transfer (queued or pending); sent once the money has left AIAIC's account (Cashfree sent it to the farmer's bank) or a transfer made by hand is recorded; reached only on Cashfree's word that the farmer's bank credited it. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "f31c4a7e52e745ffae40eb74c346be56",
+      "request_id": "d6d91156eaef4057aec7a04e226122d4",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

@@ -50,13 +50,13 @@ Where to put them:
 - Otherwise: add the repository secrets `AIAIC_FARMER_USERNAME` and `AIAIC_FARMER_PASSWORD` (the workflow now writes
   them into the server's `.env`), and set the `AIAIC_BASE_URL` secret to the https address above.
 
-Nothing else is needed: no database, no new package, no Geoapify or Razorpay key (those stay on AIAIC's server).
+Nothing else is needed: no database, no new package, no Geoapify or Cashfree key (those stay on AIAIC's server).
 
 ## Why only the practice account
 
 This app has no sign-in of its own, so everyone who opens it acts as that one AIAIC account. A real farmer's account
 would show her sales to anyone and let anyone accept an offer in her name, so the app refuses one and says so. AIAIC's
-practice account sells rehearsal records only: no real money moves (Razorpay TEST mode), nothing counts as a farmer's
+practice account sells rehearsal records only: no real money moves (Cashfree's sandbox, its TEST system), nothing counts as a farmer's
 income, and every page shows a small **Practice** chip.
 
 ## A quick check after the deploy
@@ -82,3 +82,57 @@ Where an AIAIC order's money is shown (the order page's "Your money" card and th
 `money.commission` is shown when AIAIC sends it: the agreed price, AIAIC's commission and who pays it, and what she
 receives, all AIAIC's own numbers for that sale's payment link. An AIAIC server not yet updated sends none, and nothing
 is shown. Nothing to set.
+
+## Cashfree, AIAIC's payment processor (since 4 Nov 2026)
+
+**Deploy order: this app's Cashfree words go live only after AIAIC's Cashfree release is live.** Deploy AIAIC's
+branch `payments-cashfree-2026-11-04` first, check it answers as below, then deploy this app. The other way round is not
+read as before (see the end of this section).
+
+AIAIC's payments moved to Cashfree on its branch `payments-cashfree-2026-11-04` (its design C1 to C10): the buyer pays
+AIAIC through a Cashfree payment link, and once the link is paid in full and her produce has left her, AIAIC sends the
+farmer her amount through Cashfree Payouts. Razorpay is kept in AIAIC's code but not wired; RazorpayX, Razorpay's payouts
+product, is gone. This app follows what AIAIC's answers say, field by field; nothing to set:
+
+- **The provider is named only as AIAIC names it.** Her destination names its provider (`x_destination.provider`,
+  `cashfree`): the words for removing it say Cashfree, and a destination given to an earlier provider (`razorpay`) is
+  said as such, with a line asking her to give it again (AIAIC refuses its send to it). Where AIAIC's answer names no
+  provider (an order's own payment state, a refusal), the words name none ("the payment company"). Nothing says
+  RazorpayX.
+- **Her money, step by step, from AIAIC's own steps** (`from_aiaic.steps` and `sending.status`): each of Cashfree's
+  states as AIAIC maps them is said in plain words (asked for and not reached yet; waiting for a confirmation, which
+  covers a transfer held for an approval; on its way; reached her bank; did not go through or came back, on AIAIC's team's
+  list). Only `processed` says it reached her bank. Her sale's step bar and the Payments page's totals count AIAIC's own
+  send too.
+- **Her bank account's name**: Cashfree takes English letters and spaces only; the form says so in a plain hint under
+  the box, never as a lock on Save. Save opens on any words in the box, and a press this phone would refuse (that rule,
+  a length, her tick) has her words read by AIAIC's distress scan first, as the registration form does (the platform's
+  rule D-105): a crisis gets the helplines, anything else AIAIC's refusal by its code (`account_name_letters_only`).
+  Words typed in the account or IFSC box are read with it: each box's words once its digits, spaces and hyphens are
+  taken out, the IFSC box's only when it is not in an IFSC's shape; no digit typed in either box (an account number
+  typed in the IFSC box too), and no well-formed IFSC, ever goes to the scan. A press whose account or IFSC box holds
+  words has them read first even when nothing here would refuse it (AIAIC gets the number without its spaces, and its
+  own reader misses her words joined); a press with only her bank's details goes straight to AIAIC, whose middleware
+  reads the name in its body. Route's form, where AIAIC wires it, does the same. The account box keeps the spaces she
+  types (AIAIC gets the number without them) and is held to AIAIC's own rule (5 to 35 letters and digits) after the
+  scan, so a press never sends more than AIAIC takes; the IFSC box cuts nothing off at 11. Every code AIAIC's Cashfree
+  branch answers her form with (`cashfree_*`, `live_keys_no_rehearsal`, ...) has words in English, Marathi and Hindi
+  (drafts for a native reader).
+- **Razorpay Route's card** on the Payments page shows only while AIAIC wires Route (`payout_account.wired`); Route's
+  own lines keep naming Razorpay and show only on Route's own facts.
+- **The policy pages** (Pricing, Privacy, Refund) name Cashfree as AIAIC's payment processor, the collect-then-pay flow,
+  and the refund time as AIAIC's own Refund page states it (Cashfree's 7 to 10 business days).
+
+An AIAIC server not yet on its Cashfree release is **not** read as before everywhere, which is why the order above
+holds:
+
+- What reads as before: with no `provider`, her destination's words name no provider; with no `wired`, Route's card shows
+  as it did; with no `provider` or `model` in its pricing, the commission sentence is the older one.
+- What does not: its seven RazorpayX refusals (`razorpayx_keys_incomplete`, `razorpayx_not_configured`,
+  `razorpayx_keys_other_mode`, `razorpayx_live_not_approved`, `razorpayx_refused`, `razorpayx_no_answer`,
+  `razorpayx_ip_not_allowlisted`) are kept here with words that name no provider, only for that time, and are removed
+  once AIAIC's Cashfree release is live; but this app's Pricing, Privacy and Refund pages already name Cashfree as
+  AIAIC's payment processor and its refund time, which that AIAIC does not use.
+
+The recorded answers the tests replay (`tests/fixtures/aiaic/`) are recorded again from AIAIC's branch by one command;
+`trade_recording_manifest.json` beside them names the AIAIC commit they came from and that command.

@@ -1,8 +1,8 @@
 {
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
-    "route": "POST /farmer/trade/offers/ofr_3da2dc41bf3cfe28be91/accept",
-    "at": "2026-10-23T20:00:47+00:00",
+    "route": "POST /farmer/trade/offers/ofr_82cead1a06906d063c13/accept",
+    "at": "2026-11-05T06:56:25+00:00",
     "status": 409,
     "replay": null,
     "signed_in": true,
@@ -10,7 +10,8 @@
       "params": null,
       "body": {}
     },
-    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer), her own act, so its records are real (synthetic: false) on this test database; the buyer is named as a recording. Replayed by the web and phone tests, never edited by hand."
+    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer), their own act, so its records are real (synthetic: false) on this test database; the buyer is named as a recording. Replayed by the web and phone tests, never edited by hand. Razorpay is NAMED IN-PROCESS for this recording (AIAIC_PAYMENT_PROVIDER=razorpay): kept but not wired since 4 Nov 2026, when Cashfree became the server's default provider.",
+    "provider": "razorpay (named in-process)"
   },
   "answer": {
     "detail": {

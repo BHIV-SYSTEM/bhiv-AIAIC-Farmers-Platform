@@ -7,17 +7,38 @@
  * AIAIC's commission and 18% GST on it); then each step as AIAIC says it (`steps`: a transfer the team recorded by hand
  * is "sent", never "reached"), with a TEST mark when no real money moved. The order's own link decides whether the card
  * shows, not today's setting. Her UPI ID or bank account is given here by her own press, after the notice AIAIC holds
- * (`x_notice`, in her language; its version and the language are said back with her press); it goes to Razorpay and
- * AIAIC keeps only a masked hint. She removes it here by her own press too, and AIAIC asks RazorpayX to switch it off
- * (the audit of 28 Oct 2026: MONEY-07, -11; PRIVACY-03, -04, -05, -14).
+ * (`x_notice`, in her language; its version and the language are said back with her press); it goes to AIAIC's payments
+ * provider (since 4 Nov 2026 Cashfree, as AIAIC names it: `x_destination.provider`) and AIAIC keeps only a masked hint.
+ * She removes it here by her own press too, and AIAIC asks that provider to delete it (the audit of 28 Oct 2026:
+ * MONEY-07, -11; PRIVACY-03, -04, -05, -14). A bank account's name is Cashfree's rule: English letters and spaces
+ * only, said as a plain hint under the box, never changed for her (AIAIC's `account_name_letters_only`). NO RULE OF
+ * THIS PHONE KEEPS HER WORDS FROM THE DISTRESS SCAN (the audit of 4 Nov 2026, AN-1; the platform's rule D-105): Save
+ * can be pressed whenever her box holds words, and a press this phone would refuse has them read for distress first, as
+ * the registration form does; a crisis gets AIAIC's crisis card, anything else the refusal in AIAIC's own code. Words
+ * in the account or IFSC box are read too, never a digit typed in either box or a well-formed IFSC (the re-check, RC-3,
+ * RC2-4): the account box keeps the spaces she types (they leave the number only when it goes to AIAIC), and the IFSC
+ * box cuts nothing off.
+ * A press whose bank boxes hold words has them read first even when nothing here would refuse it (AIAIC's own reader
+ * misses them once the number's spaces are gone), and the account is held to AIAIC's own rule after the scan, so a
+ * press never sends more than AIAIC takes (the re-check, RC2-3).
  */
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, Circle, IndianRupee, Loader2 } from "lucide-react";
 import { useState } from "react";
 
-import type { FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
-import { sendingSaid } from "@/lib/aiaic-trade";
+import { problemShown, useScanBeforeRefusing } from "@/lib/aiaic-scan";
+import type { DestinationTyped, FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
+import {
+  destinationGivenBefore,
+  destinationName,
+  destinationSaveOpen,
+  pressDestination,
+  pressed,
+  problem as problemOf,
+  providerKey,
+  sendingSaid,
+} from "@/lib/aiaic-trade";
 import { endMyDestination, giveMyDestination } from "@/lib/aiaic-trade.functions";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -54,14 +75,15 @@ function NoticeText({ notice }: { notice: XNotice }) {
   );
 }
 
-function RemoveDestination() {
+/** Her press to remove her details; each sentence names the provider AIAIC names for them (`providerKey`), else none. */
+function RemoveDestination({ provider }: { provider: string | null | undefined }) {
   const { t } = useI18n();
   const qc = useQueryClient();
   const fn = useServerFn(endMyDestination);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
-  const [said, setSaid] = useState<string | null>(null);
+  const [said, setSaid] = useState<ReturnType<typeof providerKey> | null>(null);
   const remove = async () => {
     setBusy(true);
     setProblem(null);
@@ -69,11 +91,17 @@ function RemoveDestination() {
     setBusy(false);
     setAsking(false);
     if (r.ok) {
-      setSaid(r.data.closure === "done" ? "aiaic.dest.removed" : "aiaic.dest.removed_pending");
+      setSaid(
+        providerKey(
+          r.data.closure === "done" ? "aiaic.dest.removed" : "aiaic.dest.removed_pending",
+          r.data.provider ?? provider,
+        ),
+      );
       await qc.invalidateQueries({ queryKey: ["aiaic-mine"] });
     } else setProblem(r.problem);
   };
-  if (said) return <p className="text-sm font-bold text-foreground">{t(said)}</p>;
+  if (said) return <p className="text-sm font-bold text-foreground">{t(said.key, said.values)}</p>;
+  const ask = providerKey("aiaic.dest.remove_ask", provider);
   return (
     <div className="space-y-2">
       {asking ? (
@@ -81,7 +109,7 @@ function RemoveDestination() {
           className="space-y-2 rounded-xl border-2 border-border p-3"
           data-testid="aiaic-dest-remove-ask"
         >
-          <p className="text-sm font-semibold text-foreground">{t("aiaic.dest.remove_ask")}</p>
+          <p className="text-sm font-semibold text-foreground">{t(ask.key, ask.values)}</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -127,8 +155,10 @@ export function DestinationForm({
   largeAmount?: boolean;
 }) {
   const { t, lang } = useI18n();
+  const activeLang = lang === "mr" || lang === "hi" ? lang : "en";
   const qc = useQueryClient();
   const fn = useServerFn(giveMyDestination);
+  const scan = useScanBeforeRefusing();
   const [kind, setKind] = useState<"upi_id" | "bank_account">(
     largeAmount ? "bank_account" : "upi_id",
   );
@@ -164,40 +194,59 @@ export function DestinationForm({
           </button>
         </div>
         {largeAmount && dest.kind === "upi_id" ? tooLarge : null}
-        <RemoveDestination />
+        {destinationGivenBefore(dest) ? (
+          <p className="text-sm font-bold text-amber-900" data-testid="aiaic-dest-given-before">
+            {t("aiaic.dest.given_before")}
+          </p>
+        ) : null}
+        <RemoveDestination provider={dest.provider} />
       </div>
     );
   }
-  const ready =
-    Boolean(notice) &&
-    agreed &&
-    (kind === "upi_id"
-      ? upi.includes("@")
-      : name.trim().length >= 4 && account.length >= 5 && ifsc.length === 11);
-  const send = async () => {
+  const typed: DestinationTyped = {
+    kind,
+    upi,
+    name,
+    account,
+    ifsc,
+    agreed,
+    notice: Boolean(notice),
+  };
+  // Save opens on any words in her box: no rule of this phone keeps them from the distress scan (AN-1, D-105)
+  const ready = destinationSaveOpen(typed);
+  const give = async () => {
     if (!notice) return;
     setBusy(true);
-    setProblem(null);
     const body =
       kind === "upi_id"
         ? { kind, upi_id: upi.trim() }
         : {
             kind,
-            name: name.trim(),
-            account_number: account.trim(),
+            // as Cashfree's rule read it: her words joined by single spaces (AIAIC joins them so too)
+            name: destinationName(name),
+            // the box keeps her spaces, so her words reach the scan as typed; AIAIC gets the number without them
+            account_number: account.replace(/\s/g, ""),
             ifsc: ifsc.trim().toUpperCase(),
           };
-    const r = await fn({
-      data: {
-        key: newKey(),
-        agreed: true,
-        replace: Boolean(dest),
-        notice_version: notice.version,
-        read_in: lang === "mr" || lang === "hi" ? lang : "en",
-        ...body,
-      },
-    });
-    setBusy(false);
+    let r: Awaited<ReturnType<typeof fn>>;
+    try {
+      // a call that throws (this server not reached, an input it refuses) is said as the form's own failure line, AIAIC
+      // not answering (`pressed`), and Save never spins for good (the re-check of 4 Nov 2026, RC2-3)
+      r = await pressed(() =>
+        fn({
+          data: {
+            key: newKey(),
+            agreed: true,
+            replace: Boolean(dest),
+            notice_version: notice.version,
+            read_in: lang === "mr" || lang === "hi" ? lang : "en",
+            ...body,
+          },
+        }),
+      );
+    } finally {
+      setBusy(false);
+    }
     if (r.ok) {
       setUpi("");
       setAccount("");
@@ -214,6 +263,21 @@ export function DestinationForm({
       }
     }
   };
+  // a press this phone would refuse, or one whose bank boxes hold words: her words are read for distress BEFORE the
+  // refusal is said or the form is sent, as the registration form does (`useScanBeforeRefusing`); a press with only her
+  // bank's details goes to AIAIC, whose middleware reads every body first
+  const send = async () => {
+    setProblem(null);
+    scan.reset();
+    await pressDestination(typed, {
+      refuse: (words, refusal) =>
+        scan.refuse(words, activeLang, refusal, (code) => setProblem(problemOf(code))),
+      readFirst: (words) => scan.readFirst(words, activeLang, give),
+      give,
+    });
+  };
+  // AIAIC's crisis card outranks everything (`ProblemCard` raises it to the page's gate)
+  const shown = problemShown(scan, problem);
   return (
     <div
       className="space-y-3 rounded-2xl border-2 border-primary/40 p-3"
@@ -257,7 +321,16 @@ export function DestinationForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoComplete="off"
+              aria-describedby="aiaic-dest-name-rule"
             />
+            {/* Cashfree's rule as a plain hint, always the same: never red, never a lock on Save (AN-1) */}
+            <span
+              id="aiaic-dest-name-rule"
+              className="mt-1 block text-xs font-semibold text-muted-foreground"
+              data-testid="aiaic-dest-name-rule"
+            >
+              {t("aiaic.dest.name_rule")}
+            </span>
           </label>
           <label className="block text-sm font-bold">
             {t("aiaic.dest.account")}
@@ -265,7 +338,7 @@ export function DestinationForm({
               className={INPUT}
               value={account}
               inputMode="numeric"
-              onChange={(e) => setAccount(e.target.value.replace(/\s/g, ""))}
+              onChange={(e) => setAccount(e.target.value)}
               autoComplete="off"
             />
           </label>
@@ -274,7 +347,6 @@ export function DestinationForm({
             <input
               className={INPUT}
               value={ifsc}
-              maxLength={11}
               onChange={(e) => setIfsc(e.target.value.toUpperCase())}
               autoComplete="off"
             />
@@ -292,14 +364,14 @@ export function DestinationForm({
         />
         {t("aiaic.dest.agree")}
       </label>
-      {problem ? <ProblemCard problem={problem} /> : null}
+      {shown ? <ProblemCard problem={shown} /> : null}
       <button
         type="button"
-        disabled={!ready || busy}
+        disabled={!ready || busy || scan.scanning}
         onClick={() => void send()}
         className="flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 text-lg font-extrabold text-primary-foreground disabled:opacity-50"
       >
-        {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : null}
+        {busy || scan.scanning ? <Loader2 className="size-5 animate-spin" aria-hidden /> : null}
         {t("aiaic.dest.save")}
       </button>
     </div>
@@ -366,7 +438,12 @@ export function FromAiaicCard({
       </dl>
       <ol className="mt-3 space-y-1.5">
         {steps.map((s) => (
-          <li key={s.key} className="flex items-center gap-2 text-sm font-bold text-foreground">
+          <li
+            key={s.key}
+            className="flex items-center gap-2 text-sm font-bold text-foreground"
+            data-step={s.key}
+            data-state={s.done ? "done" : "todo"}
+          >
             {s.done ? (
               <CheckCircle2 className="size-5 text-primary" aria-hidden />
             ) : (

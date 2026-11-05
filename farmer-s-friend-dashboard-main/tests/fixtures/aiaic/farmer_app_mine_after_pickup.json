@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-10-23T20:00:46+00:00",
+    "at": "2026-11-05T06:56:24+00:00",
     "status": 200,
     "replay": null,
     "signed_in": true,
@@ -10,7 +10,8 @@
       "params": null,
       "body": null
     },
-    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer), her own act, so its records are real (synthetic: false) on this test database; the buyer is named as a recording. Replayed by the web and phone tests, never edited by hand."
+    "note": "A real answer of the real route on a *_test database: a farmer's own sale in the app (tenant rec-farmer), their own act, so its records are real (synthetic: false) on this test database; the buyer is named as a recording. Replayed by the web and phone tests, never edited by hand. Razorpay is NAMED IN-PROCESS for this recording (AIAIC_PAYMENT_PROVIDER=razorpay): kept but not wired since 4 Nov 2026, when Cashfree became the server's default provider.",
+    "provider": "razorpay (named in-process)"
   },
   "answer": {
     "tenant_id": "rec-farmer",
@@ -21,7 +22,7 @@
     "practice": false,
     "practice_note": null,
     "party": {
-      "party_id": "frm_29fc30009f6b324d74e6",
+      "party_id": "frm_599e0b567231fa847318",
       "kind": "farmer",
       "buyer_type": null,
       "tenant_id": "rec-farmer",
@@ -29,20 +30,20 @@
       "district": "Nashik",
       "state": "maharashtra",
       "consent_given": true,
-      "consent_basis": "given by the farmer herself in the AIAIC app, signed in, when she listed her produce",
+      "consent_basis": "given by the farmer themselves in the AIAIC app, signed in, when they listed their produce",
       "consent_withdrawn_at": null,
       "interests": {},
       "synthetic": false,
-      "trace_id": "e3e5a140219b49a283d2b0bc9ad5d875",
-      "created_at": "2026-10-23T20:00:45.972223+00:00",
+      "trace_id": "4e58b1888fe446e2a15450d3b48d6ed7",
+      "created_at": "2026-11-05T06:56:23.425104+00:00",
       "from_the_app": true
     },
     "listings": [
       {
-        "listing_id": "lst_b68d4f292b9edb706538",
-        "lot_id": "lot_5508ec7d55008564b50b",
+        "listing_id": "lst_8e15872f7a554b7e6c49",
+        "lot_id": "lot_b0106f45cba40889f4f5",
         "tenant_id": "rec-farmer",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
+        "farmer_id": "frm_599e0b567231fa847318",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -55,6 +56,7 @@
         "available_to": null,
         "district": "Nashik",
         "state": "maharashtra",
+        "taluka": null,
         "status": "sold",
         "reference_price": {
           "crop": "onion",
@@ -135,15 +137,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": false,
-        "trace_id": "e3e5a140219b49a283d2b0bc9ad5d875",
-        "created_at": "2026-10-23T20:00:45.972223+00:00",
-        "updated_at": "2026-10-23T20:00:46.222239+00:00",
+        "trace_id": "4e58b1888fe446e2a15450d3b48d6ed7",
+        "created_at": "2026-11-05T06:56:23.425104+00:00",
+        "updated_at": "2026-11-05T06:56:23.971983+00:00",
         "offers": [
           {
-            "offer_id": "ofr_c5925e399ee14b846e2b",
+            "offer_id": "ofr_0c2ac145c3b18af54f75",
             "tenant_id": "rec-farmer",
-            "listing_id": "lst_b68d4f292b9edb706538",
-            "buyer_id": "byr_7a10bf3516a965e93e1e",
+            "listing_id": "lst_8e15872f7a554b7e6c49",
+            "buyer_id": "byr_19c8015da97aa22d4854",
             "price_per_q": 3980.0,
             "quantity_q": 10.0,
             "delivery_terms": "The buyer collects from the farm within 3 days",
@@ -152,9 +154,10 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": false,
-            "trace_id": "ec4dc6d21d944b9d953719017c9a34d4",
-            "created_at": "2026-10-23T20:00:46.173002+00:00",
-            "updated_at": "2026-10-23T20:00:46.222239+00:00",
+            "trace_id": "30ffc97ba9674fbb933da4ac10de1d75",
+            "created_at": "2026-11-05T06:56:23.880012+00:00",
+            "updated_at": "2026-11-05T06:56:23.971983+00:00",
+            "pool_id": null,
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -180,21 +183,24 @@
                   "why": "The contact path is not switched on here for this sale."
                 }
               }
-            }
+            },
+            "pool": null
           }
-        ]
+        ],
+        "pooled_in": null,
+        "group_plan": null
       }
     ],
     "orders": [
       {
-        "order_id": "ord_8f970da17287a216126d",
-        "transaction_id": "txn_059364b3557eb5b8e396",
+        "order_id": "ord_4a7d43f031da6580adc0",
+        "transaction_id": "txn_33cf39f1eb8b3c25b1c7",
         "tenant_id": "rec-farmer",
-        "offer_id": "ofr_c5925e399ee14b846e2b",
-        "listing_id": "lst_b68d4f292b9edb706538",
-        "lot_id": "lot_5508ec7d55008564b50b",
-        "farmer_id": "frm_29fc30009f6b324d74e6",
-        "buyer_id": "byr_7a10bf3516a965e93e1e",
+        "offer_id": "ofr_0c2ac145c3b18af54f75",
+        "listing_id": "lst_8e15872f7a554b7e6c49",
+        "lot_id": "lot_b0106f45cba40889f4f5",
+        "farmer_id": "frm_599e0b567231fa847318",
+        "buyer_id": "byr_19c8015da97aa22d4854",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -214,16 +220,17 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": false,
-        "trace_id": "71766886e21945cbb9b2029cc963fece",
-        "created_at": "2026-10-23T20:00:46.222239+00:00",
-        "updated_at": "2026-10-23T20:00:46.250436+00:00",
+        "trace_id": "274576e48ce6434c9b548deadad44b75",
+        "created_at": "2026-11-05T06:56:23.971983+00:00",
+        "updated_at": "2026-11-05T06:56:24.022557+00:00",
+        "pool_id": null,
         "buyer_name": "Recorded buyer (a recording, no real business)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
         "fulfilment": [
           {
-            "event_id": "ful_4e649e9a7203f2e84196",
-            "order_id": "ord_8f970da17287a216126d",
+            "event_id": "ful_250354955a3114fc4f87",
+            "order_id": "ord_4a7d43f031da6580adc0",
             "stage": "pickup",
             "status": "done",
             "reference": null,
@@ -233,8 +240,8 @@
             },
             "evidence_kind": "operator_observed",
             "simulated": false,
-            "trace_id": "db28f1f6e19a40f08721ff49cdc72655",
-            "created_at": "2026-10-23T20:00:46.250436+00:00"
+            "trace_id": "7320114e8fbc40b091c367d3957508ee",
+            "created_at": "2026-11-05T06:56:24.022557+00:00"
           }
         ],
         "reconciliation": null,
@@ -246,7 +253,7 @@
         "payment": {
           "state": "not_connected",
           "link_made": false,
-          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay her onward from it, and settlement stays not connected for this order.",
+          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay the farmer from it, and settlement stays not connected for this order.",
           "refund_owed_inr": null,
           "refund_note": null
         },
@@ -303,7 +310,10 @@
           "can_change_number": false,
           "can_stop": false,
           "can_report": false
-        }
+        },
+        "pooled": null,
+        "pool": null,
+        "from_aiaic": null
       }
     ],
     "payout_account": {
@@ -391,6 +401,35 @@
         }
       }
     },
+    "x_destination": null,
+    "collect_then_pay": false,
+    "x_notice": {
+      "version": "xn-3900a20c8640",
+      "en": [
+        "Where AIAIC sends your sale money: your consent",
+        "To send you the money from your sale, AIAIC gives Cashfree (Cashfree Payments, AIAIC's payment service) your UPI ID, or your bank account number with its IFSC and your name as on that account (English (A-Z) letters and spaces, as printed on your passbook).",
+        "AIAIC keeps only Cashfree's reference and a short reminder: the last 4 digits of an account, or the first 2 characters and the bank of a UPI ID. AIAIC never keeps your account number, IFSC, UPI ID or name.",
+        "Cashfree keeps your details under its own terms; agreeing here includes agreeing to them.",
+        "To remove them: press Remove in your app, or tell a person from AIAIC, in person or in the app. AIAIC then asks Cashfree to delete them and sends nothing new to them; money already being sent for a sale goes on under that sale's own rule.",
+        "Questions or a complaint: not named yet."
+      ],
+      "mr": [
+        "AIAIC तुमच्या विक्रीचे पैसे कुठे पाठवते: तुमची संमती",
+        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, Cashfree (AIAIC ची पैसे पाठवण्याची सेवा) ला तुमचा UPI आयडी, किंवा तुमचा बँक खाते क्रमांक, त्याचा IFSC आणि त्या खात्यावर असलेले तुमचे नाव (इंग्रजी (A-Z) अक्षरे आणि रिकाम्या जागा, तुमच्या पासबुकवर छापले आहे तसे) देते.",
+        "AIAIC फक्त Cashfree चा संदर्भ आणि एक छोटी आठवण ठेवते: खात्याचे शेवटचे 4 अंक, किंवा UPI आयडीची पहिली 2 चिन्हे आणि बँक. तुमचा खाते क्रमांक, IFSC, UPI आयडी किंवा नाव AIAIC कधीही ठेवत नाही.",
+        "Cashfree तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
+        "ही माहिती काढून टाकण्यासाठी: तुमच्या अॅपमध्ये काढा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष भेटून किंवा अॅपमध्ये सांगा. त्यानंतर AIAIC, Cashfree ला ती हटवायला सांगते आणि तिथे नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवले जात असलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
+        "प्रश्न किंवा तक्रार: अजून ठरलेले नाही."
+      ],
+      "hi": [
+        "AIAIC आपकी बिक्री का पैसा कहाँ भेजता है: आपकी सहमति",
+        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, Cashfree (AIAIC की भुगतान सेवा) को आपकी UPI आईडी, या आपका बैंक खाता नंबर, उसका IFSC और उस खाते पर दर्ज आपका नाम (अंग्रेज़ी (A-Z) अक्षर और खाली जगह, जैसा आपकी पासबुक पर छपा है) देता है।",
+        "AIAIC केवल Cashfree का संदर्भ और एक छोटी याद रखता है: खाते के आख़िरी 4 अंक, या UPI आईडी के पहले 2 चिह्न और बैंक। आपका खाता नंबर, IFSC, UPI आईडी या नाम AIAIC कभी नहीं रखता।",
+        "Cashfree आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों पर भी सहमति है।",
+        "इसे हटाने के लिए: अपने ऐप में हटाएँ दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC, Cashfree से इसे मिटाने को कहता है और वहाँ नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा जा रहा पैसा उस बिक्री के नियम से आगे बढ़ता है।",
+        "प्रश्न या शिकायत: अभी तय नहीं।"
+      ]
+    },
     "payout_notice": {
       "version": "pn-0b66a47d1399",
       "en": [
@@ -418,9 +457,9 @@
         "प्रश्न या शिकायत: अभी तय नहीं।"
       ]
     },
-    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. Settlement and fee are not connected here: AIAIC does not pay the farmer onward. Her mobile number is kept only for an order where she asked an AIAIC person to call her, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
+    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. Settlement and fee are not connected here: AIAIC does not pay the farmer onward. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "670132ce80c94ba0a3e809a12ac08df9",
+      "request_id": "5e1b8bde8e8b40d59268ad49f1c34ce9",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

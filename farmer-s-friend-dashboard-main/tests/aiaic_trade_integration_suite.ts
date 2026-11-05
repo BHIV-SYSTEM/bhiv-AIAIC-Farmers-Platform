@@ -17,11 +17,21 @@ import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { createElement } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  RouterContextProvider,
+  createMemoryHistory,
+  createRootRoute,
+  createRouter,
+} from "@tanstack/react-router";
+import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
+import ts from "typescript";
 
-import { NotRefreshedLine } from "../src/components/farm/aiaic/AiaicBits";
+import { NotRefreshedLine, ProblemCard } from "../src/components/farm/aiaic/AiaicBits";
+import { EachSale } from "../src/components/farm/aiaic/AiaicPayments";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
+import { DestinationForm, FromAiaicCard } from "../src/components/farm/aiaic/FromAiaicCard";
 import { GroupOfferSteps, GroupSaleSteps } from "../src/components/farm/aiaic/GroupPages";
 import {
   GroupStepsLine,
@@ -75,7 +85,39 @@ import {
   mineReadEvery,
   mineShown,
   pressKeyHolder,
+  bankBoxWords,
+  destinationGivenBefore,
+  destinationNameOk,
+  destinationRefusal,
+  destinationSaveOpen,
+  destinationWords,
+  payoutFormRefusal,
+  payoutSaveOpen,
+  payoutWords,
+  pressDestination,
+  pressPayout,
+  providerKey,
+  providerName,
+  routeCardShown,
+  sendingLine,
+  type DestinationTyped,
+  type PressRun,
+  type XDestination,
+  type XNotice,
 } from "../src/lib/aiaic-trade";
+import {
+  SCAN_START,
+  formScan,
+  problemShown,
+  scanReducer,
+  scanThen,
+  scanThenRefuse,
+  useScanBeforeRefusing,
+  type AskTheScan,
+  type FormScan,
+  type ScanEvent,
+  type ScanState,
+} from "../src/lib/aiaic-scan";
 import {
   GROUP_STEPS,
   OFFER_CLOSED_REASONS,
@@ -104,9 +146,21 @@ import {
 } from "../src/lib/aiaic-account";
 import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
+import { giveMyDestination } from "../src/lib/aiaic-trade.functions";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
+import { commissionSentence } from "../src/lib/business";
+import { pricingOf } from "../src/lib/aiaic-trade";
+
+import {
+  CRISIS_EN,
+  CRISIS_HI,
+  CRISIS_MR,
+  TEST_BANK,
+  askScanFirst,
+  inProcess,
+} from "./aiaic_shared_scan";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.join(here, "fixtures", "aiaic");
@@ -197,7 +251,7 @@ test("A1 only what the screens show leaves the server (no contact path, no ids o
   }
 });
 
-test("A2 the sale's five steps are AIAIC's own states: paid only on Razorpay's word, sent is never received", () => {
+test("A2 the sale's five steps are AIAIC's own states: paid only on the provider's word, sent is never received", () => {
   const sending = mineOf("payout_mine_sending").orders[0] as AiaicOrder;
   assert.equal(sending.payment_state, "paid");
   const s1 = saleSteps(sending);
@@ -212,7 +266,7 @@ test("A2 the sale's five steps are AIAIC's own states: paid only on Razorpay's w
   assert.equal(
     saleSteps(settled)[4]?.state,
     "done",
-    "settled on Razorpay's word: her money is done",
+    "settled on Razorpay Route's word: her money is done",
   );
   for (const state of ["transferred", "released", "held"]) {
     const sent = {
@@ -236,6 +290,33 @@ test("A2 the sale's five steps are AIAIC's own states: paid only on Razorpay's w
   const s4 = saleSteps(called);
   assert.equal(s4[4]?.state, "stopped", "a reversed share stopped");
   assert.equal(s4[2]?.state, "stopped");
+
+  // AIAIC COLLECTS, THEN SENDS HER MONEY (since 4 Nov 2026 through Cashfree Payouts; AIAIC's real answers, recorded by its
+  // record_trip_and_payout_answers.py): her money step is AIAIC's own steps, done only once it reached her bank
+  const collect = (name: string) =>
+    mineOf(name).orders.find(
+      (o) => (o as { from_aiaic?: FromAiaic | null }).from_aiaic?.fixed_by_link,
+    ) as AiaicOrder;
+  const money = (name: string) => saleSteps(collect(name))[4]?.state;
+  assert.equal(money("collect_mine_paid"), "now", "the buyer paid, AIAIC holds her money: now");
+  assert.equal(money("collect_mine_processing"), "now", "on its way to her: not done yet");
+  assert.equal(money("collect_mine_processed"), "done", "it reached her bank: done");
+  const unpaid = collect("collect_mine_paid");
+  const before = {
+    ...unpaid,
+    payment_state: "link_created",
+    from_aiaic: {
+      ...(unpaid as { from_aiaic: FromAiaic }).from_aiaic,
+      buyer_paid: false,
+      steps: { buyer_paid: false, sent: false, reached: false },
+    },
+  } as AiaicOrder;
+  assert.equal(saleSteps(before)[4]?.state, "todo", "the buyer has not paid: to come");
+  assert.equal(
+    saleSteps({ ...before, order_state: "cancelled" } as AiaicOrder)[4]?.state,
+    "stopped",
+    "called off before anything was sent: stopped",
+  );
 });
 
 test("A3 a link that does not carry her share is said to pay AIAIC's account, never hers", () => {
@@ -281,8 +362,12 @@ test("A4 her money's sentence is AIAIC's key, with rupees and India's day filled
   assert.equal(said.key, "aiaic.farmer.money.settled");
   assert.equal(said.values["amount"], "₹79,600");
   assert.equal(said.values["utr"], "UTRRECORDING01");
-  // settled_at 2026-10-23T20:00:50+00:00 is 01:30 on 24 Oct in India
-  assert.equal(said.values["day"], "2026-10-24");
+  // the day is India's day of AIAIC's own time (the recording's, so read from it: UTC+5:30, as below)
+  const at = String(settled.money?.say?.values["day"] ?? "");
+  const india = new Date(Date.parse(at) + 330 * 60_000).toISOString().slice(0, 10);
+  assert.ok(/^\d{4}-\d{2}-\d{2}T/.test(at), `AIAIC's time: "${at}"`);
+  assert.equal(said.values["day"], india);
+  assert.equal(dayOf("2026-10-23T20:00:50+00:00"), "2026-10-24", "01:30 on 24 Oct in India");
   assert.equal(dayOf("2026-10-23T18:29:59+00:00"), "2026-10-23");
   assert.equal(dayOf("2026-10-23T18:30:00+00:00"), "2026-10-24");
   assert.equal(rupees(20261.36), "₹20,261.36");
@@ -349,11 +434,37 @@ test("A6 offers are AIAIC's own: Accept only where AIAIC says the offer can be a
   }
 });
 
-test("A7 the payments page's totals: agreed leaves out a called-off sale, sent counts only Razorpay's word", () => {
+test("A7 the payments page's totals: agreed leaves out a called-off sale; sent and in her bank only as AIAIC says them", () => {
   const settled = mineOf("payout_mine_settled");
   const m = moneyTotals(settled.orders);
   assert.equal(m.settled, 79600);
   assert.equal(m.sentToHer, 79600);
+  // AIAIC collects, then sends her money (Cashfree since 4 Nov 2026): its own steps, the send's own amount
+  const paidOrders = mineOf("collect_mine_paid").orders;
+  const paid = moneyTotals(paidOrders);
+  assert.deepEqual(
+    [paid.paidByBuyers, paid.sentToHer, paid.settled],
+    [paidOrders[0]?.amount_inr, 0, 0],
+    "the buyer paid, nothing sent yet",
+  );
+  const sendOf = (name: string) =>
+    (mineOf(name).orders[0] as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending;
+  const amount = sendOf("collect_mine_processing")?.amount_inr ?? Number.NaN;
+  assert.ok(amount > 0, `the recording's send carries its amount: ${amount}`);
+  const moving = moneyTotals(mineOf("collect_mine_processing").orders);
+  assert.deepEqual(
+    [moving.sentToHer, moving.settled],
+    [amount, 0],
+    "on its way: sent, not in her bank",
+  );
+  const reached = moneyTotals(mineOf("collect_mine_processed").orders);
+  assert.deepEqual([reached.sentToHer, reached.settled], [amount, amount], "it reached her bank");
+  const stale = moneyTotals(mineOf("collect_mine_stale").orders);
+  assert.deepEqual(
+    [stale.sentToHer, stale.settled],
+    [amount, amount],
+    "beside the sale that reached her, a send whose answer is not known is neither sent nor in her bank",
+  );
   const refundOrders = mineOf("farmer_app_mine_refund_owed").orders;
   const refund = moneyTotals(refundOrders);
   assert.equal(refund.sentToHer, 0, "a reversed share was never sent to her");
@@ -363,6 +474,56 @@ test("A7 the payments page's totals: agreed leaves out a called-off sale, sent c
     refund.agreed,
     standing.reduce((sum, o) => sum + o.amount_inr, 0),
     "a called-off sale is not agreed money",
+  );
+});
+
+test('A65 "Sent to you" counts only money that has left AIAIC\'s account (the audit of 4 Nov 2026, AN-2): in AIAIC\'s own answers, a send Cashfree has queued, and one it holds for AIAIC\'s approval, are in neither "Sent to you" nor "In your bank"', () => {
+  type Send = NonNullable<FromAiaic["sending"]>;
+  /** AIAIC's money left its account: Cashfree took it (processing), it reached her bank (processed), or AIAIC's team
+   * recorded a bank transfer it made by hand (recorded). */
+  const LEFT = ["processing", "processed", "recorded"];
+  const cents = (n: number) => Math.round(n * 100) / 100;
+  for (const [name, held] of [
+    ["collect_mine_queued", "queued"],
+    ["collect_mine_approval_pending", "pending"],
+  ] as const) {
+    const orders = mineOf(name).orders;
+    const sends = orders
+      .map((o) => (o as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending)
+      .filter((s): s is Send => Boolean(s));
+    const waiting = sends.filter((s) => s.status === held);
+    assert.ok(waiting.length > 0, `${name}: AIAIC's answer holds a send at ${held}`);
+    assert.ok(
+      waiting.every((s) => s.amount_inr > 0),
+      `${name}: each ${held} send carries its amount`,
+    );
+    const sum = (keep: (s: Send) => boolean) =>
+      cents(sends.filter(keep).reduce((n, s) => n + s.amount_inr, 0));
+    const totals = moneyTotals(orders);
+    assert.equal(
+      totals.sentToHer,
+      sum((s) => LEFT.includes(s.status)),
+      `${name}: "Sent to you" is only what has left AIAIC's account, never a ${held} send`,
+    );
+    assert.equal(
+      totals.settled,
+      sum((s) => s.status === "processed"),
+      `${name}: "In your bank" is only what reached it`,
+    );
+    for (const o of orders) {
+      const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
+      if (fa?.sending?.status === held)
+        assert.deepEqual(
+          [fa.steps?.sent, fa.steps?.reached],
+          [false, false],
+          `${name}: AIAIC says a ${held} send neither sent nor reached`,
+        );
+    }
+  }
+  assert.equal(
+    moneyTotals(mineOf("collect_mine_queued").orders).sentToHer,
+    0,
+    "her one send queued: nothing sent to her yet",
   );
 });
 
@@ -466,11 +627,13 @@ test("A10 every transport note and refusal AIAIC sends is worded in en, mr and h
   }
 });
 
-/** Names and codes a Marathi or Hindi line may carry in Latin letters (the owner's rule: names and numbers only). */
+/** Names and codes a Marathi or Hindi line may carry in Latin letters (the owner's rule: names and numbers only).
+ * Cashfree is AIAIC's payments provider since 4 Nov 2026 (its own Marathi and Hindi notice names it so); RazorpayX,
+ * Razorpay's payouts product, is gone and named nowhere. */
 const LATIN_ALLOWED = new Set([
   "AIAIC",
+  "Cashfree",
   "Razorpay",
-  "RazorpayX",
   "Geoapify",
   "OpenStreetMap",
   "MSRTC",
@@ -493,7 +656,9 @@ test("A11 every new line is in en, mr and hi, with the same blanks, and mr/hi ca
       const line = DICTS[lang][key];
       assert.ok(line, `${lang} has no ${key}`);
       assert.equal(blanks(line), blanks(DICTS.en[key] ?? ""), `${lang} ${key}: other blanks`);
-      const words = line.replace(/\{[a-z_]+\}/g, "").match(/[A-Za-z]+/g) ?? [];
+      // the bank name's hint shows the letters themselves, "(A-Z)" (the audit of 4 Nov 2026, AN-1): that line only
+      const own = key === "aiaic.dest.name_rule" ? line.replace("(A-Z)", "") : line;
+      const words = own.replace(/\{[a-z_]+\}/g, "").match(/[A-Za-z]+/g) ?? [];
       for (const w of words) assert.ok(LATIN_ALLOWED.has(w), `${lang} ${key}: English word "${w}"`);
     }
   }
@@ -655,24 +820,46 @@ test("A16 ANN-1 a sentence never shows a hole: a fact AIAIC did not send is said
 
 test("A17 ENG-01 'Did the buyer pay you?' only where the money is outside AIAIC or her produce was handed over", () => {
   const en = wordsIn("en");
-  const fresh = mineOf("payout_mine_offered").orders.find((o) => o.money?.can_report) as AiaicOrder;
-  assert.ok(fresh, "the recording's practice order AIAIC takes her word on");
-  assert.equal(fresh.order_state, "accepted");
-  assert.equal(fresh.payment.link_made, false);
+  // AIAIC's real answer: her practice order just accepted, no link yet; AIAIC takes no word of hers there while it can
+  // still make the buyer's link (its own rule since the push 2 audit, ENG-01: `link_still_possible`)
+  const fresh = mineOf("payout_mine_offered").orders.find(
+    (o) => o.order_state === "accepted" && !o.payment.link_made,
+  ) as AiaicOrder;
+  assert.ok(fresh, "the recording's practice order, just accepted, no link yet");
+  assert.equal(
+    fresh.money?.can_report,
+    false,
+    "AIAIC takes no word of hers while it can make the link",
+  );
+  assert.equal(fresh.money?.why_not_report?.code, "link_still_possible", "AIAIC's own reason");
   assert.equal(
     asksHerWord(fresh),
     false,
     "just accepted, no link yet: no question (a 'Not yet' closes the link)",
   );
   assert.equal(moneyCard(en, fresh), null, "and no money card on that order");
+  // where AIAIC takes her word (`can_report`), the question still waits for her produce to be handed over
+  const takes = {
+    ...fresh,
+    money: {
+      ...(fresh.money as NonNullable<AiaicOrder["money"]>),
+      can_report: true,
+      why_not_report: null,
+    },
+  };
+  assert.equal(asksHerWord(takes), false, "her word taken, nothing handed over: no question yet");
   const step = (stage: string) => ({ stage, status: "done", created_at: fresh.created_at });
-  const handed = { ...fresh, fulfilment: [step("pickup")] };
+  const handed = { ...takes, fulfilment: [step("pickup")] };
   assert.equal(asksHerWord(handed), true, "handed over: she is asked");
   assert.deepEqual(moneyCard(en, handed), {
     line: DICTS.en["aiaic.farmer.money.direct.ask"],
     asks: true,
   });
-  assert.equal(asksHerWord({ ...fresh, fulfilment: [step("delivery_exception")] }), false);
+  assert.equal(
+    asksHerWord({ ...takes, fulfilment: [step("delivery_exception")] }),
+    false,
+    "a problem on the way is no handover",
+  );
   const direct = client
     .mineForBrowser(DERIVED.answer)
     .orders.find((o) => o.money?.route === "direct") as AiaicOrder;
@@ -1391,6 +1578,9 @@ type StandIn = {
   wrongPassword: boolean;
   expireNext: boolean;
   distressOnWrite: boolean;
+  /** Every write answered with AIAIC's real crisis answer (safety_check_crisis.json): its middleware answers every
+   * route in that one shape, before the route's own rules. */
+  crisisRecorded: boolean;
   /** The fixture GET /farmer/trade answers with, when set (else by `practice`). */
   mine: string | null;
   /** The fixture GET /transport/nearby-mandis answers with. */
@@ -1400,6 +1590,21 @@ type StandIn = {
   /** What GET /notifications answers with, when set (else AIAIC's recorded answer). */
   notices: unknown;
   close: () => Promise<void>;
+};
+
+/** Her destination as AIAIC's `destination_view` says it on its Cashfree branch (the stand-in's; no person's details). */
+const STANDIN_DEST = {
+  destination_id: "xds_standin000000000001",
+  kind: "upi_id",
+  hint: "su***@upi",
+  status: "ready",
+  ready: true,
+  test_mode: true,
+  refused_code: null,
+  closure: "none",
+  consent_basis: "her_own_press",
+  created_at: "2026-11-04T10:33:09+00:00",
+  provider: "cashfree",
 };
 
 async function standIn(): Promise<StandIn> {
@@ -1414,6 +1619,7 @@ async function standIn(): Promise<StandIn> {
     wrongPassword: false,
     expireNext: false,
     distressOnWrite: false,
+    crisisRecorded: false,
     mine: null,
     nearby: "transport_nearby_nashik",
     compare: "offer_compare_depends_on_sharing",
@@ -1492,6 +1698,7 @@ async function standIn(): Promise<StandIn> {
       if (req.method === "POST") {
         const key = req.headers["idempotency-key"];
         s.posts.push({ path: u.pathname, key: typeof key === "string" ? key : undefined, body });
+        if (s.crisisRecorded) return send(200, answer("safety_check_crisis"));
         if (s.distressOnWrite) {
           return send(200, {
             distress: true,
@@ -1513,6 +1720,35 @@ async function standIn(): Promise<StandIn> {
             payment_route: "direct",
             settlement_state: "direct",
           });
+        // HER DETAILS FOR AIAIC'S SEND (4 Nov 2026), answered in the shapes of AIAIC's own code on its Cashfree branch
+        // (trade/farmer_payout.py `details`, `destination_view`, `end_destination`): a bank account's name of letters
+        // and spaces only, else 422 `account_name_letters_only` with AIAIC's words; the end names its provider
+        if (u.pathname === "/farmer/trade/payout-destination/end")
+          return send(200, {
+            party_id: "pty_standin",
+            destination: { ...STANDIN_DEST, status: "ended", ready: false, closure: "done" },
+            closure: "done",
+          });
+        if (u.pathname === "/farmer/trade/payout-destination") {
+          const name = String(body["name"] ?? "")
+            .split(/\s+/)
+            .filter(Boolean)
+            .join(" ");
+          if (body["kind"] === "bank_account" && !/^[A-Za-z][A-Za-z ]{0,98}[A-Za-z]$/.test(name))
+            return send(422, {
+              detail: {
+                reason_code: "account_name_letters_only",
+                message: "Letters and spaces only, as on your bank account.",
+                field: "name",
+                words: {
+                  en: "Letters and spaces only, as on your bank account.",
+                  mr: "फक्त अक्षरे आणि रिकाम्या जागा, तुमच्या बँक खात्यावर आहे तसे.",
+                  hi: "केवल अक्षर और खाली जगह, जैसा आपके बैंक खाते पर है।",
+                },
+              },
+            });
+          return send(201, { destination: STANDIN_DEST });
+        }
       }
       return send(404, {
         detail: { reason_code: "not_found", message: "stand-in: no such route" },
@@ -1842,7 +2078,12 @@ test("B13 ANN-1 her 'I got the money' goes with no amount, and AIAIC's answer to
   try {
     settings(s.url, USER, PASSWORD);
     asHer(s);
-    const order = "ord_6e5c6a9c56d2cb56fce7";
+    // the order of the derived answer her report is about (an operator recorded it paid outside AIAIC: `direct`)
+    const order =
+      client
+        .mineForBrowser(DERIVED.answer)
+        .orders.find((o) => o.money?.say?.key === "farmer.money.direct.said_got")?.order_id ?? "";
+    assert.ok(order.startsWith("ord_"), `the derived answer's order: "${order}"`);
     assert.equal((await client.reportPayment(newPressKey(), order, "received")).ok, true);
     const sent = s.posts.find((p) => p.path === `/farmer/trade/orders/${order}/payment-report`);
     assert.deepEqual(sent?.body, { what: "received" }, "she said no amount: none is sent");
@@ -2058,7 +2299,8 @@ test("B17 the money notice names its crop by AIAIC's name in the reader's langua
       hiSaid,
     );
     assert.ok(moneyNoticeLine(wordsIn("mr"), hi, names).startsWith(`${onion}: `));
-    // a send RazorpayX stopped is said with its own words, and a state this app has no words for as news to open:
+    // a send the provider stopped (`cancelled`, an earlier provider's state) is said with its own words, and a state this
+    // app has no words for as news to open:
     // DERIVED in memory from the recording (the newest notice of the sale with another state), never written to a file
     for (const [status, key] of [
       ["cancelled", "aiaic.money.status.cancelled"],
@@ -2861,6 +3103,2655 @@ test("B19 her sale's news through this server: one per offer (the newest, more t
     );
   } finally {
     s.notices = null;
+    await s.close();
+  }
+});
+
+// ------------- A and B, the Cashfree switch (4 Nov 2026; AIAIC's design C10): her provider named only as AIAIC names it
+
+/** The lines that are Razorpay Route's own (a share of hers carried by the buyer's link, her Route account): they name
+ * Razorpay, and show only on Route's own facts (`money.say` of a Route payout, the Route card while AIAIC wires Route). */
+/** The seven RazorpayX refusal codes an AIAIC not yet on its Cashfree release still answers her form with (the audit of
+ * 4 Nov 2026, AN-5; the re-check, RC-4): kept with words that name no provider until AIAIC's Cashfree release is live,
+ * then removed. */
+const OLD_RAZORPAYX_KEYS = [
+  "aiaic.refused.razorpayx_keys_incomplete",
+  "aiaic.refused.razorpayx_keys_other_mode",
+  "aiaic.refused.razorpayx_not_configured",
+  "aiaic.refused.razorpayx_live_not_approved",
+  "aiaic.refused.razorpayx_refused",
+  "aiaic.refused.razorpayx_no_answer",
+  "aiaic.refused.razorpayx_ip_not_allowlisted",
+];
+
+const ROUTE_ONLY = [
+  "aiaic.farmer.money.will_send_bank",
+  "aiaic.farmer.money.will_send_bank_any",
+  "aiaic.farmer.money.will_send_upi",
+  "aiaic.farmer.money.sending",
+  "aiaic.farmer.money.held",
+  "aiaic.farmer.money.settled",
+  "aiaic.farmer.money.settled_no_utr",
+  "aiaic.farmer.money.failed",
+  "aiaic.farmer.money.reason.other",
+  "aiaic.farmer.payout.checking",
+  "aiaic.farmer.payout.needs_correction",
+  "aiaic.farmer.payout.reason.other",
+  "aiaic.farmer.payout.refused",
+  "aiaic.farmer.payout.route_not_enabled",
+  "aiaic.farmer.payout.withdrawn",
+  "aiaic.payout.send",
+  "aiaic.gs.paid.settled",
+  "aiaic.refused.test_keys_synthetic_payees_only",
+];
+const sourceOf = (file: string) =>
+  fs.readFileSync(path.join(APP, "src", "components", "farm", "aiaic", file), "utf-8");
+
+/** A router for a part of a page rendered on the server (its links and server functions need one; nothing is loaded). */
+const appRouter = createRouter({
+  routeTree: createRootRoute(),
+  history: createMemoryHistory({ initialEntries: ["/"] }),
+});
+/** A part of a page rendered on the server as the app holds it (a router, a query cache, the reader's language), its
+ * texts joined. Nothing is asked of AIAIC by a render: a server function runs only on a press. */
+const inApp = (el: ReactElement, lang: (typeof LANGS)[number] = "en") =>
+  renderToString(
+    createElement(RouterContextProvider, {
+      router: appRouter as never,
+      children: createElement(QueryClientProvider, {
+        client: new QueryClient(),
+        children: createElement(I18nProvider, { initialLang: lang, children: el }),
+      }),
+    }),
+  ).replaceAll("<!-- -->", "");
+
+test("A47 her money's provider is named only as AIAIC names it: Cashfree where it says so, none where it names none, RazorpayX nowhere", () => {
+  for (const lang of LANGS) {
+    const lines = Object.entries(DICTS[lang]).filter(([k]) => k.startsWith("aiaic."));
+    for (const [k, v] of lines) {
+      assert.ok(!/razorpayx/i.test(v), `${lang} ${k}: names RazorpayX`);
+      // a key may name it only as one of the seven codes an AIAIC not yet switched answers (AN-5, RC-4)
+      assert.ok(
+        !/razorpayx/i.test(k) || OLD_RAZORPAYX_KEYS.includes(k),
+        `${lang} ${k}: a RazorpayX key`,
+      );
+    }
+    const razorpay = lines
+      .filter(([, v]) => v.includes("Razorpay"))
+      .map(([k]) => k)
+      .sort();
+    assert.deepEqual(
+      razorpay,
+      [...ROUTE_ONLY].sort(),
+      `${lang}: Razorpay is named by Route's lines only`,
+    );
+    for (const [k, v] of lines)
+      if (/^aiaic\.(money|dest|pay|payments)\./.test(k) || k.startsWith("aiaic.refused.cashfree_"))
+        assert.ok(
+          !v.includes("Razorpay"),
+          `${lang} ${k}: a line of AIAIC's own send names Razorpay`,
+        );
+  }
+  // AIAIC's real answer on its Cashfree branch: her destination names its provider, and so do her words
+  const dest = (mineOf("collect_mine_processing") as { x_destination?: XDestination | null })
+    .x_destination;
+  assert.equal(dest?.provider, "cashfree", "AIAIC names her destination's provider");
+  assert.equal(providerName(dest?.provider), "Cashfree", "said as Cashfree");
+  for (const key of ["aiaic.dest.remove_ask", "aiaic.dest.removed", "aiaic.dest.removed_pending"]) {
+    for (const lang of LANGS) {
+      const named = providerKey(key, dest?.provider);
+      const said = wordsIn(lang)(named.key, named.values);
+      assert.ok(said.includes("Cashfree") && !HOLE.test(said), `${lang} ${key}: "${said}"`);
+      // an earlier provider's details, or an AIAIC that names none: the same sentence without a name
+      for (const other of ["razorpay", undefined, null, ""]) {
+        const plain = providerKey(key, other);
+        assert.equal(plain.key, `${key}_any`, `${key} for ${String(other)}`);
+        const w = wordsIn(lang)(plain.key, plain.values);
+        assert.ok(
+          Boolean(DICTS[lang][plain.key]) && !HOLE.test(w) && !/Cashfree|Razorpay/.test(w),
+          `${lang} ${plain.key}: "${w}"`,
+        );
+      }
+    }
+  }
+  // details given to an earlier provider (AIAIC's send through Cashfree refuses them): she is asked to give them again
+  const given = dest as XDestination;
+  assert.equal(destinationGivenBefore(given), false, "Cashfree's own details: nothing to say");
+  assert.equal(
+    destinationGivenBefore({ ...given, provider: "razorpay" }),
+    true,
+    "an earlier provider's details: give them again",
+  );
+  assert.equal(destinationGivenBefore({ ...given, provider: undefined }), false, "none named");
+  assert.equal(
+    destinationGivenBefore({ ...given, provider: "razorpay", ready: false }),
+    false,
+    "not ready: no such line",
+  );
+  for (const lang of LANGS)
+    assert.ok(DICTS[lang]["aiaic.dest.given_before"], `${lang}: words to give them again`);
+  const card = sourceOf("FromAiaicCard.tsx");
+  assert.ok(
+    card.includes("<RemoveDestination provider={dest.provider} />"),
+    "the remove press names her destination's provider",
+  );
+  assert.ok(
+    card.includes("destinationGivenBefore(dest)"),
+    "an earlier provider's details are asked again",
+  );
+});
+
+test("A48 each state of her money's send through Cashfree is said in plain words; only `processed` says it reached her bank", () => {
+  // AIAIC's real answer (record_trip_and_payout_answers.py, Cashfree stood in for): her send on its way. Each other state
+  // of Cashfree's as AIAIC maps it (its design, C8: RECEIVED and QUEUED queued; PENDING, APPROVAL_PENDING and
+  // VALIDATION_PENDING pending; ACKNOWLEDGED processing; SUCCESS processed; FAILED failed; REJECTED and MANUALLY_REJECTED
+  // rejected; REVERSED reversed) is DERIVED in memory from it, never written to a file
+  const order = mineOf("collect_mine_processing").orders[0] as AiaicOrder & {
+    from_aiaic: FromAiaic;
+  };
+  const sending = order.from_aiaic.sending as NonNullable<FromAiaic["sending"]>;
+  assert.equal(sending.rail, "cashfree", "AIAIC's send goes through Cashfree");
+  const rs = rupees(sending.amount_inr);
+  const STATES = [
+    "requesting",
+    "queued",
+    "pending",
+    "processing",
+    "processed",
+    "failed",
+    "rejected",
+    "reversed",
+    "recorded",
+    "no_answer",
+  ];
+  for (const status of STATES) {
+    const said = sendingSaid({ ...sending, status });
+    assert.equal(said, status, `${status} is said as itself`);
+    for (const lang of LANGS) {
+      const key = `aiaic.money.status.${status}`;
+      assert.ok(DICTS[lang][key], `${lang} has words for ${status}`);
+      const line = wordsIn(lang)(key, { rs });
+      assert.ok(!HOLE.test(line) && line.includes(rs), `${lang} ${status}: "${line}"`);
+      assert.ok(!line.includes("Razorpay"), `${lang} ${status}: "${line}"`);
+      if (lang !== "en")
+        for (const w of line.match(/[A-Za-z]+/g) ?? [])
+          assert.ok(LATIN_ALLOWED.has(w), `${lang} ${status}: English word "${w}" in "${line}"`);
+    }
+    const en = wordsIn("en")(`aiaic.money.status.${status}`, { rs });
+    assert.equal(en.includes("reached your bank"), status === "processed", `en ${status}: "${en}"`);
+  }
+  // what waits says it has not reached her; what ended is on AIAIC's team's list (AIAIC holds it for its team to send)
+  for (const status of ["queued", "pending"])
+    assert.ok(
+      wordsIn("en")(`aiaic.money.status.${status}`, { rs }).includes("has not reached you yet"),
+      `${status}: not reached yet`,
+    );
+  for (const status of ["failed", "rejected", "reversed"])
+    assert.ok(
+      wordsIn("en")(`aiaic.money.status.${status}`, { rs }).includes("AIAIC team's list"),
+      `${status}: on the team's list`,
+    );
+  // her notices of the same send (AIAIC's real notices), each in its own words, and none while Cashfree still holds her
+  // money: AIAIC tells her only once it has left its account (its notices.py PAID_TOLD, never `queued` or `pending`,
+  // narrowed after its audit's A-4 of 4 Nov 2026), though this very send was queued on its way (collect_mine_queued)
+  type Row = { kind: string; body: Record<string, unknown> };
+  const rows = answer<{ notifications: Row[] }>("notices_money_processed").notifications.filter(
+    (n) => n.kind === "trade_farmer_paid",
+  );
+  const statuses = rows.map((r) => String(r.body["status"]));
+  for (const status of ["processing", "processed"])
+    assert.ok(
+      statuses.includes(status),
+      `the recording holds a ${status} notice: ${statuses.join(", ")}`,
+    );
+  const queued = mineOf("collect_mine_queued").orders.find(
+    (o) => (o as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending?.status === "queued",
+  );
+  assert.ok(queued, "AIAIC recorded this send while Cashfree held it queued");
+  assert.ok(
+    rows.every((r) => r.body["order_id"] === queued.order_id),
+    "the notices are of that same send",
+  );
+  for (const status of ["queued", "pending"])
+    assert.ok(
+      !statuses.includes(status),
+      `no ${status} notice: her money had not left AIAIC's account (${statuses.join(", ")})`,
+    );
+  for (const r of rows) {
+    assert.equal(r.body["rail"], "cashfree", "the notice's send went through Cashfree");
+    for (const lang of LANGS) {
+      const line = moneyNoticeLine(wordsIn(lang), {
+        orderId: String(r.body["order_id"]),
+        crop: "onion",
+        status: String(r.body["status"]),
+        amountInr: Number(r.body["amount_inr"]),
+        utr: null,
+        testMode: true,
+      });
+      assert.ok(
+        !line.includes(DICTS[lang]["aiaic.money.status.other"] ?? "?") && !HOLE.test(line),
+        `${lang} ${String(r.body["status"])}: "${line}"`,
+      );
+    }
+  }
+});
+
+test("A49 her details' refusals on AIAIC's Cashfree branch are worded in en, mr and hi; RazorpayX's codes only as an AIAIC not yet switched answers them", () => {
+  // the codes POST /farmer/trade/payout-destination answers on AIAIC's Cashfree branch (its trade/farmer_payout.py
+  // `details`, `_destination_refusal`, `claim_destination`, `finish_destination`, and its route's own)
+  const CODES = [
+    "account_name_letters_only",
+    "upi_id_not_valid",
+    "ifsc_not_valid",
+    "account_number_not_valid",
+    "destination_kind_not_valid",
+    "unknown_notice_version",
+    "payout_consent_required",
+    "consent_withdrawn",
+    "cashfree_payouts_not_configured",
+    "cashfree_live_not_approved",
+    "test_keys_rehearsal_farmers_only",
+    "live_keys_no_rehearsal",
+    "destination_being_made",
+    "destination_exists",
+    "destination_ended_while_asked",
+    "cashfree_ip_not_allowlisted",
+    "cashfree_details_already_registered",
+    "cashfree_refused",
+    "cashfree_no_answer",
+    "answer_not_kept",
+    "no_destination",
+  ];
+  for (const code of CODES)
+    for (const lang of LANGS)
+      assert.ok(DICTS[lang][`aiaic.refused.${code}`], `${lang} has no words for ${code}`);
+  for (const lang of LANGS)
+    assert.deepEqual(
+      Object.keys(DICTS[lang])
+        .filter((k) => k.startsWith("aiaic.refused.razorpayx_"))
+        .sort(),
+      [...OLD_RAZORPAYX_KEYS].sort(),
+      `${lang}: RazorpayX's codes only as an AIAIC not yet switched answers them (AN-5)`,
+    );
+  // a bank account's name, by Cashfree's rule as AIAIC checks it: letters and single spaces, 2 to 100, a letter at each end
+  const NAMES: [string, boolean][] = [
+    ["Recording Farmer", true],
+    ["Ram  Kumar ", true],
+    ["R", false],
+    ["R. Kumar", false],
+    ["Ram1", false],
+    ["राम कुमार", false],
+    ["A".repeat(100), true],
+    ["A".repeat(101), false],
+  ];
+  for (const [name, ok] of NAMES) assert.equal(destinationNameOk(name), ok, `"${name}"`);
+  const card = sourceOf("FromAiaicCard.tsx");
+  assert.ok(card.includes('t("aiaic.dest.name_rule")'), "the rule is said beside the name box");
+  assert.ok(
+    !card.includes("destinationNameOk("),
+    "the rule never locks Save: a name that breaks it is refused after the distress scan (AN-1: A52)",
+  );
+  for (const lang of LANGS)
+    assert.ok(DICTS[lang]["aiaic.dest.name_rule"], `${lang} says the name's rule`);
+});
+
+test("A50 Razorpay Route's card shows only where AIAIC wires Route; AIAIC's Cashfree answers say it does not", () => {
+  const cashfree = mineOf("collect_mine_paid");
+  assert.equal(
+    cashfree.payout_account?.wired,
+    false,
+    "AIAIC's Cashfree branch: Route is not wired",
+  );
+  assert.equal(cashfree.payout_notice, undefined, "and it sends no Route notice");
+  assert.equal(routeCardShown(cashfree.payout_account), false, "no Route card");
+  // recorded with Razorpay named in-process (AIAIC's trade recorder): Route wired, its card as before
+  assert.equal(routeCardShown(mineOf("payout_mine_settled").payout_account), true, "Route wired");
+  assert.equal(routeCardShown(undefined), true, "an AIAIC that does not say: as before");
+  assert.ok(
+    sourceOf("AiaicPayments.tsx").includes("routeCardShown(data.mine.payout_account)"),
+    "the Payments page shows Route's card by routeCardShown",
+  );
+  // nothing new leaves this server but the provider's name and whether Route is wired
+  const DEST = ["kind", "hint", "status", "ready", "provider"];
+  const PAYOUT = [
+    "offered",
+    "why_not_offered",
+    "test_mode",
+    "test_values_only",
+    "say",
+    "can_create",
+    "can_withdraw",
+    "wired",
+    "account",
+  ];
+  for (const name of MINE_FIXTURES) {
+    const mine = mineOf(name) as AiaicMine & { x_destination?: XDestination | null };
+    const d = Object.keys(mine.x_destination ?? {});
+    assert.ok(
+      d.every((k) => DEST.includes(k)),
+      `${name}: x_destination ${d.join(",")}`,
+    );
+    const p = Object.keys(mine.payout_account ?? {});
+    assert.ok(
+      p.every((k) => PAYOUT.includes(k)),
+      `${name}: payout_account ${p.join(",")}`,
+    );
+  }
+});
+
+test("A51 the policies name Cashfree as AIAIC's payment processor and its refund time as AIAIC's own page states it; RazorpayX nowhere", () => {
+  const page = (name: string) =>
+    fs.readFileSync(path.join(APP, "src", "content", "policies", `${name}.md`), "utf-8");
+  for (const name of ["about", "contact", "pricing", "privacy", "refund", "terms"]) {
+    const text = page(name);
+    assert.ok(!/razorpayx/i.test(text), `${name} names RazorpayX`);
+    // Razorpay only as Razorpay Route's own form (shown only where AIAIC uses Route): never as AIAIC's processor
+    for (const line of text.split(/\r?\n/))
+      if (line.includes("Razorpay"))
+        assert.ok(
+          line.includes("Razorpay Route"),
+          `${name}: Razorpay named outside Route: "${line}"`,
+        );
+  }
+  for (const name of ["pricing", "privacy", "refund"])
+    assert.ok(page(name).includes("Cashfree"), `${name} names Cashfree`);
+  // AIAIC's own refund page (its Cashfree branch): "Cashfree states that a refund can take 7 to 10 business days"
+  assert.ok(page("refund").includes("7 to 10 business days"), "Cashfree's own refund time");
+  assert.ok(!/5 to 7/.test(page("refund")), "Razorpay's earlier refund time is gone");
+  assert.ok(
+    page("pricing").includes("Cashfree Payouts"),
+    "AIAIC pays her through Cashfree Payouts",
+  );
+  // only `- ` lists are read by the pages (policy-text.ts): no numbered line is left to run into a paragraph
+  for (const name of ["pricing", "privacy", "refund"])
+    assert.ok(!/^\d+\. /m.test(page(name)), `${name}: a numbered list the page cannot draw`);
+  // AIAIC's public pricing on its Cashfree branch (`payouts.public_pricing`): it names its provider and its model
+  const cashfree = pricingOf({
+    currency: "INR",
+    commission: { set: true, valid: false, bps: null, percent: null, payer: null },
+    payment_fee: { set: true, paid_by: "buyer", parts: null },
+    provider: "cashfree",
+    model: "collect_then_pay",
+    how: {},
+    example: null,
+  });
+  assert.deepEqual(
+    [cashfree?.provider, cashfree?.model],
+    ["cashfree", "collect_then_pay"],
+    "AIAIC's provider and model are read",
+  );
+  const collecting = commissionSentence({
+    status: "read",
+    pricing: cashfree as NonNullable<typeof cashfree>,
+  });
+  assert.ok(
+    collecting.endsWith("makes no payment link.") && !collecting.includes("share"),
+    `collect-then-pay, no Route share: "${collecting}"`,
+  );
+  const older = pricingOf({ commission: { set: true, valid: false }, payment_fee: { set: true } });
+  assert.deepEqual(
+    [older?.provider, older?.model],
+    [null, null],
+    "an AIAIC that does not say: none",
+  );
+  assert.ok(
+    commissionSentence({ status: "read", pricing: older as NonNullable<typeof older> }).includes(
+      "carries a farmer's share",
+    ),
+    "an older AIAIC's sentence stays as it was",
+  );
+});
+
+// ------------- A and B, the audit of 4 Nov 2026 on the Cashfree switch (AN-1 to AN-7): each fix checked by what she reads
+
+/** The helplines of AIAIC's real crisis answer (safety_check_crisis.json), as her crisis card says them. */
+const HELPLINES = ["14416", "1800-891-4416", "1800-180-1551"];
+
+test("A52 AN-1 her words in a payout form reach the distress scan before any refusal of this phone: Save opens on any words, a crisis gets the helplines, her own script gets the letters refusal only after the scan", async () => {
+  // AIAIC's real crisis answer (POST /safety/check, recorded by AIAIC's recorder): its middleware answers every route in
+  // this one shape. The scan is the real `scanFirst` server function (`askScanFirst`), with fetch answered here:
+  // nothing leaves.
+  const crisisAnswer = answer<Record<string, unknown>>("safety_check_crisis");
+  const realFetch = globalThis.fetch;
+  const log: string[] = [];
+  let scanAnswer: Record<string, unknown> = crisisAnswer;
+  globalThis.fetch = (async (url: string | URL | Request) => {
+    log.push(`asked ${new URL(String(url)).pathname}`);
+    return new Response(JSON.stringify(scanAnswer), { status: 200 });
+  }) as typeof fetch;
+  // the scan as the page asks it: the real `scanFirst` server function (AIAIC's crisis card, or a clean read)
+  const ask = askScanFirst;
+  const seen: { card: AiaicProblem | null } = { card: null };
+  const said = {
+    crisis: (crisis: AiaicProblem["crisis"]) => {
+      log.push("crisis card");
+      seen.card = problem("crisis", { crisis });
+    },
+    say: (code: string) => log.push(`refused ${code}`),
+  };
+  // one press of Save on her UPI ID or bank account form, as the card wires it (`pressDestination`)
+  const give = async () => {
+    log.push("sent to AIAIC");
+  };
+  const press = (typed: DestinationTyped, lang: (typeof LANGS)[number]) =>
+    pressDestination(typed, {
+      refuse: (words, refusal) => scanThenRefuse(ask, words, lang, refusal, said),
+      readFirst: (words) => scanThen(ask, words, lang, { crisis: said.crisis, then: give }),
+      give,
+    });
+  const helplinesShown = (what: string) => {
+    const html = inApp(createElement(ProblemCard, { problem: seen.card ?? problem("none") }));
+    assert.ok(html.includes("data-crisis"), `${what}: the crisis card`);
+    for (const phone of HELPLINES) assert.ok(html.includes(phone), `${what}: helpline ${phone}`);
+    assert.ok(
+      !html.includes(enSaid("aiaic.refused.account_name_letters_only")),
+      `${what}: no refusal`,
+    );
+  };
+  try {
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_MR, "mr"],
+    ] as const)
+      for (const boxes of [TEST_BANK, { account: "", ifsc: "" }])
+        for (const agreed of [true, false]) {
+          const typed: DestinationTyped = {
+            kind: "bank_account",
+            upi: "",
+            name: words,
+            ...boxes,
+            agreed,
+            notice: true,
+          };
+          const what = `"${words}", account and IFSC ${boxes.account ? "filled" : "empty"}, ticked ${agreed}`;
+          assert.equal(destinationSaveOpen(typed), true, `${what}: Save can be pressed`);
+          assert.equal(
+            destinationRefusal(typed),
+            "account_name_letters_only",
+            `${what}: refused here`,
+          );
+          log.length = 0;
+          seen.card = null;
+          await press(typed, lang);
+          assert.deepEqual(
+            log,
+            ["asked /safety/check", "crisis card"],
+            `${what}: the scan first, then the crisis card, and no refusal`,
+          );
+          helplinesShown(what);
+        }
+    // a name in her own script that is not a crisis: the letters refusal, said only after the scan read it
+    scanAnswer = { distress: false };
+    const own: DestinationTyped = {
+      kind: "bank_account",
+      upi: "",
+      name: "सुनीता पाटील",
+      ...TEST_BANK,
+      agreed: true,
+      notice: true,
+    };
+    assert.equal(destinationSaveOpen(own), true, "her own script: Save can be pressed");
+    log.length = 0;
+    await press(own, "mr");
+    assert.deepEqual(log, ["asked /safety/check", "refused account_name_letters_only"]);
+    for (const lang of LANGS) {
+      const refusal = DICTS[lang]["aiaic.refused.account_name_letters_only"] ?? "";
+      assert.ok(
+        refusal && refusal !== DICTS[lang]["aiaic.dest.name_rule"],
+        `${lang}: its own words`,
+      );
+    }
+    // the same words in the UPI ID box: read first too (the box's rule is its @)
+    scanAnswer = crisisAnswer;
+    const upi: DestinationTyped = { ...own, kind: "upi_id", upi: CRISIS_HI };
+    assert.equal(destinationWords(upi), CRISIS_HI);
+    assert.equal(destinationSaveOpen(upi), true, "the UPI ID box: Save can be pressed");
+    log.length = 0;
+    await press(upi, "hi");
+    assert.deepEqual(log, ["asked /safety/check", "crisis card"], "the UPI ID box: read first");
+    // nothing typed: nothing to read, and the form is not complete
+    assert.equal(destinationSaveOpen({ ...own, name: "   " }), false, "no words: Save waits");
+    // a form this phone would not refuse goes to AIAIC, whose middleware reads every body first (B21)
+    const complete: DestinationTyped = { ...own, name: "Recording Farmer" };
+    assert.equal(destinationRefusal(complete), null);
+    log.length = 0;
+    await press(complete, "en");
+    assert.deepEqual(
+      log,
+      ["sent to AIAIC"],
+      "no scan of this phone's: AIAIC's middleware reads it",
+    );
+    // every other rule of this phone is a refusal said after the scan, in AIAIC's own codes (worded in en, mr and hi)
+    const refusals: [DestinationTyped, string][] = [
+      [{ ...complete, name: "Ram" }, "account_name_not_valid"],
+      [{ ...complete, account: "1234" }, "account_number_not_valid"],
+      [{ ...complete, ifsc: "YESB000026" }, "ifsc_not_valid"],
+      [{ ...complete, agreed: false }, "payout_consent_required"],
+      [{ ...complete, notice: false }, "payout_consent_required"],
+      [{ ...complete, kind: "upi_id", upi: "no-at-sign" }, "upi_id_not_valid"],
+    ];
+    for (const [typed, code] of refusals) {
+      assert.equal(destinationRefusal(typed), code, code);
+      for (const lang of LANGS) assert.ok(DICTS[lang][`aiaic.refused.${code}`], `${lang} ${code}`);
+    }
+    // ROUTE's form (its card shows only where AIAIC wires Route): the name on her PAN, read first in the same order
+    const route = {
+      destination: "bank_account" as const,
+      pan: "",
+      name_on_pan: CRISIS_HI,
+      account_number: "",
+      ifsc: "",
+    };
+    const none = { agreed: false, readNotice: false, notice: true };
+    assert.equal(
+      payoutSaveOpen(route, none),
+      true,
+      "Route: Save opens on her words, ticked or not",
+    );
+    assert.equal(payoutFormRefusal(route, none), "pan", "Route: refused here");
+    log.length = 0;
+    await scanThenRefuse(ask, payoutWords(route), "hi", payoutFormRefusal(route, none) ?? "", said);
+    assert.deepEqual(log, ["asked /safety/check", "crisis card"], "Route: the scan first");
+    assert.equal(
+      payoutSaveOpen({ ...route, name_on_pan: " " }, none),
+      false,
+      "Route: nothing typed",
+    );
+    const given = { agreed: true, readNotice: true, notice: true };
+    assert.equal(
+      payoutSaveOpen({ ...route, name_on_pan: "" }, given),
+      true,
+      "Route: ticked, as before",
+    );
+    const good = {
+      destination: "bank_account" as const,
+      pan: "AAAPZ4321K",
+      name_on_pan: "Practice Payee Testname",
+      account_number: "000123456789",
+      ifsc: "RECT0000001",
+    };
+    assert.equal(payoutFormRefusal(good, given), null, "Route: complete, to AIAIC");
+    assert.equal(
+      payoutFormRefusal(good, { ...given, readNotice: false }),
+      "payout_consent_required",
+    );
+    assert.equal(
+      payoutWords({ ...good, destination: "upi_id", upi_id: CRISIS_MR }),
+      `Practice Payee Testname. ${CRISIS_MR}`,
+      "Route: a UPI ID typed as words is read too",
+    );
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  // the card: the rule a plain hint under the box, always there; Save by her words; the press through the scan
+  const notice = (mineOf("collect_mine_paid") as { x_notice?: XNotice | null }).x_notice;
+  assert.ok(notice, "the recording holds AIAIC's notice");
+  for (const lang of LANGS) {
+    const html = inApp(
+      createElement(DestinationForm, { dest: null, notice, largeAmount: true }),
+      lang,
+    );
+    const hint = html.match(/<span id="aiaic-dest-name-rule" class="([^"]*)"[^>]*>([^<]*)</);
+    assert.ok(hint, `${lang}: the hint under the name box`);
+    assert.equal(
+      hint[2],
+      escHtml(DICTS[lang]["aiaic.dest.name_rule"] ?? "?"),
+      `${lang}: its words`,
+    );
+    assert.ok(
+      hint[1].includes("text-muted-foreground") && !hint[1].includes("destructive"),
+      `${lang}: plain, never red`,
+    );
+    assert.ok(!html.includes("aria-invalid"), `${lang}: no box marked wrong before a press`);
+  }
+  assert.ok(
+    DICTS.en["aiaic.dest.name_rule"]?.includes("English letters (A-Z)") &&
+      DICTS.en["aiaic.dest.name_rule"]?.includes("passbook"),
+    "the hint names the letters and the passbook",
+  );
+  const card = sourceOf("FromAiaicCard.tsx");
+  assert.ok(
+    card.includes("useScanBeforeRefusing()"),
+    "the card asks the registration form's own scan",
+  );
+  assert.ok(card.includes("const ready = destinationSaveOpen(typed);"), "Save opens on her words");
+  assert.ok(
+    /pressDestination\(typed, \{\s*refuse: \(words, refusal\) =>\s*scan\.refuse\(words, activeLang, refusal,/.test(
+      card,
+    ),
+    "a press this phone would refuse goes through the scan",
+  );
+  // the scan's crisis card is what the card shows first (`problemShown`; its state and wiring: A58)
+  assert.ok(card.includes("const shown = problemShown(scan, problem);"), "the scan's crisis card");
+  const payments = sourceOf("AiaicPayments.tsx");
+  // Route's press is `pressPayout`, in the same order (the scan before anything is said or sent: A63 runs it)
+  assert.ok(
+    /pressPayout\(details, consent, \{\s*refuse: \(words, refusal\) =>\s*scan\.refuse\(words, scanLang, refusal,/.test(
+      payments,
+    ),
+    "Route: the scan before anything is said or sent",
+  );
+  assert.ok(
+    payments.includes("!payoutSaveOpen(details, consent)"),
+    "Route: Save opens on her words",
+  );
+});
+
+/** Her money's card as the order page gives it: AIAIC's facts of her order and of her records (`AiaicOrderDetail`). */
+function moneyCardOf(mine: AiaicMine, order: AiaicOrder) {
+  const her = mine as AiaicMine & {
+    x_destination?: XDestination | null;
+    collect_then_pay?: boolean;
+    x_notice?: XNotice | null;
+  };
+  return createElement(FromAiaicCard, {
+    money: (order as { from_aiaic?: FromAiaic | null }).from_aiaic,
+    dest: her.x_destination,
+    collectThenPay: her.collect_then_pay === true,
+    notice: her.x_notice,
+  });
+}
+
+test("A53 AN-3 her money's send in her own language and on her card: in Marathi and Hindi only `processed` says it reached her bank, the card ticks it only then, and a sale AIAIC collects asks where it goes", () => {
+  // AIAIC's real answer (record_trip_and_payout_answers.py, Cashfree stood in for): her send on its way. Each other
+  // state is said through the same dictionaries (the states are AIAIC's: A48)
+  const sending = (mineOf("collect_mine_processing").orders[0] as { from_aiaic?: FromAiaic | null })
+    .from_aiaic?.sending;
+  assert.ok(sending, "the recording holds AIAIC's send");
+  const rs = rupees(sending.amount_inr);
+  const STATES = [
+    "requesting",
+    "queued",
+    "pending",
+    "processing",
+    "processed",
+    "failed",
+    "rejected",
+    "reversed",
+    "cancelled",
+    "recorded",
+    "no_answer",
+  ];
+  // the words each language says them with, pinned as its dictionary writes them
+  const REACHED = {
+    en: "reached your bank",
+    mr: "तुमच्या बँकेत पोहोचले",
+    hi: "आपके बैंक में पहुँचे",
+  };
+  const NOT_YET = {
+    en: "it has not reached you yet",
+    mr: "ते अजून तुमच्यापर्यंत पोहोचलेले नाहीत",
+    hi: "ये अभी आप तक नहीं पहुँचे हैं",
+  };
+  for (const lang of LANGS) {
+    const line = (status: string) => wordsIn(lang)(`aiaic.money.status.${status}`, { rs });
+    const processed = line("processed");
+    assert.ok(processed.includes(REACHED[lang]), `${lang} processed: "${processed}"`);
+    for (const status of STATES.filter((s) => s !== "processed")) {
+      assert.notEqual(line(status), processed, `${lang} ${status} is said as processed`);
+      assert.ok(!line(status).includes(REACHED[lang]), `${lang} ${status}: "${line(status)}"`);
+    }
+    for (const status of ["queued", "pending"])
+      assert.ok(line(status).includes(NOT_YET[lang]), `${lang} ${status}: "${line(status)}"`);
+  }
+  // her sale's card (rendered as the order page gives it): "It reaches your bank" ticked only on processed
+  const cardRupees = (n: number | null | undefined) =>
+    `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  for (const [name, reached] of [
+    ["collect_mine_processing", false],
+    ["collect_mine_processed", true],
+  ] as const) {
+    const mine = mineOf(name);
+    const order = mine.orders[0] as AiaicOrder;
+    const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic;
+    assert.equal(
+      fa?.sending?.status,
+      reached ? "processed" : "processing",
+      `${name}: AIAIC's state`,
+    );
+    for (const lang of LANGS) {
+      const html = inApp(moneyCardOf(mine, order), lang);
+      const state = (step: string) =>
+        html.match(new RegExp(`data-step="${step}" data-state="(\\w+)"`))?.[1];
+      assert.equal(state("buyer_paid"), "done", `${name} ${lang}: the buyer paid`);
+      assert.equal(state("sending"), "done", `${name} ${lang}: AIAIC sends it`);
+      assert.equal(state("reached"), reached ? "done" : "todo", `${name} ${lang}: reached`);
+      const said = wordsIn(lang)(`aiaic.money.status.${fa?.sending?.status}`, {
+        rs: cardRupees(fa?.sending?.amount_inr),
+      });
+      assert.ok(html.includes(escHtml(said)), `${name} ${lang}: the send's own line "${said}"`);
+    }
+  }
+  // a sale AIAIC collects, then pays her, with no link that fixed her money yet and no destination of hers: AIAIC's
+  // real answer (record_buyer_portal_answers.py); her card shows and asks where her money goes
+  const more = mineOf("buyer_farmer_mine_more_time") as AiaicMine & {
+    collect_then_pay?: boolean;
+    x_destination?: XDestination | null;
+  };
+  assert.equal(more.collect_then_pay, true, "AIAIC collects, then pays her (as it answered)");
+  assert.equal(more.x_destination ?? null, null, "no destination of hers yet");
+  const unfixed = more.orders.find((o) => {
+    const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
+    return fa && !fa.fixed_by_link && o.order_state !== "cancelled";
+  });
+  assert.ok(unfixed, "the recording holds a sale no link fixed yet");
+  assert.equal(needsDestination(unfixed, more), true, "her one thing to do: say where it goes");
+  const html = inApp(moneyCardOf(more, unfixed));
+  assert.ok(html.includes('data-testid="aiaic-from-aiaic"'), "her money's card shows");
+  assert.ok(html.includes('data-testid="aiaic-destination-form"'), "with the form for it");
+});
+
+test("A54 AN-4 no screen of her sale names Razorpay by its own words: no string or JSX text of the AIAIC components says it, any case, but AIAIC's codes listed here", () => {
+  // AIAIC's code strings a component may hold that are never shown as words, each with why. None is held today: Route's
+  // words name Razorpay only from the dictionaries (ROUTE_ONLY, A47), never from a component.
+  const ALLOWED: Record<string, string> = {};
+  for (const [code, why] of Object.entries(ALLOWED))
+    assert.ok(/^[a-z_]+$/.test(code) && why.trim().length > 20, `${code}: a code, with its reason`);
+  const files: string[] = [];
+  const walk = (dir: string): void => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true }))
+      if (e.isDirectory()) walk(path.join(dir, e.name));
+      else if (e.name.endsWith(".tsx")) files.push(path.join(dir, e.name));
+  };
+  walk(path.join(APP, "src", "components", "farm", "aiaic"));
+  assert.ok(files.length >= 30, `only ${files.length} components`);
+  let read = 0;
+  const named: string[] = [];
+  for (const file of files) {
+    // the compiler's own reading: comments are no part of it; every string, template part and JSX text is
+    const source = ts.createSourceFile(
+      file,
+      fs.readFileSync(file, "utf-8"),
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX,
+    );
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isStringLiteralLike(node) ||
+        ts.isTemplateHead(node) ||
+        ts.isTemplateMiddle(node) ||
+        ts.isTemplateTail(node) ||
+        ts.isJsxText(node)
+      ) {
+        read += 1;
+        const text = node.text;
+        if (/razorpay/i.test(text) && !Object.hasOwn(ALLOWED, text)) {
+          const line = source.getLineAndCharacterOfPosition(node.getStart()).line + 1;
+          named.push(`${path.relative(APP, file)}:${line} ${JSON.stringify(text.trim())}`);
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+  }
+  assert.ok(read > 3000, `only ${read} strings read`);
+  assert.deepEqual(named, [], "a component names Razorpay in its own words");
+});
+
+test("A55 AN-5 an AIAIC not yet on its Cashfree release: each RazorpayX refusal it answers is said in en, mr and hi by what it means for her, with no raw code and no provider named", () => {
+  // the codes AIAIC's main branch answers her form with: its trade/razorpayx.py `refusal()` (keys_incomplete,
+  // not_configured, keys_other_mode, live_not_approved), returned by trade/farmer_payout.py `_destination_refusal`, and
+  // that file's own (refused, no_answer, ip_not_allowlisted), as read at origin/main 7f5d04f (the re-check, RC-4)
+  assert.equal(OLD_RAZORPAYX_KEYS.length, 7);
+  for (const code of ["keys_incomplete", "keys_other_mode"])
+    for (const lang of LANGS)
+      assert.equal(
+        DICTS[lang][`aiaic.refused.razorpayx_${code}`],
+        DICTS[lang]["aiaic.refused.razorpayx_not_configured"],
+        `${lang} ${code}: said as AIAIC's other configuration refusals are`,
+      );
+  for (const key of OLD_RAZORPAYX_KEYS) {
+    const code = key.slice("aiaic.refused.".length);
+    for (const lang of LANGS) {
+      // the words her screen says for AIAIC's refusal (`ProblemCard`, as her form shows it)
+      const html = inApp(createElement(ProblemCard, { problem: problem(code) }), lang);
+      const said = html.match(/<p class="[^"]*">([^<]*)<\/p>/)?.[1] ?? "";
+      assert.equal(said, escHtml(DICTS[lang][key] ?? "?"), `${lang} ${code}: its own line`);
+      assert.ok(!said.includes(code) && !HOLE.test(said), `${lang} ${code}: "${said}"`);
+      assert.ok(!/razorpay|cashfree/i.test(said), `${lang} ${code}: names a provider: "${said}"`);
+      assert.notEqual(
+        said,
+        escHtml(wordsIn(lang)("aiaic.problem.other", { code })),
+        `${lang} ${code}: never the line for a code it has no words for`,
+      );
+    }
+  }
+  // the source marks them for removal once AIAIC's Cashfree release is live
+  const dict = fs.readFileSync(path.join(APP, "src", "lib", "i18n-aiaic.ts"), "utf-8");
+  assert.equal(
+    dict.split("REMOVE once AIAIC's Cashfree release is live").length - 1,
+    3,
+    "marked for removal in each language",
+  );
+});
+
+test("A56 AN-6 a group sale asks her to give her details again when they went to an earlier provider, whose details AIAIC's send through Cashfree refuses", () => {
+  // AIAIC's real answer: her group order, AIAIC collects then pays her, no destination of hers yet
+  const mine = mineOf("connected_farmer_mine_journey");
+  const order = mine.orders.find((o) => o.pool);
+  assert.ok(order?.pool, "her group order");
+  const offer = findOffer(mine, order.offer_id)?.offer ?? null;
+  // her destination as AIAIC's Cashfree branch answers it (collect_mine_processing): given to Cashfree; and DERIVED in
+  // memory, only its `provider` changed, as AIAIC says one given to the earlier provider
+  const cashfree = (mineOf("collect_mine_processing") as { x_destination?: XDestination | null })
+    .x_destination;
+  assert.ok(cashfree?.ready && cashfree.provider === "cashfree", "AIAIC's Cashfree destination");
+  const earlier: XDestination = { ...cashfree, provider: "razorpay" };
+  const withDest = (dest: XDestination | null) => ({ ...mine, x_destination: dest }) as AiaicMine;
+  const page = (dest: XDestination | null) =>
+    inApp(
+      createElement(GroupSaleSteps, {
+        order,
+        data: { mine: withDest(dest), cropNames: {}, districtNames: {} },
+        group: groupView(order.pool as AiaicPool, offer, order),
+        crop: "Onion",
+        buyer: "A buyer",
+        prices: {
+          pricePerQ: order.price_per_q,
+          amount: order.amount_inr,
+          ask: null,
+          mandi: null,
+          reading: false,
+        },
+      }),
+    );
+  const asked = 'data-testid="aiaic-gs-give-destination"';
+  assert.equal(needsDestination(order, withDest(null)), true, "no destination: asked");
+  assert.ok(page(null).includes(asked), "no destination: the page asks");
+  assert.equal(destinationGivenBefore(earlier), true);
+  assert.equal(needsDestination(order, withDest(earlier)), true, "an earlier provider's: asked");
+  assert.ok(page(earlier).includes(asked), "an earlier provider's: the page asks again");
+  assert.equal(needsDestination(order, withDest(cashfree)), false, "Cashfree's own: not asked");
+  assert.ok(!page(cashfree).includes(asked), "Cashfree's own: the page does not ask");
+  assert.equal(
+    needsDestination({ ...order, order_state: "cancelled" }, withDest(earlier)),
+    false,
+    "never on a sale called off",
+  );
+});
+
+test("A57 AN-7 each sale's card on the Payments page says AIAIC's send of her money in its own state, as her group sale's page does", () => {
+  const data = (mine: AiaicMine) => ({ mine, cropNames: {}, districtNames: {} });
+  const shown = 'data-testid="aiaic-payments-send"';
+  // AIAIC's real answers (Cashfree stood in for): her send on its way, and reached her bank
+  for (const [name, status] of [
+    ["collect_mine_processing", "processing"],
+    ["collect_mine_processed", "processed"],
+  ] as const) {
+    const mine = mineOf(name);
+    const order = mine.orders[0] as AiaicOrder;
+    const sending = (order as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending;
+    assert.equal(sending?.status, status, `${name}: AIAIC's state`);
+    assert.equal(order.money?.say ?? null, null, `${name}: AIAIC's money sentence is empty here`);
+    for (const lang of LANGS) {
+      const line = sendingLine(wordsIn(lang), order);
+      assert.equal(
+        line,
+        wordsIn(lang)(`aiaic.money.status.${status}`, { rs: rupees(sending?.amount_inr) }),
+        `${name} ${lang}: the send's own state`,
+      );
+      assert.equal(line, groupPaidWords(wordsIn(lang), order), "as her group sale's page says it");
+      const html = inApp(createElement(EachSale, { data: data(mine) }), lang);
+      const said = html.match(new RegExp(`${shown}>([^<]*)<`))?.[1];
+      assert.equal(said, escHtml(line ?? "?"), `${name} ${lang}: on its card`);
+    }
+  }
+  // the buyer paid and AIAIC sends nothing yet: no such line; a state with no words: none, never a key
+  assert.ok(
+    !inApp(createElement(EachSale, { data: data(mineOf("collect_mine_paid")) })).includes(shown),
+  );
+  const moving = mineOf("collect_mine_processing").orders[0] as AiaicOrder & {
+    from_aiaic: FromAiaic;
+  };
+  const unheard = {
+    ...moving,
+    from_aiaic: {
+      ...moving.from_aiaic,
+      sending: { ...moving.from_aiaic.sending, status: "a_state_not_held" },
+    },
+  } as AiaicOrder;
+  assert.equal(sendingLine(wordsIn("en"), unheard), null);
+  assert.ok(
+    sourceOf("AiaicPayments.tsx").includes("const sent = sendingLine(t, o);"),
+    "EachSale says it",
+  );
+});
+
+// ------------------------------- the re-check of 4 Nov 2026: what a payout form reads and shows, held as the form holds it
+
+/**
+ * A payout form's scan as the page holds it, with nothing leaving this machine. The scan is asked through the REAL
+ * `scanFirst` server function (aiaic-account.functions.ts: its own validator, then its own handler over this server's
+ * `scanRead`), run in this process (`askScanFirst`: one function middleware stands in for Start's RPC round trip, which
+ * only the Vite plugin builds), exactly as the shared hook's `useServerFn(scanFirst)` calls it; so the crisis outcome
+ * the reducer and the selector are handed is the real function's. Every `/safety/check` it asks goes to `fetch`, which
+ * is replaced here: answered by AIAIC's recorded crisis answer (`reply`; its middleware answers every route in this one
+ * shape), a clean read, or nothing at all (`"unreachable"`). The form's state is kept as React's `useReducer` keeps it,
+ * through the hook's own reducer (`scanReducer`), and what the hook hands the form at each render is `formScan`'s.
+ * `texts`: what each scan was asked to read; `scanningWhenAsked`: whether the form said it was asking at the moment it
+ * asked.
+ */
+function scanBench() {
+  const realFetch = globalThis.fetch;
+  const bench = {
+    reply: answer<Record<string, unknown>>("safety_check_crisis") as
+      Record<string, unknown> | "unreachable",
+    texts: [] as string[],
+    scanningWhenAsked: [] as boolean[],
+    /** what a whole press did, in order (`pressForm`): "scan" each time the scan is asked, "give" when her form goes */
+    order: [] as string[],
+    state: SCAN_START,
+  };
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    assert.equal(new URL(String(url)).pathname, "/safety/check", "only the scan is asked");
+    bench.texts.push((JSON.parse(String(init?.body)) as { text: string }).text);
+    bench.order.push("scan");
+    if (bench.reply === "unreachable") throw new TypeError("fetch failed");
+    return new Response(JSON.stringify(bench.reply), { status: 200 });
+  }) as typeof fetch;
+  // the real `scanFirst` server function (aiaic-account.functions.ts), in this process: no copy of its handler
+  const ask: AskTheScan = async (q) => {
+    bench.scanningWhenAsked.push(bench.state.scanning);
+    return askScanFirst(q);
+  };
+  const dispatch = (event: ScanEvent) => {
+    bench.state = scanReducer(bench.state, event);
+  };
+  /** What the hook hands the form at this render. */
+  const handed = (): FormScan => formScan(bench.state, dispatch, ask);
+  /** One press both payout forms make when this phone would refuse it: their own problem cleared, the scan reset, her
+   * words read first; then what the form shows (`problemShown`), rendered where it shows it. */
+  const press = async (words: string, lang: (typeof LANGS)[number], refusal: string) => {
+    const said: { problem: AiaicProblem | null } = { problem: null };
+    bench.texts.length = 0;
+    bench.scanningWhenAsked.length = 0;
+    handed().reset();
+    await handed().refuse(words, lang, refusal, (code) => {
+      said.problem = problem(code);
+    });
+    const shown = problemShown(handed(), said.problem);
+    return {
+      said: said.problem,
+      html: shown ? inApp(createElement(ProblemCard, { problem: shown }), lang) : "",
+    };
+  };
+  /** One whole press of Save as a payout form wires it (`pressDestination` or `pressPayout`, handed `refuse`, `readFirst`
+   * and `give` as the form hands them): `order` says what happened, in order (each scan asked, her form given), and her
+   * form is never sent anywhere; then what the form shows (`problemShown`), rendered. */
+  const pressForm = async (
+    lang: (typeof LANGS)[number],
+    run: (wired: PressRun) => Promise<void>,
+  ) => {
+    const said: { problem: AiaicProblem | null } = { problem: null };
+    bench.texts.length = 0;
+    bench.scanningWhenAsked.length = 0;
+    bench.order.length = 0;
+    const give = async () => {
+      bench.order.push("give");
+    };
+    handed().reset();
+    await run({
+      refuse: (words, refusal) =>
+        handed().refuse(words, lang, refusal, (code) => {
+          said.problem = problem(code);
+        }),
+      readFirst: (words) => handed().readFirst(words, lang, give),
+      give,
+    });
+    const shown = problemShown(handed(), said.problem);
+    return {
+      said: said.problem,
+      order: [...bench.order],
+      html: shown ? inApp(createElement(ProblemCard, { problem: shown }), lang) : "",
+    };
+  };
+  const restore = () => {
+    globalThis.fetch = realFetch;
+  };
+  return { bench, handed, press, pressForm, restore };
+}
+
+/** What a form shows after a crisis: AIAIC's crisis card alone, with its three helplines, and no refusal of this phone. */
+function crisisCardOnly(
+  html: string,
+  lang: (typeof LANGS)[number],
+  refusal: string,
+  what: string,
+): void {
+  assert.ok(html.includes("data-crisis"), `${what}: the crisis card`);
+  for (const phone of HELPLINES) assert.ok(html.includes(phone), `${what}: helpline ${phone}`);
+  assert.equal(html.split('role="alert"').length - 1, 1, `${what}: one card, the crisis card`);
+  // the refusal's own line, where it is said as a card (Route's box refusals are said beside the box instead)
+  const line = DICTS[lang][`aiaic.refused.${refusal}`];
+  if (line) assert.ok(!html.includes(escHtml(line)), `${what}: no refusal`);
+}
+
+test("A58 RC-1 RC2-1 the crisis card a payout form shows is its scan's own state: AIAIC's recorded crisis answer, through the real scanFirst server function, the hook's own reducer and behaviour, shows the helplines and no refusal; a clean read says the refusal; a new press clears the card", async () => {
+  const { bench, handed, press, restore } = scanBench();
+  try {
+    // what every form's scan is handed comes from the REAL server function (the re-check, RC2-1): AIAIC's recorded crisis
+    // answer as its crisis, with AIAIC's helplines; a clean read as clean; a scan that cannot be asked as not read
+    const real = await askScanFirst({ data: { text: CRISIS_HI, lang: "hi" } });
+    assert.deepEqual(
+      bench.texts,
+      [CRISIS_HI],
+      "the real function asked AIAIC's scan, once, with her words",
+    );
+    assert.equal(real.ok ? "ok" : real.code, "crisis", "the real function: a crisis");
+    assert.deepEqual(
+      !real.ok ? real.crisis?.helplines.map((h) => h.phone) : null,
+      HELPLINES,
+      "the real function: AIAIC's own helplines",
+    );
+    bench.reply = { distress: false };
+    assert.deepEqual(await askScanFirst({ data: { text: "सुनीता पाटील", lang: "mr" } }), {
+      ok: true,
+    });
+    bench.reply = "unreachable";
+    assert.deepEqual(await askScanFirst({ data: { text: CRISIS_HI, lang: "hi" } }), {
+      ok: false,
+      code: "scan_not_read",
+    });
+    // its own validator runs: more than AIAIC's scan takes is refused before anything is asked
+    bench.texts.length = 0;
+    await assert.rejects(
+      askScanFirst({ data: { text: "x".repeat(2001), lang: "en" } }),
+      "the real function's validator",
+    );
+    assert.deepEqual(bench.texts, [], "the validator refused it: nothing asked");
+    bench.reply = answer<Record<string, unknown>>("safety_check_crisis");
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_MR, "mr"],
+    ] as const) {
+      // the Cashfree form: her crisis in the name box, the account and IFSC full or empty, ticked or not
+      for (const boxes of [TEST_BANK, { account: "", ifsc: "" }])
+        for (const agreed of [true, false]) {
+          const typed: DestinationTyped = {
+            kind: "bank_account",
+            upi: "",
+            name: words,
+            ...boxes,
+            agreed,
+            notice: true,
+          };
+          const what = `${lang}, account and IFSC ${boxes.account ? "filled" : "empty"}, ticked ${agreed}`;
+          const refusal = destinationRefusal(typed);
+          assert.ok(refusal, `${what}: this phone would refuse it`);
+          const { said, html } = await press(destinationWords(typed), lang, refusal);
+          assert.deepEqual(bench.texts, [words], `${what}: her words read first, and nothing else`);
+          assert.deepEqual(
+            bench.scanningWhenAsked,
+            [true],
+            `${what}: Save waits while it is asked`,
+          );
+          const now = handed();
+          assert.equal(now.inCrisis, true, `${what}: the form's state is the crisis`);
+          assert.equal(now.scanning, false, `${what}: the scan is no longer asked`);
+          assert.deepEqual(
+            now.crisis?.helplines.map((h) => h.phone),
+            HELPLINES,
+            `${what}: AIAIC's own helplines are kept`,
+          );
+          assert.equal(said, null, `${what}: no refusal said`);
+          crisisCardOnly(html, lang, refusal, what);
+        }
+      // Route's form: the name on her PAN, nothing else typed, not ticked
+      const route = {
+        destination: "bank_account" as const,
+        pan: "",
+        name_on_pan: words,
+        account_number: "",
+        ifsc: "",
+      };
+      const refusal = payoutFormRefusal(route, { agreed: false, readNotice: false, notice: true });
+      assert.equal(refusal, "pan", `Route ${lang}: this phone would refuse it`);
+      const { said, html } = await press(payoutWords(route), lang, refusal ?? "");
+      assert.deepEqual(bench.texts, [words], `Route ${lang}: her words read first`);
+      assert.equal(said, null, `Route ${lang}: no refusal said`);
+      crisisCardOnly(html, lang, refusal ?? "", `Route ${lang}`);
+    }
+    // a clean read: the refusal in its own words, and the last press's crisis card is gone (a new press resets it)
+    assert.equal(handed().inCrisis, true, "the last press was a crisis");
+    bench.reply = { distress: false };
+    const own: DestinationTyped = {
+      kind: "bank_account",
+      upi: "",
+      name: "सुनीता पाटील",
+      ...TEST_BANK,
+      agreed: true,
+      notice: true,
+    };
+    for (const lang of LANGS) {
+      const refusal = destinationRefusal(own) ?? "";
+      const { said, html } = await press(destinationWords(own), lang, refusal);
+      assert.deepEqual(bench.texts, ["सुनीता पाटील"], `${lang}: read first`);
+      assert.equal(said?.code, "account_name_letters_only", `${lang}: then refused`);
+      assert.equal(handed().inCrisis, false, `${lang}: no crisis now`);
+      assert.ok(!html.includes("data-crisis"), `${lang}: no crisis card`);
+      assert.ok(
+        html.includes(escHtml(DICTS[lang]["aiaic.refused.account_name_letters_only"] ?? "?")),
+        `${lang}: the refusal in its own words`,
+      );
+    }
+    // a scan that cannot be asked: the refusal is still said, never a crisis card, and Save does not wait for ever
+    bench.reply = "unreachable";
+    const lost = await press(CRISIS_HI, "hi", "account_name_letters_only");
+    assert.equal(lost.said?.code, "account_name_letters_only");
+    assert.equal(handed().scanning, false);
+    assert.ok(!lost.html.includes("data-crisis"));
+    // nothing typed: nothing is asked, and the refusal is said
+    const blank = await press("   ", "en", "payout_consent_required");
+    assert.deepEqual(bench.texts, [], "nothing typed: nothing asked");
+    assert.equal(blank.said?.code, "payout_consent_required");
+  } finally {
+    restore();
+  }
+  // the reducer itself: a crisis raises the state with AIAIC's card; a reset drops it; nothing else changes it
+  const card = { answer: null, message: null, helplines: [{ name: "Tele-MANAS", phone: "14416" }] };
+  const raised = scanReducer(SCAN_START, { type: "crisis", crisis: card });
+  assert.deepEqual(raised, { inCrisis: true, crisis: card, scanning: false });
+  assert.deepEqual(scanReducer(raised, { type: "reset" }), SCAN_START);
+  assert.equal(
+    scanReducer(SCAN_START, { type: "reset" }),
+    SCAN_START,
+    "nothing to drop: the same state",
+  );
+  assert.equal(
+    scanReducer(SCAN_START, { type: "asked" }),
+    SCAN_START,
+    "not asking: the same state",
+  );
+  assert.equal(problemShown(SCAN_START, null), null);
+  assert.equal(
+    problemShown(raised, problem("pan"))?.code,
+    "crisis",
+    "the crisis card before the form's own",
+  );
+  // the hook IS these parts: the reducer's state from React, formScan's behaviour, nothing else; rendered in the app, it
+  // hands the form the scan's starting state
+  const scanSource = fs.readFileSync(path.join(APP, "src", "lib", "aiaic-scan.ts"), "utf-8");
+  const hook = scanSource.slice(scanSource.indexOf("export function useScanBeforeRefusing"));
+  assert.equal(
+    hook.replace(/\s+/g, " ").trim(),
+    "export function useScanBeforeRefusing(): FormScan { const ask = useServerFn(scanFirst); const [state, dispatch] = useReducer(scanReducer, SCAN_START); return formScan(state, dispatch, ask); }",
+    "the hook is the reducer's state and formScan's behaviour, nothing else",
+  );
+  const first: { scan: FormScan | null } = { scan: null };
+  const Probe = () => {
+    first.scan = useScanBeforeRefusing();
+    return null;
+  };
+  inApp(createElement(Probe));
+  assert.ok(first.scan, "the hook ran in the app's tree");
+  const { refuse, readFirst, reset, ...state } = first.scan;
+  assert.deepEqual(state, SCAN_START, "it starts with no crisis and no scan asked");
+  assert.ok(
+    typeof refuse === "function" && typeof readFirst === "function" && typeof reset === "function",
+  );
+  // both payout forms show what problemShown gives, and only that, where their problem shows
+  for (const file of ["FromAiaicCard.tsx", "AiaicPayments.tsx"]) {
+    const form = sourceOf(file);
+    assert.ok(form.includes("const scan = useScanBeforeRefusing();"), `${file}: the shared hook`);
+    assert.ok(form.includes("const shown = problemShown(scan, problem);"), `${file}: problemShown`);
+    assert.ok(form.includes("{shown ? <ProblemCard problem={shown} /> : null}"), `${file}: shown`);
+    assert.ok(!form.includes("scan.inCrisis"), `${file}: no second reading of the crisis state`);
+  }
+});
+
+test("A59 RC-2 the bank name's hint never depends on what she typed: one element straight under the name box, every attribute a fixed string, its only words the hint's own line", () => {
+  // the component as the compiler reads it: what the hint is cannot follow the form's state (R08 made its class do so)
+  const file = path.join(APP, "src", "components", "farm", "aiaic", "FromAiaicCard.tsx");
+  const source = ts.createSourceFile(
+    file,
+    fs.readFileSync(file, "utf-8"),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  const attribute = (el: ts.JsxOpeningLikeElement, name: string) =>
+    el.attributes.properties.find(
+      (a): a is ts.JsxAttribute => ts.isJsxAttribute(a) && a.name.getText(source) === name,
+    );
+  const fixed = (el: ts.JsxOpeningLikeElement, name: string): string | null => {
+    const init = attribute(el, name)?.initializer;
+    return init && ts.isStringLiteral(init) ? init.text : null;
+  };
+  const hints: ts.JsxElement[] = [];
+  const visit = (node: ts.Node): void => {
+    if (ts.isJsxElement(node) && fixed(node.openingElement, "id") === "aiaic-dest-name-rule")
+      hints.push(node);
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  assert.equal(hints.length, 1, "one hint");
+  const hint = hints[0] as ts.JsxElement;
+  for (const a of hint.openingElement.attributes.properties) {
+    assert.ok(ts.isJsxAttribute(a), "nothing spread onto the hint");
+    assert.ok(
+      a.initializer && ts.isStringLiteral(a.initializer),
+      `${a.name.getText(source)}: a fixed string, never an expression`,
+    );
+  }
+  const cls = fixed(hint.openingElement, "className") ?? "";
+  assert.ok(
+    cls.includes("text-muted-foreground") && !/destructive|danger|red-/.test(cls),
+    `plain, never red: "${cls}"`,
+  );
+  assert.equal(attribute(hint.openingElement, "aria-invalid"), undefined, "never marked wrong");
+  // its only words are the hint's own line, by its own key
+  const kids = hint.children.filter((c) => !(ts.isJsxText(c) && c.containsOnlyTriviaWhiteSpaces));
+  assert.equal(kids.length, 1, "one child");
+  const only = kids[0];
+  assert.ok(only && ts.isJsxExpression(only) && only.expression, "a said line");
+  assert.equal(only.expression.getText(source), 't("aiaic.dest.name_rule")', "the hint's own line");
+  // straight in the name box's label, never inside a condition; the box beside it looks like every other box
+  const label = hint.parent;
+  assert.ok(
+    ts.isJsxElement(label) && label.openingElement.tagName.getText(source) === "label",
+    "straight in the name box's label",
+  );
+  const box = label.children.find(
+    (c): c is ts.JsxSelfClosingElement =>
+      ts.isJsxSelfClosingElement(c) && c.tagName.getText(source) === "input",
+  );
+  assert.ok(box, "the name box beside it");
+  assert.equal(fixed(box, "aria-describedby"), "aiaic-dest-name-rule", "the box names its hint");
+  assert.equal(attribute(box, "value")?.initializer?.getText(source), "{name}", "the name box");
+  assert.equal(
+    attribute(box, "className")?.initializer?.getText(source),
+    "{INPUT}",
+    "as every box",
+  );
+  assert.equal(attribute(box, "aria-invalid"), undefined, "never marked wrong");
+});
+
+test("A60 RC-3 RC2-4 words typed in her account or IFSC box reach the distress scan before any refusal, on both payout forms; no digit typed in either box (an account number typed in the IFSC box too), and no well-formed IFSC, ever goes to the scan", async () => {
+  // what her bank boxes hold that cannot be her bank's details, and only that
+  assert.deepEqual(
+    bankBoxWords(TEST_BANK.account, TEST_BANK.ifsc),
+    [],
+    "a well-formed account and IFSC",
+  );
+  assert.deepEqual(
+    bankBoxWords("0262 9180-0001 191", " yesb0000262 "),
+    [],
+    "typed apart, small letters",
+  );
+  assert.deepEqual(bankBoxWords("०२६२ ९१८० ०००१ १९१", ""), [], "Devanagari digits are digits");
+  assert.deepEqual(
+    bankBoxWords(CRISIS_HI, ""),
+    [CRISIS_HI],
+    "her words in the account box, as typed",
+  );
+  assert.deepEqual(
+    bankBoxWords(`${TEST_BANK.account} ${CRISIS_MR} 42`, ""),
+    [CRISIS_MR],
+    "her words, never the digits beside them",
+  );
+  assert.deepEqual(bankBoxWords("", CRISIS_MR), [CRISIS_MR], "her words in the IFSC box");
+  // the IFSC box read as the account box is (the re-check, RC2-4): an IFSC not in its shape without its digits; a
+  // well-formed one never; an account number typed in it never, however it is typed
+  assert.deepEqual(bankBoxWords("", "YESB000026"), ["YESB"]);
+  for (const typed of [
+    TEST_BANK.account,
+    "000123456789",
+    "0262 9180-0001 191",
+    "०२६२ ९१८० ०००१ १९१",
+    ` ${TEST_BANK.account} `,
+  ])
+    assert.deepEqual(bankBoxWords("", typed), [], `"${typed}" in the IFSC box: nothing read`);
+  assert.deepEqual(
+    bankBoxWords("", `${CRISIS_MR} 42`),
+    [CRISIS_MR],
+    "her words in the IFSC box, never the digits beside them",
+  );
+  // the box upper-cases what she types: her words go to the scan so, with their spaces
+  assert.deepEqual(bankBoxWords("", CRISIS_EN.toUpperCase()), [CRISIS_EN.toUpperCase()]);
+  assert.deepEqual(bankBoxWords(undefined, undefined), []);
+  // Save opens on words in either box (no rule of this phone keeps them from the scan), never on digits alone
+  const empty: DestinationTyped = {
+    kind: "bank_account",
+    upi: "",
+    name: "",
+    account: "",
+    ifsc: "",
+    agreed: false,
+    notice: true,
+  };
+  assert.equal(destinationSaveOpen({ ...empty, account: CRISIS_HI }), true, "the account box");
+  assert.equal(destinationSaveOpen({ ...empty, ifsc: CRISIS_MR }), true, "the IFSC box");
+  assert.equal(destinationSaveOpen({ ...empty, ...TEST_BANK }), false, "an account and an IFSC");
+  const routeEmpty = {
+    destination: "bank_account" as const,
+    pan: "",
+    name_on_pan: "",
+    account_number: "",
+    ifsc: "",
+  };
+  const none = { agreed: false, readNotice: false, notice: true };
+  assert.equal(payoutSaveOpen({ ...routeEmpty, account_number: CRISIS_MR }, none), true, "Route");
+  assert.equal(payoutSaveOpen({ ...routeEmpty, ifsc: CRISIS_HI }, none), true, "Route's IFSC");
+  assert.equal(
+    payoutSaveOpen(
+      { ...routeEmpty, account_number: TEST_BANK.account, ifsc: TEST_BANK.ifsc },
+      none,
+    ),
+    false,
+    "Route: an account and an IFSC",
+  );
+  // the account's length is counted as AIAIC gets it, its spaces left out
+  const complete: DestinationTyped = {
+    kind: "bank_account",
+    upi: "",
+    name: "Recording Farmer",
+    ...TEST_BANK,
+    agreed: true,
+    notice: true,
+  };
+  assert.equal(destinationRefusal(complete), null);
+  assert.equal(destinationRefusal({ ...complete, account: "0262 9180 0001 191" }), null, "apart");
+  assert.equal(destinationRefusal({ ...complete, account: "1 2 3 4" }), "account_number_not_valid");
+  // a press with her words in each box, on both forms: read first with the name, never the bank's own details
+  const route = {
+    destination: "bank_account" as const,
+    pan: "AAAPZ4321K",
+    name_on_pan: "Practice Payee Testname",
+    account_number: "000123456789",
+    ifsc: "RECT0000001",
+  };
+  const given = { agreed: true, readNotice: true, notice: true };
+  const { bench, press, pressForm, restore } = scanBench();
+  try {
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_MR, "mr"],
+    ] as const) {
+      const cashfree: [string, DestinationTyped][] = [
+        ["the account box, no IFSC", { ...complete, account: words, ifsc: "" }],
+        ["the account box, not ticked", { ...complete, account: words, agreed: false }],
+        ["the IFSC box, the account filled", { ...complete, ifsc: words }],
+        ["the IFSC box, no account", { ...complete, ifsc: words, account: "" }],
+      ];
+      for (const [where, typed] of cashfree) {
+        const what = `${lang} ${where}`;
+        const refusal = destinationRefusal(typed);
+        assert.ok(refusal, `${what}: this phone would refuse it`);
+        const { said, html } = await press(destinationWords(typed), lang, refusal);
+        assert.deepEqual(bench.texts, [`Recording Farmer. ${words}`], `${what}: read first`);
+        assert.equal(said, null, `${what}: no refusal said`);
+        crisisCardOnly(html, lang, refusal, what);
+      }
+      const routes: [string, typeof route][] = [
+        ["Route's account box", { ...route, account_number: words }],
+        ["Route's IFSC box", { ...route, ifsc: words }],
+      ];
+      for (const [where, typed] of routes) {
+        const what = `${lang} ${where}`;
+        const refusal = payoutFormRefusal(typed, given);
+        assert.ok(refusal, `${what}: this phone would refuse it`);
+        const { said, html } = await press(payoutWords(typed), lang, refusal);
+        assert.deepEqual(bench.texts, [`Practice Payee Testname. ${words}`], `${what}: read first`);
+        assert.equal(said, null, `${what}: no refusal said`);
+        crisisCardOnly(html, lang, refusal, what);
+      }
+    }
+    // AIAIC's English phrase in the IFSC box, upper-cased by the box, on both forms: read first with its spaces
+    const loud = CRISIS_EN.toUpperCase();
+    const cfLoud = await pressForm("en", (run) =>
+      pressDestination({ ...complete, ifsc: loud }, run),
+    );
+    assert.deepEqual(bench.texts, [`Recording Farmer. ${loud}`], "Cashfree's IFSC box: read first");
+    assert.deepEqual(cfLoud.order, ["scan"]);
+    crisisCardOnly(cfLoud.html, "en", "ifsc_not_valid", "Cashfree's IFSC box");
+    const rtLoud = await pressForm("en", (run) =>
+      pressPayout({ ...route, ifsc: loud }, given, run),
+    );
+    assert.deepEqual(
+      bench.texts,
+      [`Practice Payee Testname. ${loud}`],
+      "Route's IFSC box: read first",
+    );
+    assert.deepEqual(rtLoud.order, ["scan"]);
+    crisisCardOnly(rtLoud.html, "en", "ifsc", "Route's IFSC box");
+    // not a crisis: an IFSC not in its shape is read without its digits, then refused in its own words
+    bench.reply = { distress: false };
+    const typo = { ...complete, ifsc: "YESB000026" };
+    const { said } = await press(destinationWords(typo), "en", destinationRefusal(typo) ?? "");
+    assert.deepEqual(bench.texts, ["Recording Farmer. YESB"]);
+    assert.equal(said?.code, "ifsc_not_valid");
+    // an account number typed in the IFSC box (the re-check's cases, RC2-4), on both forms: refused after the scan,
+    // which reads her name and never the number
+    const mistyped: [string, DestinationTyped, string, string][] = [
+      [
+        "the account number in the IFSC box, the account box empty",
+        { ...complete, account: "", ifsc: TEST_BANK.account },
+        "Recording Farmer",
+        "account_number_not_valid",
+      ],
+      [
+        "the account number in both boxes",
+        { ...complete, ifsc: TEST_BANK.account },
+        "Recording Farmer",
+        "ifsc_not_valid",
+      ],
+      [
+        "the IFSC in the account box, the account number in the IFSC box",
+        { ...complete, account: TEST_BANK.ifsc, ifsc: TEST_BANK.account },
+        "Recording Farmer. YESB",
+        "ifsc_not_valid",
+      ],
+    ];
+    for (const [where, typed, read, code] of mistyped) {
+      const r = await pressForm("en", (run) => pressDestination(typed, run));
+      assert.deepEqual(bench.texts, [read], `Cashfree, ${where}: no digit of hers read`);
+      assert.deepEqual(r.order, ["scan"], `Cashfree, ${where}: read first, never given`);
+      assert.equal(r.said?.code, code, `Cashfree, ${where}: then refused`);
+    }
+    for (const [where, typed] of [
+      [
+        "the account number in the IFSC box",
+        { ...route, account_number: "", ifsc: "000123456789" },
+      ],
+      ["the account number in both boxes", { ...route, ifsc: "000123456789" }],
+    ] as const) {
+      const r = await pressForm("en", (run) => pressPayout(typed, given, run));
+      assert.deepEqual(bench.texts, ["Practice Payee Testname"], `Route, ${where}: no digit read`);
+      assert.deepEqual(r.order, ["scan"], `Route, ${where}: read first, never given`);
+      assert.ok(r.said, `Route, ${where}: then refused`);
+    }
+  } finally {
+    restore();
+  }
+  // the boxes keep what she types: the account box its spaces (AIAIC gets the number without them), no IFSC box cut at 11
+  const card = sourceOf("FromAiaicCard.tsx");
+  assert.ok(card.includes("onChange={(e) => setAccount(e.target.value)}"), "the account box");
+  assert.ok(card.includes('account_number: account.replace(/\\s/g, ""),'), "AIAIC's number");
+  for (const file of ["FromAiaicCard.tsx", "AiaicPayments.tsx"])
+    assert.ok(!sourceOf(file).includes("maxLength={11}"), `${file}: the IFSC box cuts nothing`);
+});
+
+test("A61 RC2-1 every page that takes the shared scan shows its crisis card on the scan's own state: a payout form through problemShown, every other page by a crisis branch that opens on inCrisis alone and shows AIAIC's card", () => {
+  // the compiler's reading of every file under src/ that takes the hook (the re-check's S06 and S07: a page whose crisis
+  // branch stopped reading the hook's state passed every suite)
+  const files: string[] = [];
+  const walk = (dir: string): void => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true }))
+      if (e.isDirectory()) walk(path.join(dir, e.name));
+      else if (/\.tsx?$/.test(e.name)) files.push(path.join(dir, e.name));
+  };
+  walk(path.join(APP, "src"));
+  // the `||` operands of a condition, its parentheses left out
+  const operands = (e: ts.Expression): ts.Expression[] => {
+    while (ts.isParenthesizedExpression(e)) e = e.expression;
+    return ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.BarBarToken
+      ? [...operands(e.left), ...operands(e.right)]
+      : [e];
+  };
+  const reads = (e: ts.Node, v: string, field: string) =>
+    ts.isPropertyAccessExpression(e) &&
+    ts.isIdentifier(e.expression) &&
+    e.expression.text === v &&
+    e.name.text === field;
+  const within = (root: ts.Node, found: (n: ts.Node) => boolean): boolean => {
+    let hit = false;
+    const visit = (n: ts.Node): void => {
+      if (hit) return;
+      if (found(n)) hit = true;
+      else ts.forEachChild(n, visit);
+    };
+    visit(root);
+    return hit;
+  };
+  const users: string[] = [];
+  for (const file of files) {
+    const text = fs.readFileSync(file, "utf-8");
+    if (!text.includes("useScanBeforeRefusing")) continue;
+    const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const takers: string[] = [];
+    const branches: ts.IfStatement[] = [];
+    const selected: string[] = [];
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isVariableDeclaration(node) &&
+        ts.isIdentifier(node.name) &&
+        node.initializer &&
+        ts.isCallExpression(node.initializer) &&
+        node.initializer.expression.getText(source) === "useScanBeforeRefusing"
+      )
+        takers.push(node.name.text);
+      if (ts.isIfStatement(node)) branches.push(node);
+      if (
+        ts.isCallExpression(node) &&
+        node.expression.getText(source) === "problemShown" &&
+        node.arguments[0] &&
+        ts.isIdentifier(node.arguments[0])
+      )
+        selected.push(node.arguments[0].text);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    const name = path.relative(APP, file).replaceAll("\\", "/");
+    for (const v of takers) {
+      users.push(name);
+      if (selected.includes(v)) continue; // a payout form: problemShown, crisis first (A58)
+      const crisisBranch = branches.some(
+        (b) =>
+          operands(b.expression).some((o) => reads(o, v, "inCrisis")) &&
+          within(b.thenStatement, (n) => reads(n, v, "crisis")) &&
+          within(
+            b.thenStatement,
+            (n) =>
+              ((ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
+                n.tagName.getText(source).includes("Crisis")) ||
+              (ts.isCallExpression(n) &&
+                n.expression.getText(source) === "problem" &&
+                n.arguments[0] !== undefined &&
+                ts.isStringLiteral(n.arguments[0]) &&
+                n.arguments[0].text === "crisis"),
+          ),
+      );
+      assert.ok(
+        crisisBranch,
+        `${name}: a crisis branch that opens on ${v}.inCrisis alone and shows AIAIC's card with ${v}.crisis`,
+      );
+    }
+  }
+  // every page that takes the hook today was read
+  for (const page of [
+    "src/components/farm/aiaic/AiaicPayments.tsx",
+    "src/components/farm/aiaic/FromAiaicCard.tsx",
+    "src/lib/aiaic-heard.ts",
+    "src/routes/help.index.tsx",
+    "src/routes/register.tsx",
+    "src/routes/signin.tsx",
+    "src/routes/storage.tsx",
+  ])
+    assert.ok(users.includes(page), `${page}: read`);
+});
+
+/**
+ * A PAYOUT FORM AS THE TYPESCRIPT COMPILER READS IT (A62, A64), each name resolved by its checker: the form's component,
+ * every node of its body, its own names (its state, what it makes, its press handlers) by their declarations, its press
+ * handlers (those of `send`, `give` and `stop` it declares; `send` is her press), and Save, the one button her press runs
+ * from (its onClick, or the form's onSubmit for a submit button), with Save's `disabled`.
+ */
+function compiledForm(form: { file: string; component: string }) {
+  const file = path.join(APP, "src", "components", "farm", "aiaic", form.file);
+  const options: ts.CompilerOptions = {
+    jsx: ts.JsxEmit.ReactJSX,
+    noResolve: true,
+    noLib: true,
+    types: [],
+  };
+  const program = ts.createProgram([file], options, ts.createCompilerHost(options, true));
+  const checker = program.getTypeChecker();
+  const source = program.getSourceFile(file);
+  assert.ok(source, form.file);
+  const at = (n: ts.Node) =>
+    `${form.file}:${source.getLineAndCharacterOfPosition(n.getStart(source)).line + 1}`;
+  const all: ts.Node[] = [];
+  const collect = (n: ts.Node): void => {
+    all.push(n);
+    ts.forEachChild(n, collect);
+  };
+  collect(source);
+  const component = all.find(
+    (n): n is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(n) && n.name?.text === form.component,
+  );
+  assert.ok(component?.body, `${form.file}: ${form.component}`);
+  const body = component.body;
+  const inside = (n: ts.Node, container: ts.Node) => {
+    for (let p: ts.Node | undefined = n; p; p = p.parent) if (p === container) return true;
+    return false;
+  };
+  const ownerOf = (n: ts.Node) => {
+    for (let p = n.parent; p; p = p.parent) if (ts.isFunctionLike(p)) return p;
+    return undefined;
+  };
+  const nodes = all.filter((n) => inside(n, body));
+  const symbolOf = (id: ts.Identifier) =>
+    ts.isShorthandPropertyAssignment(id.parent) && id.parent.name === id
+      ? checker.getShorthandAssignmentValueSymbol(id.parent)
+      : checker.getSymbolAtLocation(id);
+  // the component's own names (its state, what it makes, its press handlers), by their declarations
+  const own = new Map<string, { symbol: ts.Symbol; decl: ts.Node }>();
+  for (const n of nodes)
+    if (
+      (ts.isVariableDeclaration(n) || ts.isBindingElement(n)) &&
+      ts.isIdentifier(n.name) &&
+      ownerOf(n) === component
+    ) {
+      const s = checker.getSymbolAtLocation(n.name);
+      if (s) own.set(n.name.text, { symbol: s, decl: n });
+    }
+  const refs = (s: ts.Symbol) =>
+    nodes.filter(
+      (n): n is ts.Identifier =>
+        ts.isIdentifier(n) &&
+        !(
+          (ts.isVariableDeclaration(n.parent) || ts.isBindingElement(n.parent)) &&
+          n.parent.name === n
+        ) &&
+        symbolOf(n) === s,
+    );
+  const tagOf = (el: ts.JsxOpeningLikeElement) => el.tagName.getText(source);
+  const attrOf = (el: ts.JsxOpeningLikeElement, name: string) =>
+    el.attributes.properties.find(
+      (a): a is ts.JsxAttribute => ts.isJsxAttribute(a) && a.name.getText(source) === name,
+    );
+  // the attribute a node sits in, and its element
+  const attrAround = (n: ts.Node) => {
+    for (let p = n.parent; p && p !== body; p = p.parent) {
+      if (ts.isJsxAttribute(p)) return p;
+      if (ts.isJsxElement(p) || ts.isJsxSelfClosingElement(p) || ts.isJsxFragment(p)) return null;
+    }
+    return null;
+  };
+  const elementOf = (a: ts.JsxAttribute) => a.parent.parent;
+  // her press (the form has those of these it declares)
+  const PRESS = ["send", "give", "stop"];
+  const presses = PRESS.filter((p) => own.has(p)).map((p) => {
+    const d = own.get(p)?.decl;
+    assert.ok(
+      d && ts.isVariableDeclaration(d) && d.initializer && ts.isArrowFunction(d.initializer),
+      `${form.file}: ${p} is a press handler`,
+    );
+    return { name: p, symbol: own.get(p)?.symbol, body: d.initializer };
+  });
+  assert.ok(
+    presses.some((p) => p.name === "send"),
+    `${form.file}: her press`,
+  );
+  const inPress = (n: ts.Node) => presses.some((p) => inside(n, p.body));
+  // Save: the button her press runs from (its onClick, or the form's onSubmit for a submit button)
+  const send = own.get("send")?.symbol;
+  const runsSend = (a: ts.JsxAttribute | undefined) =>
+    a !== undefined &&
+    nodes.some((n) => ts.isIdentifier(n) && inside(n, a) && symbolOf(n) === send);
+  const formOf = (el: ts.Node) => {
+    for (let p = el.parent; p && p !== body; p = p.parent)
+      if (ts.isJsxElement(p) && tagOf(p.openingElement) === "form") return p.openingElement;
+    return undefined;
+  };
+  const saves = nodes.filter(
+    (n): n is ts.JsxOpeningLikeElement =>
+      (ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
+      tagOf(n) === "button" &&
+      (runsSend(attrOf(n, "onClick")) ||
+        (attrOf(n, "type")?.initializer?.getText(source) === '"submit"' &&
+          runsSend(attrOf(formOf(n) ?? n, "onSubmit")))),
+  );
+  assert.equal(saves.length, 1, `${form.file}: one Save`);
+  const saveOpen = attrOf(saves[0] as ts.JsxOpeningLikeElement, "disabled");
+  assert.ok(saveOpen, `${form.file}: Save's enablement`);
+  return {
+    source,
+    checker,
+    at,
+    all,
+    component,
+    body,
+    nodes,
+    inside,
+    ownerOf,
+    symbolOf,
+    own,
+    refs,
+    tagOf,
+    attrOf,
+    attrAround,
+    elementOf,
+    presses,
+    inPress,
+    saveOpen,
+  };
+}
+
+test("A62 RC2-2 RC3-1 RC3-2 nothing on either payout form says a refusal while she types: what she types is read only by its own box, Save's enablement and the press, each box only keeps it, nothing else of the form's changes while she types, and a refusal shows only through what her press left", () => {
+  // each form as the TypeScript compiler reads it (`compiledForm`), names resolved by its checker (the re-check's S08: a
+  // red refusal line under the name box while she types; S09: the name's label turning red; X06 and X07: the name box's
+  // onChange also setting a validity message of the browser's, or a red line of its own; each passed every suite)
+  const FORMS = [
+    {
+      file: "FromAiaicCard.tsx",
+      component: "DestinationForm",
+      typed: ["upi", "name", "account", "ifsc"],
+      made: ["typed", "ready"],
+    },
+    {
+      file: "AiaicPayments.tsx",
+      component: "PayoutAccountCard",
+      typed: ["name", "pan", "account", "ifsc", "upi"],
+      made: ["details"],
+    },
+  ];
+  // the problem only a press may leave
+  const SETTERS = ["setProblem", "setBadField"];
+  for (const form of FORMS) {
+    const {
+      source,
+      checker,
+      at,
+      component,
+      body,
+      nodes,
+      inside,
+      ownerOf,
+      symbolOf,
+      own,
+      refs,
+      tagOf,
+      attrOf,
+      attrAround,
+      elementOf,
+      presses,
+      inPress,
+      saveOpen,
+    } = compiledForm(form);
+    const shownOnPage = (n: ts.Node) => {
+      for (let p = n.parent; p && p !== body; p = p.parent)
+        if (ts.isJsxExpression(p) && (ts.isJsxElement(p.parent) || ts.isJsxFragment(p.parent)))
+          return true;
+      return false;
+    };
+    // 1. what she typed, and anything made from it, read only by its own box, Save's enablement and her press
+    const typed = new Map<ts.Symbol, string>();
+    for (const v of form.typed) {
+      const s = own.get(v)?.symbol;
+      assert.ok(s, `${form.file}: the box ${v}`);
+      typed.set(s, v);
+    }
+    const tracked = new Map(typed);
+    const queue = [...typed.keys()];
+    const boxes = new Set<string>();
+    const saveReads: string[] = [];
+    const made: string[] = [];
+    const wrong: string[] = [];
+    for (let s = queue.shift(); s; s = queue.shift()) {
+      const v = tracked.get(s) ?? "?";
+      for (const r of refs(s)) {
+        if (inPress(r)) continue;
+        const attr = attrAround(r);
+        if (attr) {
+          const el = elementOf(attr);
+          const name = attr.name.getText(source);
+          const value = attrOf(el, "value")?.initializer;
+          const itsBox =
+            typed.has(s) &&
+            tagOf(el) === "input" &&
+            value !== undefined &&
+            ts.isJsxExpression(value) &&
+            value.expression !== undefined &&
+            ts.isIdentifier(value.expression) &&
+            symbolOf(value.expression) === s;
+          if (itsBox && (name === "value" || name === "onChange")) {
+            if (name === "value") boxes.add(v);
+            continue;
+          }
+          if (attr === saveOpen) {
+            saveReads.push(v);
+            continue;
+          }
+          wrong.push(`${at(r)} ${v} read by the ${name} of a <${tagOf(el)}>`);
+          continue;
+        }
+        if (shownOnPage(r)) {
+          wrong.push(`${at(r)} ${v} read by what the page shows (JSX text)`);
+          continue;
+        }
+        // made from what she typed: the name it is made into is read by the same rules
+        let into: ts.VariableDeclaration | undefined;
+        for (let p = r.parent; p && p !== body && !into; p = p.parent)
+          if (
+            ts.isVariableDeclaration(p) &&
+            ownerOf(p) === component &&
+            ts.isIdentifier(p.name) &&
+            p.initializer &&
+            inside(r, p.initializer)
+          )
+            into = p;
+        const m = into ? checker.getSymbolAtLocation(into.name) : undefined;
+        if (into && m) {
+          if (!tracked.has(m)) {
+            tracked.set(m, into.name.getText(source));
+            made.push(into.name.getText(source));
+            queue.push(m);
+          }
+          continue;
+        }
+        wrong.push(`${at(r)} ${v} read outside its box, Save and the press`);
+      }
+    }
+    assert.deepEqual(
+      wrong,
+      [],
+      `${form.file}: what she types is read only by its own box, Save's enablement and her press (no className, aria-*, role or JSX text)`,
+    );
+    for (const v of form.typed)
+      assert.ok(boxes.has(v), `${form.file}: ${v} is its own box's value`);
+    // 1b. every box on the form is one of her boxes or her tick, and each only keeps what she types or ticks: its onChange
+    // is its own state's setter alone, of what she typed (upper-cased for a code) or of her tick, so nothing else runs
+    // while she types (the re-check of 4 Nov 2026, RC3-1 and RC3-2: an onChange that also set a validity message of the
+    // browser's, or a state of the form's own shown as a red line, passed every suite)
+    const setterOf = (state: string) => {
+      const d = own.get(state)?.decl;
+      const pair =
+        d && ts.isBindingElement(d) && ts.isArrayBindingPattern(d.parent) ? d.parent : undefined;
+      const declared = pair?.parent;
+      const second = pair?.elements[1];
+      return pair?.elements[0] === d &&
+        declared !== undefined &&
+        ts.isVariableDeclaration(declared) &&
+        declared.initializer !== undefined &&
+        ts.isCallExpression(declared.initializer) &&
+        declared.initializer.expression.getText(source) === "useState" &&
+        second !== undefined &&
+        ts.isBindingElement(second) &&
+        ts.isIdentifier(second.name)
+        ? { name: second.name.text, symbol: checker.getSymbolAtLocation(second.name) }
+        : undefined;
+    };
+    const kept: string[] = [];
+    for (const box of nodes.filter(
+      (n): n is ts.JsxOpeningLikeElement =>
+        (ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
+        ["input", "textarea", "select"].includes(tagOf(n)),
+    )) {
+      const tick = attrOf(box, "type")?.initializer?.getText(source) === '"checkbox"';
+      const holds = attrOf(box, tick ? "checked" : "value")?.initializer?.getText(source);
+      const state = tick
+        ? holds === "{agreed}"
+          ? "agreed"
+          : undefined
+        : form.typed.find((v) => holds === `{${v}}`);
+      const setter = state === undefined ? undefined : setterOf(state);
+      const init = attrOf(box, "onChange")?.initializer;
+      const change = init && ts.isJsxExpression(init) ? init.expression : undefined;
+      const said = change ? change.getText(source).replace(/\s+/g, "") : "none";
+      const keeps =
+        tagOf(box) === "input" &&
+        setter !== undefined &&
+        setter.symbol !== undefined &&
+        change !== undefined &&
+        ts.isArrowFunction(change) &&
+        ts.isCallExpression(change.body) &&
+        ts.isIdentifier(change.body.expression) &&
+        symbolOf(change.body.expression) === setter.symbol &&
+        (tick ? ["e.target.checked"] : ["e.target.value", "e.target.value.toUpperCase()"]).some(
+          (what) => said === `(e)=>${setter.name}(${what})`,
+        );
+      assert.ok(
+        keeps,
+        `${at(box)} a box that only keeps what she types (her boxes ${form.typed.join(", ")} and her tick): its onChange is its own setter alone, not ${said}`,
+      );
+      if (state !== undefined) kept.push(state);
+    }
+    assert.deepEqual(
+      kept.sort(),
+      [...form.typed, "agreed"].sort(),
+      `${form.file}: each of her boxes, and her tick, once`,
+    );
+    for (const m of form.made) assert.ok(made.includes(m), `${form.file}: ${m} is made from it`);
+    assert.ok(saveReads.length > 0, `${form.file}: Save opens on what she typed`);
+    // 2. the problem a form shows is left only by her press
+    const outside: string[] = [];
+    for (const name of SETTERS) {
+      const s = own.get(name)?.symbol;
+      if (s) for (const r of refs(s)) if (!inPress(r)) outside.push(`${at(r)} ${name}`);
+    }
+    assert.deepEqual(outside, [], `${form.file}: a problem set outside her press`);
+    // 2b. nothing of the form's own changes while she types but what she typed: every setter of its state (useState) runs
+    // only in her press, a button's onClick, the form's onSubmit, a box's onChange (its own setter alone: 1b), or a helper
+    // of the form's that only these run (Route's `clear`); never in an effect or as the form renders (the re-check of
+    // 4 Nov 2026, RC3-2: a state set while she types, shown as a red line)
+    const pressedBy = (a: ts.JsxAttribute) => {
+      const tag = tagOf(elementOf(a));
+      const name = a.name.getText(source);
+      return (
+        (name === "onClick" && tag === "button") ||
+        (name === "onSubmit" && tag === "form") ||
+        (name === "onChange" && tag === "input")
+      );
+    };
+    const helperOf = (n: ts.Node) => {
+      for (let p = n.parent; p && p !== body; p = p.parent)
+        if (
+          ts.isVariableDeclaration(p) &&
+          ownerOf(p) === component &&
+          ts.isIdentifier(p.name) &&
+          p.initializer !== undefined &&
+          ts.isArrowFunction(p.initializer)
+        )
+          return p;
+      return undefined;
+    };
+    const onPress = (n: ts.Node, seen: Set<ts.Node>): boolean => {
+      if (inPress(n)) return true;
+      const attr = attrAround(n);
+      if (attr) return pressedBy(attr);
+      const helper = helperOf(n);
+      if (!helper || seen.has(helper)) return false;
+      seen.add(helper);
+      const s = checker.getSymbolAtLocation(helper.name);
+      const uses = s ? refs(s) : [];
+      return uses.length > 0 && uses.every((u) => onPress(u, seen));
+    };
+    const stateSetters = [...own.entries()].filter(([, { decl }]) => {
+      const pair = ts.isBindingElement(decl) ? decl.parent : undefined;
+      const declared = pair?.parent;
+      return (
+        pair !== undefined &&
+        ts.isArrayBindingPattern(pair) &&
+        pair.elements[1] === decl &&
+        declared !== undefined &&
+        ts.isVariableDeclaration(declared) &&
+        declared.initializer !== undefined &&
+        ts.isCallExpression(declared.initializer) &&
+        declared.initializer.expression.getText(source) === "useState"
+      );
+    });
+    assert.ok(
+      stateSetters.some(([name]) => name === "setBusy"),
+      `${form.file}: the form's own state`,
+    );
+    const whileTyping: string[] = [];
+    for (const [name, { symbol }] of stateSetters)
+      for (const r of refs(symbol))
+        if (!onPress(r, new Set())) whileTyping.push(`${at(r)} ${name}`);
+    assert.deepEqual(
+      whileTyping,
+      [],
+      `${form.file}: a state of the form's set while she types, not by her press or her own box`,
+    );
+    // 3. her press runs only from a press (a click, a submit), or from her press itself
+    for (const p of presses)
+      for (const r of refs(p.symbol as ts.Symbol)) {
+        const by = attrAround(r)?.name.getText(source);
+        assert.ok(
+          by === "onClick" ||
+            by === "onSubmit" ||
+            presses.some((q) => q !== p && inside(r, q.body)),
+          `${at(r)} ${p.name} run by ${by ?? "something that is not a press"}`,
+        );
+      }
+    // 4. the form's page: a refusal only through what her press left. Every problem card shows problemShown's
+    // `shown`; no line names a refusal of its own but Route's box line, under `badField`, which only her press sets
+    const tops = body.statements.filter(ts.isReturnStatement);
+    const page = tops[tops.length - 1];
+    assert.ok(
+      page &&
+        nodes.some((n) => ts.isJsxSelfClosingElement(n) && inside(n, page) && tagOf(n) === "input"),
+      `${form.file}: the form's page, with its boxes`,
+    );
+    const shown = own.get("shown");
+    assert.ok(
+      shown &&
+        ts.isVariableDeclaration(shown.decl) &&
+        shown.decl.initializer?.getText(source) === "problemShown(scan, problem)",
+      `${form.file}: shown is problemShown's`,
+    );
+    const badField = own.get("badField")?.symbol;
+    const underBadField = (n: ts.Node) => {
+      for (let p = n.parent; p && p !== page; p = p.parent) {
+        const test = ts.isConditionalExpression(p)
+          ? inside(n, p.whenTrue) && p.condition
+          : ts.isBinaryExpression(p) &&
+            p.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken &&
+            inside(n, p.right) &&
+            p.left;
+        if (test && ts.isIdentifier(test) && badField !== undefined && symbolOf(test) === badField)
+          return true;
+      }
+      return false;
+    };
+    let cards = 0;
+    const lines: string[] = [];
+    for (const n of nodes.filter((x) => inside(x, page))) {
+      if (
+        (ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n)) &&
+        tagOf(n) === "ProblemCard"
+      ) {
+        const given = attrOf(n, "problem")?.initializer;
+        assert.ok(
+          given &&
+            ts.isJsxExpression(given) &&
+            given.expression &&
+            ts.isIdentifier(given.expression) &&
+            symbolOf(given.expression) === shown.symbol,
+          `${at(n)} a problem card not given problemShown's shown`,
+        );
+        cards += 1;
+      }
+      if (
+        (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n) || ts.isTemplateHead(n)) &&
+        n.text.startsWith("aiaic.refused.") &&
+        !underBadField(n)
+      )
+        lines.push(`${at(n)} ${n.text}`);
+    }
+    assert.ok(cards > 0, `${form.file}: its problem card`);
+    assert.deepEqual(lines, [], `${form.file}: a refusal said on the form but through her press`);
+  }
+});
+
+test("A63 RC2-3 words in her bank boxes reach the distress scan first though nothing here would refuse the form, on both payout forms: a crisis gets the helplines and nothing is sent; the account is held to AIAIC's own rule after the scan; Save never waits for good", async () => {
+  // AIAIC's own account rule (its trade/farmer_payout.py `_ACCOUNT`: 5 to 35 letters and digits), on the number as AIAIC
+  // gets it (its spaces taken out): the Cashfree form refuses, after the scan, exactly what AIAIC would not take
+  const complete: DestinationTyped = {
+    kind: "bank_account",
+    upi: "",
+    name: "Recording Farmer",
+    ...TEST_BANK,
+    agreed: true,
+    notice: true,
+  };
+  const ACCOUNT_41 = `${TEST_BANK.account}${TEST_BANK.account}02629180000`;
+  assert.equal(ACCOUNT_41.length, 41);
+  for (const [account, taken] of [
+    ["12345", true],
+    ["0262 9180 0001 191", true],
+    ["SB026291800001191", true],
+    ["9".repeat(35), true],
+    ["9".repeat(36), false],
+    [ACCOUNT_41, false],
+    ["1234", false],
+    ["०२६२९१८०००११९१", false],
+    ["0262-9180-0001", false],
+    [CRISIS_HI, false],
+    [CRISIS_MR, false],
+    [CRISIS_EN, true],
+  ] as const) {
+    assert.equal(
+      /^[A-Za-z0-9]{5,35}$/.test(account.replace(/\s/g, "")),
+      taken,
+      `"${account}": AIAIC's own rule`,
+    );
+    assert.equal(
+      destinationRefusal({ ...complete, account }),
+      taken ? null : "account_number_not_valid",
+      `"${account}": refused here as AIAIC would`,
+    );
+  }
+  // so her press never sends more than AIAIC takes, and this server's validator (40 at most) never throws on a press:
+  // the REAL giveMyDestination's validator, in this process (its handler never runs: nothing is asked of AIAIC)
+  const giving = (account_number: string) => ({
+    key: newPressKey(),
+    kind: "bank_account",
+    name: "Recording Farmer",
+    account_number,
+    ifsc: TEST_BANK.ifsc,
+    agreed: true,
+    replace: false,
+    notice_version: "xn-standin00",
+    read_in: "en",
+  });
+  const valid = (await inProcess(giveMyDestination, giving("9".repeat(35)), "validator")) as {
+    account_number?: string;
+  };
+  assert.equal(valid.account_number, "9".repeat(35), "the longest account AIAIC takes");
+  await assert.rejects(
+    inProcess(giveMyDestination, giving(ACCOUNT_41), "validator"),
+    "41 characters would throw in this server's validator: the form refuses them first",
+  );
+  // her despair typed, with its spaces, in the account box, every other box right, on both forms: her words go to the
+  // scan first and the crisis card shows; her form is never given. CRISIS_EN is the press no rule of this phone refuses
+  // (English letters; AIAIC's account rule takes it joined, and AIAIC's own reader misses it joined)
+  const route = {
+    destination: "bank_account" as const,
+    pan: "AAAPZ4321K",
+    name_on_pan: "Practice Payee Testname",
+    account_number: "000123456789",
+    ifsc: "RECT0000001",
+  };
+  const given = { agreed: true, readNotice: true, notice: true };
+  assert.equal(
+    destinationRefusal({ ...complete, account: CRISIS_EN }),
+    null,
+    "Cashfree: no refusal",
+  );
+  assert.equal(
+    payoutFormRefusal({ ...route, account_number: CRISIS_EN }, given),
+    null,
+    "Route: no refusal",
+  );
+  const { bench, handed, pressForm, restore } = scanBench();
+  try {
+    for (const [words, lang] of [
+      [CRISIS_HI, "hi"],
+      [CRISIS_EN, "en"],
+      [CRISIS_MR, "mr"],
+    ] as const) {
+      const cashfree: DestinationTyped = { ...complete, account: words };
+      const cf = await pressForm(lang, (run) => pressDestination(cashfree, run));
+      const what = `Cashfree, ${lang} in the account box`;
+      assert.deepEqual(
+        bench.texts,
+        [`Recording Farmer. ${words}`],
+        `${what}: read first, as typed`,
+      );
+      assert.deepEqual(cf.order, ["scan"], `${what}: the scan, and her form never given`);
+      assert.equal(cf.said, null, `${what}: no refusal said`);
+      assert.equal(handed().scanning, false, `${what}: Save no longer waits`);
+      crisisCardOnly(
+        cf.html,
+        lang,
+        destinationRefusal(cashfree) ?? "account_number_not_valid",
+        what,
+      );
+      const routed = { ...route, account_number: words };
+      const rt = await pressForm(lang, (run) => pressPayout(routed, given, run));
+      const where = `Route, ${lang} in the account box`;
+      assert.deepEqual(
+        bench.texts,
+        [`Practice Payee Testname. ${words}`],
+        `${where}: read first, as typed`,
+      );
+      assert.deepEqual(rt.order, ["scan"], `${where}: the scan, and her details never given`);
+      assert.equal(rt.said, null, `${where}: no refusal said`);
+      crisisCardOnly(rt.html, lang, payoutFormRefusal(routed, given) ?? "account_number", where);
+    }
+    // a clean read: her form goes on after the scan; the account's letters were read, never its digits
+    bench.reply = { distress: false };
+    const lettered = "SB026291800001191";
+    const cfClean = await pressForm("en", (run) =>
+      pressDestination({ ...complete, account: lettered }, run),
+    );
+    assert.deepEqual(bench.texts, ["Recording Farmer. SB"], "Cashfree: the letters only");
+    assert.deepEqual(cfClean.order, ["scan", "give"], "Cashfree: the scan, then her form given");
+    const rtClean = await pressForm("en", (run) =>
+      pressPayout({ ...route, account_number: lettered }, given, run),
+    );
+    assert.deepEqual(bench.texts, ["Practice Payee Testname. SB"], "Route: the letters only");
+    assert.deepEqual(rtClean.order, ["scan", "give"], "Route: the scan, then her details given");
+    // a well-formed account and IFSC: given at once, no scan asked (AIAIC's middleware reads the name in the body)
+    const cfPlain = await pressForm("en", (run) => pressDestination(complete, run));
+    assert.deepEqual(cfPlain.order, ["give"], "Cashfree: given, no scan asked");
+    const rtPlain = await pressForm("en", (run) => pressPayout(route, given, run));
+    assert.deepEqual(rtPlain.order, ["give"], "Route: given, no scan asked");
+    // a 41-character account: refused after the scan (her name read, never the digits), never given; Save waits no more
+    const cfLong = await pressForm("en", (run) =>
+      pressDestination({ ...complete, account: ACCOUNT_41 }, run),
+    );
+    assert.deepEqual(bench.texts, ["Recording Farmer"], "Cashfree: her name read first");
+    assert.deepEqual(cfLong.order, ["scan"], "Cashfree: never given");
+    assert.equal(cfLong.said?.code, "account_number_not_valid", "Cashfree: then refused");
+    assert.equal(handed().scanning, false, "Cashfree: Save is not stuck");
+    const rtLong = await pressForm("en", (run) =>
+      pressPayout({ ...route, account_number: ACCOUNT_41 }, given, run),
+    );
+    assert.deepEqual(bench.texts, ["Practice Payee Testname"], "Route: her name read first");
+    assert.deepEqual(rtLong.order, ["scan"], "Route: never given");
+    assert.equal(rtLong.said?.code, "account_number", "Route: then its own box refusal");
+    assert.equal(handed().scanning, false, "Route: Save is not stuck");
+    // a scan that cannot be asked leaves her form given, as the shared scan leaves a refusal said (AIAIC's middleware
+    // then reads its body first, as before)
+    bench.reply = "unreachable";
+    const cfLost = await pressForm("en", (run) =>
+      pressDestination({ ...complete, account: lettered }, run),
+    );
+    assert.deepEqual(cfLost.order, ["scan", "give"]);
+    assert.equal(handed().scanning, false);
+  } finally {
+    restore();
+  }
+  // both forms wire it so: a press whose bank boxes hold words goes to the shared scan first, then to give
+  assert.ok(
+    sourceOf("FromAiaicCard.tsx").includes(
+      "readFirst: (words) => scan.readFirst(words, activeLang, give),",
+    ),
+    "Cashfree: readFirst",
+  );
+  assert.ok(
+    sourceOf("AiaicPayments.tsx").includes(
+      "readFirst: (words) => scan.readFirst(words, scanLang, give),",
+    ),
+    "Route: readFirst",
+  );
+  // give, on both forms: its call through `pressed` (a call that throws is said as the form's failure line, AIAIC not
+  // answering: A20) and Save's busy reset in a finally
+  for (const [file, call] of [
+    ["FromAiaicCard.tsx", "pressed("],
+    ["AiaicPayments.tsx", "press("],
+  ] as const) {
+    const source = ts.createSourceFile(
+      file,
+      sourceOf(file),
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TSX,
+    );
+    const gives: ts.ArrowFunction[] = [];
+    const tries: ts.TryStatement[] = [];
+    const visit = (n: ts.Node): void => {
+      if (
+        ts.isVariableDeclaration(n) &&
+        n.name.getText(source) === "give" &&
+        n.initializer &&
+        ts.isArrowFunction(n.initializer)
+      )
+        gives.push(n.initializer);
+      if (ts.isTryStatement(n) && gives.some((g) => n.pos >= g.pos && n.end <= g.end))
+        tries.push(n);
+      ts.forEachChild(n, visit);
+    };
+    visit(source);
+    assert.equal(gives.length, 1, `${file}: give`);
+    assert.ok(
+      tries.some(
+        (t) =>
+          t.tryBlock.getText(source).includes(call) &&
+          (t.finallyBlock?.getText(source) ?? "").includes("setBusy(false)"),
+      ),
+      `${file}: give calls through ${call.slice(0, -1)} and resets busy in a finally`,
+    );
+  }
+  for (const lang of LANGS) {
+    const html = inApp(createElement(ProblemCard, { problem: problem("aiaic_unavailable") }), lang);
+    assert.ok(
+      html.includes(escHtml(DICTS[lang]["aiaic.problem.aiaic_unavailable"] ?? "?")),
+      `${lang}: the failure line a throw is said as`,
+    );
+  }
+});
+
+test("A64 RC3-1 nothing on either payout form keeps her press from the distress scan: Save opens by the shared rule alone over her words as she typed them, her press goes straight to the shared press, busy is her press's own, and the browser's own validation never refuses her press", () => {
+  // each form as the TypeScript compiler reads it (`compiledForm`). AN-1's harm (a crisis typed in her own script never
+  // reaches the scan, and no helplines show) came back with every suite green through one expression: in Save's disabled
+  // (the re-check's X08, X09), a validity message set as she types (X23) or a pattern on a box (X24), the browser then
+  // refusing to submit Route's form. The forms are right today; this holds them so
+  const FORMS = [
+    {
+      file: "FromAiaicCard.tsx",
+      component: "DestinationForm",
+      // Save waits only on the shared rule over her form (`ready`), on her press, and while the scan is asked
+      save: ["!ready", "busy", "scan.scanning"],
+      rule: "destinationSaveOpen",
+      ready: "destinationSaveOpen(typed)",
+      // her press: the shared press over her form, with the scan asked in her language
+      press: "pressDestination",
+      pressArgs: ["typed"],
+      lang: "activeLang",
+      // what the rule and her press read: each box's state, as its own property of `typed`
+      into: "typed",
+      typed: {
+        upi: "upi",
+        name: "name",
+        account: "account",
+        ifsc: "ifsc",
+      } as Record<string, string>,
+      // no box cuts what she types
+      cut: {} as Record<string, string>,
+    },
+    {
+      file: "AiaicPayments.tsx",
+      component: "PayoutAccountCard",
+      save: ["busy", "scan.scanning", "!payoutSaveOpen(details,consent)"],
+      rule: "payoutSaveOpen",
+      ready: null,
+      press: "pressPayout",
+      pressArgs: ["details", "consent"],
+      lang: "scanLang",
+      into: "details",
+      typed: {
+        name: "name_on_pan",
+        pan: "pan",
+        account: "account_number",
+        ifsc: "ifsc",
+        upi: "upi_id",
+      } as Record<string, string>,
+      // the PAN box keeps a PAN's 10 characters, as today (her words are not read from it)
+      cut: { pan: "{10}" } as Record<string, string>,
+    },
+  ];
+  // the browser's own rules a box can carry: a form with a box that breaks one is not submitted, so her press never runs
+  const BROWSER_RULES = ["required", "pattern", "min", "max", "step", "minlength"];
+  // the browser's own validity, set or asked from code
+  const VALIDITY = ["setCustomValidity", "reportValidity", "checkValidity", "requestSubmit"];
+  for (const form of FORMS) {
+    const {
+      source,
+      checker,
+      at,
+      all,
+      nodes,
+      inside,
+      symbolOf,
+      own,
+      refs,
+      tagOf,
+      attrOf,
+      attrAround,
+      elementOf,
+      inPress,
+      saveOpen,
+    } = compiledForm(form);
+    const flat = (n: ts.Node) => n.getText(source).replace(/\s+/g, "");
+    // a name the form imports under its own name, and where from
+    const importedFrom = (id: ts.Identifier) => {
+      const d = checker.getSymbolAtLocation(id)?.declarations?.[0];
+      if (!d || !ts.isImportSpecifier(d) || (d.propertyName ?? d.name).text !== id.text)
+        return undefined;
+      const from = d.parent.parent.parent.moduleSpecifier;
+      return ts.isStringLiteral(from) ? from.text : undefined;
+    };
+    const declOf = (name: string) => {
+      const d = own.get(name)?.decl;
+      return d && ts.isVariableDeclaration(d) ? d : undefined;
+    };
+    // 1. Save's disabled is the shared rule alone: its `||` operands exactly these, and every name in it the form's own
+    // or the rule imported from @/lib/aiaic-trade (which opens on any words in her boxes: A52, A60)
+    const disabled = saveOpen.initializer;
+    assert.ok(
+      disabled && ts.isJsxExpression(disabled) && disabled.expression,
+      `${form.file}: Save's disabled`,
+    );
+    const operands = (e: ts.Expression): ts.Expression[] => {
+      while (ts.isParenthesizedExpression(e)) e = e.expression;
+      return ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.BarBarToken
+        ? [...operands(e.left), ...operands(e.right)]
+        : [e];
+    };
+    assert.deepEqual(
+      operands(disabled.expression).map(flat).sort(),
+      [...form.save].sort(),
+      `${at(saveOpen)} Save waits only on ${form.save.join(" || ")}`,
+    );
+    for (const n of nodes)
+      if (
+        ts.isIdentifier(n) &&
+        inside(n, disabled) &&
+        !(ts.isPropertyAccessExpression(n.parent) && n.parent.name === n)
+      )
+        assert.ok(
+          (own.has(n.text) && own.get(n.text)?.symbol === symbolOf(n)) ||
+            (n.text === form.rule && importedFrom(n) === "@/lib/aiaic-trade"),
+          `${at(n)} ${n.text} in Save's disabled: the form's own, or the shared rule`,
+        );
+    if (form.ready) {
+      // Cashfree's `ready`: the shared rule over her form as typed, and nothing else
+      const ready = declOf("ready")?.initializer;
+      assert.equal(
+        ready ? flat(ready) : "",
+        form.ready,
+        `${form.file}: ready is the shared rule over her form, nothing else`,
+      );
+      assert.ok(ready && ts.isCallExpression(ready) && ts.isIdentifier(ready.expression));
+      assert.equal(
+        importedFrom(ready.expression),
+        "@/lib/aiaic-trade",
+        `${form.file}: ${form.rule} is the shared rule`,
+      );
+    }
+    const scan = declOf("scan")?.initializer;
+    assert.ok(
+      scan &&
+        ts.isCallExpression(scan) &&
+        ts.isIdentifier(scan.expression) &&
+        flat(scan) === "useScanBeforeRefusing()" &&
+        importedFrom(scan.expression) === "@/lib/aiaic-scan",
+      `${form.file}: scan is the shared hook (its state: A58)`,
+    );
+    // 2. her press goes straight to the shared press over her form as typed: send clears the form's problem and the
+    // scan's state, then awaits pressDestination or pressPayout of @/lib/aiaic-trade (A52, A58, A60 and A63 run them),
+    // handed the shared scan's refuse and readFirst and the form's give; nothing in it can end her press unread
+    const sent = declOf("send")?.initializer;
+    assert.ok(sent && ts.isArrowFunction(sent) && ts.isBlock(sent.body), `${form.file}: send`);
+    const steps = sent.body.statements;
+    assert.deepEqual(
+      steps.map((s, i) => (i < 2 ? flat(s) : ts.SyntaxKind[s.kind])),
+      ["setProblem(null);", "scan.reset();", "ExpressionStatement"],
+      `${form.file}: her press clears the form's problem and the scan's state, then the shared press, and nothing else`,
+    );
+    const last = steps[2];
+    const awaited =
+      last && ts.isExpressionStatement(last) && ts.isAwaitExpression(last.expression)
+        ? last.expression.expression
+        : undefined;
+    assert.ok(
+      awaited && ts.isCallExpression(awaited) && ts.isIdentifier(awaited.expression),
+      `${form.file}: her press awaits the shared press`,
+    );
+    assert.equal(awaited.expression.text, form.press, `${form.file}: the shared press`);
+    assert.equal(
+      importedFrom(awaited.expression),
+      "@/lib/aiaic-trade",
+      `${form.file}: ${form.press} is the shared press`,
+    );
+    const wired = awaited.arguments[awaited.arguments.length - 1];
+    assert.deepEqual(
+      awaited.arguments.slice(0, -1).map(flat),
+      form.pressArgs,
+      `${form.file}: the shared press over her form as typed`,
+    );
+    assert.ok(
+      wired && ts.isObjectLiteralExpression(wired),
+      `${form.file}: what the press is handed`,
+    );
+    const handed = new Map(
+      wired.properties.map((p) => [
+        ts.isSpreadAssignment(p) ? "..." : p.name.getText(source),
+        ts.isPropertyAssignment(p) ? flat(p.initializer) : ts.SyntaxKind[p.kind],
+      ]),
+    );
+    assert.deepEqual(
+      [...handed.keys()].sort(),
+      ["give", "readFirst", "refuse"],
+      `${form.file}: the press is handed refuse, readFirst and give, nothing else`,
+    );
+    assert.ok(
+      handed.get("refuse")?.startsWith(`(words,refusal)=>scan.refuse(words,${form.lang},refusal,`),
+      `${form.file}: refuse is the shared scan's, her words read before the refusal is said`,
+    );
+    assert.equal(
+      handed.get("readFirst"),
+      `(words)=>scan.readFirst(words,${form.lang},give)`,
+      `${form.file}: readFirst is the shared scan's, then give`,
+    );
+    assert.equal(
+      handed.get("give"),
+      "ShorthandPropertyAssignment",
+      `${form.file}: give is the form's own`,
+    );
+    // 3. busy is her press's own: a state of the form's, set only inside her press
+    const busy = own.get("busy")?.decl;
+    assert.ok(
+      busy &&
+        ts.isBindingElement(busy) &&
+        ts.isArrayBindingPattern(busy.parent) &&
+        flat(busy.parent.parent) === "[busy,setBusy]=useState(false)",
+      `${form.file}: busy is a state of the form's own`,
+    );
+    const setBusy = own.get("setBusy")?.symbol;
+    assert.ok(setBusy, `${form.file}: setBusy`);
+    assert.deepEqual(
+      refs(setBusy)
+        .filter((r) => !inPress(r))
+        .map(at),
+      [],
+      `${form.file}: busy set only inside her press`,
+    );
+    // 4. her words reach the rule and her press as she typed them: outside her press and her own box, each box's state is
+    // read only as itself, once, the value of its own property of `typed` (Cashfree) or `details` (Route)
+    const into = declOf(form.into)?.initializer;
+    assert.ok(into, `${form.file}: ${form.into}`);
+    const elsewhere: string[] = [];
+    for (const [v, prop] of Object.entries(form.typed)) {
+      const s = own.get(v)?.symbol;
+      assert.ok(s, `${form.file}: the box ${v}`);
+      let carried = 0;
+      for (const r of refs(s)) {
+        if (inPress(r)) continue;
+        const attr = attrAround(r);
+        if (
+          attr &&
+          attr.name.getText(source) === "value" &&
+          tagOf(elementOf(attr)) === "input" &&
+          attr.initializer !== undefined &&
+          flat(attr.initializer) === `{${v}}`
+        )
+          continue; // its own box
+        const p = r.parent;
+        const itself =
+          (ts.isShorthandPropertyAssignment(p) && p.name === r && prop === v) ||
+          (ts.isPropertyAssignment(p) && p.initializer === r && p.name.getText(source) === prop);
+        if (itself && inside(r, into)) carried += 1;
+        else elsewhere.push(`${at(r)} ${v}`);
+      }
+      assert.equal(
+        carried,
+        1,
+        `${form.file}: ${v} reaches ${form.into} as she typed it, as its ${prop}`,
+      );
+    }
+    assert.deepEqual(
+      elsewhere,
+      [],
+      `${form.file}: what she typed is read outside her press and her box only as itself, into ${form.into}`,
+    );
+    // 5. the browser's own validation never refuses her press: no box carries a rule of the browser's, or a type but text
+    // or a tick, and none cuts what she types but as today; nothing is spread onto an element or handed a ref; no element
+    // handles an event but a button's click, the form's submit and a box's change (each only keeps what she types: A62);
+    // and nothing in the form's file sets or asks a validity of the browser's
+    const refused: string[] = [];
+    for (const el of nodes.filter(
+      (n): n is ts.JsxOpeningLikeElement =>
+        ts.isJsxSelfClosingElement(n) || ts.isJsxOpeningElement(n),
+    )) {
+      const tag = tagOf(el);
+      const box = ["input", "textarea", "select"].includes(tag);
+      for (const a of el.attributes.properties) {
+        if (!ts.isJsxAttribute(a)) {
+          refused.push(`${at(a)} something spread onto a <${tag}>`);
+          continue;
+        }
+        const name = a.name.getText(source);
+        const value = a.initializer ? flat(a.initializer) : "";
+        if (name === "ref") refused.push(`${at(a)} a ref on a <${tag}>`);
+        else if (
+          /^on[a-z]/i.test(name) &&
+          !(
+            (name === "onClick" && tag === "button") ||
+            (name === "onSubmit" && tag === "form") ||
+            (name === "onChange" && tag === "input")
+          )
+        )
+          refused.push(`${at(a)} ${name} on a <${tag}>`);
+        else if (box && BROWSER_RULES.includes(name.toLowerCase()))
+          refused.push(`${at(a)} ${name} on a box`);
+        else if (box && name === "type" && !['"text"', '"checkbox"'].includes(value))
+          refused.push(`${at(a)} type=${value} on a box`);
+        else if (box && name.toLowerCase() === "maxlength") {
+          const holds = attrOf(el, "value")?.initializer;
+          const v = Object.keys(form.typed).find(
+            (t) => holds !== undefined && flat(holds) === `{${t}}`,
+          );
+          if (v === undefined || form.cut[v] !== value || name !== "maxLength")
+            refused.push(`${at(a)} ${name}=${value} cuts what she types`);
+        }
+      }
+    }
+    for (const n of all)
+      if ((ts.isIdentifier(n) || ts.isStringLiteralLike(n)) && VALIDITY.includes(n.text))
+        refused.push(`${at(n)} ${n.text}`);
+    assert.deepEqual(
+      refused,
+      [],
+      `${form.file}: the browser's own validation never refuses her press, and nothing but a press and her boxes' own setters handles what she does`,
+    );
+  }
+});
+
+test("B20 her details through this server: a name Cashfree refuses is said by AIAIC's code; her removal names its provider", async () => {
+  const s = await standIn();
+  try {
+    settings(s.url, USER, PASSWORD);
+    asHer(s);
+    const base = { agreed: true, notice_version: "xn-standin00", read_in: "mr" as const };
+    // Cashfree's own test account and IFSC (its data-to-test page): a stand-in, never a person's
+    const bad = await client.giveDestination(newPressKey(), {
+      ...base,
+      kind: "bank_account",
+      name: "R. Kumar",
+      account_number: "026291800001191",
+      ifsc: "YESB0000262",
+    });
+    assert.equal(!bad.ok ? bad.problem.code : "", "account_name_letters_only", "AIAIC's code");
+    assert.equal(!bad.ok ? bad.problem.facts?.["field"] : "", "name", "the box it is about");
+    const upi = await client.giveDestination(newPressKey(), {
+      ...base,
+      kind: "upi_id",
+      upi_id: "success@upi",
+    });
+    assert.deepEqual(
+      upi.ok ? upi.data.destination : null,
+      { kind: "upi_id", hint: "su***@upi", status: "ready", ready: true, provider: "cashfree" },
+      "only the hint, its state and its provider's name leave this server",
+    );
+    const sent = s.posts.filter((p) => p.path === "/farmer/trade/payout-destination");
+    assert.equal(sent.length, 2, "both presses reached AIAIC");
+    assert.ok(!("name" in (sent[1]?.body ?? {})), "a UPI ID goes without a name");
+    const ended = await client.endDestination(newPressKey());
+    assert.deepEqual(
+      ended.ok ? ended.data : null,
+      { closure: "done", provider: "cashfree" },
+      "the end's closure and its provider's name only",
+    );
+    for (const lang of LANGS) {
+      const said = providerKey("aiaic.dest.removed", ended.ok ? ended.data.provider : null);
+      const line = wordsIn(lang)(said.key, said.values);
+      assert.ok(line.includes("Cashfree") && !HOLE.test(line), `${lang}: "${line}"`);
+    }
+  } finally {
+    await s.close();
+  }
+});
+
+test("B21 AN-1 a form this phone would not refuse goes to AIAIC, whose crisis middleware answers first: the helplines on her form", async () => {
+  const s = await standIn();
+  try {
+    settings(s.url, USER, PASSWORD);
+    asHer(s);
+    s.crisisRecorded = true;
+    // AIAIC's own English crisis phrase: English letters and spaces, so no rule of this phone refuses it
+    const typed: DestinationTyped = {
+      kind: "bank_account",
+      upi: "",
+      name: CRISIS_EN,
+      ...TEST_BANK,
+      agreed: true,
+      notice: true,
+    };
+    assert.equal(
+      destinationRefusal(typed),
+      null,
+      "no rule of this phone refuses it: it goes to AIAIC",
+    );
+    const r = await client.giveDestination(newPressKey(), {
+      agreed: true,
+      notice_version: "xn-standin00",
+      read_in: "en",
+      kind: "bank_account",
+      name: typed.name,
+      account_number: typed.account,
+      ifsc: typed.ifsc,
+    });
+    assert.equal(
+      r.ok ? null : r.problem.code,
+      "crisis",
+      "AIAIC's crisis card, before its own rules",
+    );
+    const html = inApp(createElement(ProblemCard, { problem: r.ok ? problem("none") : r.problem }));
+    assert.ok(html.includes("data-crisis"), "the crisis card on her form");
+    for (const phone of HELPLINES) assert.ok(html.includes(phone), `helpline ${phone}`);
+    assert.equal(
+      s.posts.filter((p) => p.path === "/farmer/trade/payout-destination").length,
+      1,
+      "her press reached AIAIC once",
+    );
+  } finally {
     await s.close();
   }
 });

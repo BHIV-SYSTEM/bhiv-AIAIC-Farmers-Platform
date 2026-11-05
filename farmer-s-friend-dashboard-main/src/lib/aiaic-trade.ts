@@ -248,6 +248,10 @@ export type AiaicPricing = {
     payer: string | null;
   };
   payment_fee_set: boolean;
+  /** The payments provider AIAIC uses now ("cashfree" since 4 Nov 2026), and how her money moves ("collect_then_pay":
+   * AIAIC collects, then pays her; "route"); null from an AIAIC that does not say. */
+  provider: string | null;
+  model: string | null;
 };
 
 /** AIAIC's pricing answer, field by field; null when it is not one (then the page says it could not be read). */
@@ -269,6 +273,8 @@ export function pricingOf(raw: unknown): AiaicPricing | null {
     },
     payment_fee_set:
       !!fee && typeof fee === "object" && (fee as Record<string, unknown>)["set"] === true,
+    provider: typeof r["provider"] === "string" ? r["provider"] : null,
+    model: typeof r["model"] === "string" ? r["model"] : null,
   };
 }
 
@@ -325,7 +331,19 @@ export type PayoutAccountBlock = {
   say: AiaicSay;
   can_create: boolean;
   can_withdraw: boolean;
+  /** False when AIAIC does not wire Razorpay Route at all (4 Nov 2026: Cashfree is its provider): nothing of Route is
+   * offered, said or shown. Absent from an AIAIC not yet updated. */
+  wired?: boolean | undefined;
 };
+
+/**
+ * Whether the Payments page shows the card of her Razorpay Route account (`payout_account`): not when AIAIC says Route is
+ * not wired (`wired: false`), as AIAIC shows nothing of Route then (its design, C1) and sends her money through its own
+ * send instead (her sale's "Your money" card); an AIAIC that does not say keeps the card as before.
+ */
+export function routeCardShown(block: PayoutAccountBlock | null | undefined): boolean {
+  return block?.wired !== false;
+}
 
 export type PayoutNotice = { version: string; en: string[]; mr: string[]; hi: string[] };
 
@@ -538,9 +556,10 @@ export function handedOver(order: AiaicOrder): boolean {
 
 /**
  * The five steps of one sale, the transaction in order: agreed -> paid by the buyer -> handed over -> delivered ->
- * her money. Each is read from AIAIC's own states, never assumed: "paid" only on Razorpay's verified word
- * (`payment_state`), her money only on Razorpay's word about her share (`settlement_state`), and "sent" is never
- * "received" (only `settled` is done).
+ * her money. Each is read from AIAIC's own states, never assumed: "paid" only on the payment provider's verified word
+ * (`payment_state`), and "sent" is never "received". Her money: where AIAIC collects and then sends it to her
+ * (`from_aiaic`, since 4 Nov 2026 through Cashfree Payouts), AIAIC's own steps (done only once it reached her bank, on the
+ * provider's word); else Razorpay Route's word about her share (`settlement_state`: only `settled` is done).
  */
 export function saleSteps(order: AiaicOrder): SaleStep[] {
   const cancelled = order.order_state === "cancelled";
@@ -566,8 +585,18 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
         ? "now"
         : "todo";
   const settlement = order.money?.settlement_state ?? order.settlement_state ?? "not_connected";
-  const money: StepState =
-    settlement === "settled"
+  // AIAIC collects, then sends her money (its own steps; an AIAIC that does not say them: only that the buyer paid)
+  const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
+  const own = fa ? (fa.steps ?? { buyer_paid: fa.buyer_paid, sent: false, reached: false }) : null;
+  const money: StepState = own
+    ? own.reached
+      ? "done"
+      : cancelled
+        ? "stopped"
+        : own.sent || own.buyer_paid
+          ? "now"
+          : "todo"
+    : settlement === "settled"
       ? "done"
       : settlement === "failed" || settlement === "reversed" || settlement === "partially_reversed"
         ? "stopped"
@@ -605,7 +634,7 @@ export function paymentLine(order: AiaicOrder): { key: string; state: string; no
 
 /**
  * A SENTENCE IS NEVER SHOWN WITH A HOLE IN IT (as AIAIC's own web and phone say it, their `WITHOUT`): a fact AIAIC did
- * not send (an amount she did not say, the last characters of a bank account Razorpay gave none of) is said by the
+ * not send (an amount she did not say, the last characters of a bank account Razorpay Route gave none of) is said by the
  * same sentence without it. Each key lists the facts ITS sentence here prints (this app's buyer sentence names no
  * reference, so only his amount).
  */
@@ -966,9 +995,13 @@ export function listingOfOrder(mine: AiaicMine, order: AiaicOrder): AiaicListing
   return mine.listings.find((l) => l.listing_id === order.listing_id) ?? null;
 }
 
-/** Money summed over her orders, for the payments page's bars: what was agreed, what buyers paid (Razorpay's
- * verified word), what was sent to her and what settled (Razorpay's word about her share). Called-off orders are
- * left out of "agreed". */
+/** Money summed over her orders, for the payments page's bars: what was agreed, what buyers paid (the payment
+ * provider's verified word, `payment_state`), what was sent to her and what reached her bank. Her money moves one of two
+ * ways, each counted by AIAIC's own facts: through Razorpay Route (`money.settlement_state`: sent when transferred or
+ * released, in her bank when settled, Razorpay's word about her share), or AIAIC collects and then sends it to her
+ * (`from_aiaic.steps`, since 4 Nov 2026 through Cashfree Payouts: sent for a send on its way or a transfer AIAIC's team
+ * recorded by hand, in her bank only on the provider's word that it reached it). Called-off orders are left out of
+ * "agreed". */
 export function moneyTotals(orders: AiaicOrder[]): {
   agreed: number;
   paidByBuyers: number;
@@ -987,6 +1020,11 @@ export function moneyTotals(orders: AiaicOrder[]): {
     const share = o.money?.share_inr ?? 0;
     if (s === "transferred" || s === "released" || s === "settled") sentToHer += share;
     if (s === "settled") settled += share;
+    // AIAIC collects, then sends her money (its own steps): the send's own amount, else the link's figure for her
+    const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
+    const toHer = fa?.sending?.amount_inr ?? fa?.to_her_inr ?? 0;
+    if (fa?.steps?.sent === true) sentToHer += toHer;
+    if (fa?.steps?.reached === true) settled += toHer;
   }
   const r = (n: number) => Math.round(n * 100) / 100;
   return {
@@ -1014,10 +1052,15 @@ const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 const ACCOUNT_RE = /^[0-9A-Z]{5,20}$/;
 const UPI_RE = /^[A-Za-z0-9._-]{2,256}@[A-Za-z]{2,64}$/;
 const NAME_RE = /^[A-Za-z][A-Za-z .'-]{0,98}[A-Za-z.]$/;
+/** THE LONGEST UPI ID THIS SERVER TAKES (the validators of `givePayoutAccount` and `giveMyDestination` read this very
+ * number): both payout forms refuse a longer one after the scan, so no press of hers meets a validator's refusal,
+ * which would be said as AIAIC not answering (the re-check of 4 Nov 2026, round 3's observation). */
+export const UPI_ID_MOST = 300;
 
 /**
  * The same checks AIAIC makes (its `trade/payouts.py`), so she is told at once which box to correct; the field is
- * named, never the value. AIAIC checks again, and only AIAIC's answer counts.
+ * named, never the value. AIAIC checks again, and only AIAIC's answer counts. Never more than this server takes: a
+ * UPI ID of `UPI_ID_MOST` characters at most (AIAIC's own shape allows 321).
  */
 export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
   const pan = d.pan.replace(/\s+/g, "").toUpperCase();
@@ -1031,9 +1074,79 @@ export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
     if (d.upi_id) return "upi_id";
     return null;
   }
-  if (!UPI_RE.test((d.upi_id ?? "").trim())) return "upi_id";
+  const upi = (d.upi_id ?? "").trim();
+  if (!UPI_RE.test(upi) || upi.length > UPI_ID_MOST) return "upi_id";
   if (d.account_number || d.ifsc) return "account_number";
   return null;
+}
+
+/** Her press on Route's form: she opened AIAIC's notice and ticked that she agrees, and AIAIC sent one. */
+export type PayoutConsent = { agreed: boolean; readNotice: boolean; notice: boolean };
+
+/**
+ * NO BOX IS BLIND TO A PERSON IN CRISIS, AND NO NUMBER OF HERS GOES TO THE SCAN (the re-check of 4 Nov 2026, RC-3 and
+ * RC2-4; AIAIC's own rule for its boxes, its audit F10). What her account box and her IFSC box hold that cannot be her
+ * bank's details, for the distress scan: each box once every digit (of any script), space and hyphen is taken out, when
+ * anything is left (her words, with one space kept between them and the digits gone); the IFSC box only when it is not
+ * in an IFSC's shape. No digit typed in either box (an account number typed in the IFSC box too), and no IFSC as it
+ * should be, is ever sent to the scan.
+ */
+export function bankBoxWords(
+  account: string | null | undefined,
+  ifsc: string | null | undefined,
+): string[] {
+  // digits, spaces and hyphens out, one space kept between her words
+  const wordsIn = (box: string) => box.replace(/[\p{Nd}\s-]+/gu, " ").trim();
+  const words: string[] = [];
+  const left = wordsIn(account ?? "");
+  if (left) words.push(left);
+  const code = (ifsc ?? "").trim();
+  const inCode = wordsIn(code);
+  if (inCode && !IFSC_RE.test(code.replace(/\s+/g, "").toUpperCase())) words.push(inCode);
+  return words;
+}
+
+/** The words in Route's free boxes (the name on her PAN; a UPI ID typed as words; what her account and IFSC boxes hold
+ * that cannot be her bank's details, `bankBoxWords`), read for distress before any refusal (the audit of 4 Nov 2026,
+ * AN-1; D-105), as on the Cashfree form (`destinationWords`). */
+export function payoutWords(d: PayoutDetailsIn): string {
+  return [
+    d.name_on_pan,
+    ...(d.destination === "upi_id" ? [d.upi_id] : bankBoxWords(d.account_number, d.ifsc)),
+  ]
+    .map((b) => (b ?? "").trim())
+    .filter(Boolean)
+    .join(". ");
+}
+
+/** Route's Save can be pressed whenever its free boxes hold words, else once she opened and agreed to the notice. */
+export function payoutSaveOpen(d: PayoutDetailsIn, c: PayoutConsent): boolean {
+  return payoutWords(d) !== "" || (c.agreed && c.readNotice && c.notice);
+}
+
+/** What this phone would refuse Route's form for: the box it names (`payoutDetailsProblem`), else her consent
+ * (`payout_consent_required`), or null. Said only after her words were read for distress. */
+export function payoutFormRefusal(d: PayoutDetailsIn, c: PayoutConsent): string | null {
+  return (
+    payoutDetailsProblem(d) ??
+    (c.agreed && c.readNotice && c.notice ? null : "payout_consent_required")
+  );
+}
+
+/** One press of Route's Save, in the Cashfree form's order (`pressDestination`): a form this phone would refuse goes to
+ * the distress scan first (`refuse`); a form it would not refuse whose bank boxes hold words goes to the scan first too
+ * (`readFirst`: AIAIC gets the account without its spaces and hyphens; the re-check of 4 Nov 2026, RC2-3); a form whose
+ * bank boxes hold only her bank's details goes to AIAIC (`give`). */
+export async function pressPayout(
+  d: PayoutDetailsIn,
+  c: PayoutConsent,
+  run: PressRun,
+): Promise<void> {
+  const refusal = payoutFormRefusal(d, c);
+  if (refusal) return run.refuse(payoutWords(d), refusal);
+  if (d.destination === "bank_account" && bankBoxWords(d.account_number, d.ifsc).length > 0)
+    return run.readFirst(payoutWords(d));
+  return run.give();
 }
 
 // ------------------------------------------------------------------------------------------------ transport
@@ -1603,7 +1716,127 @@ export type XDestination = {
   hint: string;
   status: string;
   ready: boolean;
+  /** The payments provider her details were given to, as AIAIC names it (4 Nov 2026: "cashfree"; an older one
+   * "razorpay"); absent from an AIAIC not yet updated. A name, never an id. */
+  provider?: string | null | undefined;
 };
+
+/**
+ * THE PAYMENTS PROVIDER'S NAME, ONLY AS AIAIC NAMES IT (4 Nov 2026: Cashfree is AIAIC's provider; Razorpay is kept but not
+ * wired, and RazorpayX, its payouts product, is gone). AIAIC's own code to the name her words print; null for a code this
+ * app does not name (an older provider's details, an AIAIC that names none): her sentence then names no provider
+ * (`providerKey`), so a Cashfree payment is never said as Razorpay's and nothing is guessed.
+ */
+export function providerName(code: string | null | undefined): string | null {
+  return code === "cashfree" ? "Cashfree" : null;
+}
+
+/** The key a sentence that names her money's provider is said with: `key` filled with the name AIAIC gave
+ * (`providerName`), else the same sentence without it (`<key>_any`). */
+export function providerKey(
+  key: string,
+  code: string | null | undefined,
+): { key: string; values: Record<string, string> } {
+  const name = providerName(code);
+  return name ? { key, values: { provider: name } } : { key: `${key}_any`, values: {} };
+}
+
+/** Her details were given to a provider AIAIC no longer sends through (AIAIC's own rule, `destination_other_provider`:
+ * its send through Cashfree refuses them), so she is asked to give them again. An AIAIC that names no provider: not
+ * said. */
+export function destinationGivenBefore(dest: XDestination | null | undefined): boolean {
+  return Boolean(dest?.ready && typeof dest.provider === "string" && dest.provider !== "cashfree");
+}
+
+/** The name on her bank account as Cashfree's rule reads it (`destinationNameOk`) and as it goes to AIAIC: her words
+ * joined by single spaces, as AIAIC joins them. So what her press gives is what was checked, and this server's validator
+ * never refuses a name the phone gave (said as AIAIC not answering, which it never was: the re-check of 4 Nov 2026,
+ * round 3's observation). */
+export function destinationName(name: string): string {
+  return name.split(/\s+/).filter(Boolean).join(" ");
+}
+
+/** CASHFREE TAKES A NAME OF LETTERS AND SPACES ONLY (AIAIC's `cashfree.name_ok`, as its refusal
+ * `account_name_letters_only` says): English letters and single spaces, 2 to 100, a letter first and last. Checked here
+ * so she is told at once; AIAIC checks again, and only its answer counts. Never changed for her. */
+export function destinationNameOk(name: string): boolean {
+  return /^[A-Za-z][A-Za-z ]{0,98}[A-Za-z]$/.test(destinationName(name));
+}
+
+/** Her UPI ID or bank account form as typed, before anything is sent (`notice`: AIAIC sent the notice she agrees to). */
+export type DestinationTyped = {
+  kind: "upi_id" | "bank_account";
+  upi: string;
+  name: string;
+  account: string;
+  ifsc: string;
+  agreed: boolean;
+  notice: boolean;
+};
+
+/**
+ * NO RULE OF THIS PHONE KEEPS HER WORDS FROM THE DISTRESS SCAN (the audit of 4 Nov 2026, AN-1; the platform's rule
+ * D-105: nothing answers a person in crisis before the scan does). The words in her form's boxes: the name on her bank
+ * account with what her account and IFSC boxes hold that cannot be her bank's details (`bankBoxWords`, the re-check's
+ * RC-3), or what she typed as a UPI ID. Save can be pressed whenever there are any (`destinationSaveOpen`), and a press
+ * this phone would refuse has them read for distress first (`pressDestination`).
+ */
+export function destinationWords(f: DestinationTyped): string {
+  return (f.kind === "bank_account" ? [f.name, ...bankBoxWords(f.account, f.ifsc)] : [f.upi])
+    .map((b) => b.trim())
+    .filter(Boolean)
+    .join(". ");
+}
+
+/** Save can be pressed whenever her box holds any words: no rule of this phone keeps them from the scan. */
+export function destinationSaveOpen(f: DestinationTyped): boolean {
+  return destinationWords(f) !== "";
+}
+
+/** AIAIC'S OWN RULE FOR THE ACCOUNT NUMBER IT SENDS HER MONEY TO (its trade/farmer_payout.py `_ACCOUNT`): 5 to 35
+ * letters and digits. The Cashfree form holds the number to it as AIAIC gets it, its spaces taken out, so her press never
+ * sends more than AIAIC takes (the re-check of 4 Nov 2026, RC2-3). */
+export const DESTINATION_ACCOUNT_RE = /^[A-Za-z0-9]{5,35}$/;
+
+/**
+ * What this phone would refuse her form for, in the form's order, by AIAIC's own codes (worded in en, mr and hi), or
+ * null: the form then goes to AIAIC, whose crisis middleware reads every body first. The name by Cashfree's rule
+ * (`destinationNameOk`) and 4 characters at least, the account by AIAIC's own rule (`DESTINATION_ACCOUNT_RE`) on the
+ * number without its spaces, as AIAIC gets it, the IFSC by its length trimmed, a UPI ID by its @ and by the length this
+ * server takes (`UPI_ID_MOST`), then her tick on AIAIC's notice. Said only after her words were read for distress.
+ */
+export function destinationRefusal(f: DestinationTyped): string | null {
+  if (f.kind === "bank_account") {
+    if (!destinationNameOk(f.name)) return "account_name_letters_only";
+    if (f.name.trim().length < 4) return "account_name_not_valid";
+    if (!DESTINATION_ACCOUNT_RE.test(f.account.replace(/\s/g, "")))
+      return "account_number_not_valid";
+    if (f.ifsc.trim().length !== 11) return "ifsc_not_valid";
+  } else if (!f.upi.includes("@") || f.upi.trim().length > UPI_ID_MOST) return "upi_id_not_valid";
+  if (!f.notice || !f.agreed) return "payout_consent_required";
+  return null;
+}
+
+/** One press of a payout form's Save, as the form wires it: `refuse` (her words to the scan, then the refusal),
+ * `readFirst` (her words to the scan, then `give`) and `give` (her form to AIAIC). */
+export type PressRun = {
+  refuse: (words: string, refusal: string) => Promise<void>;
+  readFirst: (words: string) => Promise<void>;
+  give: () => Promise<void>;
+};
+
+/** One press of Save (D-105): a form this phone would refuse goes to the distress scan first (`refuse`, with her words
+ * and the refusal to say if they are not a crisis); a form it would not refuse whose bank boxes hold words goes to the
+ * scan first too (`readFirst`: AIAIC gets the account without its spaces, and its own reader misses her words joined;
+ * the re-check of 4 Nov 2026, RC2-3); a form whose bank boxes hold only her bank's details goes to AIAIC (`give`), whose
+ * middleware reads the name in its body first. */
+export async function pressDestination(f: DestinationTyped, run: PressRun): Promise<void> {
+  const refusal = destinationRefusal(f);
+  if (refusal) return run.refuse(destinationWords(f), refusal);
+  if (f.kind === "bank_account" && bankBoxWords(f.account, f.ifsc).length > 0)
+    return run.readFirst(destinationWords(f));
+  return run.give();
+}
 /** Her offer weighed against the mandi (`GET /farmer/trade/offers/{id}/compare`). */
 /** Which side leaves her more, and by how much (the server's figures: never a sum or a sign worked out here). */
 type ForHer = { more: "offer" | "mandi"; per_q: Rs; total: Rs } | null;
@@ -1735,7 +1968,7 @@ const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v)
  * HER OWN SALE IS READ FIRST (the audit of 30 Oct 2026, AUD-2): AIAIC calls one order of a group off on its own
  * (`cancel_order`), so a sale called off is said once, on the step where her sale stood, with AIAIC's reason
  * (`cancel_reason_code`); it is never "still gathering" or "your own sale stays", and it asks nothing of her.
- * 5. PAID: her money as AIAIC says it (`from_aiaic.steps`: reached; else Razorpay's word: settled), now while the buyer
+ * 5. PAID: her money as AIAIC says it (`from_aiaic.steps`: reached; else Razorpay Route's word: settled), now while the buyer
  *    paid and her money moves; the page adds AIAIC's own sentence for her money.
  */
 export function groupView(
@@ -2014,14 +2247,21 @@ export function askDiffPct(price: number, ask: number | null | undefined): numbe
  * Whether her one thing to do on a group sale's order is to give AIAIC her UPI ID or bank account: her sale stands
  * (AIAIC attaches her money's facts whatever the order's state, `farmer_payout.her_money`, so a sale called off is
  * never asked; the audit of 30 Oct 2026, AUD-2), AIAIC sends her money (it collects, then pays her; or the link's fee
- * is fixed), it holds no destination of hers, and her money has not reached her.
+ * is fixed), it holds no destination of hers, or only one given to an earlier provider (`destinationGivenBefore`:
+ * AIAIC's send through Cashfree refuses it, `destination_other_provider`; the audit of 4 Nov 2026, AN-6), and her money
+ * has not reached her.
  */
 export function needsDestination(order: AiaicOrder, mine: AiaicMine): boolean {
   if (order.order_state === "cancelled") return false;
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
   const dest = (mine as { x_destination?: XDestination | null }).x_destination ?? null;
   const collectThenPay = (mine as { collect_then_pay?: boolean }).collect_then_pay === true;
-  return Boolean(fa && (collectThenPay || fa.fixed_by_link) && !dest && fa.steps?.reached !== true);
+  return Boolean(
+    fa &&
+    (collectThenPay || fa.fixed_by_link) &&
+    (!dest || destinationGivenBefore(dest)) &&
+    fa.steps?.reached !== true,
+  );
 }
 
 /**
@@ -2032,10 +2272,19 @@ export function needsDestination(order: AiaicOrder, mine: AiaicMine): boolean {
  */
 export function groupPaidWords(t: Words, order: AiaicOrder): string | null {
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
-  if (fa?.sending) {
-    // a state this app has no words for: the step's own words, never a key
-    const key = `aiaic.money.status.${sendingSaid(fa.sending)}`;
-    return t(key) === key ? null : t(key, { rs: rupees(fa.sending.amount_inr) });
-  }
+  if (fa?.sending) return sendingLine(t, order);
   return moneyCard(t, order)?.line ?? (order.payment.link_made ? t(paymentLine(order).key) : null);
+}
+
+/**
+ * AIAIC'S SEND OF HER MONEY ON ONE ORDER, IN THE SEND'S OWN STATE (`aiaic.money.status.<sendingSaid>`, with its amount):
+ * the line her group sale's page, her sales list and each sale's card on the Payments page say (the audit of 4 Nov 2026,
+ * AN-7: under Cashfree `money.say` is empty while AIAIC sends her money). Null when AIAIC sends nothing on it, or for a
+ * state this app has no words for (never a key).
+ */
+export function sendingLine(t: Words, order: AiaicOrder): string | null {
+  const sending = (order as { from_aiaic?: FromAiaic | null }).from_aiaic?.sending ?? null;
+  if (!sending) return null;
+  const key = `aiaic.money.status.${sendingSaid(sending)}`;
+  return t(key) === key ? null : t(key, { rs: rupees(sending.amount_inr) });
 }

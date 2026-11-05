@@ -649,7 +649,7 @@ function MoneyCard({ order }: { order: AiaicOrder }) {
 /**
  * AIAIC's commission on this sale, from its payment link's own record (AIAIC's `money.commission`): the agreed price,
  * the commission and who pays it, and what she receives, all AIAIC's own numbers. Nothing when AIAIC sends none (no
- * share of hers at Razorpay yet, or an AIAIC not yet updated).
+ * share of hers through Razorpay Route yet, or an AIAIC not yet updated).
  */
 function CommissionBlock({ commission }: { commission: AiaicCommission | null | undefined }) {
   const { t } = useI18n();

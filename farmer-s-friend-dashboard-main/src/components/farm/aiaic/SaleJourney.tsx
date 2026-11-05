@@ -71,7 +71,7 @@ function factOf(
  * amount, APMC rates and processing. And in the event a payment comes thru is it reflecting on the Farmer portal"): the
  * sale agreed, then every step AIAIC holds on her order in the order it was recorded (collected and weighed, graded,
  * stored, processed with what it lost, picked up, on the road, delivered, a problem on the way, the quantities settled),
- * each with its own facts and day, then the buyer's payment as Razorpay last said it. A step recorded as not done says
+ * each with its own facts and day, then the buyer's payment as its provider last said it. A step recorded as not done says
  * so; a practice sale's steps say they are practice. Only what AIAIC holds is shown: nothing is assumed. `bare`: the
  * list alone, no frame or title (a group sale's order keeps it behind one press under its own steps).
  */

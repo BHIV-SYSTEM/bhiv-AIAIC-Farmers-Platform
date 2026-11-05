@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_connected_trade_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-10-28T20:13:29+00:00",
+    "at": "2026-11-05T06:56:03+00:00",
     "status": 200,
     "signed_in": true,
     "request": {
@@ -18,9 +18,9 @@
       "district": "Nashik"
     },
     "practice": true,
-    "practice_note": "This is a practice account: what it sells is kept as rehearsal data (synthetic, marked so on the operators' dashboard too). No real money moves for it: a payment link for its orders is made only with Razorpay's test keys. Nothing of it counts as a farmer's income.",
+    "practice_note": "This is a practice account: what it sells is kept as rehearsal data (synthetic, marked so on the operators' dashboard too). No real money moves for it: a payment link for its orders is made only with Cashfree's test keys. Nothing of it counts as a farmer's income.",
     "party": {
-      "party_id": "frm_391528015542299f911f",
+      "party_id": "frm_36ad74293d3f2076c033",
       "kind": "farmer",
       "buyer_type": null,
       "tenant_id": "rec-connected",
@@ -32,16 +32,16 @@
       "consent_withdrawn_at": null,
       "interests": {},
       "synthetic": true,
-      "trace_id": "66cd595de7fa40519bf25f3186c86664",
-      "created_at": "2026-10-28T20:13:24.547644+00:00",
+      "trace_id": "ff9aae39054846949266859da1110893",
+      "created_at": "2026-11-05T06:55:54.369601+00:00",
       "from_the_app": true
     },
     "listings": [
       {
-        "listing_id": "lst_d5fd5782c887029a3f7c",
-        "lot_id": "lot_f4906ffe85de98134b3c",
+        "listing_id": "lst_e2fc6e8b8d3681da29e1",
+        "lot_id": "lot_3b1651929cde81c8114d",
         "tenant_id": "rec-connected",
-        "farmer_id": "frm_391528015542299f911f",
+        "farmer_id": "frm_36ad74293d3f2076c033",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -70,27 +70,27 @@
           "source_name": "Agmarknet"
         },
         "synthetic": true,
-        "trace_id": "66cd595de7fa40519bf25f3186c86664",
-        "created_at": "2026-10-28T20:13:24.547644+00:00",
-        "updated_at": "2026-10-28T20:13:28.164644+00:00",
+        "trace_id": "ff9aae39054846949266859da1110893",
+        "created_at": "2026-11-05T06:55:54.369601+00:00",
+        "updated_at": "2026-11-05T06:56:01.910605+00:00",
         "offers": [
           {
-            "offer_id": "ofr_0082fb26532e6fde623e",
+            "offer_id": "ofr_73d601ca5dbd4b7db649",
             "tenant_id": "rec-connected",
-            "listing_id": "lst_d5fd5782c887029a3f7c",
-            "buyer_id": "byr_becd137d60cdcba8fc15",
+            "listing_id": "lst_e2fc6e8b8d3681da29e1",
+            "buyer_id": "byr_b721c84556e58c57c657",
             "price_per_q": 2450.0,
             "quantity_q": 12.0,
-            "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-01; the buyer pays within 3 days of delivery, as it said",
+            "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-08; the buyer pays within 3 days of delivery, as it said",
             "terms_code": "collection_point",
-            "valid_until": "2026-11-01",
+            "valid_until": "2026-11-08",
             "status": "accepted",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "4ce818e742f442a9b455827977c1a16f",
-            "created_at": "2026-10-28T20:13:28.054165+00:00",
-            "updated_at": "2026-10-28T20:13:28.164644+00:00",
-            "pool_id": "pol_f1cdad4a851431ed50a9",
+            "trace_id": "71839ef3b119418bb21d633cc7f01794",
+            "created_at": "2026-11-05T06:56:01.767509+00:00",
+            "updated_at": "2026-11-05T06:56:01.910605+00:00",
+            "pool_id": "pol_1a3f6425cf6e9fe0d251",
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -115,7 +115,7 @@
               }
             },
             "pool": {
-              "pool_id": "pol_f1cdad4a851431ed50a9",
+              "pool_id": "pol_1a3f6425cf6e9fe0d251",
               "crop": "onion",
               "target_q": 20.0,
               "joined_q": 12.0,
@@ -125,8 +125,8 @@
               "grade": null,
               "collection_point": "FPO collection centre",
               "district": "Nashik",
-              "collect_on": "2026-11-01",
-              "valid_until": "2026-11-01",
+              "collect_on": "2026-11-08",
+              "valid_until": "2026-11-08",
               "pay_within_days": 3,
               "status": "open",
               "simulated": true
@@ -139,21 +139,21 @@
     ],
     "orders": [
       {
-        "order_id": "ord_2820fdfcd02ab618eee7",
-        "transaction_id": "txn_3930806ef90ce925f260",
+        "order_id": "ord_e40b680c53f678cb543d",
+        "transaction_id": "txn_23dcf1c776a4a6e999b0",
         "tenant_id": "rec-connected",
-        "offer_id": "ofr_0082fb26532e6fde623e",
-        "listing_id": "lst_d5fd5782c887029a3f7c",
-        "lot_id": "lot_f4906ffe85de98134b3c",
-        "farmer_id": "frm_391528015542299f911f",
-        "buyer_id": "byr_becd137d60cdcba8fc15",
+        "offer_id": "ofr_73d601ca5dbd4b7db649",
+        "listing_id": "lst_e2fc6e8b8d3681da29e1",
+        "lot_id": "lot_3b1651929cde81c8114d",
+        "farmer_id": "frm_36ad74293d3f2076c033",
+        "buyer_id": "byr_b721c84556e58c57c657",
         "crop": "onion",
         "variety": null,
         "grade": null,
         "quantity_q": 12.0,
         "price_per_q": 2450.0,
         "amount_inr": 29400.0,
-        "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-01; the buyer pays within 3 days of delivery, as it said",
+        "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-08; the buyer pays within 3 days of delivery, as it said",
         "terms_code": "collection_point",
         "order_state": "in_fulfilment",
         "cancel_reason_code": null,
@@ -166,17 +166,17 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": true,
-        "trace_id": "31e709f707724a3d816b53f3675573f5",
-        "created_at": "2026-10-28T20:13:28.164644+00:00",
-        "updated_at": "2026-10-28T20:13:28.248325+00:00",
-        "pool_id": "pol_f1cdad4a851431ed50a9",
+        "trace_id": "00f3baba685a4442ba86328ec1783954",
+        "created_at": "2026-11-05T06:56:01.910605+00:00",
+        "updated_at": "2026-11-05T06:56:02.062362+00:00",
+        "pool_id": "pol_1a3f6425cf6e9fe0d251",
         "buyer_name": "Rehearsal onion dehydration unit",
         "buyer_type": "processor",
         "buyer_district": "Nashik",
         "fulfilment": [
           {
-            "event_id": "ful_5bc887dc68747b6175d1",
-            "order_id": "ord_2820fdfcd02ab618eee7",
+            "event_id": "ful_452062d4a36bfad7a9be",
+            "order_id": "ord_e40b680c53f678cb543d",
             "stage": "aggregation",
             "status": "done",
             "reference": null,
@@ -186,12 +186,12 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "0acc35647809420c94129812546ac83f",
-            "created_at": "2026-10-28T20:13:28.248325+00:00"
+            "trace_id": "27d51a1bfb37435584afc774b2534900",
+            "created_at": "2026-11-05T06:56:02.062362+00:00"
           },
           {
-            "event_id": "ful_7784c583f09fe1520aa9",
-            "order_id": "ord_2820fdfcd02ab618eee7",
+            "event_id": "ful_22ab190b233c549fa6c1",
+            "order_id": "ord_e40b680c53f678cb543d",
             "stage": "quality_grading",
             "status": "done",
             "reference": null,
@@ -202,8 +202,8 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "381a40797a16458cbc0354560e5d1f50",
-            "created_at": "2026-10-28T20:13:28.873776+00:00"
+            "trace_id": "2682b25b06c146719ec3cec3b307a335",
+            "created_at": "2026-11-05T06:56:03.025369+00:00"
           }
         ],
         "reconciliation": null,
@@ -214,7 +214,7 @@
         "payment": {
           "state": "not_connected",
           "link_made": false,
-          "not_onward": "This link does not carry the farmer's share: the buyer's payment reaches the account that owns the Razorpay keys, AIAIC does not pay them onward from it, and settlement stays not connected for this order.",
+          "not_onward": null,
           "refund_owed_inr": null,
           "refund_note": null
         },
@@ -271,11 +271,11 @@
           "lots": 1,
           "farmers": 1,
           "quantity_q": 11.8,
-          "recorded_at": "2026-10-28T20:13:28.248325+00:00",
+          "recorded_at": "2026-11-05T06:56:02.062362+00:00",
           "simulated": true
         },
         "pool": {
-          "pool_id": "pol_f1cdad4a851431ed50a9",
+          "pool_id": "pol_1a3f6425cf6e9fe0d251",
           "crop": "onion",
           "target_q": 20.0,
           "joined_q": 12.0,
@@ -285,21 +285,34 @@
           "grade": null,
           "collection_point": "FPO collection centre",
           "district": "Nashik",
-          "collect_on": "2026-11-01",
-          "valid_until": "2026-11-01",
+          "collect_on": "2026-11-08",
+          "valid_until": "2026-11-08",
           "pay_within_days": 3,
           "status": "open",
           "simulated": true
         },
-        "from_aiaic": null
+        "from_aiaic": {
+          "to_her_inr": null,
+          "price_inr": 29400.0,
+          "commission_inr": null,
+          "gst_inr": null,
+          "commission_percent": null,
+          "gst_percent": null,
+          "fixed_by_link": false,
+          "buyer_paid": false,
+          "sending": null,
+          "upi_one_lakh_or_more": false,
+          "steps": {
+            "buyer_paid": false,
+            "sent": false,
+            "reached": false
+          }
+        }
       }
     ],
     "payout_account": {
       "offered": false,
-      "why_not_offered": {
-        "code": "payment_not_configured",
-        "why": "No payment provider is connected on this server: Razorpay's keys (AIAIC_RAZORPAY_KEY_ID, AIAIC_RAZORPAY_KEY_SECRET) are not set. Nothing is collected."
-      },
+      "why_not_offered": null,
       "test_mode": null,
       "test_values_only": false,
       "account": null,
@@ -312,7 +325,8 @@
         }
       },
       "can_create": false,
-      "can_withdraw": false
+      "can_withdraw": false,
+      "wired": false
     },
     "contact_path": {
       "offered": true,
@@ -377,64 +391,38 @@
       }
     },
     "x_destination": null,
-    "collect_then_pay": false,
+    "collect_then_pay": true,
     "x_notice": {
-      "version": "xn-da687b498a06",
+      "version": "xn-3900a20c8640",
       "en": [
         "Where AIAIC sends your sale money: your consent",
-        "To send you the money from your sale, AIAIC gives RazorpayX (Razorpay's payment service) your UPI ID, or your bank account number with its IFSC and your name as the bank holds it.",
-        "AIAIC keeps only RazorpayX's references and a short reminder: the last 4 digits of an account, or the first 2 letters and the bank of a UPI ID. AIAIC never keeps your account number, IFSC, UPI ID or name.",
-        "Razorpay keeps your details under its own terms; agreeing here includes agreeing to them.",
-        "To remove them: press Remove in your app, or tell a person from AIAIC, in person or in the app. AIAIC then asks RazorpayX to switch them off and sends nothing new to them; money already being sent for a sale goes on under that sale's own rule.",
+        "To send you the money from your sale, AIAIC gives Cashfree (Cashfree Payments, AIAIC's payment service) your UPI ID, or your bank account number with its IFSC and your name as on that account (English (A-Z) letters and spaces, as printed on your passbook).",
+        "AIAIC keeps only Cashfree's reference and a short reminder: the last 4 digits of an account, or the first 2 characters and the bank of a UPI ID. AIAIC never keeps your account number, IFSC, UPI ID or name.",
+        "Cashfree keeps your details under its own terms; agreeing here includes agreeing to them.",
+        "To remove them: press Remove in your app, or tell a person from AIAIC, in person or in the app. AIAIC then asks Cashfree to delete them and sends nothing new to them; money already being sent for a sale goes on under that sale's own rule.",
         "Questions or a complaint: not named yet."
       ],
       "mr": [
         "AIAIC तुमच्या विक्रीचे पैसे कुठे पाठवते: तुमची संमती",
-        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, RazorpayX (Razorpay ची पैसे पाठवण्याची सेवा) ला तुमचा UPI आयडी, किंवा तुमचा बँक खाते क्रमांक, त्याचा IFSC आणि बँकेकडे असलेले तुमचे नाव देते.",
-        "AIAIC फक्त RazorpayX चे संदर्भ आणि एक छोटी आठवण ठेवते: खात्याचे शेवटचे 4 अंक, किंवा UPI आयडीची पहिली 2 अक्षरे आणि बँक. तुमचा खाते क्रमांक, IFSC, UPI आयडी किंवा नाव AIAIC कधीही ठेवत नाही.",
-        "Razorpay तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
-        "ही माहिती काढून टाकण्यासाठी: तुमच्या अॅपमध्ये काढा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष भेटून किंवा अॅपमध्ये सांगा. त्यानंतर AIAIC, RazorpayX ला ती बंद करायला सांगते आणि तिथे नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवले जात असलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
+        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, Cashfree (AIAIC ची पैसे पाठवण्याची सेवा) ला तुमचा UPI आयडी, किंवा तुमचा बँक खाते क्रमांक, त्याचा IFSC आणि त्या खात्यावर असलेले तुमचे नाव (इंग्रजी (A-Z) अक्षरे आणि रिकाम्या जागा, तुमच्या पासबुकवर छापले आहे तसे) देते.",
+        "AIAIC फक्त Cashfree चा संदर्भ आणि एक छोटी आठवण ठेवते: खात्याचे शेवटचे 4 अंक, किंवा UPI आयडीची पहिली 2 चिन्हे आणि बँक. तुमचा खाते क्रमांक, IFSC, UPI आयडी किंवा नाव AIAIC कधीही ठेवत नाही.",
+        "Cashfree तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
+        "ही माहिती काढून टाकण्यासाठी: तुमच्या अॅपमध्ये काढा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष भेटून किंवा अॅपमध्ये सांगा. त्यानंतर AIAIC, Cashfree ला ती हटवायला सांगते आणि तिथे नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवले जात असलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
         "प्रश्न किंवा तक्रार: अजून ठरलेले नाही."
       ],
       "hi": [
         "AIAIC आपकी बिक्री का पैसा कहाँ भेजता है: आपकी सहमति",
-        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, RazorpayX (Razorpay की भुगतान सेवा) को आपकी UPI आईडी, या आपका बैंक खाता नंबर, उसका IFSC और बैंक में दर्ज आपका नाम देता है।",
-        "AIAIC केवल RazorpayX के संदर्भ और एक छोटी याद रखता है: खाते के आख़िरी 4 अंक, या UPI आईडी के पहले 2 अक्षर और बैंक। आपका खाता नंबर, IFSC, UPI आईडी या नाम AIAIC कभी नहीं रखता।",
-        "Razorpay आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों पर भी सहमति है।",
-        "इसे हटाने के लिए: अपने ऐप में हटाएँ दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC, RazorpayX से इसे बंद करने को कहता है और वहाँ नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा जा रहा पैसा उस बिक्री के नियम से आगे बढ़ता है।",
+        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, Cashfree (AIAIC की भुगतान सेवा) को आपकी UPI आईडी, या आपका बैंक खाता नंबर, उसका IFSC और उस खाते पर दर्ज आपका नाम (अंग्रेज़ी (A-Z) अक्षर और खाली जगह, जैसा आपकी पासबुक पर छपा है) देता है।",
+        "AIAIC केवल Cashfree का संदर्भ और एक छोटी याद रखता है: खाते के आख़िरी 4 अंक, या UPI आईडी के पहले 2 चिह्न और बैंक। आपका खाता नंबर, IFSC, UPI आईडी या नाम AIAIC कभी नहीं रखता।",
+        "Cashfree आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों पर भी सहमति है।",
+        "इसे हटाने के लिए: अपने ऐप में हटाएँ दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC, Cashfree से इसे मिटाने को कहता है और वहाँ नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा जा रहा पैसा उस बिक्री के नियम से आगे बढ़ता है।",
         "प्रश्न या शिकायत: अभी तय नहीं।"
       ]
     },
-    "payout_notice": {
-      "version": "pn-0b66a47d1399",
-      "en": [
-        "Your sale money through AIAIC: your consent",
-        "To send the money from your sales to you, AIAIC gives Razorpay, a payment company, your PAN, your name as on your PAN card, and your bank account number with its IFSC, or your UPI ID.",
-        "AIAIC keeps only Razorpay's reference for your account and the last 2 characters of a bank account number. AIAIC never keeps your PAN, your account number, your IFSC or your UPI ID.",
-        "Razorpay keeps your details under its own terms; agreeing here includes agreeing to them.",
-        "To withdraw: press Stop in your app, or tell a person from AIAIC, in person or in the app. AIAIC then sends no new money to this account; money already sent or held for a sale goes on under that sale's own rule.",
-        "Questions or a complaint: not named yet."
-      ],
-      "mr": [
-        "AIAIC मार्फत तुमच्या विक्रीचे पैसे: तुमची संमती",
-        "तुमच्या विक्रीचे पैसे तुम्हाला पाठवण्यासाठी AIAIC, Razorpay या पैसे पाठवणाऱ्या कंपनीला तुमचा PAN, तुमच्या PAN कार्डवरील नाव, आणि तुमचा बँक खाते क्रमांक व त्याचा IFSC, किंवा तुमचा UPI आयडी देते.",
-        "AIAIC फक्त तुमच्या खात्यासाठी Razorpay चा संदर्भ आणि बँक खाते क्रमांकाची शेवटची 2 अक्षरे ठेवते. तुमचा PAN, खाते क्रमांक, IFSC किंवा UPI आयडी AIAIC कधीही ठेवत नाही.",
-        "Razorpay तुमची माहिती स्वतःच्या अटींनुसार ठेवते; इथे संमती देणे म्हणजे त्या अटींनाही संमती देणे.",
-        "संमती मागे घेण्यासाठी: तुमच्या अॅपमध्ये थांबवा दाबा, किंवा AIAIC च्या व्यक्तीला प्रत्यक्ष किंवा अॅपमधून सांगा. त्यानंतर AIAIC या खात्यात नवे पैसे पाठवत नाही; एखाद्या विक्रीचे आधीच पाठवलेले किंवा राखून ठेवलेले पैसे त्या विक्रीच्या नियमानुसार पुढे जातात.",
-        "प्रश्न किंवा तक्रार: अजून ठरलेले नाही."
-      ],
-      "hi": [
-        "AIAIC के ज़रिए आपकी बिक्री का पैसा: आपकी सहमति",
-        "आपकी बिक्री का पैसा आप तक भेजने के लिए AIAIC, Razorpay नाम की भुगतान कंपनी को आपका PAN, आपके PAN कार्ड पर लिखा नाम, और आपका बैंक खाता नंबर व उसका IFSC, या आपकी UPI आईडी देता है।",
-        "AIAIC केवल आपके खाते के लिए Razorpay का संदर्भ और बैंक खाता नंबर के आख़िरी 2 अक्षर रखता है। आपका PAN, खाता नंबर, IFSC या UPI आईडी AIAIC कभी नहीं रखता।",
-        "Razorpay आपकी जानकारी अपनी शर्तों के अनुसार रखता है; यहाँ सहमति देने का मतलब उन शर्तों को भी सहमति देना है।",
-        "सहमति वापस लेने के लिए: अपने ऐप में रोकें दबाएँ, या AIAIC के किसी व्यक्ति को आमने-सामने या ऐप में बताएँ। उसके बाद AIAIC इस खाते में नया पैसा नहीं भेजता; किसी बिक्री का पहले से भेजा गया या रोका गया पैसा उस बिक्री के नियम से आगे बढ़ता है।",
-        "प्रश्न या शिकायत: अभी तय नहीं।"
-      ]
-    },
-    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. Settlement and fee are not connected here: AIAIC does not pay the farmer onward. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
+    "payout_notice": null,
+    "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Cashfree's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. AIAIC collects, then pays, on this server: the buyer pays their whole total, the payment fee with it, through a Cashfree payment link into AIAIC's account, and AIAIC sends the farmer their amount (the link's own figure) to their UPI ID or bank account through Cashfree Payouts on an operator's press, once per order and only after their produce has left them, or AIAIC's team records a bank transfer it made by hand, with its UTR. Each order's from_aiaic says its step: being prepared, not sent yet, while Cashfree holds the transfer (queued or pending); sent once the money has left AIAIC's account (Cashfree sent it to the farmer's bank) or a transfer made by hand is recorded; reached only on Cashfree's word that the farmer's bank credited it. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "4955454833ed4500a7d7cff6dd910ee1",
+      "request_id": "73b67627fbe6421a81c3a247e9d89c78",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

@@ -14,6 +14,7 @@ import { useState } from "react";
 
 import { usePress } from "@/lib/aiaic-crisis";
 import { useMine } from "@/lib/aiaic-hooks";
+import { problemShown, useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import {
   commissionParts,
   cropName,
@@ -21,10 +22,14 @@ import {
   moneyTotals,
   newPressKey,
   paymentLine,
-  payoutDetailsProblem,
+  payoutSaveOpen,
+  pressPayout,
+  problem as problemOf,
   quintalWords,
   quintals,
+  routeCardShown,
   rupees,
+  sendingLine,
   type AiaicCommission,
   type AiaicProblem,
   type MineForScreen,
@@ -63,7 +68,14 @@ export function AiaicPayments() {
           <>
             <Totals data={data} />
             <EachSale data={data} />
-            <PayoutAccountCard block={data.mine.payout_account} notice={data.mine.payout_notice} />
+            {/* Razorpay Route's card only where AIAIC wires Route (4 Nov 2026: Cashfree is its provider; her money then
+                comes through AIAIC's own send, given and said on her sale's page) */}
+            {routeCardShown(data.mine.payout_account) ? (
+              <PayoutAccountCard
+                block={data.mine.payout_account}
+                notice={data.mine.payout_notice}
+              />
+            ) : null}
           </>
         )}
       </WithMine>
@@ -107,7 +119,9 @@ function Totals({ data }: { data: MineForScreen }) {
   );
 }
 
-function EachSale({ data }: { data: MineForScreen }) {
+/** Each sale's card: what was agreed, the buyer's payment, AIAIC's own send of her money in its state (the audit of
+ * 4 Nov 2026, AN-7), AIAIC's sentence for her money, the commission. */
+export function EachSale({ data }: { data: MineForScreen }) {
   const { t } = useI18n();
   const orders = [...data.mine.orders].sort((a, b) => b.created_at.localeCompare(a.created_at));
   return (
@@ -120,6 +134,8 @@ function EachSale({ data }: { data: MineForScreen }) {
       ) : (
         orders.map((o) => {
           const said = moneySaid(t, "money", o.money?.say ?? null);
+          // AIAIC's own send, as her group sale's page says it: under Cashfree `money.say` is empty while AIAIC sends
+          const sent = sendingLine(t, o);
           return (
             <article
               key={o.order_id}
@@ -134,6 +150,14 @@ function EachSale({ data }: { data: MineForScreen }) {
                 </p>
               </div>
               <p className="text-sm font-semibold text-foreground">{t(paymentLine(o).key)}</p>
+              {sent ? (
+                <p
+                  className="text-sm font-semibold text-foreground"
+                  data-testid="aiaic-payments-send"
+                >
+                  {sent}
+                </p>
+              ) : null}
               {said ? <p className="text-sm text-foreground/85">{said}</p> : null}
               {o.money?.commission?.set ? (
                 <p className="text-xs font-semibold text-muted-foreground">
@@ -179,9 +203,9 @@ const TEST_VALUES = {
 };
 
 /**
- * Where her money goes (her Razorpay Route account, through AIAIC): its state in AIAIC's words, and, when AIAIC
- * offers it here, the form to give it. The details pass through this app's server to AIAIC and on to Razorpay; this
- * app keeps none of them, and the form forgets them once sent.
+ * Where her money goes through Razorpay Route (her Route account, through AIAIC), shown only where AIAIC wires Route
+ * (`routeCardShown`): its state in AIAIC's words, and, when AIAIC offers it here, the form to give it. The details pass
+ * through this app's server to AIAIC and on to Razorpay; this app keeps none of them, and the form forgets them once sent.
  */
 function PayoutAccountCard({
   block,
@@ -195,6 +219,7 @@ function PayoutAccountCard({
   const giveFn = useServerFn(givePayoutAccount);
   const withdrawFn = useServerFn(withdrawPayoutAccount);
   const press = usePress();
+  const scan = useScanBeforeRefusing();
   const [open, setOpen] = useState(false);
   const [readNotice, setReadNotice] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -234,36 +259,48 @@ function PayoutAccountCard({
 
   const said = moneySaid(t, "payout", block.say);
   const lines = notice ? (notice[lang as Lang] ?? notice.en) : [];
+  const details = {
+    destination,
+    pan,
+    name_on_pan: name,
+    ...(destination === "bank_account" ? { account_number: account, ifsc } : { upi_id: upi }),
+  };
+  const consent = { agreed, readNotice, notice: Boolean(notice) };
+  const scanLang = lang === "mr" || lang === "hi" ? lang : "en";
+  // AIAIC's crisis card outranks everything (`ProblemCard` raises it to the page's gate)
+  const shown = problemShown(scan, problem);
 
-  const send = async () => {
+  const give = async () => {
+    setBadField(null);
     if (!notice) return;
-    const details = {
-      destination,
-      pan,
-      name_on_pan: name,
-      ...(destination === "bank_account" ? { account_number: account, ifsc } : { upi_id: upi }),
-    };
-    const bad = payoutDetailsProblem(details);
-    setBadField(bad);
-    if (bad) return;
     setBusy(true);
-    setProblem(null);
-    const r = await press(() =>
-      giveFn({
-        data: {
-          key: newPressKey(),
-          notice_version: notice.version,
-          shown_in: lang,
-          agreed: true,
-          destination,
-          pan: pan.replace(/\s+/g, "").toUpperCase(),
-          name_on_pan: name.replace(/\s+/g, " ").trim(),
-          ...(destination === "bank_account"
-            ? { account_number: account.replace(/[\s-]+/g, ""), ifsc: ifsc.trim().toUpperCase() }
-            : { upi_id: upi.trim() }),
-        },
-      }),
-    );
+    let r: Awaited<ReturnType<typeof giveFn>>;
+    try {
+      // a call that throws is said as the form's own failure line (`usePress`), and Save never spins for good (the
+      // re-check of 4 Nov 2026, RC2-3)
+      r = await press(() =>
+        giveFn({
+          data: {
+            key: newPressKey(),
+            notice_version: notice.version,
+            shown_in: lang,
+            agreed: true,
+            destination,
+            pan: pan.replace(/\s+/g, "").toUpperCase(),
+            name_on_pan: name.replace(/\s+/g, " ").trim(),
+            // each box as the phone's rule read it (`payoutDetailsProblem`), so this server's validator takes it
+            ...(destination === "bank_account"
+              ? {
+                  account_number: account.replace(/[\s-]+/g, ""),
+                  ifsc: ifsc.replace(/\s+/g, "").toUpperCase(),
+                }
+              : { upi_id: upi.trim() }),
+          },
+        }),
+      );
+    } finally {
+      setBusy(false);
+    }
     if (r.ok) {
       clear();
       setOpen(false);
@@ -272,8 +309,26 @@ function PayoutAccountCard({
       const field = r.problem.facts?.["field"];
       if (typeof field === "string") setBadField(field);
     }
-    setBusy(false);
     await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
+  };
+
+  const send = async () => {
+    setProblem(null);
+    scan.reset();
+    // a press this phone would refuse, or one whose bank boxes hold words: her words are read for distress BEFORE
+    // anything is said or sent (the audit of 4 Nov 2026, AN-1; the re-check, RC2-3; D-105), as the registration form
+    // does; only then the box it names, her tick, or her details to AIAIC
+    await pressPayout(details, consent, {
+      refuse: (words, refusal) =>
+        scan.refuse(words, scanLang, refusal, (code) => {
+          if (code === "payout_consent_required") {
+            setBadField(null);
+            setProblem(problemOf(code));
+          } else setBadField(code);
+        }),
+      readFirst: (words) => scan.readFirst(words, scanLang, give),
+      give,
+    });
   };
 
   const stop = async () => {
@@ -302,7 +357,7 @@ function PayoutAccountCard({
         {block.test_values_only ? <ModeChip kind="test" /> : null}
       </div>
       {said ? <p className="text-base font-bold text-foreground">{said}</p> : null}
-      {problem ? <ProblemCard problem={problem} /> : null}
+      {shown ? <ProblemCard problem={shown} /> : null}
 
       {block.can_create ? (
         open ? (
@@ -383,9 +438,9 @@ function PayoutAccountCard({
                 </label>
                 <label className="block text-xs font-bold text-foreground">
                   {t("aiaic.field.ifsc")}
+                  {/* nothing cut off at 11: words typed here reach the scan, never its digits (RC-3, RC2-4) */}
                   <input
                     value={ifsc}
-                    maxLength={11}
                     onChange={(e) => setIfsc(e.target.value.toUpperCase())}
                     className={cn(input(badField === "ifsc"), "font-mono uppercase")}
                   />
@@ -446,7 +501,7 @@ function PayoutAccountCard({
             <div className="flex gap-2">
               <button
                 type="submit"
-                disabled={busy || !agreed || !readNotice || !notice}
+                disabled={busy || scan.scanning || !payoutSaveOpen(details, consent)}
                 className="flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 font-bold text-primary-foreground disabled:opacity-60"
               >
                 {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : null}

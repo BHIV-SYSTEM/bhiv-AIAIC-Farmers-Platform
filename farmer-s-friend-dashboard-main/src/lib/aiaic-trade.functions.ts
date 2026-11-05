@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import {
   PRESS_KEY_RE,
+  UPI_ID_MOST,
   type AiaicPricing,
   type AiaicResult,
   type BuyersLooking,
@@ -125,7 +126,7 @@ export const givePayoutAccount = createServerFn({ method: "POST" })
         name_on_pan: z.string().min(2).max(100),
         account_number: z.string().max(40).optional(),
         ifsc: z.string().max(20).optional(),
-        upi_id: z.string().max(300).optional(),
+        upi_id: z.string().max(UPI_ID_MOST).optional(),
       })
       .parse(d),
   )
@@ -248,7 +249,7 @@ export const giveMyDestination = createServerFn({ method: "POST" })
       .object({
         key: pressKey,
         kind: z.enum(["upi_id", "bank_account"]),
-        upi_id: z.string().trim().max(300).optional(),
+        upi_id: z.string().trim().max(UPI_ID_MOST).optional(),
         name: z.string().trim().max(120).optional(),
         account_number: z.string().trim().max(40).optional(),
         ifsc: z.string().trim().max(20).optional(),
