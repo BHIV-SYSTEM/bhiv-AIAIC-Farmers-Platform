@@ -20,13 +20,25 @@
  *      keeps her tap off it as far as the DOM says (jsdom does no layout: `inert`, `hidden`, a class that takes its taps);
  *  (c) her tap (a real click on Save, or the form's submit as the browser makes it) asks the scan FIRST, before her form
  *      is given to anything, in her chosen language, with her words as she typed them;
- *  (d) AIAIC's crisis card shows with its 3 helplines, no refusal is on screen, her form is never given, and Save is not
- *      stuck.
+ *  (d) AIAIC's crisis card SHOWS with its 3 helplines, each a link she can tap that dials it, with nothing on the card,
+ *      on a helpline or around them that hides it or keeps her tap off it as far as the DOM says (a closed <details>
+ *      among those); no refusal is on screen, her form is never given, and Save is not stuck, as she finds it: her
+ *      second tap asks the scan again, first, and gets the card again, and with every other field valid and ticked her
+ *      box corrected is given at once (the re-check of 5 Nov 2026, round 5: RC5-1, RC5-2).
+ * The Cashfree form in each of its three states (round 5, RC5-3): her first destination (AIAIC's notice, none given
+ * before); a replacement (a destination given before, as a recording holds it, and Change tapped: her tick is hers to
+ * give again); and a form AIAIC sent no notice for (nothing to tick). Held fixed: `largeAmount` (false: her amount
+ * under Rs 1,00,000, so the UPI box is offered), and Route's card only as AIAIC offers it on a TEST server (its TEST
+ * values button fills the other fields; no recording holds a live Route form).
+ * A slow scan (round 5, RC5-4): in T1 to T4 AIAIC answers after SLOW_MS (12 s), within this server's own limit on its
+ * answer (15 s, whose signal the stand-in honours, as a real fetch does); (c) and (d) still hold, and while the scan is
+ * asked nothing is given and no refusal is on screen. A time limit of the phone's of SLOW_MS or more is not seen here.
  * The one kind of press the re-check's RC2-3 decision sends to AIAIC as now (CRISIS_EN in a name box, every other field
  * valid and ticked: no rule of this phone refuses it, and AIAIC's own middleware reads the name first) is asserted
  * exactly as it is, so a change to it is seen. Not a crisis: a well-formed form is given with no scan; a 41-character
  * account is refused after the scan and Save is not stuck; an account number typed in the IFSC box sends no digit to
- * the scan.
+ * the scan; after each of those refusals, a copied phrase typed into a box and tapped asks the scan first and gets
+ * AIAIC's crisis card (RC5-1).
  *
  * NOTHING LEAVES THIS MACHINE: AIAIC is a closed port of this machine (AIAIC_BASE_URL, set before any app module loads),
  * `fetch` answers only the scan's `/safety/check` (AIAIC's RECORDED crisis answer, safety_check_crisis.json, when what
@@ -84,6 +96,27 @@ const CRISIS_ANSWER = recorded("safety_check_crisis");
 const HELPLINES = (CRISIS_ANSWER["talk_to_someone"] as { phone: string }[]).map((h) => h.phone);
 /** A clean read: AIAIC's answer with no distress in it (as the trade suite's scan bench answers one). */
 const CLEAN_ANSWER = { distress: false };
+/** A SLOW SCAN (the re-check's round 5, RC5-4): the next scan asked (`slowScan.next`) is answered after SLOW_MS, as AIAIC
+ * on a slow network might answer, and within this server's own limit on AIAIC's answer (15 s: TIMEOUT_MS of
+ * aiaic-account.server.ts, whose signal the stand-in honours). A time limit of the phone's of SLOW_MS or more is not
+ * seen here. */
+const SLOW_MS = 12_000;
+const slowScan = { next: false };
+/** The stand-in's answer after `ms`, given up as a real fetch gives up once its signal aborts. */
+const answerAfter = (ms: number, signal: AbortSignal | null | undefined) =>
+  new Promise<void>((answer, gaveUp) => {
+    if (signal?.aborted) return gaveUp(signal.reason);
+    if (ms <= 0) return answer();
+    const stop = () => {
+      clearTimeout(timer);
+      gaveUp(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", stop);
+      answer();
+    }, ms);
+    signal?.addEventListener("abort", stop, { once: true });
+  });
 
 /** What one press did, in order: "scan" each time the scan is asked, "give" when her form goes to its server function. */
 const seen = {
@@ -116,6 +149,9 @@ globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) =>
   const text = String(body.text ?? "");
   seen.events.push("scan");
   seen.scans.push({ text, lang: String(body.lang) });
+  const slow = slowScan.next;
+  slowScan.next = false;
+  await answerAfter(slow ? SLOW_MS : 0, init?.signal);
   const crisis = PHRASES.some((p) => text.toLowerCase().includes(p.toLowerCase()));
   return new Response(JSON.stringify(crisis ? CRISIS_ANSWER : CLEAN_ANSWER), {
     status: 200,
@@ -214,6 +250,10 @@ function suite(app: App, window: Window & typeof globalThis) {
   // what she sees: the forms read AIAIC's recorded answers through this server's own reading of them
   const notice = (app.mineForBrowser(recorded("collect_mine_paid")) as { x_notice?: unknown })
     .x_notice as never;
+  /** A destination she gave before, as AIAIC answered it in a recording: the Cashfree form is then her replacement. */
+  const givenBefore = (
+    app.mineForBrowser(recorded("collect_mine_processing")) as { x_destination?: unknown }
+  ).x_destination as Record<string, unknown>;
   const mineAnswer = {
     ok: true,
     data: {
@@ -291,10 +331,28 @@ function suite(app: App, window: Window & typeof globalThis) {
   };
 
   // ------------------------------------------------------------------------------------------- the page, driven
+  /** One macrotask turn, as a 0-ms timer gives it; the loop is kept turning meanwhile (immediates), so it never sleeps
+   * through the clock's tick, which holds a lone timer about 10 ms on Windows (here about 1 ms, as on Linux). */
+  const turn = () =>
+    new Promise<void>((done) => {
+      let fired = false;
+      setTimeout(() => {
+        fired = true;
+        done();
+      }, 0);
+      const spin = () => {
+        if (!fired) setImmediate(spin);
+      };
+      setImmediate(spin);
+    });
+  /** Her press run to its end, under React's act: 30 macrotask turns at least, and SETTLE_MS at least (measured on
+   * 5 Nov 2026, every press of this suite had ended within about 30 ms). */
+  const SETTLE_MS = 150;
   const settle = async () => {
-    for (let i = 0; i < 30; i++)
+    const from = Date.now();
+    for (let i = 0; i < 30 || Date.now() - from < SETTLE_MS; i++)
       await act(async () => {
-        await new Promise((r) => setTimeout(r, 0));
+        await turn();
       });
   };
   /** One input event, as her keyboard makes it: the box's value set through the browser's own setter. */
@@ -309,6 +367,12 @@ function suite(app: App, window: Window & typeof globalThis) {
   const tap = async (el: Element) => {
     await act(async () => {
       (el as HTMLElement).click();
+    });
+  };
+  /** Time passing as she waits, in real time, under React's act (the page answers what happens meanwhile). */
+  const wait = async (ms: number) => {
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, ms));
     });
   };
 
@@ -376,11 +440,44 @@ function suite(app: App, window: Window & typeof globalThis) {
     return found;
   };
 
-  const openCashfree = async (lang: Lang, gate = false): Promise<Opened> => {
-    const form = createElement(app.DestinationForm, { dest: null, notice, largeAmount: false });
+  /** The Cashfree form's three states (the re-check's round 5, RC5-3): her first destination (AIAIC's notice, none given
+   * before), a replacement (`givenBefore`, and Change tapped) and a form AIAIC sent no notice for (nothing to tick). */
+  type CashfreeState = "first" | "replace" | "nonotice";
+  const openCashfree = async (
+    lang: Lang,
+    gate = false,
+    state: CashfreeState = "first",
+  ): Promise<Opened> => {
+    const form = createElement(app.DestinationForm, {
+      dest: state === "replace" ? (givenBefore as never) : null,
+      notice: state === "nonotice" ? null : notice,
+      largeAmount: false,
+    });
     const m = await mount(gate ? createElement(app.CrisisFirst, { children: form }) : form, lang);
     const scope = () =>
       m.container.querySelector('[data-testid="aiaic-destination-form"]') ?? m.container;
+    if (state === "replace") {
+      // a destination given before shows as its hint and Change, not as the form, until she taps Change
+      assert.equal(givenBefore["ready"], true, "the recording's destination is ready");
+      assert.equal(
+        m.container.querySelector('[data-testid="aiaic-destination-form"]'),
+        null,
+        "her destination given before shows, not the form",
+      );
+      assert.ok(
+        (m.container.textContent ?? "").includes(String(givenBefore["hint"])),
+        "its masked hint",
+      );
+      const change = [...m.container.querySelectorAll("button")].find(
+        (b) => (b.textContent ?? "").trim() === words(lang, "aiaic.dest.change"),
+      );
+      assert.ok(change, "Change, to replace it");
+      await tap(change);
+      assert.ok(
+        m.container.querySelector('[data-testid="aiaic-destination-form"]'),
+        "Change opens the form: her replacement",
+      );
+    }
     const LABEL: Record<Box | "pan", string> = {
       name: "aiaic.dest.name",
       account: "aiaic.dest.account",
@@ -521,14 +618,21 @@ function suite(app: App, window: Window & typeof globalThis) {
     [...scope.querySelectorAll('[role="alert"], [role="status"], [aria-live]')].map(
       (r) => `${r.getAttribute("role") ?? "live"}: ${(r.textContent ?? "").trim()}`,
     );
-  /** What keeps her tap off Save, as far as the DOM can say (jsdom does no layout, and a script's `click()` reaches an
-   * element a browser would not let her tap): disabled (its own, or a fieldset's), or on Save or around it `inert`,
-   * `hidden`, `aria-hidden`, an inline style that hides it or takes its taps, or a class that does, read by its name. */
+  /** What keeps her eyes or her tap off an element (Save; AIAIC's crisis card and each helpline on it, the re-check's
+   * round 5, RC5-2), as far as the DOM can say (jsdom does no layout, and a script's `click()` reaches an element a
+   * browser would not let her tap): disabled (its own, or a fieldset's), or on it or around it `inert`, `hidden`,
+   * `aria-hidden`, an inline style that hides it or takes its taps, or a class that does, read by its name; or a closed
+   * <details> it is inside of, outside that details' own summary. A stylesheet rule other than those classes is not seen. */
   const NO_TAP = new Set(["hidden", "invisible", "pointer-events-none"]);
-  const untappable = (save: HTMLButtonElement): string[] => {
+  const untappable = (el: Element): string[] => {
     const why: string[] = [];
-    if (save.disabled || save.matches(":disabled")) why.push("disabled");
-    for (let e: Element | null = save; e; e = e.parentElement) {
+    if ((el as HTMLButtonElement).disabled === true || el.matches(":disabled"))
+      why.push("disabled");
+    for (
+      let e: Element | null = el, from: Element | null = null;
+      e;
+      from = e, e = e.parentElement
+    ) {
       const tag = `<${e.tagName.toLowerCase()}>`;
       for (const a of ["inert", "hidden"]) if (e.hasAttribute(a)) why.push(`${a} on ${tag}`);
       if (e.getAttribute("aria-hidden") === "true") why.push(`aria-hidden on ${tag}`);
@@ -541,8 +645,43 @@ function suite(app: App, window: Window & typeof globalThis) {
         why.push(`a style on ${tag} that hides it or takes its taps`);
       for (const c of (e.getAttribute("class") ?? "").split(/\s+/))
         if (NO_TAP.has(c)) why.push(`${c} on ${tag}`);
+      if (
+        from &&
+        e.tagName === "DETAILS" &&
+        !e.hasAttribute("open") &&
+        from !== [...e.children].find((k) => k.tagName === "SUMMARY")
+      )
+        why.push("inside a closed <details>, outside its summary");
     }
     return why;
+  };
+  /** (d) AIAIC's crisis card SHOWN with its 3 helplines (the re-check's round 5, RC5-2): the card, and each helpline of
+   * AIAIC's answer as a link she can tap that dials it, with nothing on either or around them that hides it or keeps
+   * her tap off it (`untappable`): the helplines are the card's whole purpose. */
+  const cardShown = (scope: Element, press: string) => {
+    const card = scope.querySelector("[data-crisis]");
+    assert.ok(card, `${press}: AIAIC's crisis card shows`);
+    assert.deepEqual(
+      untappable(card),
+      [],
+      `${press}: the card is shown, nothing on it or around it hides it`,
+    );
+    for (const phone of HELPLINES) {
+      const link = [...card.querySelectorAll("a")].find((a) =>
+        (a.textContent ?? "").includes(phone),
+      );
+      assert.ok(link, `${press}: helpline ${phone} is on the card, as a link`);
+      assert.equal(
+        link.getAttribute("href"),
+        `tel:${phone.replace(/[^0-9+]/g, "")}`,
+        `${press}: her tap on helpline ${phone} dials it`,
+      );
+      assert.deepEqual(
+        untappable(link),
+        [],
+        `${press}: helpline ${phone} is shown, and her tap reaches it`,
+      );
+    }
   };
   /** (a) and (b), after each input event: against the empty form. */
   const watchTyping = (f: Opened, lang: Lang) => {
@@ -605,18 +744,59 @@ function suite(app: App, window: Window & typeof globalThis) {
     rest: "valid" | "empty";
     /** inside the app's own gate (`CrisisFirst`, as `TradeSwitch` puts every AIAIC page): the card then stands alone */
     gate?: boolean;
+    /** the Cashfree form's state: her first destination when not said */
+    state?: CashfreeState;
+    /** her first tap's scan is answered after SLOW_MS */
+    slow?: boolean;
   };
+  /** Route's TEST values (AiaicPayments.tsx's own; AIAIC's recorder uses the same kind): never a person's. */
+  const ROUTE_VALID = {
+    name: "Practice Payee Testname",
+    pan: "AAAPZ4321K",
+    account: "000123456789",
+    ifsc: "RECT0000001",
+    upi: "practicepayee@rzptest",
+  };
+  const CASHFREE_VALID = { name: "Recording Farmer", ...TEST_BANK, upi: "success@upi" };
+  const VALID = { cashfree: CASHFREE_VALID, route: ROUTE_VALID };
+  /** Each box as her press sends it to its server function. */
+  const SENT_AS: Record<Case["form"], Record<Box, string>> = {
+    cashfree: { name: "name", account: "account_number", ifsc: "ifsc", upi: "upi_id" },
+    route: { name: "name_on_pan", account: "account_number", ifsc: "ifsc", upi: "upi_id" },
+  };
+  const FN_OF = { cashfree: "giveMyDestination", route: "givePayoutAccount" } as const;
+  const notStuck = (f: Opened) => {
+    const save = f.save();
+    assert.ok(save, "Save is still on her form");
+    assert.deepEqual(untappable(save), [], "Save is not stuck");
+    assert.equal(save.querySelector(".animate-spin"), null, "Save does not spin");
+  };
+  const givenAtOnce = (fn: string, fields: Record<string, string>) => {
+    assert.deepEqual(seen.events, ["give"], "given at once: no scan is asked");
+    assert.equal(seen.given[0]?.fn, fn);
+    assert.equal(seen.given[0]?.taken, true, "its server function's validator takes it");
+    for (const [k, v] of Object.entries(fields))
+      assert.equal(seen.given[0]?.sent[k], v, `${k} as she typed it`);
+  };
+  /** Every other field valid and ticked (or the Cashfree UPI form, whose only box is hers, ticked): her box corrected
+   * is a well-formed form, given at once. */
+  const correctable = (c: Case) =>
+    !c.gate && c.ticked && (c.rest === "valid" || (c.form === "cashfree" && c.kind === "upi"));
   /** The press the re-check's RC2-3 decision sends to AIAIC as now: no rule of this phone refuses it, and AIAIC's own
    * middleware reads the name in its body first (the trade suite's B21). Asserted exactly, so a change to it is seen. */
   const sentAsNow = (c: Case) =>
     c.phrase === "CRISIS_EN" && c.box === "name" && c.ticked && c.rest === "valid";
 
+  /** When the screen is read while a slow scan is asked. */
+  const WHILE_ASKED_MS = 300;
   const crisisCase = (c: Case) => async () => {
     const lang = LANG_OF[c.phrase];
     const phrase = PHRASE[c.phrase];
     await inStart(async () => {
       const f =
-        c.form === "cashfree" ? await openCashfree(lang, c.gate) : await openRoute(lang, c.gate);
+        c.form === "cashfree"
+          ? await openCashfree(lang, c.gate, c.state)
+          : await openRoute(lang, c.gate);
       try {
         await f.choose(c.kind);
         if (c.ticked) await f.tick();
@@ -640,7 +820,23 @@ function suite(app: App, window: Window & typeof globalThis) {
         const save = f.save();
         assert.ok(save, "Save is on her form");
         assert.deepEqual(untappable(save), [], "her tap can reach Save");
-        await tap(save);
+        if (c.slow) {
+          // AIAIC answers after SLOW_MS; while it is asked, nothing answers her before it does
+          slowScan.next = true;
+          await tap(save);
+          await wait(WHILE_ASKED_MS);
+          assert.deepEqual(
+            seen.events,
+            ["scan"],
+            "while the slow scan is asked: asked first, nothing given",
+          );
+          assert.deepEqual(
+            refusalOnScreen(f.scope(), lang),
+            [],
+            "while the slow scan is asked: no refusal is on screen",
+          );
+          await wait(SLOW_MS - WHILE_ASKED_MS + 500);
+        } else await tap(save);
         await settle();
         if (sentAsNow(c)) {
           assert.deepEqual(
@@ -649,44 +845,81 @@ function suite(app: App, window: Window & typeof globalThis) {
             "sent to AIAIC as now: no scan on this phone, given",
           );
           const sent = seen.given[0]?.sent ?? {};
-          assert.equal(
-            sent[c.form === "cashfree" ? "name" : "name_on_pan"],
-            phrase,
-            "the name's words reach AIAIC intact",
-          );
+          assert.equal(sent[SENT_AS[c.form].name], phrase, "the name's words reach AIAIC intact");
           assert.equal(seen.given[0]?.taken, true, "its server function's validator takes it");
+          if (c.form === "cashfree")
+            assert.equal(
+              sent["replace"],
+              c.state === "replace",
+              "a replacement only when it is one",
+            );
           return;
         }
-        // (c) the scan first, in her language, with her words as she typed them
-        assert.equal(
-          seen.events[0],
-          "scan",
-          `her tap asks the scan first (it did: ${seen.events.join(", ") || "nothing"})`,
-        );
-        assert.equal(seen.scans[0]?.lang, lang, "the scan is asked in her chosen language");
-        assert.ok(
-          seen.scans[0]?.text.includes(typed.trim()),
-          `the scan reads her words as she typed them ("${seen.scans[0]?.text}")`,
-        );
-        for (const scan of seen.scans)
-          assert.doesNotMatch(scan.text, /\p{Nd}/u, "no digit she typed goes to the scan");
-        // (d) AIAIC's crisis card, nothing refused, never given, Save not stuck
-        assert.deepEqual(seen.events, ["scan"], "her form is never given");
-        const card = f.scope().querySelector("[data-crisis]");
-        assert.ok(card, "AIAIC's crisis card shows");
-        for (const phone of HELPLINES)
-          assert.ok((card.textContent ?? "").includes(phone), `helpline ${phone}`);
-        assert.deepEqual(refusalOnScreen(f.scope(), lang), [], "no refusal is on screen");
+        const scanFirstThenCard = (press: string) => {
+          // (c) the scan first, in her language, with her words as she typed them
+          assert.equal(
+            seen.events[0],
+            "scan",
+            `${press} asks the scan first (it did: ${seen.events.join(", ") || "nothing"})`,
+          );
+          assert.equal(
+            seen.scans[0]?.lang,
+            lang,
+            `${press}: the scan is asked in her chosen language`,
+          );
+          assert.ok(
+            seen.scans[0]?.text.includes(typed.trim()),
+            `${press}: the scan reads her words as she typed them ("${seen.scans[0]?.text}")`,
+          );
+          for (const scan of seen.scans)
+            assert.doesNotMatch(
+              scan.text,
+              /\p{Nd}/u,
+              `${press}: no digit she typed goes to the scan`,
+            );
+          // (d) AIAIC's crisis card shown with its helplines, nothing refused, never given
+          assert.deepEqual(seen.events, ["scan"], `${press}: her form is never given`);
+          cardShown(f.scope(), press);
+          assert.deepEqual(
+            refusalOnScreen(f.scope(), lang),
+            [],
+            `${press}: no refusal is on screen`,
+          );
+        };
+        scanFirstThenCard("her tap");
         if (c.gate) {
           // the page is the card alone: nothing of her form, and no Save to be stuck
           assert.equal(f.container.querySelector("input, form"), null, "the card stands alone");
           return;
         }
-        const after = f.save();
-        assert.ok(after, "Save is still on her form");
-        assert.deepEqual(untappable(after), [], "Save is not stuck");
-        assert.equal(after.querySelector(".animate-spin"), null, "Save does not spin");
+        notStuck(f);
+        // Save is not stuck, as she finds it (RC5-1): her second tap asks the scan again, first, and the card again
+        seen.reset();
+        const again = f.save();
+        assert.ok(again, "Save is on her form for her second tap");
+        await tap(again);
+        await settle();
+        scanFirstThenCard("her second tap");
+        notStuck(f);
+        if (correctable(c)) {
+          // her box corrected, every other field valid and ticked: given at once
+          const value = VALID[c.form][c.box];
+          await input(f.box(c.box), value);
+          seen.reset();
+          const corrected = f.save();
+          assert.ok(corrected, "Save is on her form for her corrected press");
+          await tap(corrected);
+          await settle();
+          givenAtOnce(FN_OF[c.form], { [SENT_AS[c.form][c.box]]: value });
+          if (c.form === "cashfree")
+            assert.equal(
+              seen.given[0]?.sent["replace"],
+              c.state === "replace",
+              "a replacement only when it is one",
+            );
+        }
       } finally {
+        slowScan.next = false;
         await f.unmount();
       }
     });
@@ -721,21 +954,59 @@ function suite(app: App, window: Window & typeof globalThis) {
   ];
   const FORM_SAID = { cashfree: "Cashfree", route: "Route" };
   const BOX_SAID = { name: "name", account: "account", ifsc: "IFSC", upi: "UPI ID" };
+  const STATE_SAID: Record<CashfreeState, string> = {
+    first: "",
+    replace: " replacement form (a destination given before, Change tapped),",
+    nonotice: " form with no notice from AIAIC (nothing to tick),",
+  };
+  const outcome = (c: Case) =>
+    sentAsNow(c)
+      ? "given with no scan on this phone, as the RC2-3 decision sends it to AIAIC"
+      : `the scan first, AIAIC's crisis card and helplines shown, never given; her second tap the same${correctable(c) ? "; her box corrected, given at once" : ""}`;
   let n = 0;
-  for (const b of boxes)
-    for (const phrase of ["CRISIS_HI", "CRISIS_EN", "CRISIS_MR"] as const)
-      for (const ticked of [true, false])
-        for (const rest of b.rests) {
-          n += 1;
-          const c: Case = { id: `M${String(n).padStart(3, "0")}`, ...b, phrase, ticked, rest };
-          const what = sentAsNow(c)
-            ? "given with no scan on this phone, as the RC2-3 decision sends it to AIAIC"
-            : "the scan first, AIAIC's crisis card and helplines, never given";
-          test(
-            `${c.id} ${FORM_SAID[c.form]} ${c.kind === "bank" ? "bank" : "UPI"} form, ${b.form === "route" && b.box === "name" ? "name on PAN" : BOX_SAID[c.box]} box: ${c.phrase} (${LANG_OF[c.phrase]}), ${ticked ? "ticked" : "not ticked"}, the rest ${rest === "valid" ? "valid" : "empty"}: ${what}`,
-            crisisCase(c),
-          );
-        }
+  const matrix = (state: CashfreeState, forms: Case["form"][]) => {
+    for (const b of boxes.filter((x) => forms.includes(x.form)))
+      for (const phrase of ["CRISIS_HI", "CRISIS_EN", "CRISIS_MR"] as const)
+        for (const ticked of state === "nonotice" ? [false] : [true, false])
+          for (const rest of b.rests) {
+            n += 1;
+            const c: Case = { id: `M${String(n).padStart(3, "0")}`, ...b, phrase, ticked, rest };
+            if (state !== "first") c.state = state;
+            test(
+              `${c.id} ${FORM_SAID[c.form]}${STATE_SAID[state]} ${c.kind === "bank" ? "bank" : "UPI"} form, ${b.form === "route" && b.box === "name" ? "name on PAN" : BOX_SAID[c.box]} box: ${c.phrase} (${LANG_OF[c.phrase]}), ${ticked ? "ticked" : "not ticked"}, the rest ${rest === "valid" ? "valid" : "empty"}: ${outcome(c)}`,
+              crisisCase(c),
+            );
+          }
+  };
+  // M001 to M102: both forms, the Cashfree form as her first destination
+  matrix("first", ["cashfree", "route"]);
+  // M103 to M165: the Cashfree form's other two states (the re-check's round 5, RC5-3)
+  matrix("replace", ["cashfree"]);
+  matrix("nonotice", ["cashfree"]);
+
+  // a slow scan (the re-check's round 5, RC5-4): each form, a press this phone would refuse and one it gives once read
+  const SLOW: [Case["form"], Box, Phrase, string][] = [
+    ["cashfree", "name", "CRISIS_HI", "a press this phone would refuse"],
+    ["cashfree", "account", "CRISIS_EN", "a press read first, nothing here refusing it"],
+    ["route", "name", "CRISIS_HI", "a press this phone would refuse"],
+    ["route", "account", "CRISIS_EN", "a press read first, nothing here refusing it"],
+  ];
+  SLOW.forEach(([form, box, phrase, press], i) => {
+    const c: Case = {
+      id: `T${i + 1}`,
+      form,
+      kind: "bank",
+      box,
+      phrase,
+      ticked: true,
+      rest: "valid",
+      slow: true,
+    };
+    test(
+      `${c.id} a slow scan (AIAIC answers after ${SLOW_MS / 1000} s), ${FORM_SAID[form]} bank form, ${form === "route" && box === "name" ? "name on PAN" : BOX_SAID[box]} box: ${phrase} (${LANG_OF[phrase]}), ticked, the rest valid (${press}): while it is asked nothing is given and no refusal shows; then ${outcome(c)}`,
+      crisisCase(c),
+    );
+  });
 
   // inside the app's own gate, a crisis in each box of each form: the page becomes the card alone
   const GATED: [Case["form"], Kind, Box, Phrase][] = [
@@ -767,15 +1038,6 @@ function suite(app: App, window: Window & typeof globalThis) {
   });
 
   // ------------------------------------------------------------------------------------- not a crisis
-  /** Route's TEST values (AiaicPayments.tsx's own; AIAIC's recorder uses the same kind): never a person's. */
-  const ROUTE_VALID = {
-    name: "Practice Payee Testname",
-    pan: "AAAPZ4321K",
-    account: "000123456789",
-    ifsc: "RECT0000001",
-    upi: "practicepayee@rzptest",
-  };
-  const CASHFREE_VALID = { name: "Recording Farmer", ...TEST_BANK, upi: "success@upi" };
   const ACCOUNT_41 = `${TEST_BANK.account}${TEST_BANK.account}02629180000`;
   /** Her form filled box by box, each change an input event held to (a), then her tap: the form, for what it shows. */
   const pressFilled = async (
@@ -800,12 +1062,6 @@ function suite(app: App, window: Window & typeof globalThis) {
     await settle();
     return f;
   };
-  const notStuck = (f: Opened) => {
-    const save = f.save();
-    assert.ok(save, "Save is still on her form");
-    assert.deepEqual(untappable(save), [], "Save is not stuck");
-    assert.equal(save.querySelector(".animate-spin"), null, "Save does not spin");
-  };
   /** Refused after the scan read her words (none of them a digit): the refusal said, never given, Save not stuck. */
   const refusedAfterScan = (f: Opened, said: string) => {
     assert.equal(seen.events[0], "scan", "her words are read first");
@@ -816,28 +1072,94 @@ function suite(app: App, window: Window & typeof globalThis) {
     assert.ok((f.scope().textContent ?? "").includes(said), `the refusal is said: "${said}"`);
     notStuck(f);
   };
-  const givenAtOnce = (fn: string, fields: Record<string, string>) => {
-    assert.deepEqual(seen.events, ["give"], "given at once: no scan is asked");
-    assert.equal(seen.given[0]?.fn, fn);
-    assert.equal(seen.given[0]?.taken, true, "its server function's validator takes it");
-    for (const [k, v] of Object.entries(fields))
-      assert.equal(seen.given[0]?.sent[k], v, `${k} as she typed it`);
+  /**
+   * AFTER A REFUSAL, A CRISIS (the re-check's round 5, RC5-1): she types a copied phrase into a box, one character at a
+   * time, and taps again. Save stays on her form and open while she types, and nothing is said but what her first press
+   * left; her tap asks the scan first, in her chosen language, with her words; AIAIC's crisis card is shown with its
+   * helplines; her form is never given, and Save is not stuck. The Cashfree form then says no refusal at all; Route's
+   * may keep her first press's box line beside the card (Route's second press, older than this branch, accepted as it
+   * is: inside the app's gate the card stands alone), and nothing else.
+   */
+  const crisisAfterRefusal = async (
+    f: Opened,
+    form: Case["form"],
+    lang: Lang,
+    b: Box,
+    phrase: Phrase,
+  ) => {
+    const left = refusalOnScreen(f.scope(), lang);
+    const nothingNew = (where: string) => {
+      for (const why of refusalOnScreen(f.scope(), lang))
+        assert.ok(
+          left.includes(why),
+          `${where}: nothing said but what her first press left (${why})`,
+        );
+    };
+    const box = f.box(b);
+    await input(box, "");
+    for (const ch of Array.from(PHRASE[phrase])) {
+      await input(box, box.value + ch);
+      const save = f.save();
+      assert.ok(save, "while she types: Save is on her form");
+      assert.deepEqual(
+        untappable(save),
+        [],
+        "while she types: Save is open, and her tap reaches it",
+      );
+      for (const i of f.scope().querySelectorAll("input"))
+        assert.equal(
+          (i as HTMLInputElement).validationMessage,
+          "",
+          "while she types: no box carries the browser's own message",
+        );
+      nothingNew("while she types");
+    }
+    const typed = box.value;
+    seen.reset();
+    const save = f.save();
+    assert.ok(save, "Save is on her form");
+    await tap(save);
+    await settle();
+    const press = "her tap after the refusal";
+    assert.equal(
+      seen.events[0],
+      "scan",
+      `${press} asks the scan first (it did: ${seen.events.join(", ") || "nothing"})`,
+    );
+    assert.deepEqual(seen.events, ["scan"], `${press}: her form is never given`);
+    assert.equal(seen.scans[0]?.lang, lang, `${press}: the scan is asked in her chosen language`);
+    assert.ok(
+      seen.scans[0]?.text.includes(typed.trim()),
+      `${press}: the scan reads her words as she typed them ("${seen.scans[0]?.text}")`,
+    );
+    for (const scan of seen.scans)
+      assert.doesNotMatch(
+        scan.text,
+        /\p{Nd}/u,
+        `${press}: no digit goes to the scan ("${scan.text}")`,
+      );
+    cardShown(f.scope(), press);
+    if (form === "cashfree")
+      assert.deepEqual(refusalOnScreen(f.scope(), lang), [], `${press}: no refusal is on screen`);
+    else nothingNew(press);
+    notStuck(f);
   };
   const routeSaid = (lang: Lang, field: string) =>
     words(lang, "aiaic.refused.payout_details_not_valid").replace(
       "{field}",
       words(lang, `aiaic.field.${field}`),
     );
-  const quietly = (run: () => Promise<Opened>, then: (f: Opened) => void) => async () => {
-    await inStart(async () => {
-      const f = await run();
-      try {
-        then(f);
-      } finally {
-        await f.unmount();
-      }
-    });
-  };
+  const quietly =
+    (run: () => Promise<Opened>, then: (f: Opened) => void | Promise<void>) => async () => {
+      await inStart(async () => {
+        const f = await run();
+        try {
+          await then(f);
+        } finally {
+          await f.unmount();
+        }
+      });
+    };
 
   test(
     "N1 Cashfree bank form, well formed and ticked: given at once with no scan, and its server function's validator takes it",
@@ -894,7 +1216,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     ),
   );
   test(
-    "N5 Cashfree, a 41-character account: refused after the scan read her name, never given, Save not stuck",
+    "N5 Cashfree, a 41-character account: refused after the scan read her name, never given, Save not stuck; then CRISIS_HI typed in the account box and tapped: the scan first, AIAIC's crisis card",
     quietly(
       () =>
         pressFilled("cashfree", "en", "bank", {
@@ -906,11 +1228,12 @@ function suite(app: App, window: Window & typeof globalThis) {
         assert.equal(ACCOUNT_41.length, 41);
         assert.deepEqual(seen.scans, [{ text: CASHFREE_VALID.name, lang: "en" }]);
         refusedAfterScan(f, words("en", "aiaic.refused.account_number_not_valid"));
+        return crisisAfterRefusal(f, "cashfree", "en", "account", "CRISIS_HI");
       },
     ),
   );
   test(
-    "N6 Route, a 41-character account: refused after the scan read her name, never given, Save not stuck",
+    "N6 Route, a 41-character account: refused after the scan read her name, never given, Save not stuck; then CRISIS_HI typed in the account box and tapped: the scan first, AIAIC's crisis card",
     quietly(
       () =>
         pressFilled("route", "en", "bank", {
@@ -922,6 +1245,7 @@ function suite(app: App, window: Window & typeof globalThis) {
       (f) => {
         assert.deepEqual(seen.scans, [{ text: ROUTE_VALID.name, lang: "en" }]);
         refusedAfterScan(f, routeSaid("en", "account_number"));
+        return crisisAfterRefusal(f, "route", "en", "account", "CRISIS_HI");
       },
     ),
   );
@@ -935,7 +1259,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     const accountBox = (valid: { account: string; ifsc: string }) =>
       account === "empty" ? "" : account === "ifsc" ? valid.ifsc : valid.account;
     test(
-      `N${7 + 2 * i} Cashfree, an account number typed in the IFSC box, ${what}: no digit goes to the scan, then the refusal`,
+      `N${7 + 2 * i} Cashfree, an account number typed in the IFSC box, ${what}: no digit goes to the scan, then the refusal; then CRISIS_MR typed in the IFSC box and tapped: the scan first, AIAIC's crisis card`,
       quietly(
         () =>
           pressFilled("cashfree", "en", "bank", {
@@ -943,11 +1267,14 @@ function suite(app: App, window: Window & typeof globalThis) {
             account: accountBox(CASHFREE_VALID),
             ifsc: CASHFREE_VALID.account,
           }),
-        (f) => refusedAfterScan(f, words("en", `aiaic.refused.${cashfreeCode}`)),
+        (f) => {
+          refusedAfterScan(f, words("en", `aiaic.refused.${cashfreeCode}`));
+          return crisisAfterRefusal(f, "cashfree", "en", "ifsc", "CRISIS_MR");
+        },
       ),
     );
     test(
-      `N${8 + 2 * i} Route, an account number typed in the IFSC box, ${what}: no digit goes to the scan, then the refusal`,
+      `N${8 + 2 * i} Route, an account number typed in the IFSC box, ${what}: no digit goes to the scan, then the refusal; then CRISIS_MR typed in the IFSC box and tapped: the scan first, AIAIC's crisis card`,
       quietly(
         () =>
           pressFilled("route", "en", "bank", {
@@ -956,7 +1283,10 @@ function suite(app: App, window: Window & typeof globalThis) {
             account: accountBox(ROUTE_VALID),
             ifsc: ROUTE_VALID.account,
           }),
-        (f) => refusedAfterScan(f, routeSaid("en", routeField)),
+        (f) => {
+          refusedAfterScan(f, routeSaid("en", routeField));
+          return crisisAfterRefusal(f, "route", "en", "ifsc", "CRISIS_MR");
+        },
       ),
     );
   });
@@ -1274,6 +1604,7 @@ async function main() {
       outside.length = 0;
       seen.unanswered.length = 0;
       seen.rejections.length = 0;
+      slowScan.next = false;
       try {
         await t.run();
         assert.deepEqual(
