@@ -18,6 +18,7 @@
  * https://tile.openstreetmap.org (and any other tile host used), or the browser refuses every tile.
  */
 import { placeShown, type NearbyMandi, type TransportEstimate } from "@/lib/aiaic-trade";
+import { mandiIdentity } from "@/lib/aiaic-trip";
 
 export const OSM_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const OSM_COPYRIGHT_URL = "https://www.openstreetmap.org/copyright";
@@ -144,7 +145,9 @@ export const NEARBY_DOTS = 12;
  * Every place is labelled in her language `lang` from the names AIAIC sends beside it (`names[lang]`, contract section
  * 20); a server not yet updated sends none, and the label is then as before: her district by the name the page has for
  * it (`fromName`, AIAIC's district list in her language) else AIAIC's district, a mandi by AIAIC's label. Places are
- * told apart by their keys (`mandi`), never by a label.
+ * told apart by their identity (`mandiIdentity`: the state, the district and the name AIAIC sends), never by a label:
+ * one name AIAIC lists twice is two towns, and the one not chosen is drawn as a dot of its own (the audit of 6 Nov 2026,
+ * F2: Ramnagar APMC of Maihar was dropped from the map when Satna's was chosen).
  */
 export function routeMapOf(
   est: TransportEstimate,
@@ -156,8 +159,9 @@ export function routeMapOf(
   const to = est.to;
   const coordinates = est.route?.coordinates;
   const road = est.distance?.method === "road" && Array.isArray(coordinates);
+  const chosen = mandiIdentity(to);
   const others: MapPlace[] = nearby
-    .filter((m) => m.mandi !== to.mandi)
+    .filter((m) => mandiIdentity(m) !== chosen)
     .slice(0, NEARBY_DOTS)
     .map((m) => ({
       lat: m.lat,

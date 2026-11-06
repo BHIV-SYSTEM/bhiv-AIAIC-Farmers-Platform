@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   QUANTITY_CHOICES,
   attributionsOf,
-  placeShown,
   quintalWords,
   quintals,
   rupeeRange,
@@ -15,11 +14,25 @@ import {
   sourcesSaid,
   startDistrict,
   vehicleName,
+  type NearbyMandi,
   type TransportEstimate,
 } from "@/lib/aiaic-trade";
 import type { TripWays } from "@/lib/aiaic-trade";
 import { getNearbyMandis, getTransportEstimate } from "@/lib/aiaic-trade.functions";
-import { estateOf, mandiKey, type Estate } from "@/lib/aiaic-trip";
+import {
+  chosenEntry,
+  estateOf,
+  mandiChoices,
+  mandiIdentity,
+  namedEntries,
+  nearbyAsk,
+  nearbyLimitFor,
+  nearbyQueryKey,
+  tripAsk,
+  tripQueryKey,
+  type Estate,
+  type TripFrom,
+} from "@/lib/aiaic-trip";
 import { useI18n } from "@/lib/i18n";
 import { getPlacesDistricts } from "@/lib/places.functions";
 import { cn } from "@/lib/utils";
@@ -29,7 +42,8 @@ import { TripWaysTiles } from "./TripWaysTiles";
 import { RouteMap } from "./RouteMap";
 import { routeMapOf } from "./route-map";
 
-// her state and a mandi's letters-only key: shared with the answer at a glance, which asks the same trip (push 4)
+// her state, a mandi's letters-only key and its identity, the query keys and the requests: shared with the answer at a
+// glance, which asks the same trip (push 4; one key for one trip since the audit of 6 Nov 2026, N7)
 
 const SELECT =
   "min-h-12 w-full rounded-xl border-2 border-input bg-background px-3 text-base font-semibold text-foreground outline-none focus:border-ring";
@@ -73,6 +87,8 @@ export function TransportCostCard({
 
   const [estate, setEstate] = useState<Estate>(estateOf(fromState));
   const [district, setDistrict] = useState<string>((fromDistrict ?? "").toLowerCase());
+  // her own choice: the identity of the mandi she picked (`mandiIdentity`: its state, district and name), never its
+  // name alone (two towns of one name are two choices)
   const [mandiPick, setMandiPick] = useState<string>("");
   const [weight, setWeight] = useState<number>(quantityQ > 0 ? quantityQ : 10);
   const [more, setMore] = useState(false);
@@ -94,52 +110,37 @@ export function TransportCostCard({
     setDistrict(startDistrict(districtList, [fromDistrict], fromText));
   }, [districtList, fromDistrict, fromText, district]);
 
-  // A wider list when an answer named a mandi, so that mandi is more likely held in it.
-  const nearbyLimit = toMandi ? 40 : 15;
+  // A wider list when an answer named a mandi, so that mandi is more likely held in it. Asked under the same keys, with
+  // the same requests, as the answer at a glance asks (`useMandiTrip`): whichever is drawn first fills the other.
+  const nearbyLimit = nearbyLimitFor(toMandi);
+  const place = { estate, district, taluka: fromTaluka };
   const nearby = useQuery({
-    queryKey: ["aiaic-nearby", estate, district, nearbyLimit, fromTaluka ?? null],
-    queryFn: () =>
-      nearbyFn({
-        data: {
-          district,
-          state: estate,
-          limit: nearbyLimit,
-          ...(fromTaluka ? { taluka: fromTaluka } : {}),
-        },
-      }),
+    queryKey: nearbyQueryKey(place, nearbyLimit),
+    queryFn: () => nearbyFn({ data: nearbyAsk(place, nearbyLimit) }),
     enabled: Boolean(district),
     staleTime: 30 * 60_000,
   });
   const mandis = useMemo(() => (nearby.data?.ok ? nearby.data.data.mandis : []), [nearby.data]);
-  // The mandi the answer named, when AIAIC's list holds it (names compared by their letters, "APMC" left out).
-  const named = useMemo(() => {
-    const key = mandiKey(toMandi);
-    return key ? (mandis.find((m) => mandiKey(m.mandi) === key)?.mandi ?? "") : "";
-  }, [toMandi, mandis]);
-  // Her own choice first, then the mandi the answer named, then the first mandi far enough to measure a trip to.
-  const mandi = useMemo(() => {
-    if (mandiPick && mandis.some((m) => m.mandi === mandiPick)) return mandiPick;
-    if (named) return named;
-    return (mandis.find((m) => m.straight_km >= 5) ?? mandis[0])?.mandi ?? "";
-  }, [mandiPick, mandis, named]);
-  const mandiRow = mandis.find((m) => m.mandi === mandi);
+  // The mandi the answer named, when AIAIC's list holds it (names compared by their letters, "APMC" left out); of two
+  // towns of one name the nearer, its district said beside it in the list, so she sees which and can choose the other.
+  const named = useMemo(() => namedEntries(mandis, toMandi)[0] ?? null, [toMandi, mandis]);
+  // Her own choice first (by the mandi's identity), then the mandi the answer named, then the first mandi far enough to
+  // measure a trip to.
+  const entry = useMemo(() => chosenEntry(mandis, mandiPick, named), [mandiPick, mandis, named]);
+  // Each mandi of the list as a choice of its own: its identity, its name in her language, and its district beside a
+  // name the list holds twice (6 Nov 2026, the audit's F2: Ramnagar APMC of Satna and of Maihar were one choice)
+  const choices = useMemo(
+    () => mandiChoices(mandis, lang, t, districtList),
+    [mandis, lang, t, districtList],
+  );
 
+  // The trip asked for the mandi chosen, by its own state and district (AIAIC finds one of two towns of one name by
+  // them), and kept under its identity
+  const trip: TripFrom = { estate, district, weight, taluka: fromTaluka };
   const estimate = useQuery({
-    queryKey: ["aiaic-transport", estate, district, mandi, weight, fromTaluka ?? null],
-    queryFn: () =>
-      estimateFn({
-        data: {
-          mandi,
-          quantity_q: weight,
-          district,
-          state: estate,
-          mandi_state: estateOf(mandiRow?.state),
-          ...(mandiRow?.district_key ? { mandi_district: mandiRow.district_key } : {}),
-          from_place: "farm",
-          ...(fromTaluka ? { taluka: fromTaluka } : {}),
-        },
-      }),
-    enabled: Boolean(district && mandi && weight > 0),
+    queryKey: tripQueryKey(entry, trip),
+    queryFn: () => estimateFn({ data: tripAsk(entry as NearbyMandi, trip) }),
+    enabled: Boolean(district && entry && weight > 0),
     staleTime: 30 * 60_000,
   });
 
@@ -258,20 +259,21 @@ export function TransportCostCard({
               </span>
               <select
                 aria-label={t("aiaic.transport.to")}
-                value={mandi}
+                value={mandiIdentity(entry)}
                 onChange={(e) => setMandiPick(e.target.value)}
                 className={cn(SELECT, "mt-0.5")}
               >
                 {mandis.length ? null : (
                   <option value="">{t("aiaic.transport.choose_mandi")}</option>
                 )}
-                {/* each mandi said in her language (AIAIC's names, else its label); its label is what is sent. No km
-                    in the list (27 Oct 2026, the owner: "two distances given why? make it only one"): its km was the
-                    straight line x 1.3 and disagreed with the trip's measured km above; the list keeps AIAIC's order,
-                    nearest first */}
-                {mandis.map((m) => (
-                  <option key={`${m.state}:${m.mandi}`} value={m.mandi}>
-                    {placeShown(m.names, lang, m.mandi)}
+                {/* each mandi said in her language (AIAIC's names, else its label), by its identity (its state,
+                    district and name): its label, state and district are what is sent, and a name the list holds twice
+                    says its district (6 Nov 2026, the audit's F2). No km in the list (27 Oct 2026, the owner: "two
+                    distances given why? make it only one"): its km was the straight line x 1.3 and disagreed with the
+                    trip's measured km above; the list keeps AIAIC's order, nearest first */}
+                {choices.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
                   </option>
                 ))}
               </select>

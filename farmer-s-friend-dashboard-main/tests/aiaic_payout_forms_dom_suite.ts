@@ -215,9 +215,17 @@ async function loadApp() {
   const { AiaicPayments } = await import("../src/components/farm/aiaic/AiaicPayments");
   const { CrisisFirst } = await import("../src/components/farm/aiaic/CrisisFirst");
   const { scanFirst } = await import("../src/lib/aiaic-account.functions");
-  const { getMyTrade, giveMyDestination, givePayoutAccount } =
-    await import("../src/lib/aiaic-trade.functions");
+  const {
+    getMyTrade,
+    getNearbyMandis,
+    getTransportEstimate,
+    giveMyDestination,
+    givePayoutAccount,
+  } = await import("../src/lib/aiaic-trade.functions");
+  const { getPlacesDistricts } = await import("../src/lib/places.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
+  const { placeShown, rupeeRange } = await import("../src/lib/aiaic-trade");
+  const { TransportCostCard } = await import("../src/components/farm/aiaic/TransportCostCard");
   const shared = await import("./aiaic_shared_scan");
   return {
     React,
@@ -236,9 +244,15 @@ async function loadApp() {
     CrisisFirst,
     scanFirst,
     getMyTrade,
+    getNearbyMandis,
+    getTransportEstimate,
+    getPlacesDistricts,
     giveMyDestination,
     givePayoutAccount,
     mineForBrowser,
+    placeShown,
+    rupeeRange,
+    TransportCostCard,
     shared,
   };
 }
@@ -279,11 +293,40 @@ function suite(app: App, window: Window & typeof globalThis) {
     giveMyDestination: app.giveMyDestination,
     givePayoutAccount: app.givePayoutAccount,
     getMyTrade: app.getMyTrade,
+    getPlacesDistricts: app.getPlacesDistricts,
+    getNearbyMandis: app.getNearbyMandis,
+    getTransportEstimate: app.getTransportEstimate,
+  };
+  /** The transport card's reads (the audit of 6 Nov 2026, F2): each answered by AIAIC's recorded answer to what the card
+   * sent (`recordedTrip`), after the read's own validator; what each sent is kept, in order. */
+  const TRIP_READS = {
+    getPlacesDistricts: "districts",
+    getNearbyMandis: "nearby",
+    getTransportEstimate: "estimate",
+  } as const;
+  const trips = {
+    recordings: {} as Parameters<typeof shared.recordedTrip>[2],
+    asked: [] as { read: string; sent: Record<string, unknown> }[],
   };
   const rpc = {
     options: {
       client: async (ctx: Record<string, unknown>) => {
         const name = handlers.get(ctx["extractedFn"]);
+        if (name && name in TRIP_READS) {
+          const read = TRIP_READS[name as keyof typeof TRIP_READS];
+          const sent = (await shared.inProcess(
+            named[name as keyof typeof TRIP_READS],
+            ctx["data"],
+            "validator",
+          )) as Record<string, unknown>;
+          trips.asked.push({ read, sent });
+          const result = shared.recordedTrip(read, sent, trips.recordings);
+          if (result === null) {
+            seen.unanswered.push(`${name}: no recording answers ${JSON.stringify(sent)}`);
+            throw new Error("a read no recording answers");
+          }
+          return { ...ctx, result };
+        }
         if (name === "scanFirst")
           // the REAL scanFirst: its own validator, then its own handler (`scanRead`, asking `fetch` above)
           return {
@@ -1026,6 +1069,109 @@ function suite(app: App, window: Window & typeof globalThis) {
     ]);
     outside.length = 0; // its own two, seen
     assert.equal(HELPLINES.length, 3, "AIAIC's recorded crisis answer holds its three helplines");
+  });
+
+  // ------------------------------------ the transport card, as she picks (the audit of 6 Nov 2026, F2; AIAIC 4ed3229)
+  /** AIAIC 4ed3229's real answers for a Satna farmer (W2's recorder, copied byte for byte): the mandis near Satna hold
+   * one name twice, Ramnagar APMC, a village in Satna and a town in Maihar; and AIAIC's estimate for each, asked by its
+   * own district. The card's district names are AIAIC's recorded lists for Madhya Pradesh. */
+  const RAMNAGAR = "Ramnagar APMC";
+  const SATNA = {
+    nearby: ["transport_nearby_satna"],
+    estimates: [
+      "transport_estimate_satna_ramnagar_satna_10q",
+      "transport_estimate_satna_ramnagar_maihar_10q",
+    ],
+  };
+  test("R1 the transport card as she picks (the audit of 6 Nov 2026, F2): Ramnagar APMC, one name AIAIC 4ed3229 lists twice near Satna (Satna's village, Maihar's town), is two choices; her tap on Maihar's asks AIAIC with Maihar's district and shows Maihar's trip, and her tap back shows Satna's again, in en, mr and hi", async () => {
+    type Trip = { cost: { low_rs: number; high_rs: number }; distance: { km: number } };
+    const satnaTrip = recorded(SATNA.estimates[0] ?? "") as unknown as Trip;
+    const maiharTrip = recorded(SATNA.estimates[1] ?? "") as unknown as Trip;
+    const nearby = recorded("transport_nearby_satna") as unknown as {
+      mandis: { mandi: string; names: Record<string, unknown> }[];
+    };
+    const ramnagar = nearby.mandis.find((m) => m.mandi === RAMNAGAR);
+    trips.recordings = SATNA;
+    try {
+      for (const lang of ["en", "mr", "hi"] as const) {
+        trips.asked.length = 0;
+        const fare = (t: Trip) => app.rupeeRange(t.cost.low_rs, t.cost.high_rs);
+        const km = (t: Trip) =>
+          words(lang, "aiaic.transport.km").replace("{km}", String(Math.round(t.distance.km)));
+        await inStart(async () => {
+          const page = await mount(
+            createElement(app.TransportCostCard, {
+              crop: "soybean",
+              cropLabel: "Soybean",
+              quantityQ: 10,
+              fromState: "mp",
+              fromDistrict: "satna",
+            }),
+            lang,
+          );
+          try {
+            await settle();
+            const said = () => page.container.textContent ?? "";
+            const to = page.container.querySelector(
+              `select[aria-label="${words(lang, "aiaic.transport.to")}"]`,
+            ) as HTMLSelectElement | null;
+            assert.ok(to, `${lang}: the "To" list`);
+            const shown = app.placeShown(ramnagar?.names as never, lang, RAMNAGAR);
+            const both = [...to.options].filter((o) => (o.textContent ?? "").includes(shown));
+            assert.equal(both.length, 2, `${lang}: the two Ramnagar APMCs are in the list`);
+            const lastTrip = () => trips.asked.filter((a) => a.read === "estimate").at(-1)?.sent;
+            // her first trip: the first mandi at least 5 km away, Satna's Ramnagar, asked by its own district
+            assert.equal(lastTrip()?.["mandi_district"], "satna", `${lang}: her first trip`);
+            assert.ok(
+              said().includes(fare(satnaTrip)),
+              `${lang}: Satna's fare, ${fare(satnaTrip)}`,
+            );
+            // her tap on the other one: her finger on the list, the choice, the list's change as the browser makes it
+            const other = both.find((o) => !o.selected);
+            assert.ok(other, `${lang}: the other Ramnagar APMC is a choice of its own`);
+            await land(to);
+            await act(async () => {
+              other.selected = true;
+              to.dispatchEvent(new window.Event("change", { bubbles: true }));
+            });
+            await settle();
+            const asked = lastTrip();
+            assert.equal(asked?.["mandi"], RAMNAGAR, `${lang}: the mandi asked`);
+            assert.equal(asked?.["mandi_state"], "mp", `${lang}: its state`);
+            assert.equal(
+              asked?.["mandi_district"],
+              "maihar",
+              `${lang}: her pick is asked by Maihar's district: ${JSON.stringify(trips.asked)}`,
+            );
+            assert.ok(
+              said().includes(fare(maiharTrip)),
+              `${lang}: Maihar's fare, ${fare(maiharTrip)}`,
+            );
+            assert.ok(said().includes(km(maiharTrip)), `${lang}: Maihar's km, ${km(maiharTrip)}`);
+            assert.ok(!said().includes(fare(satnaTrip)), `${lang}: Satna's fare is gone`);
+            assert.equal(to.selectedOptions[0], other, `${lang}: her pick stays chosen`);
+            // and back: Satna's again, from what the card was told already (one cache entry for each town)
+            const back = both.find((o) => o !== other);
+            await act(async () => {
+              if (back) back.selected = true;
+              to.dispatchEvent(new window.Event("change", { bubbles: true }));
+            });
+            await settle();
+            assert.ok(said().includes(fare(satnaTrip)), `${lang}: Satna's fare again`);
+            assert.ok(!said().includes(fare(maiharTrip)), `${lang}: Maihar's fare is gone`);
+            assert.equal(
+              trips.asked.filter((a) => a.read === "estimate").length,
+              2,
+              `${lang}: each town's trip asked once`,
+            );
+          } finally {
+            await page.unmount();
+          }
+        });
+      }
+    } finally {
+      trips.recordings = {};
+    }
   });
 
   // the matrix: each form, each box she types words in, each phrase, her tick on and off, the rest valid and empty

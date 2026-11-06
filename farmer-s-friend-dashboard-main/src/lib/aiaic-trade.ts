@@ -1172,6 +1172,9 @@ export type TransportEstimate = {
   to: {
     mandi: string;
     district?: string | null | undefined;
+    /** The mandi's district key: with its state and name, the mandi's identity (`mandiIdentity`; AIAIC 4ed3229 tells
+     * two towns of one name apart by it). */
+    district_key?: string | undefined;
     state: string;
     lat: number;
     lon: number;
