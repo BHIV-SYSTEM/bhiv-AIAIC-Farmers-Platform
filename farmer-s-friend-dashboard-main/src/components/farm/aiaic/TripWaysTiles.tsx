@@ -90,12 +90,14 @@ export function TripWaysTiles({ ways }: { ways: TripWays | null | undefined }) {
             </p>
           </Tile>
         ) : null}
+        {/* marked the cheapest only as AIAIC marks it (HONESTY-08): an answer with no `cheapest` marks no way (the
+            audit of 6 Nov 2026, N6), as AIAIC's own tiles do */}
         <Tile
           icon={Handshake}
           title={t("aiaic.ways.buyer_collects")}
           total={ways.buyer_collects.cost}
           tip={t("aiaic.ways.buyer_collects_tip")}
-          best={(ways.cheapest?.of_all ?? "buyer_collects") === "buyer_collects"}
+          best={ways.cheapest?.of_all === "buyer_collects"}
         />
         {/* on request, and the shared price only when lots go together (HONESTY-08): the main figure is hiring alone */}
         <Tile

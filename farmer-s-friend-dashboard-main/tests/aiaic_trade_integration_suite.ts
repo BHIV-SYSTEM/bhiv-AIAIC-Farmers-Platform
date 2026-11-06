@@ -43,6 +43,7 @@ import {
 import { CompareBody } from "../src/components/farm/aiaic/OfferCompareBody";
 import { NEARBY_DOTS, nameBelow, routeMapOf } from "../src/components/farm/aiaic/route-map";
 import { TransportCostCard } from "../src/components/farm/aiaic/TransportCostCard";
+import { TripWaysTiles } from "../src/components/farm/aiaic/TripWaysTiles";
 import { priceCompareOf, rowShown } from "../src/lib/aiaic-analysis";
 import {
   PRESS_KEY_RE,
@@ -160,7 +161,7 @@ import { useMandiTrip } from "../src/lib/aiaic-trip";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
 import { getPlacesDistricts } from "../src/lib/places.functions";
 import { commissionSentence } from "../src/lib/business";
-import { pricingOf, rupeeRange } from "../src/lib/aiaic-trade";
+import { pricingOf, rupeeRange, type TripWays } from "../src/lib/aiaic-trade";
 
 import {
   CRISIS_EN,
@@ -1730,6 +1731,34 @@ test("A70 F1 every recording the transport manifest names is held to its bytes, 
         /^(transport_|places_districts_mp_)/.test(n) && n !== "transport_recording_manifest.json",
     );
   for (const n of here) assert.ok(n in named || n in trade.files, `${n} is named by no manifest`);
+});
+
+test("A71 N6 her ways mark as the cheapest only the way AIAIC sends as cheapest (HONESTY-08): an answer with no cheapest marks none", () => {
+  const TITLE: Record<string, string> = {
+    alone: "aiaic.ways.alone",
+    shared: "aiaic.ways.shared",
+    buyer_collects: "aiaic.ways.buyer_collects",
+  };
+  for (const name of ["transport_estimate_niphad_lasalgaon_1q", ...SATNA_TRIPS]) {
+    const ways = (est(name) as TransportEstimate & { ways: TripWays }).ways;
+    assert.ok(ways.cheapest?.of_all, `${name}: AIAIC 4ed3229 sends its cheapest`);
+    for (const lang of LANGS) {
+      const word = escHtml(DICTS[lang]["aiaic.ways.cheapest"] ?? "?");
+      const tiles = inApp(createElement(TripWaysTiles, { ways }), lang).split("<li ").slice(1);
+      const marked = tiles.filter((tile) => tile.includes(word));
+      assert.equal(marked.length, 1, `${name} ${lang}: one tile marked`);
+      const title = escHtml(DICTS[lang][TITLE[ways.cheapest?.of_all ?? ""] ?? ""] ?? "?");
+      assert.ok(marked[0]?.includes(title), `${name} ${lang}: AIAIC's cheapest is the one marked`);
+      // a parsed copy of the same answer, its `cheapest` taken out in memory: no tile is marked
+      const none = structuredClone(ways);
+      delete none.cheapest;
+      const html = inApp(createElement(TripWaysTiles, { ways: none }), lang);
+      assert.ok(
+        !html.includes(word),
+        `${name} ${lang}: a way marked as the cheapest that AIAIC did not mark`,
+      );
+    }
+  }
 });
 
 test("A24 the mandis an advice compared: AIAIC's rows[].mandi_shown, the key kept; mr and hi say no APMC", () => {
