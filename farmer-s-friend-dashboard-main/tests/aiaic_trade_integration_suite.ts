@@ -644,36 +644,80 @@ test("A10 every transport note and refusal AIAIC sends is worded in en, mr and h
  * A10b THE PER-KM NOTE SAYS WHAT AIAIC WORKED OUT (6 Nov 2026). Since 24 Oct AIAIC's per-km rate is the MEDIAN of the
  * published rate cards (its note: "the median of {n} published rate cards"), and its website and the Gov Ops portal say
  * "the middle of". This app's words still said "the average" in all three languages: true for two cards only. On the
- * several-trips answer (three cards) the median is Rs 78 a km where the average would be Rs 69.33. Read from each
- * estimate recorded from today's AIAIC that carries the note, so a change in what AIAIC says is seen here
- * (`transport_estimate_estimate` is the server's answer from before 24 Oct, kept for its missing names: it averaged).
+ * several-trips answer (three cards) the median is Rs 78 a km where the average would be Rs 69.33. Read from EVERY
+ * estimate here recorded from today's AIAIC that carries the note, so a change in what AIAIC says is seen here (the
+ * audit of 6 Nov, F3: the 1 q trip of the sale steps had been left out; the list is now held to the folder, so one
+ * recorded later is not left out either). `transport_estimate_estimate` is the server's answer from before 24 Oct, kept
+ * for its missing names (it averaged): the transport manifest keeps it from an earlier server, and it is not read here.
+ * Each line keeps the count of rate cards and says the rate is no quote (N3), as AIAIC's own note does; in Marathi and
+ * Hindi in AIAIC's own words for that (its website's `farmer.transport.note.rates_averaged` at 4ed3229,
+ * aiaic-frontend/src/i18n/pages.js: "ठरलेला भाव नाही", "कोई तय भाव नहीं"; N2: the Marathi line had ended
+ * "दरपत्रक नाही", the word it uses a few words before for the rate cards themselves).
  */
-test("A10b the per-km note says the middle of the rate cards, as AIAIC's median, never an average", () => {
+test("A10b the per-km note says the middle of the rate cards, as AIAIC's median, never an average; with their count, and that it is no quote", () => {
   const key = "aiaic.transport.note.rates_averaged";
-  let seen = 0;
-  for (const name of [
+  const READ = [
     "transport_estimate_road",
     "transport_estimate_several_trips",
     "transport_estimate_short_trip",
     "transport_estimate_lasalgaon_named",
-  ]) {
-    for (const n of est(name).notes) {
-      if (n.code !== "rates_averaged") continue;
-      seen += 1;
-      assert.match(
-        n.text ?? "",
-        /\bmedian\b/,
-        `${name}: AIAIC's note no longer says the median; read what it works out`,
-      );
+    "transport_estimate_niphad_lasalgaon_1q",
+    "transport_estimate_satna_ramnagar_satna_10q",
+    "transport_estimate_satna_ramnagar_maihar_10q",
+  ];
+  // every estimate recorded from today's AIAIC that carries the note: the folder's estimates, less those the transport
+  // manifest keeps from an earlier server
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "transport_recording_manifest.json"), "utf-8"),
+  ) as { kept_from_an_earlier_server: Record<string, unknown> };
+  const kept = Object.keys(manifest.kept_from_an_earlier_server).map((n) => n.slice(0, -5));
+  const carrying = fs
+    .readdirSync(FIXTURES)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.slice(0, -5))
+    .filter(
+      (name) =>
+        recorded(name)._recorded?.route === "GET /transport/estimate" &&
+        !kept.includes(name) &&
+        (est(name).notes ?? []).some((n) => n.code === "rates_averaged"),
+    );
+  assert.deepEqual(
+    [...carrying].sort(),
+    [...READ].sort(),
+    "the estimates recorded from today's AIAIC that carry the per-km note, each read here",
+  );
+  const caveat = { en: /\bnot a quote\b/, mr: /ठरलेला भाव नाही/, hi: /कोई तय भाव नहीं/ } as const;
+  for (const name of READ) {
+    const e = est(name);
+    const notes = e.notes.filter((n) => n.code === "rates_averaged");
+    assert.equal(notes.length, 1, `${name}: its per-km note`);
+    const own = notes[0]!;
+    assert.match(
+      own.text ?? "",
+      /\bmedian\b/,
+      `${name}: AIAIC's note no longer says the median; read what it works out`,
+    );
+    assert.match(own.text ?? "", caveat.en, `${name}: AIAIC's note no longer says it is no quote`);
+    const n = own.values?.["n"];
+    assert.equal(typeof n, "number", `${name}: AIAIC's count of rate cards`);
+    // her line, as the card says it: the count AIAIC sent, no blank left, and that it is no quote
+    for (const lang of LANGS) {
+      const said = noteLines(wordsIn(lang), e, lang).notes.find((x) => x.code === "rates_averaged");
+      assert.ok(said, `${name} ${lang}: the per-km note is said`);
+      assert.ok(said.text.includes(String(n)), `${name} ${lang}: the count ${n} in "${said.text}"`);
+      assert.ok(!HOLE.test(said.text), `${name} ${lang}: a blank left in "${said.text}"`);
+      assert.match(said.text, caveat[lang], `${name} ${lang}: "${said.text}" says it is no quote`);
     }
   }
-  assert.ok(seen >= 4, `the per-km note was read on ${seen} recorded estimates`);
+  for (const lang of LANGS) assert.ok(DICTS[lang][key]?.includes("{n}"), `${lang}: the count`);
   assert.match(DICTS.en[key], /\bthe middle of\b/);
   assert.doesNotMatch(DICTS.en[key], /average/i);
   assert.match(DICTS.mr[key], /मधला दर/);
   assert.doesNotMatch(DICTS.mr[key], /सरासरी/);
   assert.match(DICTS.hi[key], /बीच का/);
   assert.doesNotMatch(DICTS.hi[key], /औसत/);
+  // the rate cards are one thing, and that the rate is no quote another: the Marathi line names the cards once
+  assert.equal(DICTS.mr[key].split("दरपत्रक").length - 1, 1, `mr: "${DICTS.mr[key]}"`);
 });
 
 /** Names and codes a Marathi or Hindi line may carry in Latin letters (the owner's rule: names and numbers only).
@@ -1218,7 +1262,10 @@ test("A22 a mandi near her is said in her language from AIAIC's names; its key s
 
   // a server not yet updated: no names leave this server, and every mandi is said by its label, as before
   const before = client.nearbyForBrowser(answer("transport_nearby_nashik"));
-  assert.ok(before.mandis.length > 0, "today's recorded answer holds mandis");
+  assert.ok(
+    before.mandis.length > 0,
+    "the answer kept from the server of 23 Oct 2026, which sent no names, holds mandis",
+  );
   for (const m of before.mandis) {
     assert.equal("names" in m, false, `${m.mandi}: names made up`);
     for (const lang of LANGS) assert.equal(placeShown(m.names, lang, m.mandi), m.mandi);
