@@ -709,7 +709,10 @@ test("A10b the per-km note says the middle of the rate cards, as AIAIC's median,
       assert.match(said.text, caveat[lang], `${name} ${lang}: "${said.text}" says it is no quote`);
     }
   }
-  for (const lang of LANGS) assert.ok(DICTS[lang][key]?.includes("{n}"), `${lang}: the count`);
+  for (const lang of LANGS) {
+    assert.ok(DICTS[lang][key]?.includes("{n}"), `${lang}: the count`);
+    assert.match(DICTS[lang][key] ?? "", caveat[lang], `${lang}: that it is no quote`);
+  }
   assert.match(DICTS.en[key], /\bthe middle of\b/);
   assert.doesNotMatch(DICTS.en[key], /average/i);
   assert.match(DICTS.mr[key], /मधला दर/);

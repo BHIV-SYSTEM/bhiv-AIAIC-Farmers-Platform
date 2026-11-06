@@ -54,6 +54,12 @@
  * refused and fails the test it happened in. Her form, when given, meets its server function's own validator in this
  * process; its handler never runs, so AIAIC is never asked. The crisis phrases are imported from the shared module,
  * copied there from AIAIC's and this app's own crisis tests: none is written here.
+ *
+ * ONE MORE CARD, THE TRANSPORT CARD (R1; the audit of bde7fa3, 6 Nov 2026, F2): the REAL `TransportCostCard`, driven as
+ * she picks a mandi from its "To" list, the list AIAIC 4ed3229 sends a Satna farmer with one name twice (Ramnagar APMC,
+ * Satna's village and Maihar's town). Its three reads (the districts, the mandis near her, the trip) are answered in this
+ * process, each after its server function's own validator, by AIAIC's recorded answer to what the card sent
+ * (`recordedTrip` of the shared module): never by `fetch`, so the guard above holds for it too.
  */
 process.env["AIAIC_BASE_URL"] = "http://127.0.0.1:9";
 for (const k of [
