@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/push2_2026-10-23/W2_record_transport.py",
     "route": "GET /transport/estimate",
-    "at": "2026-10-24T08:50:50+00:00",
+    "at": "2026-11-06T10:35:10+00:00",
     "status": 200,
     "request": {
       "params": {
@@ -195,6 +195,49 @@
       "low_rs": 288,
       "high_rs": 342
     },
+    "ways": {
+      "alone": {
+        "cost": {
+          "low_rs": 2883,
+          "high_rs": 3418
+        },
+        "per_quintal": {
+          "low_rs": 288,
+          "high_rs": 342
+        },
+        "fill_pct": 67,
+        "trips": 1
+      },
+      "shared": null,
+      "buyer_collects": {
+        "cost": {
+          "low_rs": 0,
+          "high_rs": 0
+        },
+        "how": "the buyer's own vehicle collects at your farm, village or collection point"
+      },
+      "aiaic_arranges": {
+        "cost": {
+          "low_rs": 2883,
+          "high_rs": 3418
+        },
+        "shared_cost": null,
+        "on_request": true,
+        "shared_only_when": "other lots go the same way on the same day",
+        "how": "on request: a transporter partner AIAIC works with; the shared price only when lots going the same way are put together"
+      },
+      "order": [
+        "alone",
+        "shared",
+        "buyer_collects",
+        "aiaic_arranges"
+      ],
+      "cheapest": {
+        "on_her_own": "alone",
+        "of_all": "buyer_collects",
+        "then": "alone"
+      }
+    },
     "notes": [
       {
         "code": "from_district_centre",
@@ -234,6 +277,24 @@
       {
         "code": "tolls_mixed",
         "text": "Tolls are inside some sources' rates, not others'."
+      },
+      {
+        "code": "loading_not_counted",
+        "text": "Loading and unloading are not in these figures (ABC Express blog of 2026-05-12 puts them at Rs 500-2,000 a truck).",
+        "source": {
+          "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+          "date": "2026-05-12",
+          "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
+        }
+      },
+      {
+        "code": "season_not_counted",
+        "text": "In the monsoon and festival weeks trips can cost 20-30% more (ABC Express blog of 2026-05-12); not counted.",
+        "source": {
+          "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+          "date": "2026-05-12",
+          "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
+        }
       }
     ],
     "attribution": [

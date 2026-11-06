@@ -2,7 +2,7 @@
  "_recorded": {
   "by": "reports/push2_2026-10-23/A_record_transport_fixtures.py (AIAIC repo)",
   "route": "GET /transport/estimate",
-  "at": "2026-10-23T20:34:48+00:00",
+  "at": "2026-11-06T10:34:58+00:00",
   "status": 200,
   "request": {
    "params": {
@@ -29,7 +29,16 @@
    "area": "unknown",
    "settlement": "Nashik",
    "trip_starts_at": "farm",
-   "end_area": "rural"
+   "end_area": "rural",
+   "names": {
+    "en": "Nashik",
+    "translated": {
+     "mr": true,
+     "hi": true
+    },
+    "mr": "नाशिक",
+    "hi": "नासिक"
+   }
   },
   "to": {
    "mandi": "APMC Lasalgaon",
@@ -52,7 +61,16 @@
    "area": "rural",
    "geocoder": "nominatim",
    "geocoded_on": "2026-10-23",
-   "district": "Nashik"
+   "district": "Nashik",
+   "names": {
+    "en": "APMC Lasalgaon",
+    "translated": {
+     "mr": false,
+     "hi": false
+    },
+    "mr": "Lasalgaon बाजार समिती",
+    "hi": "Lasalgaon मंडी"
+   }
   },
   "quantity_q": 20.0,
   "route_type": {
@@ -106,7 +124,7 @@
    "n_sources": 2,
    "rs_per_km_low": 39.5,
    "rs_per_km_high": 46.5,
-   "basis": "the average of the published sources below (long trips); not a quote",
+   "basis": "the median of the published sources below (long trips); not a quote",
    "sources": [
     {
      "key": "truckguru_2026_10",
@@ -174,6 +192,49 @@
    "low_rs": 210,
    "high_rs": 249
   },
+  "ways": {
+   "alone": {
+    "cost": {
+     "low_rs": 4219,
+     "high_rs": 4967
+    },
+    "per_quintal": {
+     "low_rs": 210,
+     "high_rs": 249
+    },
+    "fill_pct": 57,
+    "trips": 1
+   },
+   "shared": null,
+   "buyer_collects": {
+    "cost": {
+     "low_rs": 0,
+     "high_rs": 0
+    },
+    "how": "the buyer's own vehicle collects at your farm, village or collection point"
+   },
+   "aiaic_arranges": {
+    "cost": {
+     "low_rs": 4219,
+     "high_rs": 4967
+    },
+    "shared_cost": null,
+    "on_request": true,
+    "shared_only_when": "other lots go the same way on the same day",
+    "how": "on request: a transporter partner AIAIC works with; the shared price only when lots going the same way are put together"
+   },
+   "order": [
+    "alone",
+    "shared",
+    "buyer_collects",
+    "aiaic_arranges"
+   ],
+   "cheapest": {
+    "on_her_own": "alone",
+    "of_all": "buyer_collects",
+    "then": "alone"
+   }
+  },
   "notes": [
    {
     "code": "from_district_centre",
@@ -189,7 +250,7 @@
    },
    {
     "code": "rates_averaged",
-    "text": "Per km: the average of 2 published rate cards (long trips), not a quote.",
+    "text": "Per km: the median of 2 published rate cards (long trips), not a quote.",
     "values": {
      "n": 2
     }
@@ -213,6 +274,24 @@
    {
     "code": "tolls_mixed",
     "text": "Tolls are inside some sources' rates, not others'."
+   },
+   {
+    "code": "loading_not_counted",
+    "text": "Loading and unloading are not in these figures (ABC Express blog of 2026-05-12 puts them at Rs 500-2,000 a truck).",
+    "source": {
+     "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+     "date": "2026-05-12",
+     "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
+    }
+   },
+   {
+    "code": "season_not_counted",
+    "text": "In the monsoon and festival weeks trips can cost 20-30% more (ABC Express blog of 2026-05-12); not counted.",
+    "source": {
+     "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+     "date": "2026-05-12",
+     "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
+    }
    }
   ],
   "attribution": [

@@ -1,0 +1,336 @@
+{
+ "state": "madhya pradesh",
+ "lang": "hi",
+ "districts": [
+  {
+   "key": "agar malwa",
+   "name": "आगर मालवा",
+   "name_en": "Agar Malwa",
+   "translated": true
+  },
+  {
+   "key": "alirajpur",
+   "name": "अलीराजपुर",
+   "name_en": "Alirajpur",
+   "translated": true
+  },
+  {
+   "key": "anuppur",
+   "name": "अनूपपुर",
+   "name_en": "Anuppur",
+   "translated": true
+  },
+  {
+   "key": "ashoknagar",
+   "name": "अशोकनगर",
+   "name_en": "Ashoknagar",
+   "translated": true
+  },
+  {
+   "key": "balaghat",
+   "name": "बालाघाट",
+   "name_en": "Balaghat",
+   "translated": true
+  },
+  {
+   "key": "barwani",
+   "name": "बड़वानी",
+   "name_en": "Barwani",
+   "translated": true
+  },
+  {
+   "key": "betul",
+   "name": "बैतूल",
+   "name_en": "Betul",
+   "translated": true
+  },
+  {
+   "key": "bhind",
+   "name": "भिंड",
+   "name_en": "Bhind",
+   "translated": true
+  },
+  {
+   "key": "bhopal",
+   "name": "भोपाल",
+   "name_en": "Bhopal",
+   "translated": true
+  },
+  {
+   "key": "burhanpur",
+   "name": "बुरहानपुर",
+   "name_en": "Burhanpur",
+   "translated": true
+  },
+  {
+   "key": "chhatarpur",
+   "name": "छतरपुर",
+   "name_en": "Chhatarpur",
+   "translated": true
+  },
+  {
+   "key": "chhindwara",
+   "name": "छिंदवाड़ा",
+   "name_en": "Chhindwara",
+   "translated": true
+  },
+  {
+   "key": "damoh",
+   "name": "दमोह",
+   "name_en": "Damoh",
+   "translated": true
+  },
+  {
+   "key": "datia",
+   "name": "दतिया",
+   "name_en": "Datia",
+   "translated": true
+  },
+  {
+   "key": "dewas",
+   "name": "देवास",
+   "name_en": "Dewas",
+   "translated": true
+  },
+  {
+   "key": "dhar",
+   "name": "धार",
+   "name_en": "Dhar",
+   "translated": true
+  },
+  {
+   "key": "dindori",
+   "name": "डिंडोरी",
+   "name_en": "Dindori",
+   "translated": true
+  },
+  {
+   "key": "guna",
+   "name": "गुना",
+   "name_en": "Guna",
+   "translated": true
+  },
+  {
+   "key": "gwalior",
+   "name": "ग्वालियर",
+   "name_en": "Gwalior",
+   "translated": true
+  },
+  {
+   "key": "harda",
+   "name": "हरदा",
+   "name_en": "Harda",
+   "translated": true
+  },
+  {
+   "key": "indore",
+   "name": "इंदौर",
+   "name_en": "Indore",
+   "translated": true
+  },
+  {
+   "key": "jabalpur",
+   "name": "जबलपुर",
+   "name_en": "Jabalpur",
+   "translated": true
+  },
+  {
+   "key": "jhabua",
+   "name": "झाबुआ",
+   "name_en": "Jhabua",
+   "translated": true
+  },
+  {
+   "key": "katni",
+   "name": "कटनी",
+   "name_en": "Katni",
+   "translated": true
+  },
+  {
+   "key": "khandwa",
+   "name": "खंडवा",
+   "name_en": "Khandwa",
+   "translated": true
+  },
+  {
+   "key": "khargone",
+   "name": "खरगोन",
+   "name_en": "Khargone",
+   "translated": true
+  },
+  {
+   "key": "maihar",
+   "name": "मैहर",
+   "name_en": "Maihar",
+   "translated": true
+  },
+  {
+   "key": "mandla",
+   "name": "मंडला",
+   "name_en": "Mandla",
+   "translated": true
+  },
+  {
+   "key": "mandsaur",
+   "name": "मंदसौर",
+   "name_en": "Mandsaur",
+   "translated": true
+  },
+  {
+   "key": "mauganj",
+   "name": "मऊगंज",
+   "name_en": "Mauganj",
+   "translated": true
+  },
+  {
+   "key": "morena",
+   "name": "मुरैना",
+   "name_en": "Morena",
+   "translated": true
+  },
+  {
+   "key": "narmadapuram",
+   "name": "नर्मदापुरम",
+   "name_en": "Narmadapuram",
+   "translated": true
+  },
+  {
+   "key": "narsinghpur",
+   "name": "नरसिंहपुर",
+   "name_en": "Narsinghpur",
+   "translated": true
+  },
+  {
+   "key": "neemuch",
+   "name": "नीमच",
+   "name_en": "Neemuch",
+   "translated": true
+  },
+  {
+   "key": "niwari",
+   "name": "निवाड़ी",
+   "name_en": "Niwari",
+   "translated": true
+  },
+  {
+   "key": "pandhurna",
+   "name": "पांढुर्णा",
+   "name_en": "Pandhurna",
+   "translated": true
+  },
+  {
+   "key": "panna",
+   "name": "पन्ना",
+   "name_en": "Panna",
+   "translated": true
+  },
+  {
+   "key": "raisen",
+   "name": "रायसेन",
+   "name_en": "Raisen",
+   "translated": true
+  },
+  {
+   "key": "rajgarh",
+   "name": "राजगढ़",
+   "name_en": "Rajgarh",
+   "translated": true
+  },
+  {
+   "key": "ratlam",
+   "name": "रतलाम",
+   "name_en": "Ratlam",
+   "translated": true
+  },
+  {
+   "key": "rewa",
+   "name": "रीवा",
+   "name_en": "Rewa",
+   "translated": true
+  },
+  {
+   "key": "sagar",
+   "name": "सागर",
+   "name_en": "Sagar",
+   "translated": true
+  },
+  {
+   "key": "satna",
+   "name": "सतना",
+   "name_en": "Satna",
+   "translated": true
+  },
+  {
+   "key": "sehore",
+   "name": "सीहोर",
+   "name_en": "Sehore",
+   "translated": true
+  },
+  {
+   "key": "seoni",
+   "name": "सिवनी",
+   "name_en": "Seoni",
+   "translated": true
+  },
+  {
+   "key": "shahdol",
+   "name": "शहडोल",
+   "name_en": "Shahdol",
+   "translated": true
+  },
+  {
+   "key": "shajapur",
+   "name": "शाजापुर",
+   "name_en": "Shajapur",
+   "translated": true
+  },
+  {
+   "key": "sheopur",
+   "name": "श्योपुर",
+   "name_en": "Sheopur",
+   "translated": true
+  },
+  {
+   "key": "shivpuri",
+   "name": "शिवपुरी",
+   "name_en": "Shivpuri",
+   "translated": true
+  },
+  {
+   "key": "sidhi",
+   "name": "सीधी",
+   "name_en": "Sidhi",
+   "translated": true
+  },
+  {
+   "key": "singrauli",
+   "name": "सिंगरौली",
+   "name_en": "Singrauli",
+   "translated": true
+  },
+  {
+   "key": "tikamgarh",
+   "name": "टीकमगढ़",
+   "name_en": "Tikamgarh",
+   "translated": true
+  },
+  {
+   "key": "ujjain",
+   "name": "उज्जैन",
+   "name_en": "Ujjain",
+   "translated": true
+  },
+  {
+   "key": "umaria",
+   "name": "उमरिया",
+   "name_en": "Umaria",
+   "translated": true
+  },
+  {
+   "key": "vidisha",
+   "name": "विदिशा",
+   "name_en": "Vidisha",
+   "translated": true
+  }
+ ]
+}

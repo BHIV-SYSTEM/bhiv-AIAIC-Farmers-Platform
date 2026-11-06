@@ -2,7 +2,7 @@
  "_recorded": {
   "by": "reports/push2_2026-10-23/A_record_transport_fixtures.py (AIAIC repo)",
   "route": "GET /transport/estimate",
-  "at": "2026-10-23T20:34:48+00:00",
+  "at": "2026-11-06T10:34:58+00:00",
   "status": 200,
   "request": {
    "params": {
@@ -29,7 +29,16 @@
    "area": "unknown",
    "settlement": "Nashik",
    "trip_starts_at": "farm",
-   "end_area": "rural"
+   "end_area": "rural",
+   "names": {
+    "en": "Nashik",
+    "translated": {
+     "mr": true,
+     "hi": true
+    },
+    "mr": "नाशिक",
+    "hi": "नासिक"
+   }
   },
   "to": {
    "mandi": "APMC Ahilyanagar",
@@ -49,7 +58,16 @@
    "area": "urban",
    "geocoder": "nominatim",
    "geocoded_on": "2026-10-23",
-   "district": "Ahilyanagar"
+   "district": "Ahilyanagar",
+   "names": {
+    "en": "APMC Ahilyanagar",
+    "translated": {
+     "mr": true,
+     "hi": true
+    },
+    "mr": "अहिल्यानगर बाजार समिती",
+    "hi": "अहिल्यानगर मंडी"
+   }
   },
   "quantity_q": 200.0,
   "route_type": {
@@ -102,9 +120,9 @@
    "official": false,
    "confirmed_current": false,
    "n_sources": 3,
-   "rs_per_km_low": 69.33,
-   "rs_per_km_high": 90.0,
-   "basis": "the average of the published sources below (long trips); not a quote",
+   "rs_per_km_low": 78.0,
+   "rs_per_km_high": 85.0,
+   "basis": "the median of the published sources below (long trips); not a quote",
    "sources": [
     {
      "key": "truckguru_2026_10",
@@ -173,8 +191,8 @@
     "factor": 1.15,
     "from": "the mean of Porter's 148-166 km routes (Rs 28.23 a km, x1.21) and the owner's TruckGuru quote at 175 km against TruckGuru's long-trip rate for that class (x1.10)"
    },
-   "applied_per_km_low": 87.7,
-   "applied_per_km_high": 113.85,
+   "applied_per_km_low": 98.67,
+   "applied_per_km_high": 107.52,
    "minimum_per_trip": {
     "low_rs": 7500,
     "high_rs": 9500,
@@ -186,16 +204,59 @@
    "return_in_high": false
   },
   "fare_per_trip": {
-   "low_rs": 16216,
-   "high_rs": 21051
+   "low_rs": 18244,
+   "high_rs": 19882
   },
   "cost": {
-   "low_rs": 32432,
-   "high_rs": 42102
+   "low_rs": 36488,
+   "high_rs": 39763
   },
   "per_quintal": {
-   "low_rs": 162,
-   "high_rs": 211
+   "low_rs": 182,
+   "high_rs": 199
+  },
+  "ways": {
+   "alone": {
+    "cost": {
+     "low_rs": 36488,
+     "high_rs": 39763
+    },
+    "per_quintal": {
+     "low_rs": 182,
+     "high_rs": 199
+    },
+    "fill_pct": 62,
+    "trips": 2
+   },
+   "shared": null,
+   "buyer_collects": {
+    "cost": {
+     "low_rs": 0,
+     "high_rs": 0
+    },
+    "how": "the buyer's own vehicle collects at your farm, village or collection point"
+   },
+   "aiaic_arranges": {
+    "cost": {
+     "low_rs": 36488,
+     "high_rs": 39763
+    },
+    "shared_cost": null,
+    "on_request": true,
+    "shared_only_when": "other lots go the same way on the same day",
+    "how": "on request: a transporter partner AIAIC works with; the shared price only when lots going the same way are put together"
+   },
+   "order": [
+    "alone",
+    "shared",
+    "buyer_collects",
+    "aiaic_arranges"
+   ],
+   "cheapest": {
+    "on_her_own": "alone",
+    "of_all": "buyer_collects",
+    "then": "alone"
+   }
   },
   "notes": [
    {
@@ -212,7 +273,7 @@
    },
    {
     "code": "rates_averaged",
-    "text": "Per km: the average of 3 published rate cards (long trips), not a quote.",
+    "text": "Per km: the median of 3 published rate cards (long trips), not a quote.",
     "values": {
      "n": 3
     }
@@ -242,6 +303,24 @@
     "text": "2 trips for this quantity.",
     "values": {
      "trips": 2
+    }
+   },
+   {
+    "code": "loading_not_counted",
+    "text": "Loading and unloading are not in these figures (ABC Express blog of 2026-05-12 puts them at Rs 500-2,000 a truck).",
+    "source": {
+     "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+     "date": "2026-05-12",
+     "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
+    }
+   },
+   {
+    "code": "season_not_counted",
+    "text": "In the monsoon and festival weeks trips can cost 20-30% more (ABC Express blog of 2026-05-12); not counted.",
+    "source": {
+     "name": "ABC Express blog: Transportation Charges in India - How to Calculate Per Km Cost",
+     "date": "2026-05-12",
+     "url": "https://abctransport.co.in/blog/truck-transportation-charges-in-india-calculate-per-km-cost/"
     }
    }
   ],

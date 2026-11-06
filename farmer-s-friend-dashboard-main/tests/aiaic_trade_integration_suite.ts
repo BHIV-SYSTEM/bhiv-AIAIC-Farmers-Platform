@@ -11,6 +11,7 @@
  *   127.0.0.1: no request leaves this machine; the account and password are stand-ins, never a real one.
  */
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
@@ -24,6 +25,7 @@ import {
   createRootRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { runWithStartContext } from "@tanstack/start-storage-context";
 import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 import ts from "typescript";
@@ -40,6 +42,8 @@ import {
 } from "../src/components/farm/aiaic/GroupSteps";
 import { CompareBody } from "../src/components/farm/aiaic/OfferCompareBody";
 import { NEARBY_DOTS, nameBelow, routeMapOf } from "../src/components/farm/aiaic/route-map";
+import { TransportCostCard } from "../src/components/farm/aiaic/TransportCostCard";
+import { TripWaysTiles } from "../src/components/farm/aiaic/TripWaysTiles";
 import { priceCompareOf, rowShown } from "../src/lib/aiaic-analysis";
 import {
   PRESS_KEY_RE,
@@ -146,12 +150,18 @@ import {
 } from "../src/lib/aiaic-account";
 import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
-import { giveMyDestination } from "../src/lib/aiaic-trade.functions";
+import {
+  getNearbyMandis,
+  getTransportEstimate,
+  giveMyDestination,
+} from "../src/lib/aiaic-trade.functions";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
+import { useMandiTrip } from "../src/lib/aiaic-trip";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
+import { getPlacesDistricts } from "../src/lib/places.functions";
 import { commissionSentence } from "../src/lib/business";
-import { pricingOf } from "../src/lib/aiaic-trade";
+import { pricingOf, rupeeRange, type TripWays } from "../src/lib/aiaic-trade";
 
 import {
   CRISIS_EN,
@@ -160,6 +170,9 @@ import {
   TEST_BANK,
   askScanFirst,
   inProcess,
+  recordedTrip,
+  type TripRead,
+  type TripRecordings,
 } from "./aiaic_shared_scan";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -625,6 +638,89 @@ test("A10 every transport note and refusal AIAIC sends is worded in en, mr and h
     for (const lang of ["en", "mr", "hi"] as const)
       assert.ok(DICTS[lang][key], `${lang} has no words for ${key}`);
   }
+});
+
+/**
+ * A10b THE PER-KM NOTE SAYS WHAT AIAIC WORKED OUT (6 Nov 2026). Since 24 Oct AIAIC's per-km rate is the MEDIAN of the
+ * published rate cards (its note: "the median of {n} published rate cards"), and its website and the Gov Ops portal say
+ * "the middle of". This app's words still said "the average" in all three languages: true for two cards only. On the
+ * several-trips answer (three cards) the median is Rs 78 a km where the average would be Rs 69.33. Read from EVERY
+ * estimate here recorded from today's AIAIC that carries the note, so a change in what AIAIC says is seen here (the
+ * audit of 6 Nov, F3: the 1 q trip of the sale steps had been left out; the list is now held to the folder, so one
+ * recorded later is not left out either). `transport_estimate_estimate` is the server's answer from before 24 Oct, kept
+ * for its missing names (it averaged): the transport manifest keeps it from an earlier server, and it is not read here.
+ * Each line keeps the count of rate cards and says the rate is no quote (N3), as AIAIC's own note does; in Marathi and
+ * Hindi in AIAIC's own words for that (its website's `farmer.transport.note.rates_averaged` at 4ed3229,
+ * aiaic-frontend/src/i18n/pages.js: "ठरलेला भाव नाही", "कोई तय भाव नहीं"; N2: the Marathi line had ended
+ * "दरपत्रक नाही", the word it uses a few words before for the rate cards themselves).
+ */
+test("A10b the per-km note says the middle of the rate cards, as AIAIC's median, never an average; with their count, and that it is no quote", () => {
+  const key = "aiaic.transport.note.rates_averaged";
+  const READ = [
+    "transport_estimate_road",
+    "transport_estimate_several_trips",
+    "transport_estimate_short_trip",
+    "transport_estimate_lasalgaon_named",
+    "transport_estimate_niphad_lasalgaon_1q",
+    "transport_estimate_satna_ramnagar_satna_10q",
+    "transport_estimate_satna_ramnagar_maihar_10q",
+  ];
+  // every estimate recorded from today's AIAIC that carries the note: the folder's estimates, less those the transport
+  // manifest keeps from an earlier server
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "transport_recording_manifest.json"), "utf-8"),
+  ) as { kept_from_an_earlier_server: Record<string, unknown> };
+  const kept = Object.keys(manifest.kept_from_an_earlier_server).map((n) => n.slice(0, -5));
+  const carrying = fs
+    .readdirSync(FIXTURES)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.slice(0, -5))
+    .filter(
+      (name) =>
+        recorded(name)._recorded?.route === "GET /transport/estimate" &&
+        !kept.includes(name) &&
+        (est(name).notes ?? []).some((n) => n.code === "rates_averaged"),
+    );
+  assert.deepEqual(
+    [...carrying].sort(),
+    [...READ].sort(),
+    "the estimates recorded from today's AIAIC that carry the per-km note, each read here",
+  );
+  const caveat = { en: /\bnot a quote\b/, mr: /ठरलेला भाव नाही/, hi: /कोई तय भाव नहीं/ } as const;
+  for (const name of READ) {
+    const e = est(name);
+    const notes = e.notes.filter((n) => n.code === "rates_averaged");
+    assert.equal(notes.length, 1, `${name}: its per-km note`);
+    const own = notes[0]!;
+    assert.match(
+      own.text ?? "",
+      /\bmedian\b/,
+      `${name}: AIAIC's note no longer says the median; read what it works out`,
+    );
+    assert.match(own.text ?? "", caveat.en, `${name}: AIAIC's note no longer says it is no quote`);
+    const n = own.values?.["n"];
+    assert.equal(typeof n, "number", `${name}: AIAIC's count of rate cards`);
+    // her line, as the card says it: the count AIAIC sent, no blank left, and that it is no quote
+    for (const lang of LANGS) {
+      const said = noteLines(wordsIn(lang), e, lang).notes.find((x) => x.code === "rates_averaged");
+      assert.ok(said, `${name} ${lang}: the per-km note is said`);
+      assert.ok(said.text.includes(String(n)), `${name} ${lang}: the count ${n} in "${said.text}"`);
+      assert.ok(!HOLE.test(said.text), `${name} ${lang}: a blank left in "${said.text}"`);
+      assert.match(said.text, caveat[lang], `${name} ${lang}: "${said.text}" says it is no quote`);
+    }
+  }
+  for (const lang of LANGS) {
+    assert.ok(DICTS[lang][key]?.includes("{n}"), `${lang}: the count`);
+    assert.match(DICTS[lang][key] ?? "", caveat[lang], `${lang}: that it is no quote`);
+  }
+  assert.match(DICTS.en[key], /\bthe middle of\b/);
+  assert.doesNotMatch(DICTS.en[key], /average/i);
+  assert.match(DICTS.mr[key], /मधला दर/);
+  assert.doesNotMatch(DICTS.mr[key], /सरासरी/);
+  assert.match(DICTS.hi[key], /बीच का/);
+  assert.doesNotMatch(DICTS.hi[key], /औसत/);
+  // the rate cards are one thing, and that the rate is no quote another: the Marathi line names the cards once
+  assert.equal(DICTS.mr[key].split("दरपत्रक").length - 1, 1, `mr: "${DICTS.mr[key]}"`);
 });
 
 /** Names and codes a Marathi or Hindi line may carry in Latin letters (the owner's rule: names and numbers only).
@@ -1169,7 +1265,10 @@ test("A22 a mandi near her is said in her language from AIAIC's names; its key s
 
   // a server not yet updated: no names leave this server, and every mandi is said by its label, as before
   const before = client.nearbyForBrowser(answer("transport_nearby_nashik"));
-  assert.ok(before.mandis.length > 0, "today's recorded answer holds mandis");
+  assert.ok(
+    before.mandis.length > 0,
+    "the answer kept from the server of 23 Oct 2026, which sent no names, holds mandis",
+  );
   for (const m of before.mandis) {
     assert.equal("names" in m, false, `${m.mandi}: names made up`);
     for (const lang of LANGS) assert.equal(placeShown(m.names, lang, m.mandi), m.mandi);
@@ -1264,6 +1363,451 @@ test("A23 the map names her district and every mandi in her language; places are
         .map((m) => m.mandi),
     );
     assert.equal(routeMapOf(old, lang, null, oldNear).places[0]?.label, old.from.district);
+  }
+});
+
+// ----------- A, the audit of 6 Nov 2026 (AIAIC 4ed3229): one name AIAIC lists twice (F2), one cache for one trip (N7)
+
+/**
+ * AIAIC 4ed3229's real answers for a Satna farmer (Madhya Pradesh), recorded by AIAIC's W2 recorder
+ * (reports/push2_2026-10-23/W2_record_transport.py) from a git archive of 4ed3229 and copied byte for byte: the mandis
+ * near Satna hold ONE NAME TWICE, Ramnagar APMC, a village in Satna (24 km) and a town in Maihar (47 km), two entries
+ * AIAIC tells apart by their `district_key` (its C10's AIAIC-05; its contract, section 20: one name AIAIC's data holds at
+ * two points "stays two entries: send mandi_district"); and AIAIC's estimate for each, asked by its own district. The
+ * district names the page holds for Madhya Pradesh are AIAIC's own recorded answers of GET /places/districts?state=mp in
+ * en, mr and hi (recorded by AIAIC's reports/govops_di_2026-11-04/record_district_samples.py; copied byte for byte from
+ * AIAIC 4ed3229's aiaic-frontend/src/test/recorded_district/).
+ */
+const SATNA_NEARBY = "transport_nearby_satna";
+const SATNA_TRIPS = [
+  "transport_estimate_satna_ramnagar_satna_10q",
+  "transport_estimate_satna_ramnagar_maihar_10q",
+] as const;
+const RAMNAGAR = "Ramnagar APMC";
+type PlaceRow = { key: string; name: string; name_en: string; translated: boolean };
+const mpDistricts = (lang: (typeof LANGS)[number]) =>
+  (
+    JSON.parse(
+      fs.readFileSync(path.join(FIXTURES, `places_districts_mp_${lang}.json`), "utf-8"),
+    ) as { districts: PlaceRow[] }
+  ).districts;
+type RawSatna = {
+  mandis: { mandi: string; district_key: string; lat: number; lon: number; names: RawNames }[];
+};
+
+/** Each of the transport card's server functions by its own handler, learnt once by calling it through a middleware
+ * that only reads it (a call on the page's side runs no validator and no handler). */
+let tripReadsLearnt: Map<unknown, TripRead> | null = null;
+async function tripReads(): Promise<Map<unknown, TripRead>> {
+  if (tripReadsLearnt) return tripReadsLearnt;
+  const found = new Map<unknown, TripRead>();
+  const fns: [TripRead, unknown][] = [
+    ["districts", getPlacesDistricts],
+    ["nearby", getNearbyMandis],
+    ["estimate", getTransportEstimate],
+  ];
+  for (const [read, fn] of fns) {
+    const reader = {
+      options: {
+        client: async (ctx: Record<string, unknown>) => {
+          found.set(ctx["extractedFn"], read);
+          return { ...ctx, result: null };
+        },
+      },
+    };
+    await runWithStartContext({ startOptions: { functionMiddleware: [reader] } } as never, () =>
+      (fn as (opts: { data: unknown }) => Promise<unknown>)({ data: null }),
+    );
+  }
+  assert.equal(found.size, 3, "each read is told apart by its own handler");
+  tripReadsLearnt = found;
+  return found;
+}
+
+/**
+ * A PART OF A PAGE DRAWN AS THE BROWSER DRAWS IT, HERE ON THE SERVER (6 Nov 2026): rendered; then each read its render
+ * made (each query, enabled, with no answer yet) is asked through its OWN query function, that is through the very server
+ * function the page calls (`useServerFn`), with Start's RPC round trip stood in for by one function middleware, as
+ * `inProcess` does: the function's own validator runs on what the page sent, and AIAIC's recorded answer to that request
+ * (`recordedTrip`) is its answer (its handler, which asks AIAIC, never runs); then rendered again, until it asks nothing
+ * more. `asked`: what each read sent, in order; `unanswered`: what no recording answers (its test fails). Nothing leaves
+ * this machine. A choice she makes by a tap is not made here: the payout forms' DOM suite drives the card for that.
+ */
+async function drawn(
+  el: ReactElement,
+  lang: (typeof LANGS)[number],
+  recordings: TripRecordings,
+): Promise<{
+  html: string;
+  asked: { read: TripRead; sent: Record<string, unknown> }[];
+  unanswered: string[];
+}> {
+  const reads = await tripReads();
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const asked: { read: TripRead; sent: Record<string, unknown> }[] = [];
+  const unanswered: string[] = [];
+  const rpc = {
+    options: {
+      client: async (ctx: Record<string, unknown>) => {
+        const read = reads.get(ctx["extractedFn"]);
+        assert.ok(read, "a server function the transport card does not call");
+        const validator = ctx["inputValidator"] as (d: unknown) => Record<string, unknown>;
+        const sent = validator(ctx["data"]);
+        asked.push({ read, sent });
+        const result = recordedTrip(read, sent, recordings);
+        if (result === null) {
+          unanswered.push(`${read} ${JSON.stringify(sent)}`);
+          throw new Error(`no recording answers this ${read}`);
+        }
+        return { ...ctx, result };
+      },
+    },
+  };
+  const render = () =>
+    renderToString(
+      createElement(RouterContextProvider, {
+        router: appRouter as never,
+        children: createElement(QueryClientProvider, {
+          client: qc,
+          children: createElement(I18nProvider, { initialLang: lang, children: el }),
+        }),
+      }),
+    ).replaceAll("<!-- -->", "");
+  let html = render();
+  for (let round = 0; round < 8; round += 1) {
+    const todo = qc
+      .getQueryCache()
+      .getAll()
+      .filter((q) => {
+        const on = (q.options as { enabled?: unknown }).enabled;
+        return q.state.status === "pending" && q.state.fetchStatus === "idle" && on !== false;
+      });
+    if (!todo.length) return { html, asked, unanswered };
+    await runWithStartContext({ startOptions: { functionMiddleware: [rpc] } } as never, () =>
+      Promise.all(todo.map((q) => q.fetch().catch(() => undefined))),
+    );
+    html = render();
+  }
+  assert.fail("the page kept asking");
+}
+
+const unescHtml = (s: string) =>
+  s
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&amp;/g, "&");
+
+/** The "To" list's choices as the card draws them: each option's value, its words, and whether it is the one chosen. */
+function toOptions(html: string, lang: (typeof LANGS)[number]) {
+  const at = html.indexOf(`aria-label="${escHtml(DICTS[lang]["aiaic.transport.to"] ?? "?")}"`);
+  assert.ok(at >= 0, `${lang}: the "To" list`);
+  const list = html.slice(at, html.indexOf("</select>", at));
+  return [...list.matchAll(/<option([^>]*)>([^<]*)<\/option>/g)].map((m) => ({
+    value: unescHtml(/value="([^"]*)"/.exec(m[1] ?? "")?.[1] ?? ""),
+    chosen: /\sselected=""/.test(m[1] ?? ""),
+    label: unescHtml(m[2] ?? ""),
+  }));
+}
+
+/** The answer at a glance's trip, as `useMandiTrip` hands it to AnswerAtAGlance, said as data. */
+function TripSaid(p: { district: string; state: string; toMandi: string; quantityQ?: number }) {
+  const trip = useMandiTrip(p);
+  const to = trip.estimate?.to as { mandi?: string; district_key?: string } | undefined;
+  return createElement("output", {
+    "data-glance-mandi": trip.mandi,
+    "data-glance-to": to ? `${to.district_key ?? ""}|${to.mandi ?? ""}` : "",
+    "data-glance-km": trip.estimate ? String(trip.estimate.distance.km) : "",
+  });
+}
+const glanceOf = (html: string) => {
+  const m = /data-glance-mandi="([^"]*)" data-glance-to="([^"]*)" data-glance-km="([^"]*)"/.exec(
+    html,
+  );
+  assert.ok(m, "the glance's trip is drawn");
+  return { mandi: unescHtml(m[1] ?? ""), to: unescHtml(m[2] ?? ""), km: m[3] ?? "" };
+};
+
+test("A66 F2 one name AIAIC lists twice (Ramnagar APMC: Satna's village, Maihar's town) is two choices she can tell apart, each with its district in her language, and her trip is asked by its own district: AIAIC 4ed3229's real Satna answers through the real card", async () => {
+  const raw = answer<RawSatna>(SATNA_NEARBY);
+  const twice = raw.mandis.filter((m) => m.mandi === RAMNAGAR);
+  assert.deepEqual(
+    twice.map((m) => m.district_key),
+    ["satna", "maihar"],
+    "AIAIC's list holds the one name twice, Satna's first",
+  );
+  const [satnaTrip, maiharTrip] = SATNA_TRIPS.map(est);
+  assert.deepEqual(
+    [satnaTrip?.distance.km, maiharTrip?.distance.km],
+    [31.2, 61],
+    "AIAIC prices two trips",
+  );
+  const card = createElement(TransportCostCard, {
+    crop: "soybean",
+    cropLabel: "Soybean",
+    quantityQ: 10,
+    fromState: "mp",
+    fromDistrict: "satna",
+  });
+  for (const lang of LANGS) {
+    const names = mpDistricts(lang);
+    const district = (key: string) => names.find((d) => d.key === key)?.name ?? `(${key}?)`;
+    const { html, asked, unanswered } = await drawn(card, lang, {
+      nearby: [SATNA_NEARBY],
+      estimates: [...SATNA_TRIPS],
+    });
+    assert.deepEqual(unanswered, [], `${lang}: a read no recording answers`);
+    const options = toOptions(html, lang);
+    assert.equal(
+      options.length,
+      raw.mandis.length,
+      `${lang}: one choice for each mandi of the list`,
+    );
+    const shown = placeShown(twice[0]?.names, lang, RAMNAGAR);
+    const both = options.filter((o, i) => raw.mandis[i]?.mandi === RAMNAGAR);
+    assert.equal(both.length, 2, `${lang}: ${JSON.stringify(options)}`);
+    const [satna, maihar] = both;
+    assert.notEqual(
+      satna?.value,
+      maihar?.value,
+      `${lang}: the two towns are one choice, she can pick only the first: ${JSON.stringify(both)}`,
+    );
+    assert.notEqual(
+      satna?.label,
+      maihar?.label,
+      `${lang}: the two look the same: ${JSON.stringify(both)}`,
+    );
+    for (const [o, own, other] of [
+      [satna, "satna", "maihar"],
+      [maihar, "maihar", "satna"],
+    ] as const) {
+      assert.ok(
+        o?.label.includes(shown),
+        `${lang}: "${o?.label}" says the mandi as AIAIC names it`,
+      );
+      assert.ok(
+        o?.label.includes(district(own)) && !o.label.includes(district(other)),
+        `${lang}: "${o?.label}" names its district, ${district(own)}, as AIAIC's list says it`,
+      );
+      if (lang !== "en") {
+        // her words only: the mandi's own Latin name (AIAIC holds none in her script) is a name, never an English word
+        const latin = o?.label.replace(shown, "").match(/[A-Za-z]+/g) ?? [];
+        assert.deepEqual(latin, [], `${lang}: English in "${o?.label}"`);
+      }
+    }
+    // every mandi the list holds once is said by its name alone, as before
+    raw.mandis.forEach((m, i) => {
+      if (m.mandi === RAMNAGAR) return;
+      assert.equal(options[i]?.label, placeShown(m.names, lang, m.mandi), `${lang}: ${m.mandi}`);
+    });
+    // her first trip: the first mandi at least 5 km away, Satna's Ramnagar (24 km), asked with its own state and district
+    assert.ok(
+      satna?.chosen && !maihar?.chosen,
+      `${lang}: Satna's is the one chosen: ${JSON.stringify(both)}`,
+    );
+    const trips = asked.filter((a) => a.read === "estimate");
+    assert.equal(trips.length, 1, `${lang}: one trip asked`);
+    assert.equal(trips[0]?.sent["mandi"], RAMNAGAR);
+    assert.equal(trips[0]?.sent["mandi_state"], "mp");
+    assert.equal(trips[0]?.sent["mandi_district"], "satna", `${lang}: asked by its own district`);
+    const fare = rupeeRange(satnaTrip?.cost.low_rs, satnaTrip?.cost.high_rs);
+    assert.ok(html.includes(fare), `${lang}: Satna's fare, ${fare}`);
+    assert.ok(
+      !html.includes(rupeeRange(maiharTrip?.cost.low_rs, maiharTrip?.cost.high_rs)),
+      `${lang}: Maihar's fare is not shown for Satna's trip`,
+    );
+  }
+  // a district the page's list does not hold (a parsed copy of AIAIC's list for Madhya Pradesh, Maihar taken out in
+  // memory): the choice says AIAIC's own key for it, never a name made up
+  for (const lang of LANGS) {
+    const without = mpDistricts(lang).filter((d) => d.key !== "maihar");
+    const r = await drawn(card, lang, {
+      districts: without,
+      nearby: [SATNA_NEARBY],
+      estimates: [...SATNA_TRIPS],
+    });
+    const keyed = toOptions(r.html, lang).filter((o, i) => raw.mandis[i]?.mandi === RAMNAGAR);
+    assert.ok(
+      keyed[1]?.label.includes("maihar") && !keyed[1].label.includes("Maihar"),
+      `${lang}: "${keyed[1]?.label}"`,
+    );
+    assert.notEqual(keyed[0]?.label, keyed[1]?.label, `${lang}: the two look the same`);
+  }
+});
+
+test("A67 F2 the map keeps the two apart: the other town of the name is drawn as its own dot, the chosen one once", () => {
+  const near = client.nearbyForBrowser(answer(SATNA_NEARBY)).mandis;
+  for (const [name, other] of [
+    [SATNA_TRIPS[0], "maihar"],
+    [SATNA_TRIPS[1], "satna"],
+  ] as const) {
+    const trip = est(name);
+    const twin = near.find((m) => m.mandi === RAMNAGAR && m.district_key === other);
+    assert.ok(twin, `the Ramnagar APMC of ${other} is in the list`);
+    for (const lang of LANGS) {
+      const [, chosen, ...dots] = routeMapOf(trip, lang, null, near).places;
+      assert.deepEqual(
+        [chosen?.lat, chosen?.lon],
+        [trip.to.lat, trip.to.lon],
+        `${name}: the chosen`,
+      );
+      assert.ok(
+        dots.some((d) => d.lat === twin.lat && d.lon === twin.lon),
+        `${name} ${lang}: the other Ramnagar APMC, ${other}'s, is not drawn: ${JSON.stringify(dots)}`,
+      );
+      assert.ok(
+        !dots.some((d) => d.lat === trip.to.lat && d.lon === trip.to.lon),
+        `${name} ${lang}: the chosen one is drawn twice`,
+      );
+      assert.equal(
+        dots.length,
+        Math.min(near.length - 1, NEARBY_DOTS),
+        `${name} ${lang}: the dots`,
+      );
+    }
+  }
+});
+
+test("A68 F2 the answer at a glance keeps the two apart: no trip under a name AIAIC lists twice (an answer names a mandi by its name alone, so which town it means is not known), and one entry of the name is asked by its own district", async () => {
+  const glance = (nearby: TripRecordings["nearby"]) =>
+    drawn(createElement(TripSaid, { district: "satna", state: "mp", toMandi: RAMNAGAR }), "en", {
+      nearby,
+      estimates: [...SATNA_TRIPS],
+    });
+  const both = await glance([SATNA_NEARBY]);
+  assert.deepEqual(both.unanswered, []);
+  assert.deepEqual(
+    glanceOf(both.html),
+    { mandi: "", to: "", km: "" },
+    "a name AIAIC lists twice: no trip at a glance, never one town's trip under the other's name",
+  );
+  assert.equal(both.asked.filter((a) => a.read === "estimate").length, 0, "no trip asked for it");
+  // one entry of the name (a parsed copy of AIAIC's list, the other town taken out in memory): asked with its own state
+  // and district, and that trip said
+  for (const [kept, km] of [
+    ["maihar", "61"],
+    ["satna", "31.2"],
+  ] as const) {
+    const one = structuredClone(answer<RawSatna>(SATNA_NEARBY));
+    one.mandis = one.mandis.filter((m) => m.mandi !== RAMNAGAR || m.district_key === kept);
+    const r = await glance([{ from: SATNA_NEARBY, answer: one }]);
+    assert.deepEqual(r.unanswered, [], kept);
+    const trips = r.asked.filter((a) => a.read === "estimate");
+    assert.equal(trips.length, 1, kept);
+    assert.equal(trips[0]?.sent["mandi_district"], kept, `${kept}: asked by its own district`);
+    assert.equal(trips[0]?.sent["mandi_state"], "mp", kept);
+    assert.deepEqual(glanceOf(r.html), { mandi: RAMNAGAR, to: `${kept}|${RAMNAGAR}`, km }, kept);
+  }
+});
+
+test("A69 N7 the transport card and the answer at a glance ask under the same keys: drawn together for one trip, AIAIC is asked once for the list and once for the trip, and both say that trip", async () => {
+  const trip = est("transport_estimate_short_trip");
+  const { html, asked, unanswered } = await drawn(
+    createElement(
+      "div",
+      null,
+      createElement(TransportCostCard, {
+        crop: "onion",
+        cropLabel: "Onion",
+        quantityQ: 20,
+        fromState: "mh",
+        fromDistrict: "nashik",
+        toMandi: "APMC Lasalgaon",
+      }),
+      createElement(TripSaid, {
+        district: "nashik",
+        state: "mh",
+        toMandi: "APMC Lasalgaon",
+        quantityQ: 20,
+      }),
+    ),
+    "en",
+    { nearby: [NAMED_NEARBY], estimates: ["transport_estimate_short_trip"] },
+  );
+  assert.deepEqual(unanswered, []);
+  const count = (read: TripRead) => asked.filter((a) => a.read === read).length;
+  assert.deepEqual(
+    { districts: count("districts"), nearby: count("nearby"), estimate: count("estimate") },
+    { districts: 1, nearby: 1, estimate: 1 },
+    `whichever is drawn first fills the other: ${JSON.stringify(asked)}`,
+  );
+  assert.deepEqual(glanceOf(html), {
+    mandi: "APMC Lasalgaon",
+    to: "nashik|APMC Lasalgaon",
+    km: String(trip.distance.km),
+  });
+  assert.ok(
+    html.includes(rupeeRange(trip.cost.low_rs, trip.cost.high_rs)),
+    "the card says that trip",
+  );
+});
+
+test("A70 F1 every recording the transport manifest names is held to its bytes, as the storage samples are (S45): the sha256 and the size of its LF text, a Windows checkout's CRLF set aside; every transport recording here is named", () => {
+  type Held = { sha256: string; bytes: number };
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "transport_recording_manifest.json"), "utf-8"),
+  ) as {
+    files: Record<string, Held>;
+    kept_from_an_earlier_server: Record<string, Held>;
+    copied_from_aiaics_tree?: Record<string, Held>;
+  };
+  const named: Record<string, Held> = {
+    ...manifest.files,
+    ...manifest.kept_from_an_earlier_server,
+    ...(manifest.copied_from_aiaics_tree ?? {}),
+  };
+  assert.ok(Object.keys(named).length >= 9, `only ${Object.keys(named).length} named`);
+  for (const [name, held] of Object.entries(named)) {
+    // the text AIAIC wrote: a Windows checkout may write CRLF over the file's LF (core.autocrlf)
+    const text = fs.readFileSync(path.join(FIXTURES, name), "utf-8").replace(/\r\n/g, "\n");
+    const bytes = Buffer.from(text, "utf-8");
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      held.sha256,
+      `${name} is not the file its manifest names`,
+    );
+    assert.equal(bytes.length, held.bytes, `${name}: its size`);
+  }
+  // every transport recording and district list of Madhya Pradesh here is named by it (the sale steps' trip by the trade
+  // manifest, which names its own recorder)
+  const trade = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "trade_recording_manifest.json"), "utf-8"),
+  ) as { files: Record<string, unknown> };
+  const here = fs
+    .readdirSync(FIXTURES)
+    .filter(
+      (n) =>
+        /^(transport_|places_districts_mp_)/.test(n) && n !== "transport_recording_manifest.json",
+    );
+  for (const n of here) assert.ok(n in named || n in trade.files, `${n} is named by no manifest`);
+});
+
+test("A71 N6 her ways mark as the cheapest only the way AIAIC sends as cheapest (HONESTY-08): an answer with no cheapest marks none", () => {
+  const TITLE: Record<string, string> = {
+    alone: "aiaic.ways.alone",
+    shared: "aiaic.ways.shared",
+    buyer_collects: "aiaic.ways.buyer_collects",
+  };
+  for (const name of ["transport_estimate_niphad_lasalgaon_1q", ...SATNA_TRIPS]) {
+    const ways = (est(name) as TransportEstimate & { ways: TripWays }).ways;
+    assert.ok(ways.cheapest?.of_all, `${name}: AIAIC 4ed3229 sends its cheapest`);
+    for (const lang of LANGS) {
+      const word = escHtml(DICTS[lang]["aiaic.ways.cheapest"] ?? "?");
+      const tiles = inApp(createElement(TripWaysTiles, { ways }), lang).split("<li ").slice(1);
+      const marked = tiles.filter((tile) => tile.includes(word));
+      assert.equal(marked.length, 1, `${name} ${lang}: one tile marked`);
+      const title = escHtml(DICTS[lang][TITLE[ways.cheapest?.of_all ?? ""] ?? ""] ?? "?");
+      assert.ok(marked[0]?.includes(title), `${name} ${lang}: AIAIC's cheapest is the one marked`);
+      // a parsed copy of the same answer, its `cheapest` taken out in memory: no tile is marked
+      const none = structuredClone(ways);
+      delete none.cheapest;
+      const html = inApp(createElement(TripWaysTiles, { ways: none }), lang);
+      assert.ok(
+        !html.includes(word),
+        `${name} ${lang}: a way marked as the cheapest that AIAIC did not mark`,
+      );
+    }
   }
 });
 

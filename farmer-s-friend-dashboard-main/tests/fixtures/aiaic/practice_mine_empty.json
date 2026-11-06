@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-11-05T06:56:28+00:00",
+    "at": "2026-11-06T10:33:54+00:00",
     "status": 200,
     "replay": null,
     "signed_in": true,
@@ -167,7 +167,7 @@
     },
     "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Razorpay's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. Settlement and fee are not connected here: AIAIC does not pay the farmer onward. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "cefdfea89fdd4854bede154f19bb1374",
+      "request_id": "b1e6f91dcd74438684b0d7483c9d8e43",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

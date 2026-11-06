@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trip_and_payout_answers.py",
     "route": "GET /notifications",
-    "at": "2026-11-05T06:55:09+00:00",
+    "at": "2026-11-06T10:31:54+00:00",
     "status": 200,
     "request": {
       "params": {}
@@ -17,16 +17,16 @@
         "rule_id": null,
         "kind": "trade_farmer_paid",
         "body": {
-          "utr": "UTR1808806823006",
+          "utr": "UTR1375224611006",
           "crop": "onion",
           "rail": "cashfree",
           "status": "processed",
-          "order_id": "ord_749349b08ea2b997cd77",
-          "farmer_id": "frm_e1d0c762de8fc372a21f",
+          "order_id": "ord_1f6781a07f8a7a700165",
+          "farmer_id": "frm_e24e79382e7e2e183134",
           "test_mode": true,
           "amount_inr": 9882.0
         },
-        "created_at": "2026-11-05T06:55:09.198323+00:00",
+        "created_at": "2026-11-06T10:31:54.068824+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -41,16 +41,16 @@
         "rule_id": null,
         "kind": "trade_farmer_paid",
         "body": {
-          "utr": "UTR1808806823006",
+          "utr": "UTR1375224611006",
           "crop": "onion",
           "rail": "cashfree",
           "status": "processing",
-          "order_id": "ord_749349b08ea2b997cd77",
-          "farmer_id": "frm_e1d0c762de8fc372a21f",
+          "order_id": "ord_1f6781a07f8a7a700165",
+          "farmer_id": "frm_e24e79382e7e2e183134",
           "test_mode": true,
           "amount_inr": 9882.0
         },
-        "created_at": "2026-11-05T06:55:09.082727+00:00",
+        "created_at": "2026-11-06T10:31:53.799759+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -68,14 +68,14 @@
           "crop": "onion",
           "stage": "pickup",
           "status": "done",
-          "event_id": "ful_2ab57ce103653365808c",
-          "order_id": "ord_749349b08ea2b997cd77",
-          "farmer_id": "frm_e1d0c762de8fc372a21f",
+          "event_id": "ful_2c5ca0735a88389a038d",
+          "order_id": "ord_1f6781a07f8a7a700165",
+          "farmer_id": "frm_e24e79382e7e2e183134",
           "simulated": true,
-          "listing_id": "lst_11a21f3b28d5bf54f0b6",
+          "listing_id": "lst_dea440015ca7cc0fa76c",
           "order_state": "in_fulfilment"
         },
-        "created_at": "2026-11-05T06:55:08.751703+00:00",
+        "created_at": "2026-11-06T10:31:51.843149+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -91,16 +91,16 @@
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_7d8dffead6533e14fbff",
-          "farmer_id": "frm_e1d0c762de8fc372a21f",
+          "offer_id": "ofr_517b6b3ea127470cd13f",
+          "farmer_id": "frm_e24e79382e7e2e183134",
           "buyer_type": "wholesaler",
-          "listing_id": "lst_11a21f3b28d5bf54f0b6",
+          "listing_id": "lst_dea440015ca7cc0fa76c",
           "quantity_q": 4.0,
           "price_per_q": 2500.0,
           "valid_until": null,
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-05T06:55:08.143767+00:00",
+        "created_at": "2026-11-06T10:31:47.892854+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -116,16 +116,16 @@
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_818d4d6fdd17f6931b3f",
-          "farmer_id": "frm_e1d0c762de8fc372a21f",
+          "offer_id": "ofr_dce6959d84d32d485d7c",
+          "farmer_id": "frm_e24e79382e7e2e183134",
           "buyer_type": "wholesaler",
-          "listing_id": "lst_11a21f3b28d5bf54f0b6",
+          "listing_id": "lst_dea440015ca7cc0fa76c",
           "quantity_q": 4.0,
           "price_per_q": 2500.0,
           "valid_until": null,
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-05T06:55:07.837648+00:00",
+        "created_at": "2026-11-06T10:31:47.497917+00:00",
         "read_at": null,
         "deliveries": [
           {

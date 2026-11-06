@@ -1,0 +1,248 @@
+{
+ "what": "Real answers of AIAIC's real /transport routes, made in-process (FastAPI's TestClient) from a `git archive` of one AIAIC commit, with no Geoapify key (the distance is AIAIC's own estimate, straight line x 1.3) except `transport_estimate_road`, whose road came from a local stand-in for Geoapify on 127.0.0.1 (a made-up 175 km route; no request left the machine). Copied byte for byte under Annapoorna's names; never edited by hand; replayed by tests/aiaic_trade_integration_suite.ts and the payout forms' DOM suite; never shown to a farmer. Each sha256 and size is of the file's LF text, the bytes git holds (a Windows checkout may write CRLF over them).",
+ "recorded_from": {
+  "repository": "AIAIC (BHIV-Engineering-Exchange/bhiv-AIAIC_farmers-Backend)",
+  "commit": "4ed3229f70fc104b5f8c63895883a64f810e1c85",
+  "subject": "Merge pull request #43 from BHIV-Engineering-Exchange/fix/ci-test-job-time-2026-11-06",
+  "note": "the commit deployed on 6 Nov 2026"
+ },
+ "recorders": {
+  "reports/push2_2026-10-23/A_record_transport_fixtures.py": "AIAIC's transport router alone, on a fresh app; no database",
+  "reports/push2_2026-10-23/W2_record_transport.py": "AIAIC's whole service (service.main) on a *_test database; run with --only, naming the files it recorded here (each file's `_recorded.at` says when)"
+ },
+ "recorders_kept_where": "in AIAIC's working reports folder, not in its repository",
+ "the_trip_estimate_of_the_sale_steps": "transport_estimate_niphad_lasalgaon_1q.json is recorded by the trip recorder and named in trade_recording_manifest.json",
+ "files": {
+  "transport_estimate_msrtc.json": {
+   "recorder": "reports/push2_2026-10-23/A_record_transport_fixtures.py",
+   "recorder_name_for_it": "transport_estimate_msrtc",
+   "route": "GET /transport/estimate",
+   "status": 200,
+   "request": {
+    "params": {
+     "mandi": "APMC Ahilyanagar",
+     "quantity_q": 80,
+     "district": "nashik",
+     "state": "mh",
+     "mandi_state": "mh",
+     "mandi_district": "ahmednagar",
+     "from_place": "farm"
+    }
+   },
+   "sha256": "e4b7f0108cc6ba57b5609b27af516db2eb20e3cc6619956866d7bdb7f2b3e362",
+   "bytes": 7211
+  },
+  "transport_estimate_road.json": {
+   "recorder": "reports/push2_2026-10-23/A_record_transport_fixtures.py",
+   "recorder_name_for_it": "transport_estimate_road",
+   "route": "GET /transport/estimate",
+   "status": 200,
+   "request": {
+    "params": {
+     "mandi": "APMC Ahilyanagar",
+     "quantity_q": 5,
+     "district": "nashik",
+     "state": "mh",
+     "mandi_state": "mh",
+     "mandi_district": "ahmednagar",
+     "from_place": "farm"
+    }
+   },
+   "sha256": "dca858001e051f3dfba6ac2095490ac3a9b40fecbe2edbc204545784dbe943f9",
+   "bytes": 9527
+  },
+  "transport_estimate_several_trips.json": {
+   "recorder": "reports/push2_2026-10-23/A_record_transport_fixtures.py",
+   "recorder_name_for_it": "transport_estimate_several_trips",
+   "route": "GET /transport/estimate",
+   "status": 200,
+   "request": {
+    "params": {
+     "mandi": "APMC Ahilyanagar",
+     "quantity_q": 200,
+     "district": "nashik",
+     "state": "mh",
+     "mandi_state": "mh",
+     "mandi_district": "ahmednagar",
+     "from_place": "farm"
+    }
+   },
+   "sha256": "2030691b22592a438661c58a66553a75f5c0a1f7aca6afc848dcb8e4e7216310",
+   "bytes": 8971
+  },
+  "transport_estimate_short_trip.json": {
+   "recorder": "reports/push2_2026-10-23/A_record_transport_fixtures.py",
+   "recorder_name_for_it": "transport_estimate_short_trip",
+   "route": "GET /transport/estimate",
+   "status": 200,
+   "request": {
+    "params": {
+     "mandi": "APMC Lasalgaon",
+     "quantity_q": 20,
+     "district": "nashik",
+     "state": "mh",
+     "mandi_state": "mh",
+     "mandi_district": "nashik",
+     "from_place": "farm"
+    }
+   },
+   "sha256": "749ad03f950594452affcba2f742b7529fd424749006f9b4df118e9ae65c05e4",
+   "bytes": 8027
+  },
+  "transport_refused_mandi_not_held.json": {
+   "recorder": "reports/push2_2026-10-23/A_record_transport_fixtures.py",
+   "recorder_name_for_it": "transport_refused_mandi_not_held",
+   "route": "GET /transport/estimate",
+   "status": 404,
+   "request": {
+    "params": {
+     "mandi": "No Such Mandi Anywhere",
+     "quantity_q": 5,
+     "district": "nashik",
+     "state": "mh",
+     "from_place": "farm"
+    }
+   },
+   "sha256": "fe98ea3f1a3d9cc881e6bf9d2418a79dcd3275d15c672fc676280eb27d1e9ba8",
+   "bytes": 713
+  },
+  "transport_nearby_nashik_named.json": {
+   "recorder": "reports/push2_2026-10-23/W2_record_transport.py",
+   "recorder_name_for_it": "transport_nearby_nashik.json",
+   "route": "GET /transport/nearby-mandis",
+   "status": 200,
+   "request": {
+    "params": {
+     "district": "Nashik",
+     "state": "mh",
+     "limit": 12,
+     "same_state": "true"
+    }
+   },
+   "sha256": "2a3ea2b317a4eacffb8b7bef34c6ebdf419db43ea4bbdfab1960a4b486e3e93d",
+   "bytes": 12679
+  },
+  "transport_estimate_lasalgaon_named.json": {
+   "recorder": "reports/push2_2026-10-23/W2_record_transport.py",
+   "recorder_name_for_it": "transport_estimate_lasalgaon_10q.json",
+   "route": "GET /transport/estimate",
+   "status": 200,
+   "request": {
+    "params": {
+     "mandi": "Lasalgaon",
+     "quantity_q": 10,
+     "district": "Nashik",
+     "state": "mh"
+    }
+   },
+   "sha256": "145bf7a63961b13451f47968adb6e4b6132c88066755f6531eb7e413499f06d7",
+   "bytes": 9357
+  },
+  "transport_nearby_satna.json": {
+   "recorder": "reports/push2_2026-10-23/W2_record_transport.py",
+   "recorder_name_for_it": "transport_nearby_satna.json",
+   "route": "GET /transport/nearby-mandis",
+   "status": 200,
+   "request": {
+    "params": {
+     "district": "Satna",
+     "state": "mp",
+     "limit": 12,
+     "same_state": "true"
+    }
+   },
+   "sha256": "c7a6000a89aaf6cfd7d0e903cada70a33d88d69a637b03a10d5ff0cf038bb49d",
+   "bytes": 12194
+  },
+  "transport_estimate_satna_ramnagar_satna_10q.json": {
+   "recorder": "reports/push2_2026-10-23/W2_record_transport.py",
+   "recorder_name_for_it": "transport_estimate_satna_ramnagar_satna_10q.json",
+   "route": "GET /transport/estimate",
+   "status": 200,
+   "request": {
+    "params": {
+     "mandi": "Ramnagar APMC",
+     "quantity_q": 10,
+     "district": "Satna",
+     "state": "mp",
+     "mandi_state": "madhya pradesh",
+     "mandi_district": "satna"
+    }
+   },
+   "sha256": "7ba1b3b29ef484a662055071d46099a6e349a942e1d2f0b45896c363d4c9e3d1",
+   "bytes": 9263
+  },
+  "transport_estimate_satna_ramnagar_maihar_10q.json": {
+   "recorder": "reports/push2_2026-10-23/W2_record_transport.py",
+   "recorder_name_for_it": "transport_estimate_satna_ramnagar_maihar_10q.json",
+   "route": "GET /transport/estimate",
+   "status": 200,
+   "request": {
+    "params": {
+     "mandi": "Ramnagar APMC",
+     "quantity_q": 10,
+     "district": "Satna",
+     "state": "mp",
+     "mandi_state": "madhya pradesh",
+     "mandi_district": "maihar"
+    }
+   },
+   "sha256": "c40929bccf5820cc1bffa52528ba4be31ec0b86f8b2416802e77f07545683355",
+   "bytes": 9237
+  }
+ },
+ "kept_from_an_earlier_server": {
+  "transport_nearby_nashik.json": {
+   "why": "the answer of the server deployed before AIAIC sent `names` (recorded 23 Oct 2026): the suite's no-names case (an AIAIC that sends no names: every place said as before, none made up). Not re-recorded: today's AIAIC sends names.",
+   "sha256": "8b5133ab94645cd545fd4f886a57b411f03ca989080375efcb1cd8853ac5032c",
+   "bytes": 8870
+  },
+  "transport_estimate_estimate.json": {
+   "why": "the same server's trip answer (23 Oct 2026, no `names`; it averaged the rate cards, as AIAIC did then): kept for the same no-names case.",
+   "sha256": "35cad16a72c67b473b64c3b3ebabce82e0d76f4800ad9fdf97b6e581a724912b",
+   "bytes": 6106
+  }
+ },
+ "copied_from_aiaics_tree_what": "AIAIC's own recorded answers of GET /places/districts for Madhya Pradesh, the district names the transport card holds (it says a mandi's district beside a name AIAIC lists twice): copied byte for byte from that commit's tree, where AIAIC's recorder keeps them with no envelope; each one's request, moment and sha256 are those AIAIC's own manifest beside them names",
+ "copied_from_aiaics_tree": {
+  "places_districts_mp_en.json": {
+   "from": "aiaic-frontend/src/test/recorded_district/places_districts_mp_en.sample.json",
+   "recorder": "reports/govops_di_2026-11-04/record_district_samples.py",
+   "route": "GET /places/districts",
+   "status": 200,
+   "request": {
+    "state": "mp",
+    "lang": "en"
+   },
+   "at": "2026-11-05T23:07:58+00:00",
+   "sha256": "42b988f392441ad25f57d9c174ec99301beaf0231eaacd9fb3048b8261e92199",
+   "bytes": 5486
+  },
+  "places_districts_mp_mr.json": {
+   "from": "aiaic-frontend/src/test/recorded_district/places_districts_mp_mr.sample.json",
+   "recorder": "reports/govops_di_2026-11-04/record_district_samples.py",
+   "route": "GET /places/districts",
+   "status": 200,
+   "request": {
+    "state": "mp",
+    "lang": "mr"
+   },
+   "at": "2026-11-05T23:07:58+00:00",
+   "sha256": "57d586e01979bb808a3df02b6a19c396c2b3c284c79b655decbed9c8560ef802",
+   "bytes": 6085
+  },
+  "places_districts_mp_hi.json": {
+   "from": "aiaic-frontend/src/test/recorded_district/places_districts_mp_hi.sample.json",
+   "recorder": "reports/govops_di_2026-11-04/record_district_samples.py",
+   "route": "GET /places/districts",
+   "status": 200,
+   "request": {
+    "state": "mp",
+    "lang": "hi"
+   },
+   "at": "2026-11-05T23:07:58+00:00",
+   "sha256": "56d1efaf86fcef9819349cf1a48a65658a2e06871ae69ba79ccb6d8c2e22b7f5",
+   "bytes": 6085
+  }
+ }
+}

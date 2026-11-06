@@ -935,6 +935,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.transport.loading": "Working out the cost…",
   "aiaic.transport.choose_mandi": "Choose a mandi",
   "aiaic.transport.choose_district": "Choose your district",
+  "aiaic.transport.mandi_in_district": "{mandi} ({district} district)",
   "aiaic.transport.source.official": "MSRTC's chart ({day})",
   "aiaic.transport.map": "Map of the trip",
   "aiaic.routemap.title": "Map of the places",
@@ -972,7 +973,7 @@ export const AIAIC_EN: Dict = {
     "The mandi is near your district's centre: your trip from your farm may be longer.",
   "aiaic.transport.note.approximate_centre": "A district centre used here is approximate.",
   "aiaic.transport.note.rates_averaged":
-    "Per km: the average of {n} published rate cards (long trips), not a quote.",
+    "Per km: the middle of {n} published rate cards (long trips), not a quote.",
   "aiaic.transport.note.short_trip_band": "Trips up to {up_to_km} km cost more per km: ×{factor}.",
   "aiaic.transport.note.route_type_assumption": "Route type: ×{factor}, an assumption.",
   "aiaic.transport.note.route_type_unknown_end":
@@ -2014,6 +2015,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.transport.loading": "खर्च काढत आहे…",
   "aiaic.transport.choose_mandi": "मंडी निवडा",
   "aiaic.transport.choose_district": "तुमचा जिल्हा निवडा",
+  "aiaic.transport.mandi_in_district": "{mandi} ({district} जिल्हा)",
   "aiaic.transport.source.official": "MSRTC चे दरपत्रक ({day})",
   "aiaic.transport.map": "प्रवासाचा नकाशा",
   "aiaic.routemap.title": "ठिकाणांचा नकाशा",
@@ -2051,7 +2053,7 @@ export const AIAIC_MR: Dict = {
     "मंडी तुमच्या जिल्ह्याच्या मध्याजवळ आहे: तुमच्या शेतापासूनचा प्रवास जास्त लांब असू शकतो.",
   "aiaic.transport.note.approximate_centre": "इथे वापरलेला जिल्ह्याचा मध्य अंदाजे आहे.",
   "aiaic.transport.note.rates_averaged":
-    "प्रति किमी: {n} प्रसिद्ध दरपत्रकांची सरासरी (लांबच्या फेऱ्या), दरपत्रक नाही.",
+    "प्रति किमी: {n} प्रसिद्ध दरपत्रकांपैकी मधला दर (लांबच्या फेऱ्या), ठरलेला भाव नाही.",
   "aiaic.transport.note.short_trip_band":
     "{up_to_km} किमीपर्यंतच्या फेऱ्यांना प्रति किमी जास्त खर्च: ×{factor}.",
   "aiaic.transport.note.route_type_assumption": "मार्गाचा प्रकार: ×{factor}, एक गृहीतक.",
@@ -3085,6 +3087,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.transport.loading": "खर्च निकाल रहे हैं…",
   "aiaic.transport.choose_mandi": "मंडी चुनें",
   "aiaic.transport.choose_district": "अपना ज़िला चुनें",
+  "aiaic.transport.mandi_in_district": "{mandi} ({district} ज़िला)",
   "aiaic.transport.source.official": "MSRTC का भाड़ा-पत्र ({day})",
   "aiaic.transport.map": "यात्रा का नक्शा",
   "aiaic.routemap.title": "स्थानों का नक्शा",
@@ -3118,7 +3121,7 @@ export const AIAIC_HI: Dict = {
     "मंडी आपके ज़िले के बीच के पास है: आपके खेत से सफ़र ज़्यादा लंबा हो सकता है।",
   "aiaic.transport.note.approximate_centre": "यहाँ इस्तेमाल हुआ ज़िले का बीच अंदाज़न है।",
   "aiaic.transport.note.rates_averaged":
-    "प्रति किमी: {n} छपे हुए भाड़ा-पत्रों का औसत (लंबे फेरे), भाव-पत्र नहीं।",
+    "प्रति किमी: {n} छपे हुए भाड़ा-पत्रों में से बीच का भाड़ा (लंबे फेरे), कोई तय भाव नहीं।",
   "aiaic.transport.note.short_trip_band":
     "{up_to_km} किमी तक के फेरों का प्रति किमी खर्च ज़्यादा: ×{factor}।",
   "aiaic.transport.note.route_type_assumption": "रास्ते का प्रकार: ×{factor}, एक मान्यता।",

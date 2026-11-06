@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "GET /farmer/trade/price",
-    "at": "2026-11-05T06:56:28+00:00",
+    "at": "2026-11-06T10:33:54+00:00",
     "status": 200,
     "replay": null,
     "signed_in": true,
@@ -239,7 +239,7 @@
       "hi": "नासिक"
     },
     "trace": {
-      "request_id": "11a6be9b7fdb493991d86a7a9d8a3aa3",
+      "request_id": "ae4b974c8ca54d008f849e6c0d366f2f",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",
