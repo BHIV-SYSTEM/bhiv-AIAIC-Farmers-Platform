@@ -1,8 +1,8 @@
 {
   "_recorded": {
     "by": "reports/handover_tools/record_trip_and_payout_answers.py",
-    "route": "GET /trade/offers/ofr_db8285bc51dff2478b0f/compare",
-    "at": "2026-11-05T06:55:11+00:00",
+    "route": "GET /trade/offers/ofr_da07f4e0cc47f24f27be/compare",
+    "at": "2026-11-06T10:31:58+00:00",
     "status": 200,
     "request": {
       "params": {
@@ -12,7 +12,7 @@
     "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Cashfree stood in for on the recording machine (its sandbox, test-only keys; one order's plain link made with Razorpay named and stood in for), no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
   },
   "answer": {
-    "offer_id": "ofr_db8285bc51dff2478b0f",
+    "offer_id": "ofr_da07f4e0cc47f24f27be",
     "crop": "onion",
     "quantity_q": 1.0,
     "from": {

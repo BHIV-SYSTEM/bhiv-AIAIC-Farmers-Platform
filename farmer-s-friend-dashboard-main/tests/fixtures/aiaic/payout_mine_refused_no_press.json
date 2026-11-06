@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "POST /farmer/trade/payout-account",
-    "at": "2026-11-05T06:56:30+00:00",
+    "at": "2026-11-06T10:33:57+00:00",
     "status": 422,
     "replay": null,
     "signed_in": true,

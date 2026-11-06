@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "POST /farmer/trade/payout-account",
-    "at": "2026-11-05T06:56:26+00:00",
+    "at": "2026-11-06T10:33:52+00:00",
     "status": 200,
     "replay": "false",
     "signed_in": true,
@@ -23,9 +23,9 @@
     "provider": "razorpay (named in-process)"
   },
   "answer": {
-    "party_id": "frm_599e0b567231fa847318",
+    "party_id": "frm_abf1102da603de06d424",
     "account": {
-      "payout_account_id": "pac_f74c1de40717f5bfbfcd",
+      "payout_account_id": "pac_bc5a5963b4e1002bcb20",
       "provider": "razorpay_route",
       "status": "created",
       "refused_code": null,
@@ -38,7 +38,7 @@
       "requirement_codes": [],
       "name_check": "matched_by_rule",
       "consent_notice_version": "pn-0b66a47d1399",
-      "consent_given_at": "2026-11-05T06:56:26.276197+00:00",
+      "consent_given_at": "2026-11-06T10:33:52.773868+00:00",
       "consent_basis": "in_app_self",
       "consent_how": null,
       "consent_read_in": "mr",
@@ -46,8 +46,8 @@
       "provider_closure": null,
       "test_mode": false,
       "synthetic": false,
-      "created_at": "2026-11-05T06:56:26.276197+00:00",
-      "updated_at": "2026-11-05T06:56:26.288356+00:00",
+      "created_at": "2026-11-06T10:33:52.773868+00:00",
+      "updated_at": "2026-11-06T10:33:52.800218+00:00",
       "error_code": null,
       "why": null,
       "ready": false,
@@ -57,7 +57,7 @@
       }
     },
     "trace": {
-      "request_id": "729e372396474f10ab9a5ba3607bfa0c",
+      "request_id": "5318db97b07843a0a1194cc4d56bd047",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

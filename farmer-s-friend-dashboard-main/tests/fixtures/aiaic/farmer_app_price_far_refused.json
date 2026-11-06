@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "POST /farmer/trade/listings",
-    "at": "2026-11-05T06:56:24+00:00",
+    "at": "2026-11-06T10:33:51+00:00",
     "status": 422,
     "replay": null,
     "signed_in": true,

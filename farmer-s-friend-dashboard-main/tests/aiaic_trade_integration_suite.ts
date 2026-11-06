@@ -627,6 +627,42 @@ test("A10 every transport note and refusal AIAIC sends is worded in en, mr and h
   }
 });
 
+/**
+ * A10b THE PER-KM NOTE SAYS WHAT AIAIC WORKED OUT (6 Nov 2026). Since 24 Oct AIAIC's per-km rate is the MEDIAN of the
+ * published rate cards (its note: "the median of {n} published rate cards"), and its website and the Gov Ops portal say
+ * "the middle of". This app's words still said "the average" in all three languages: true for two cards only. On the
+ * several-trips answer (three cards) the median is Rs 78 a km where the average would be Rs 69.33. Read from each
+ * estimate recorded from today's AIAIC that carries the note, so a change in what AIAIC says is seen here
+ * (`transport_estimate_estimate` is the server's answer from before 24 Oct, kept for its missing names: it averaged).
+ */
+test("A10b the per-km note says the middle of the rate cards, as AIAIC's median, never an average", () => {
+  const key = "aiaic.transport.note.rates_averaged";
+  let seen = 0;
+  for (const name of [
+    "transport_estimate_road",
+    "transport_estimate_several_trips",
+    "transport_estimate_short_trip",
+    "transport_estimate_lasalgaon_named",
+  ]) {
+    for (const n of est(name).notes) {
+      if (n.code !== "rates_averaged") continue;
+      seen += 1;
+      assert.match(
+        n.text ?? "",
+        /\bmedian\b/,
+        `${name}: AIAIC's note no longer says the median; read what it works out`,
+      );
+    }
+  }
+  assert.ok(seen >= 4, `the per-km note was read on ${seen} recorded estimates`);
+  assert.match(DICTS.en[key], /\bthe middle of\b/);
+  assert.doesNotMatch(DICTS.en[key], /average/i);
+  assert.match(DICTS.mr[key], /मधला दर/);
+  assert.doesNotMatch(DICTS.mr[key], /सरासरी/);
+  assert.match(DICTS.hi[key], /बीच का/);
+  assert.doesNotMatch(DICTS.hi[key], /औसत/);
+});
+
 /** Names and codes a Marathi or Hindi line may carry in Latin letters (the owner's rule: names and numbers only).
  * Cashfree is AIAIC's payments provider since 4 Nov 2026 (its own Marathi and Hindi notice names it so); RazorpayX,
  * Razorpay's payouts product, is gone and named nowhere. */

@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/push2_2026-10-23/W2_record_transport.py",
     "route": "GET /transport/nearby-mandis",
-    "at": "2026-10-24T08:50:50+00:00",
+    "at": "2026-11-06T10:35:10+00:00",
     "status": 200,
     "request": {
       "params": {
@@ -43,6 +43,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Nashik",
         "lat": 20.01125,
         "lon": 73.79024,
@@ -72,6 +73,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Dindori",
         "lat": 20.20373,
         "lon": 73.83259,
@@ -102,6 +104,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Pimpalgaon Baswant",
         "lat": 20.16795,
         "lon": 73.98845,
@@ -131,6 +134,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Ghoti",
         "lat": 19.71678,
         "lon": 73.62447,
@@ -159,6 +163,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Vani",
         "lat": 20.33061,
         "lon": 73.88946,
@@ -192,6 +197,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Lasalgaon",
         "lat": 20.14268,
         "lon": 74.23775,
@@ -220,6 +226,7 @@
         ],
         "state": "maharashtra",
         "district_key": "ahmednagar",
+        "also_filed_under": [],
         "place": "Akole",
         "lat": 19.54193,
         "lon": 74.00926,
@@ -248,6 +255,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Chandvad",
         "lat": 20.32781,
         "lon": 74.23872,
@@ -277,6 +285,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Kalvan",
         "lat": 20.49041,
         "lon": 74.02536,
@@ -306,6 +315,7 @@
         ],
         "state": "maharashtra",
         "district_key": "ahmednagar",
+        "also_filed_under": [],
         "place": "Sangamner",
         "lat": 19.56634,
         "lon": 74.21126,
@@ -335,6 +345,7 @@
         ],
         "state": "maharashtra",
         "district_key": "ahmednagar",
+        "also_filed_under": [],
         "place": "Kopargaon",
         "lat": 19.885,
         "lon": 74.4762,
@@ -364,6 +375,7 @@
         ],
         "state": "maharashtra",
         "district_key": "nashik",
+        "also_filed_under": [],
         "place": "Yeola",
         "lat": 20.04291,
         "lon": 74.48804,
@@ -388,9 +400,9 @@
     ],
     "count": 12,
     "held": {
-      "mandis": 938,
-      "at_their_own_town": 503,
-      "at_their_district_centre": 435
+      "mandis": 927,
+      "at_their_own_town": 485,
+      "at_their_district_centre": 442
     },
     "distance_is": "straight line between the two points, in km; road_km_estimate is that x 1.3, an estimate. GET /transport/estimate gives the road distance when one can be had.",
     "attribution": [
@@ -405,9 +417,9 @@
       }
     ],
     "points_source": {
-      "built_on": "2026-10-23",
+      "built_on": "2026-10-29",
       "title": "District centres and mandi towns of Maharashtra and Madhya Pradesh: points, place classes, sources",
-      "rule": "A name is read to its town (a sub-yard 'X(Y)' tries Y, then X). An answer is kept only when it is a settlement, an administrative area or a marketplace in the mandi's state, the geocoder's own district for it is the mandi's district (or the district it was carved from), or, where it names none, the mandi's district centre is the nearest one, and it lies within 200 km of that centre; a Geoapify answer must also carry the town's own name. Anything else is refused, never guessed."
+      "rule": "A name is read to its town (a sub-yard 'X(Y)' tries Y, then X). An answer is kept only when it is a settlement, an administrative area or a marketplace in the mandi's state, the geocoder's own district for it is the mandi's district (or the district it was carved from), or, where it names none, the mandi's district centre is the nearest one, and it lies within 200 km of that centre; a Geoapify answer must also carry the town's own name. Where the mandi's town is one of its district's official talukas (Maharashtra), an answer whose own taluka (the geocoder's county) names another taluka is refused (since 29 Oct 2026). Anything else is refused, never guessed."
     }
   }
 }

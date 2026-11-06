@@ -2,7 +2,7 @@
  "_recorded": {
   "by": "reports/push2_2026-10-23/A_record_transport_fixtures.py (AIAIC repo)",
   "route": "GET /transport/estimate",
-  "at": "2026-10-23T20:34:48+00:00",
+  "at": "2026-11-06T10:34:58+00:00",
   "status": 404,
   "request": {
    "params": {
