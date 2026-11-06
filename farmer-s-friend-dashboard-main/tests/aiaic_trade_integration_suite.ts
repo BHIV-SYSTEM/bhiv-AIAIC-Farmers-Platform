@@ -11,6 +11,7 @@
  *   127.0.0.1: no request leaves this machine; the account and password are stand-ins, never a real one.
  */
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import type { AddressInfo } from "node:net";
@@ -1301,6 +1302,46 @@ test("A23 the map names her district and every mandi in her language; places are
     );
     assert.equal(routeMapOf(old, lang, null, oldNear).places[0]?.label, old.from.district);
   }
+});
+
+test("A70 F1 every recording the transport manifest names is held to its bytes, as the storage samples are (S45): the sha256 and the size of its LF text, a Windows checkout's CRLF set aside; every transport recording here is named", () => {
+  type Held = { sha256: string; bytes: number };
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "transport_recording_manifest.json"), "utf-8"),
+  ) as {
+    files: Record<string, Held>;
+    kept_from_an_earlier_server: Record<string, Held>;
+    copied_from_aiaics_tree?: Record<string, Held>;
+  };
+  const named: Record<string, Held> = {
+    ...manifest.files,
+    ...manifest.kept_from_an_earlier_server,
+    ...(manifest.copied_from_aiaics_tree ?? {}),
+  };
+  assert.ok(Object.keys(named).length >= 9, `only ${Object.keys(named).length} named`);
+  for (const [name, held] of Object.entries(named)) {
+    // the text AIAIC wrote: a Windows checkout may write CRLF over the file's LF (core.autocrlf)
+    const text = fs.readFileSync(path.join(FIXTURES, name), "utf-8").replace(/\r\n/g, "\n");
+    const bytes = Buffer.from(text, "utf-8");
+    assert.equal(
+      createHash("sha256").update(bytes).digest("hex"),
+      held.sha256,
+      `${name} is not the file its manifest names`,
+    );
+    assert.equal(bytes.length, held.bytes, `${name}: its size`);
+  }
+  // every transport recording and district list of Madhya Pradesh here is named by it (the sale steps' trip by the trade
+  // manifest, which names its own recorder)
+  const trade = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "trade_recording_manifest.json"), "utf-8"),
+  ) as { files: Record<string, unknown> };
+  const here = fs
+    .readdirSync(FIXTURES)
+    .filter(
+      (n) =>
+        /^(transport_|places_districts_mp_)/.test(n) && n !== "transport_recording_manifest.json",
+    );
+  for (const n of here) assert.ok(n in named || n in trade.files, `${n} is named by no manifest`);
 });
 
 test("A24 the mandis an advice compared: AIAIC's rows[].mandi_shown, the key kept; mr and hi say no APMC", () => {

@@ -1,0 +1,415 @@
+{
+  "_recorded": {
+    "by": "reports/push2_2026-10-23/W2_record_transport.py",
+    "route": "GET /transport/nearby-mandis",
+    "at": "2026-11-06T11:44:54+00:00",
+    "status": 200,
+    "request": {
+      "params": {
+        "district": "Satna",
+        "state": "mp",
+        "limit": 12,
+        "same_state": "true"
+      }
+    },
+    "note": "A real answer of the real route (service.main through FastAPI's TestClient on this laptop, no database read: every request names its district). No Geoapify key was set for this request, so the distance is the straight line x 1.3, said to be an estimate. Replayed by the web tests, never edited by hand."
+  },
+  "answer": {
+    "from": {
+      "state": "madhya pradesh",
+      "district_key": "satna",
+      "district": "Satna",
+      "lat": 24.57,
+      "lon": 80.83,
+      "approximate": null,
+      "place_class": "city",
+      "area": "urban",
+      "settlement": "Satna",
+      "names": {
+        "en": "Satna",
+        "translated": {
+          "mr": true,
+          "hi": true
+        },
+        "mr": "सतना",
+        "hi": "सतना"
+      }
+    },
+    "mandis": [
+      {
+        "mandi": "Satna APMC",
+        "also_named": [
+          "Satna",
+          "Satna(F&V)",
+          "Satna(F&V) APMC"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "satna",
+        "also_filed_under": [],
+        "place": "Satna",
+        "lat": 24.57513,
+        "lon": 80.83257,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "city",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 0.6,
+        "road_km_estimate": 0.8,
+        "names": {
+          "en": "Satna APMC",
+          "translated": {
+            "mr": true,
+            "hi": true
+          },
+          "mr": "सतना बाजार समिती",
+          "hi": "सतना मंडी"
+        }
+      },
+      {
+        "mandi": "Ramnagar APMC",
+        "also_named": [
+          "Ramnagar"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "satna",
+        "also_filed_under": [],
+        "place": "Ramnagar",
+        "lat": 24.62608,
+        "lon": 81.05894,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "village",
+        "area": "rural",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 24.0,
+        "road_km_estimate": 31.2,
+        "names": {
+          "en": "Ramnagar APMC",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Ramnagar बाजार समिती",
+          "hi": "Ramnagar मंडी"
+        }
+      },
+      {
+        "mandi": "Nagod APMC",
+        "also_named": [
+          "Nagod"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "satna",
+        "also_filed_under": [],
+        "place": "Nagod",
+        "lat": 24.57052,
+        "lon": 80.58676,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "city",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 24.6,
+        "road_km_estimate": 32.0,
+        "names": {
+          "en": "Nagod APMC",
+          "translated": {
+            "mr": false,
+            "hi": true
+          },
+          "mr": "Nagod बाजार समिती",
+          "hi": "नागोद मंडी"
+        }
+      },
+      {
+        "mandi": "Amarpatan APMC",
+        "also_named": [
+          "Amarpatan"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "maihar",
+        "also_filed_under": [
+          "satna"
+        ],
+        "place": "Amarpatan",
+        "lat": 24.31598,
+        "lon": 80.97437,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "town",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 31.8,
+        "road_km_estimate": 41.3,
+        "names": {
+          "en": "Amarpatan APMC",
+          "translated": {
+            "mr": false,
+            "hi": true
+          },
+          "mr": "Amarpatan बाजार समिती",
+          "hi": "अमरपाटन मंडी"
+        }
+      },
+      {
+        "mandi": "Maihar APMC",
+        "also_named": [
+          "Maihar(F&V)",
+          "Maihar(F&V) APMC"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "maihar",
+        "also_filed_under": [
+          "satna"
+        ],
+        "place": "Maihar",
+        "lat": 24.26044,
+        "lon": 80.75927,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "town",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 35.2,
+        "road_km_estimate": 45.7,
+        "names": {
+          "en": "Maihar APMC",
+          "translated": {
+            "mr": true,
+            "hi": true
+          },
+          "mr": "मैहर बाजार समिती",
+          "hi": "मैहर मंडी"
+        }
+      },
+      {
+        "mandi": "Ramnagar APMC",
+        "also_named": [],
+        "state": "madhya pradesh",
+        "district_key": "maihar",
+        "also_filed_under": [],
+        "place": "Ramnagar",
+        "lat": 24.21702,
+        "lon": 81.08444,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "town",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 47.0,
+        "road_km_estimate": 61.0,
+        "names": {
+          "en": "Ramnagar APMC",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Ramnagar बाजार समिती",
+          "hi": "Ramnagar मंडी"
+        }
+      },
+      {
+        "mandi": "Rewa APMC",
+        "also_named": [
+          "Rewa",
+          "Rewa(F&V)",
+          "Rewa(F&V) APMC"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "rewa",
+        "also_filed_under": [],
+        "place": "Rewa",
+        "lat": 24.5359,
+        "lon": 81.2934,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "city",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 47.0,
+        "road_km_estimate": 61.1,
+        "names": {
+          "en": "Rewa APMC",
+          "translated": {
+            "mr": true,
+            "hi": true
+          },
+          "mr": "रीवा बाजार समिती",
+          "hi": "रीवा मंडी"
+        }
+      },
+      {
+        "mandi": "Baikunthpur APMC",
+        "also_named": [
+          "Baikunthpur"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "rewa",
+        "also_filed_under": [],
+        "place": "Baikunthpur",
+        "lat": 24.72843,
+        "lon": 81.41015,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "village",
+        "area": "rural",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 61.2,
+        "road_km_estimate": 79.6,
+        "names": {
+          "en": "Baikunthpur APMC",
+          "translated": {
+            "mr": false,
+            "hi": false
+          },
+          "mr": "Baikunthpur बाजार समिती",
+          "hi": "Baikunthpur मंडी"
+        }
+      },
+      {
+        "mandi": "Ajaygarh APMC",
+        "also_named": [
+          "Ajaygarh"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "panna",
+        "also_filed_under": [],
+        "place": "Ajaygarh",
+        "lat": 24.90291,
+        "lon": 80.25787,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "town",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 68.6,
+        "road_km_estimate": 89.2,
+        "names": {
+          "en": "Ajaygarh APMC",
+          "translated": {
+            "mr": false,
+            "hi": true
+          },
+          "mr": "Ajaygarh बाजार समिती",
+          "hi": "अजयगढ़ मंडी"
+        }
+      },
+      {
+        "mandi": "Panna APMC",
+        "also_named": [
+          "Panna"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "panna",
+        "also_filed_under": [],
+        "place": "Panna",
+        "lat": 24.44989,
+        "lon": 80.14627,
+        "located_by": "mandi_town",
+        "point_kind": "area_centre",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 70.5,
+        "road_km_estimate": 91.6,
+        "names": {
+          "en": "Panna APMC",
+          "translated": {
+            "mr": true,
+            "hi": true
+          },
+          "mr": "पन्ना बाजार समिती",
+          "hi": "पन्ना मंडी"
+        }
+      },
+      {
+        "mandi": "Pawai APMC",
+        "also_named": [
+          "Pawai"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "panna",
+        "also_filed_under": [],
+        "place": "Pawai",
+        "lat": 24.2736,
+        "lon": 80.16626,
+        "located_by": "mandi_town",
+        "point_kind": "town",
+        "place_class": "town",
+        "area": "urban",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 74.8,
+        "road_km_estimate": 97.3,
+        "names": {
+          "en": "Pawai APMC",
+          "translated": {
+            "mr": false,
+            "hi": true
+          },
+          "mr": "Pawai बाजार समिती",
+          "hi": "पवई मंडी"
+        }
+      },
+      {
+        "mandi": "Umariya APMC",
+        "also_named": [
+          "Umariya"
+        ],
+        "state": "madhya pradesh",
+        "district_key": "umaria",
+        "also_filed_under": [],
+        "place": "Umariya",
+        "lat": 23.80665,
+        "lon": 80.94642,
+        "located_by": "mandi_town",
+        "point_kind": "area_centre",
+        "place_class": "unknown",
+        "area": "unknown",
+        "geocoder": "nominatim",
+        "geocoded_on": "2026-10-23",
+        "straight_km": 85.7,
+        "road_km_estimate": 111.4,
+        "names": {
+          "en": "Umariya APMC",
+          "translated": {
+            "mr": true,
+            "hi": true
+          },
+          "mr": "उमरिया बाजार समिती",
+          "hi": "उमरिया मंडी"
+        }
+      }
+    ],
+    "count": 12,
+    "held": {
+      "mandis": 927,
+      "at_their_own_town": 485,
+      "at_their_district_centre": 442
+    },
+    "distance_is": "straight line between the two points, in km; road_km_estimate is that x 1.3, an estimate. GET /transport/estimate gives the road distance when one can be had.",
+    "attribution": [
+      {
+        "text": "© OpenStreetMap contributors",
+        "url": "https://www.openstreetmap.org/copyright",
+        "licence": "ODbL 1.0"
+      }
+    ],
+    "points_source": {
+      "built_on": "2026-10-29",
+      "title": "District centres and mandi towns of Maharashtra and Madhya Pradesh: points, place classes, sources",
+      "rule": "A name is read to its town (a sub-yard 'X(Y)' tries Y, then X). An answer is kept only when it is a settlement, an administrative area or a marketplace in the mandi's state, the geocoder's own district for it is the mandi's district (or the district it was carved from), or, where it names none, the mandi's district centre is the nearest one, and it lies within 200 km of that centre; a Geoapify answer must also carry the town's own name. Where the mandi's town is one of its district's official talukas (Maharashtra), an answer whose own taluka (the geocoder's county) names another taluka is refused (since 29 Oct 2026). Anything else is refused, never guessed."
+    }
+  }
+}
