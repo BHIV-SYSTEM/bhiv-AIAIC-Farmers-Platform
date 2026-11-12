@@ -30,6 +30,8 @@ import {
 } from "./aiaic-identity.server";
 import {
   commissionOf,
+  evidenceKindOf,
+  holdsOf,
   namesOf,
   pricingOf,
   problem,
@@ -357,6 +359,9 @@ function stepOf(x: unknown): Record<string, unknown> {
     if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") kept[k] = v;
   }
   out["detail"] = kept;
+  // HOW THE STEP IS KNOWN (Round 2, R2-3): AIAIC's code from its closed list, else none (`buyer_confirmed`: the buyer's
+  // own "It arrived", said to her as such)
+  out["evidence_kind"] = evidenceKindOf(src["evidence_kind"]);
   const loss = src["loss"];
   out["loss"] = loss && typeof loss === "object" ? pick(loss, ["q", "pct"] as const) : null;
   return out;
@@ -582,6 +587,8 @@ export function mineForBrowser(raw: unknown): AiaicMine {
         const s = (fa as Record<string, unknown>)["sending"];
         m["sending"] = s && typeof s === "object" ? pick(s, SENDING_KEYS) : null;
         m["steps"] = stepsOf((fa as Record<string, unknown>)["steps"]);
+        // WHAT AIAIC HOLDS FOR HER NOW (Round 2, R2-2's `holds`): her own amount, since when, why it waits (a closed code)
+        m["holds"] = holdsOf((fa as Record<string, unknown>)["holds"]);
         order["from_aiaic"] = m;
       }
       if (src["money"] && typeof src["money"] === "object") {

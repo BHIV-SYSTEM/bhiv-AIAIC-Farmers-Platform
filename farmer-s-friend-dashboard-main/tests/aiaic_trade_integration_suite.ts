@@ -135,12 +135,14 @@ import {
   moreTimeGiven,
   needsDestination,
   orderOfOffer,
+  WAITS_FOR,
   type AiaicOffer,
   type AiaicPool,
   type OfferView,
   type ReferencePrice,
 } from "../src/lib/aiaic-trade";
 import {
+  TRADE_NOTICE_KINDS,
   moneyNoticeLine,
   newsShown,
   tradeFactsOf,
@@ -148,6 +150,8 @@ import {
   type Notice,
   type TradeNoticeKind,
 } from "../src/lib/aiaic-account";
+import { AccountNotices } from "../src/components/farm/AccountChip";
+import { SaleJourney } from "../src/components/farm/aiaic/SaleJourney";
 import * as account from "../src/lib/aiaic-account.server";
 import { FALLBACK_BASE_URL } from "../src/lib/aiaic-base.server";
 import {
@@ -2754,9 +2758,8 @@ test("B16 the farmer's money: one notice per sale (the newest, with its amount, 
   // notifications after the send reached them; their sale while it was on its way, and once the buyer paid)
   const s = await standIn();
   type Row = { notification_id: number; kind: string; body: Record<string, unknown> };
-  const rows = answer<{ notifications: Row[] }>("notices_money_processed").notifications.filter(
-    (n) => n.kind === "trade_farmer_paid",
-  );
+  const recordedRows = answer<{ notifications: Row[] }>("notices_money_processed").notifications;
+  const rows = recordedRows.filter((n) => n.kind === "trade_farmer_paid");
   try {
     settings(s.url, null, null);
     asHer(s);
@@ -2775,13 +2778,19 @@ test("B16 the farmer's money: one notice per sale (the newest, with its amount, 
         rows[0].body["order_id"],
       ],
     );
+    // (R2-3 lane A part A-c: CHANGED ON PURPOSE. Her buyer's payment of the same sale, `trade_buyer_paid`, is read with
+    // this newer news of its money: once it reached her bank, "not in your account yet" is no news; A72 holds it.)
     assert.deepEqual(
       [...(m.alsoIds ?? [])].sort(),
-      rows
-        .slice(1)
+      [
+        ...rows.slice(1),
+        ...recordedRows.filter(
+          (r) => r.kind === "trade_buyer_paid" && r.body["order_id"] === rows[0].body["order_id"],
+        ),
+      ]
         .map((r) => r.notification_id)
         .sort(),
-      "the older notice is read with it",
+      "the older notice, and her buyer's payment of the same sale, are read with it",
     );
     // her sale is read every 5 s while AIAIC's send is moving, else every 15 s
     const asRead = (name: string) =>
@@ -3110,9 +3119,21 @@ test("A40 MORE TIME (AIAIC's recorded notice and answer): said with the offer's 
       .filter((x) => x.chip === "open")
       .map((x) => x.offer.offer_id),
   );
-  const shown = newsShown(notices, open).map((n) => n.trade?.offerId);
-  assert.ok(shown.length > 0 && shown.every((id) => id && open.has(id)));
-  assert.ok(shown.length < notices.length, "news of answered offers is not shown");
+  // (R2-3 lane A part A-c, 13 Nov 2026: CHANGED ON PURPOSE. AIAIC's recording, re-recorded at R2-2, holds her buyer's
+  // payment too, `trade_buyer_paid`: news of her ORDER, which names no offer. This test holds the offers' news; A72 holds
+  // the payment's.)
+  const news = newsShown(notices, open);
+  const offersNews = notices.filter((n) => n.kind === "trade_offer");
+  const shown = news.filter((n) => n.kind === "trade_offer").map((n) => n.trade?.offerId);
+  assert.ok(
+    shown.length > 0 && shown.every((id) => id && open.has(id)),
+    "her news of offers: open offers only",
+  );
+  assert.ok(shown.length < offersNews.length, "news of answered offers is not shown");
+  assert.ok(
+    news.some((n) => n.kind === "trade_buyer_paid"),
+    "her buyer's payment is news of her order: shown",
+  );
   assert.deepEqual(
     newsShown([{ ...notices[0], read: true } as Notice], null),
     [],
@@ -3592,6 +3613,501 @@ test("A46 AUD-4..AUD-9 her steps' words and page: stages, the team decides, a no
   );
 });
 
+// ------------- R2-3 lane A part A-c (13 Nov 2026): her buyer's payment (A6), "the buyer said it arrived", and "AIAIC holds
+// your money" (A5), each on AIAIC's recorded answers; what no recording holds is DERIVED in memory, and said so
+
+/** Her news strip rendered on the server as the app holds it: her session and her notices in the page's cache. */
+const stripOf = (notices: Notice[], lang: (typeof LANGS)[number]) => {
+  const qc = new QueryClient();
+  qc.setQueryData(["aiaic-me"], {
+    signedIn: true,
+    username: "farmer",
+    displayName: null,
+    signedOutNote: false,
+    erasedNote: false,
+  });
+  qc.setQueryData(["aiaic-notices", lang], notices);
+  return renderToString(
+    createElement(RouterContextProvider, {
+      router: appRouter as never,
+      children: createElement(QueryClientProvider, {
+        client: qc,
+        children: createElement(I18nProvider, {
+          initialLang: lang,
+          children: createElement(AccountNotices),
+        }),
+      }),
+    }),
+  ).replaceAll("<!-- -->", "");
+};
+/** One notice's own element in a rendered strip: from its test id to the next notice (each is a `role="status"`). */
+const noticeHtml = (html: string, testid: string): string | null => {
+  const at = html.indexOf(`data-testid="${testid}"`);
+  if (at < 0) return null;
+  const next = html.indexOf('role="status"', at);
+  return html.slice(at, next < 0 ? undefined : next);
+};
+const ONION = { en: "Onion", mr: "कांदा", hi: "प्याज" } as const;
+const latinIn = (s: string) => (s.match(/[A-Za-z]+/g) ?? []).filter((w) => !LATIN_ALLOWED.has(w));
+
+test("A72 A6 her buyer has paid in full (AIAIC's recorded notice, `trade_buyer_paid`): read and drawn with its words and its icon, HER OWN amount (G-20) and TEST; read with newer news of its sale; a kind her app does not hold is still dropped", async () => {
+  type Row = {
+    notification_id: number;
+    kind: string;
+    read_at: string | null;
+    body: Record<string, unknown>;
+  };
+  const recordedNotices = answer<{ unread: number; notifications: Row[] }>(
+    "buyer_farmer_notices_more_time",
+  );
+  const paidRow = recordedNotices.notifications.find((r) => r.kind === "trade_buyer_paid");
+  assert.ok(
+    paidRow && typeof paidRow.body["to_her_inr"] === "number",
+    "AIAIC's recording holds her buyer's payment, with her amount",
+  );
+  const her = Number(paidRow.body["to_her_inr"]);
+  // her sale of that payment, in AIAIC's recorded answer of the same world: the notice's amount is hers, not the buyer's
+  const sale = answer<{
+    orders: { order_id: string; from_aiaic?: { to_her_inr?: number; price_inr?: number } }[];
+  }>("buyer_farmer_mine_more_time").orders.find((o) => o.order_id === paidRow.body["order_id"]);
+  assert.ok(sale?.from_aiaic, "her sale of that payment is in AIAIC's recorded answer");
+  assert.equal(her, sale.from_aiaic.to_her_inr, "the notice's amount is her own (to_her_inr)");
+  assert.notEqual(
+    sale.from_aiaic.price_inr,
+    her,
+    "the buyer's total and hers differ here, so the checks below are not vacuous",
+  );
+  assert.ok(
+    (TRADE_NOTICE_KINDS as readonly string[]).includes("trade_buyer_paid"),
+    "a kind her app says",
+  );
+  const facts = tradeFactsOf("trade_buyer_paid", paidRow.body);
+  assert.ok(facts, "the notice keeps its facts");
+  assert.equal(facts.orderId, paidRow.body["order_id"], "news of her order");
+  assert.equal(facts.offerId, null, "no offer");
+  assert.equal(facts.toHerInr, her, "her own amount");
+  assert.equal(facts.testMode, true, "TEST, as AIAIC recorded it");
+  assert.ok(!("farmer_id" in facts), "the farmer's record id stays on AIAIC's side");
+  // G-20, DERIVED in memory: a buyer's total sent beside her amount is never said as hers
+  const withTotal = tradeFactsOf("trade_buyer_paid", {
+    ...paidRow.body,
+    amount_inr: Number(sale.from_aiaic.price_inr),
+  });
+  assert.ok(withTotal, "the derived notice keeps its facts");
+  for (const lang of LANGS) {
+    const t = wordsIn(lang);
+    const line = tradeNoticeLine(t, "trade_buyer_paid", facts, { onion: ONION[lang] });
+    assert.ok(line.startsWith(`${ONION[lang]}: `), `${lang}: the crop by its name in "${line}"`);
+    assert.ok(line.includes(rupees(her)), `${lang}: her own amount in "${line}"`);
+    const total = tradeNoticeLine(t, "trade_buyer_paid", withTotal, {});
+    assert.ok(
+      total.includes(rupees(her)) && !total.includes(rupees(Number(sale.from_aiaic.price_inr))),
+      `${lang}: never the buyer's total: "${total}"`,
+    );
+    assert.ok(line.endsWith(t("aiaic.money.test")), `${lang}: TEST, no real money moved`);
+    assert.ok(!HOLE.test(line) && !line.includes("aiaic."), `${lang}: said whole: "${line}"`);
+    const none = tradeNoticeLine(t, "trade_buyer_paid", { ...facts, toHerInr: null }, {});
+    assert.ok(
+      !HOLE.test(none) && !none.includes("—") && !none.includes("aiaic."),
+      `${lang}: no amount sent: the same sentence without it: "${none}"`,
+    );
+    if (lang !== "en") assert.deepEqual(latinIn(line + none), [], `${lang}: no English word`);
+  }
+  const s = await standIn();
+  try {
+    settings(s.url, null, null);
+    asHer(s);
+    s.notices = recordedNotices;
+    const all = await account.myNotices("en");
+    const paid = all.filter((n) => n.kind === "trade_buyer_paid");
+    assert.equal(paid.length, 1, "her buyer's payment, through this server: its own news");
+    assert.equal(paid[0]?.trade?.toHerInr, her, "her own amount");
+    assert.ok(!JSON.stringify(all).includes("frm_"), "no farmer's record id leaves this server");
+    // drawn on her news strip, as the app holds it: its words, its icon, Open
+    for (const lang of LANGS) {
+      const el = noticeHtml(stripOf(all, lang), "notice-trade_buyer_paid");
+      assert.ok(el, `${lang}: drawn on her news strip`);
+      assert.ok(el.includes("lucide-wallet"), `${lang}: with its own icon`);
+      const words = tradeNoticeLine(wordsIn(lang), "trade_buyer_paid", paid[0].trade ?? facts, {});
+      assert.ok(el.includes(escHtml(words)), `${lang}: its words "${words}"`);
+      assert.ok(el.includes('data-testid="notice-trade-open"'), `${lang}: Open, to her sale`);
+    }
+    // a kind her app does not hold is still dropped (DERIVED in memory: the same row under another kind)
+    const unknown = JSON.parse(JSON.stringify(recordedNotices)) as typeof recordedNotices;
+    // (another order's, so that it could not be read with the payment's own news and hidden there)
+    unknown.notifications.push({
+      ...paidRow,
+      notification_id: 999_001,
+      kind: "trade_kind_not_held",
+      body: { ...paidRow.body, order_id: "ord_derivedkindnotheld001" },
+    });
+    s.notices = unknown;
+    const after = await account.myNotices("en");
+    assert.equal(after.length, all.length, "a kind her app does not hold is not shown");
+    assert.ok(
+      after.every((n) => String(n.kind) !== "trade_kind_not_held"),
+      "nor kept",
+    );
+    // READ WITH NEWER NEWS OF ITS SALE (AIAIC's recorded notices of a sale whose money then reached her bank)
+    s.notices = null;
+    const money = await account.myNotices("en");
+    const rows = answer<{ notifications: Row[] }>("notices_money_processed").notifications;
+    const paidThere = rows.find((r) => r.kind === "trade_buyer_paid");
+    assert.ok(paidThere, "the recording holds her buyer's payment, before its send");
+    assert.ok(
+      money.every((n) => n.kind !== "trade_buyer_paid"),
+      "not said once her money left AIAIC",
+    );
+    const newer = money.find((n) => n.money?.orderId === paidThere.body["order_id"]);
+    assert.ok(
+      newer?.alsoIds?.includes(paidThere.notification_id),
+      "read with the news of its money",
+    );
+    // G-28, DERIVED in memory: the sale called off after the buyer paid (its call-off notice, newer, of the same sale)
+    const off = JSON.parse(JSON.stringify(recordedNotices)) as typeof recordedNotices;
+    off.notifications.unshift({
+      notification_id: 999_002,
+      kind: "trade_order_cancelled",
+      read_at: null,
+      body: { order_id: paidRow.body["order_id"], crop: "onion", reason_code: "buyer_called_off" },
+    });
+    s.notices = off;
+    const called = await account.myNotices("en");
+    assert.ok(
+      called.every((n) => n.kind !== "trade_buyer_paid"),
+      "G-28: not said beside its call-off",
+    );
+    assert.ok(
+      called
+        .find((n) => n.kind === "trade_order_cancelled")
+        ?.alsoIds?.includes(paidRow.notification_id),
+      "read with the call-off",
+    );
+  } finally {
+    s.notices = null;
+    await s.close();
+  }
+});
+
+test("A73 \"the buyer said it arrived\": the buyer's own word on her sale's journey and in her step notice, only on AIAIC's `buyer_confirmed` for a delivery done (DERIVED in memory from AIAIC's recorded step notice and sale: no recording holds a buyer's word on a real order)", () => {
+  type Row = { kind: string; body: Record<string, unknown> };
+  const step = answer<{ notifications: Row[] }>("notices_money_processed").notifications.find(
+    (r) => r.kind === "trade_order_step",
+  );
+  assert.ok(step, "AIAIC's recorded step notice");
+  assert.equal(
+    step.body["evidence_kind"],
+    "simulated",
+    "a practice order's step, as AIAIC recorded it",
+  );
+  // DERIVED: the buyer's word on a real order recorded the delivery, as AIAIC's `buyers.add_word` writes it
+  const word = {
+    ...step.body,
+    stage: "delivered",
+    status: "done",
+    simulated: false,
+    evidence_kind: "buyer_confirmed",
+  };
+  for (const lang of LANGS) {
+    const t = wordsIn(lang);
+    const f = tradeFactsOf("trade_order_step", word);
+    assert.ok(f, "the notice keeps its facts");
+    assert.equal(f.evidenceKind, "buyer_confirmed");
+    const line = tradeNoticeLine(t, "trade_order_step", f, { onion: ONION[lang] });
+    assert.equal(
+      line,
+      `${ONION[lang]}: ${t("aiaic.notice.buyer_said_arrived")}`,
+      `${lang}: the buyer's own word`,
+    );
+    if (lang !== "en") assert.deepEqual(latinIn(line), [], `${lang}: no English word`);
+    // known any other way, the delivery is the step's own words
+    for (const ev of ["operator_observed", "partner_observed", "simulated", "a_kind_not_held"]) {
+      const g = tradeFactsOf("trade_order_step", { ...word, evidence_kind: ev });
+      assert.ok(g, "kept");
+      const l = tradeNoticeLine(t, "trade_order_step", g, { onion: ONION[lang] });
+      assert.ok(
+        !l.includes(t("aiaic.notice.buyer_said_arrived")),
+        `${lang} ${ev}: not the buyer's word`,
+      );
+      assert.ok(
+        l.includes(t("aiaic.journey.stage.delivered")),
+        `${lang} ${ev}: delivered, in its own words`,
+      );
+    }
+    // the buyer's code on a step that is not a delivery done is not said so
+    for (const other of [{ stage: "pickup" }, { status: "pending" }]) {
+      const g = tradeFactsOf("trade_order_step", { ...word, ...other });
+      assert.ok(g, "kept");
+      // (the crop's name first, so the words keep their own case in English)
+      const l = tradeNoticeLine(t, "trade_order_step", g, { onion: ONION[lang] });
+      assert.ok(
+        !l.includes(t("aiaic.notice.buyer_said_arrived")),
+        `${lang} ${JSON.stringify(other)}: not said`,
+      );
+    }
+  }
+  // HER SALE'S JOURNEY: AIAIC's recorded sale, with a delivery by the buyer's word DERIVED from its recorded pickup
+  const raw = answer<{ orders: { fulfilment: Record<string, unknown>[] }[] }>(
+    "collect_mine_queued",
+  );
+  const derived = JSON.parse(JSON.stringify(raw)) as typeof raw;
+  const pickup = derived.orders[0].fulfilment.find((x) => x["stage"] === "pickup");
+  assert.ok(pickup, "her recorded sale holds its pickup");
+  derived.orders[0].fulfilment.push(
+    {
+      ...pickup,
+      event_id: "ful_derivedbuyerword00001",
+      stage: "delivered",
+      simulated: false,
+      evidence_kind: "buyer_confirmed",
+      detail: {},
+      created_at: "2026-11-12T17:00:00+00:00",
+    },
+    {
+      ...pickup,
+      event_id: "ful_derivedunknownkind001",
+      stage: "in_transit",
+      evidence_kind: "a_kind_not_held",
+      detail: {},
+      created_at: "2026-11-12T16:59:00+00:00",
+    },
+  );
+  const mine = client.mineForBrowser(derived);
+  const steps = mine.orders[0].fulfilment;
+  assert.equal(
+    steps.find((x) => x.stage === "delivered")?.evidence_kind,
+    "buyer_confirmed",
+    "AIAIC's code passes this server",
+  );
+  assert.equal(
+    steps.find((x) => x.stage === "pickup")?.evidence_kind,
+    "simulated",
+    "as AIAIC recorded it",
+  );
+  assert.equal(
+    steps.find((x) => x.stage === "in_transit")?.evidence_kind,
+    null,
+    "a code not in AIAIC's list: none",
+  );
+  const titlesOf = (html: string) =>
+    [...html.matchAll(/data-testid="aiaic-journey-step-title"[^>]*>([^<]*)</g)].map((m) => m[1]);
+  for (const lang of LANGS) {
+    const t = wordsIn(lang);
+    const titles = titlesOf(inApp(createElement(SaleJourney, { order: mine.orders[0] }), lang));
+    assert.ok(
+      titles.includes(escHtml(t("aiaic.journey.buyer_said_arrived"))),
+      `${lang}: the buyer said it arrived, on her journey: ${titles.join(" | ")}`,
+    );
+    assert.ok(
+      titles.includes(escHtml(t("aiaic.journey.stage.pickup"))),
+      `${lang}: her pickup, its own words`,
+    );
+    // the same delivery known by AIAIC's team: its stage's own words
+    const team = JSON.parse(JSON.stringify(mine.orders[0])) as AiaicOrder;
+    for (const x of team.fulfilment)
+      if (x.stage === "delivered") x.evidence_kind = "operator_observed";
+    const theirs = titlesOf(inApp(createElement(SaleJourney, { order: team }), lang));
+    assert.ok(
+      !theirs.includes(escHtml(t("aiaic.journey.buyer_said_arrived"))),
+      `${lang}: not the buyer's word`,
+    );
+    assert.ok(theirs.includes(escHtml(t("aiaic.journey.stage.delivered"))), `${lang}: delivered`);
+  }
+});
+
+test('A74 A5 "AIAIC holds your money" on her money card (AIAIC\'s recorded answers): its line with HER OWN amount and its waiting words for each `waits_for` AIAIC answered, the new middle step, "It reaches your bank" only on reached; the four codes no recording holds DERIVED; never the buyer\'s total (G-20); never on a sale called off (G-28)', () => {
+  const cardRupees = (n: number | null | undefined) =>
+    `₹${Number(n).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const faOf = (o: AiaicOrder) => (o as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
+  const card = (mine: AiaicMine, order: AiaicOrder, lang: (typeof LANGS)[number]) => {
+    const her = mine as AiaicMine & {
+      x_destination?: XDestination | null;
+      collect_then_pay?: boolean;
+      x_notice?: XNotice | null;
+    };
+    return inApp(
+      createElement(FromAiaicCard, {
+        money: faOf(order),
+        dest: her.x_destination,
+        collectThenPay: her.collect_then_pay === true,
+        notice: her.x_notice,
+        calledOff: order.order_state === "cancelled",
+      }),
+      lang,
+    );
+  };
+  const stateOf = (html: string, step: string) =>
+    html.match(new RegExp(`data-step="${step}" data-state="(\\w+)"`))?.[1];
+  const holdsCode = (html: string) =>
+    html.match(/data-testid="aiaic-money-holds" data-waits-for="(\w+)"/)?.[1] ?? null;
+  const holdsBlock = (html: string) => {
+    const at = html.indexOf('data-testid="aiaic-money-holds"');
+    // its words, from the end of its own tag to the card's figures
+    return at < 0 ? "" : html.slice(html.indexOf(">", at) + 1, html.indexOf("<dl", at));
+  };
+  type RawHolds = { amount_inr: number; since: string; waits_for: string } | null;
+  const seen = new Set<string>();
+  let differ = false;
+  for (const name of [
+    "collect_mine_paid",
+    "collect_mine_queued",
+    "collect_mine_stale",
+    "collect_mine_approval_pending",
+    "collect_mine_processing",
+    "collect_mine_processed",
+    "buyer_farmer_mine_more_time",
+  ]) {
+    const mine = mineOf(name);
+    const raws = answer<{ orders: { order_id: string; from_aiaic?: { holds?: RawHolds } }[] }>(
+      name,
+    ).orders;
+    for (const order of mine.orders) {
+      const fa = faOf(order);
+      if (!fa) continue;
+      const raw = raws.find((o) => o.order_id === order.order_id)?.from_aiaic?.holds ?? null;
+      const said = fa.steps ?? { buyer_paid: fa.buyer_paid, sent: false, reached: false };
+      for (const lang of LANGS) {
+        const t = wordsIn(lang);
+        const html = card(mine, order, lang);
+        assert.ok(
+          html.includes('data-testid="aiaic-from-aiaic"'),
+          `${name} ${lang}: her money's card`,
+        );
+        assert.deepEqual(
+          [...html.matchAll(/data-step="(\w+)"/g)].map((m) => m[1]),
+          ["buyer_paid", "holds", "sending", "reached"],
+          `${name} ${lang}: her money's four steps, the new one in the middle`,
+        );
+        if (raw) {
+          seen.add(raw.waits_for);
+          assert.equal(holdsCode(html), raw.waits_for, `${name} ${lang}: AIAIC's own code`);
+          const line = t("aiaic.money.holds.line", { rs: cardRupees(raw.amount_inr) });
+          assert.ok(html.includes(escHtml(line)), `${name} ${lang}: "${line}"`);
+          const why = t(`aiaic.money.holds.waits_for.${raw.waits_for}`);
+          assert.ok(html.includes(escHtml(why)), `${name} ${lang}: why it waits, "${why}"`);
+          assert.equal(raw.amount_inr, fa.to_her_inr, `${name}: AIAIC holds her own amount`);
+          if (fa.price_inr !== null && fa.price_inr !== raw.amount_inr) {
+            differ = true;
+            assert.ok(
+              !holdsBlock(html).includes(escHtml(cardRupees(fa.price_inr))),
+              `${name} ${lang}: never the buyer's total (G-20)`,
+            );
+          }
+          assert.equal(stateOf(html, "holds"), "done", `${name} ${lang}: AIAIC holds your money`);
+          if (lang !== "en")
+            assert.deepEqual(
+              latinIn(holdsBlock(html).replace(/<[^>]*>/g, " ")),
+              [],
+              `${name} ${lang}: no English word`,
+            );
+        } else {
+          assert.equal(
+            holdsCode(html),
+            null,
+            `${name} ${lang}: no holds line where AIAIC holds none`,
+          );
+          assert.equal(
+            stateOf(html, "holds"),
+            said.sent || said.reached ? "done" : "todo",
+            `${name} ${lang}: the middle step: done once her money left AIAIC, else not yet`,
+          );
+        }
+        assert.equal(
+          stateOf(html, "buyer_paid"),
+          said.buyer_paid ? "done" : "todo",
+          `${name} ${lang}: the buyer pays`,
+        );
+        assert.equal(
+          stateOf(html, "sending"),
+          said.sent ? "done" : "todo",
+          `${name} ${lang}: AIAIC sends it`,
+        );
+        assert.equal(
+          stateOf(html, "reached"),
+          said.reached ? "done" : "todo",
+          `${name} ${lang}: in her bank only on reached`,
+        );
+      }
+    }
+  }
+  assert.deepEqual(
+    [...seen].sort(),
+    ["not_known", "pickup", "provider"],
+    "the codes AIAIC's recordings hold",
+  );
+  assert.ok(
+    differ,
+    "a recording where the buyer's total and hers differ (else G-20's check is vacuous)",
+  );
+  for (const code of WAITS_FOR)
+    for (const lang of LANGS)
+      assert.ok(DICTS[lang][`aiaic.money.holds.waits_for.${code}`], `${code}: words in ${lang}`);
+  // THE FOUR CODES AIAIC ANSWERS (its own T21) THAT NO RECORDING HERE HOLDS YET, and one it may add later: DERIVED in
+  // memory from AIAIC's recorded paid sale (collect_mine_paid), its holds' code changed (listed for the main session to record)
+  const paidRaw = answer<{
+    orders: { order_state: string; from_aiaic: { holds: { waits_for: string } | null } }[];
+  }>("collect_mine_paid");
+  for (const code of [
+    "your_details",
+    "aiaic_team",
+    "problem",
+    "aiaic_team_again",
+    "a_code_not_held",
+  ]) {
+    const d = JSON.parse(JSON.stringify(paidRaw)) as typeof paidRaw;
+    const h = d.orders[0]?.from_aiaic.holds;
+    assert.ok(h, "the recorded paid sale holds its holds");
+    h.waits_for = code;
+    const mine = client.mineForBrowser(d);
+    const readAs = code === "a_code_not_held" ? "not_known" : code;
+    for (const lang of LANGS) {
+      const html = card(mine, mine.orders[0] as AiaicOrder, lang);
+      assert.equal(holdsCode(html), readAs, `${code} ${lang}: read as ${readAs}`);
+      assert.ok(
+        html.includes(escHtml(wordsIn(lang)(`aiaic.money.holds.waits_for.${readAs}`))),
+        `${code} ${lang}: its own waiting words`,
+      );
+    }
+  }
+  // G-28, DERIVED in memory from AIAIC's recorded paid sale: the sale called off. AIAIC answers `holds: null` then (its
+  // T21); the card says nothing of holding whether AIAIC's block is null or (an AIAIC with G-28's defect) still set, and
+  // never works it out from her steps (the buyer had paid)
+  for (const kept of [false, true]) {
+    const d = JSON.parse(JSON.stringify(paidRaw)) as typeof paidRaw;
+    const o = d.orders[0];
+    assert.ok(o, "the recorded paid sale");
+    o.order_state = "cancelled";
+    if (!kept) o.from_aiaic.holds = null;
+    const mine = client.mineForBrowser(d);
+    const order = mine.orders[0] as AiaicOrder;
+    assert.equal(faOf(order)?.steps?.buyer_paid, true, "the buyer had paid");
+    for (const lang of LANGS) {
+      const html = card(mine, order, lang);
+      const how = kept ? "a block still set" : "AIAIC's null";
+      assert.equal(holdsCode(html), null, `called off (${how}) ${lang}: no holds line`);
+      assert.ok(
+        !html.includes(escHtml(wordsIn(lang)("aiaic.money.holds.line_no_rs"))),
+        `called off (${how}) ${lang}: "AIAIC holds it" never said`,
+      );
+      assert.equal(
+        stateOf(html, "holds"),
+        "todo",
+        `called off (${how}) ${lang}: AIAIC holds nothing`,
+      );
+    }
+  }
+  // the order page tells both of its money cards of a call-off
+  const page = fs.readFileSync(
+    path.join(APP, "src", "components", "farm", "aiaic", "AiaicOrderDetail.tsx"),
+    "utf-8",
+  );
+  assert.equal(
+    (page.match(/calledOff=\{order\.order_state === "cancelled"\}/g) ?? []).length,
+    2,
+    "both money cards of the order page are told of a call-off",
+  );
+});
+
 test("B19 her sale's news through this server: one per offer (the newest, more time), the older read with it; a READ more-time notice only says more time; no farmer id", async () => {
   // AIAIC's real answer of GET /notifications after its team gave more time (record_buyer_portal_answers.py)
   type Row = {
@@ -3615,7 +4131,11 @@ test("B19 her sale's news through this server: one per offer (the newest, more t
     s.notices = recordedNotices;
     const all = await account.myNotices("en");
     const offers = all.filter((n) => n.kind === "trade_offer");
-    const ids = new Set(rows.map((r) => r.body["offer_id"]));
+    // (R2-3 lane A part A-c: CHANGED ON PURPOSE. The re-recorded notices hold her buyer's payment too, which names no
+    // offer: A72 holds it. One notice per offer, counted over the offers' own notices.)
+    const ids = new Set(
+      rows.filter((r) => r.kind === "trade_offer").map((r) => r.body["offer_id"]),
+    );
     assert.equal(offers.length, ids.size, "one notice per offer");
     const n = offers.find((x) => x.trade?.offerId === moved.body["offer_id"]);
     assert.ok(n?.trade?.moreTime, "the newest of that offer: more time");

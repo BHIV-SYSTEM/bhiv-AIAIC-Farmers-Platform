@@ -303,12 +303,16 @@ export async function myNotices(lang = "en"): Promise<Notice[]> {
           });
         continue;
       }
-      // one notice per offer or per order: the newest (AIAIC lists the newest first); an older one is read with it
+      // one notice per offer or per order: the newest (AIAIC lists the newest first); an older one is read with it. The
+      // buyer's payment (Round 2, R2-3) is read with ANY newer news of its sale: its money sent or in her bank, a step, a
+      // call-off (G-28: "AIAIC has received your money" is never said beside a sale called off, nor after it was sent)
       const subject = facts.offerId ? `offer:${facts.offerId}` : `order:${facts.orderId}`;
       const newerNews = out.find(
         (o) =>
-          o.trade &&
-          (o.trade.offerId ? `offer:${o.trade.offerId}` : `order:${o.trade.orderId}`) === subject,
+          (o.trade &&
+            (o.trade.offerId ? `offer:${o.trade.offerId}` : `order:${o.trade.orderId}`) ===
+              subject) ||
+          (kind === "trade_buyer_paid" && o.money?.orderId === facts.orderId),
       );
       if (newerNews) {
         newerNews.alsoIds = [...(newerNews.alsoIds ?? []), Number(n["notification_id"])];

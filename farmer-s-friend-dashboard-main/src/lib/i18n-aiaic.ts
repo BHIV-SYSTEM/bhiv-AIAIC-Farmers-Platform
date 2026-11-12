@@ -1136,6 +1136,29 @@ export const AIAIC_EN: Dict = {
   "aiaic.notice.cancelled": "your sale of {qty} was called off.",
   "aiaic.notice.cancelled_no_qty": "your sale was called off.",
   "aiaic.notice.lot_open_again": "Your lot takes offers again.",
+  "aiaic.notice.buyer_paid":
+    "the buyer has paid in full. AIAIC has received {rs} for you. It is not in your account yet.",
+  "aiaic.notice.buyer_paid_no_rs":
+    "the buyer has paid in full. AIAIC has received your money. It is not in your account yet.",
+  "aiaic.notice.buyer_said_arrived": "the buyer said it arrived.",
+  "aiaic.journey.buyer_said_arrived": "The buyer said it arrived",
+  "aiaic.money.step.holds": "AIAIC holds your money",
+  "aiaic.money.holds.line":
+    "The buyer has paid. AIAIC has received {rs} for you and holds it. It is not in your account yet.",
+  "aiaic.money.holds.line_no_rs":
+    "The buyer has paid. AIAIC has received your money and holds it. It is not in your account yet.",
+  "aiaic.money.holds.since": "With AIAIC since {day}.",
+  "aiaic.money.holds.waits_for.pickup": "AIAIC's team sends it once the pickup is recorded.",
+  "aiaic.money.holds.waits_for.your_details":
+    "Give your UPI ID or bank account below; AIAIC's team sends it then.",
+  "aiaic.money.holds.waits_for.aiaic_team": "AIAIC's team will send it to you.",
+  "aiaic.money.holds.waits_for.problem":
+    "A problem was reported about the delivery. AIAIC's team is looking; your money stays with AIAIC until it is settled.",
+  "aiaic.money.holds.waits_for.aiaic_team_again":
+    "The last send did not reach you. AIAIC's team will send it again.",
+  "aiaic.money.holds.waits_for.provider": "AIAIC's payments provider is getting it ready to send.",
+  "aiaic.money.holds.waits_for.not_known":
+    "AIAIC's team is checking; your money stays with AIAIC until then.",
 };
 
 export const AIAIC_MR: Dict = {
@@ -2261,6 +2284,29 @@ export const AIAIC_MR: Dict = {
   "aiaic.notice.cancelled": "तुमची {qty} ची विक्री रद्द झाली.",
   "aiaic.notice.cancelled_no_qty": "तुमची विक्री रद्द झाली.",
   "aiaic.notice.lot_open_again": "तुमचा लॉट पुन्हा ऑफर घेतो.",
+  "aiaic.notice.buyer_paid":
+    "खरेदीदाराने पूर्ण पैसे भरले. AIAIC कडे तुमच्यासाठी {rs} आले आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.notice.buyer_paid_no_rs":
+    "खरेदीदाराने पूर्ण पैसे भरले. AIAIC कडे तुमचे पैसे आले आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.notice.buyer_said_arrived": "खरेदीदाराने माल पोहोचल्याचे सांगितले.",
+  "aiaic.journey.buyer_said_arrived": "खरेदीदाराने माल पोहोचल्याचे सांगितले",
+  "aiaic.money.step.holds": "तुमचे पैसे AIAIC कडे आहेत",
+  "aiaic.money.holds.line":
+    "खरेदीदाराने पैसे भरले. AIAIC कडे तुमच्यासाठी {rs} आले आहेत आणि ते AIAIC कडेच आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.money.holds.line_no_rs":
+    "खरेदीदाराने पैसे भरले. AIAIC कडे तुमचे पैसे आले आहेत आणि ते AIAIC कडेच आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.money.holds.since": "{day} पासून AIAIC कडे.",
+  "aiaic.money.holds.waits_for.pickup": "माल उचलल्याची नोंद झाल्यावर AIAIC ची टीम ते पाठवते.",
+  "aiaic.money.holds.waits_for.your_details":
+    "खाली तुमचा UPI आयडी किंवा बँक खाते द्या; मग AIAIC ची टीम ते पाठवते.",
+  "aiaic.money.holds.waits_for.aiaic_team": "AIAIC ची टीम ते तुम्हाला पाठवेल.",
+  "aiaic.money.holds.waits_for.problem":
+    "माल पोहोचवण्याबद्दल अडचण कळवली गेली आहे. AIAIC ची टीम पाहत आहे; ती सुटेपर्यंत तुमचे पैसे AIAIC कडेच राहतात.",
+  "aiaic.money.holds.waits_for.aiaic_team_again":
+    "मागील वेळी पाठवलेले पैसे तुमच्यापर्यंत पोहोचले नाहीत. AIAIC ची टीम ते पुन्हा पाठवेल.",
+  "aiaic.money.holds.waits_for.provider": "AIAIC चा पेमेंट पुरवठादार ते पाठवण्याची तयारी करत आहे.",
+  "aiaic.money.holds.waits_for.not_known":
+    "AIAIC ची टीम तपासत आहे; तोपर्यंत तुमचे पैसे AIAIC कडेच राहतात.",
 };
 
 export const AIAIC_HI: Dict = {
@@ -3368,4 +3414,27 @@ export const AIAIC_HI: Dict = {
   "aiaic.notice.cancelled": "आपकी {qty} की बिक्री रद्द हुई।",
   "aiaic.notice.cancelled_no_qty": "आपकी बिक्री रद्द हुई।",
   "aiaic.notice.lot_open_again": "आपका लॉट फिर से ऑफ़र लेता है।",
+  "aiaic.notice.buyer_paid":
+    "खरीदार ने पूरा पैसा भर दिया। AIAIC को आपके लिए {rs} मिल गए हैं। वे अभी आपके खाते में नहीं हैं।",
+  "aiaic.notice.buyer_paid_no_rs":
+    "खरीदार ने पूरा पैसा भर दिया। AIAIC को आपका पैसा मिल गया है। वह अभी आपके खाते में नहीं है।",
+  "aiaic.notice.buyer_said_arrived": "खरीदार ने बताया कि माल पहुँच गया।",
+  "aiaic.journey.buyer_said_arrived": "खरीदार ने बताया कि माल पहुँच गया",
+  "aiaic.money.step.holds": "आपका पैसा AIAIC के पास है",
+  "aiaic.money.holds.line":
+    "खरीदार ने पैसे भर दिए। AIAIC को आपके लिए {rs} मिल गए हैं और वे AIAIC के पास हैं। वे अभी आपके खाते में नहीं हैं।",
+  "aiaic.money.holds.line_no_rs":
+    "खरीदार ने पैसे भर दिए। AIAIC को आपका पैसा मिल गया है और वह AIAIC के पास है। वह अभी आपके खाते में नहीं है।",
+  "aiaic.money.holds.since": "{day} से AIAIC के पास।",
+  "aiaic.money.holds.waits_for.pickup": "माल उठाए जाने की नोंद होने पर AIAIC की टीम इसे भेजती है।",
+  "aiaic.money.holds.waits_for.your_details":
+    "नीचे अपनी UPI आईडी या बैंक खाता दें; फिर AIAIC की टीम इसे भेजती है।",
+  "aiaic.money.holds.waits_for.aiaic_team": "AIAIC की टीम इसे आपको भेजेगी।",
+  "aiaic.money.holds.waits_for.problem":
+    "माल पहुँचाने के बारे में एक दिक्कत बताई गई है। AIAIC की टीम देख रही है; उसके सुलझने तक आपका पैसा AIAIC के पास ही रहता है।",
+  "aiaic.money.holds.waits_for.aiaic_team_again":
+    "पिछली बार भेजा गया पैसा आप तक नहीं पहुँचा। AIAIC की टीम इसे फिर से भेजेगी।",
+  "aiaic.money.holds.waits_for.provider": "AIAIC का भुगतान प्रदाता इसे भेजने की तैयारी कर रहा है।",
+  "aiaic.money.holds.waits_for.not_known":
+    "AIAIC की टीम जाँच रही है; तब तक आपका पैसा AIAIC के पास ही रहता है।",
 };

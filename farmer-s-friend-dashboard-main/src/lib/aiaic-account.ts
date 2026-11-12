@@ -2,7 +2,7 @@
  * HER ACCOUNT AND HER HELP QUERIES, the shapes the screens read (push 4b, 25 Oct 2026; AIAIC_BACKEND_CONTRACT.md
  * sections 22 and 24). Shared by the server (`aiaic-account.server.ts`) and the screens; nothing secret is in here.
  */
-import { dayOf, quintals, rupees } from "./aiaic-trade";
+import { buyerSaidItArrived, dayOf, evidenceKindOf, quintals, rupees } from "./aiaic-trade";
 
 /** The registration notice's version this app shows (AIAIC refuses another with `notice_changed`). Tied to the
  * notice's words: `tests/aiaic_account_suite.ts` checks `NOTICE_WORDS_SHA256` against the three languages' text, so the
@@ -98,11 +98,14 @@ export type QueryResult =
   { ok: true; query: HelpQuery } | { ok: false; code: string; crisis?: Crisis | null };
 
 /** AIAIC's trade notices this app says (AIAIC's `trade.notices`, 30 Oct 2026): an offer on her lot (or more time to
- * answer it), a step recorded on her order, her order called off. */
+ * answer it), a step recorded on her order, her order called off; and (Round 2, R2-3; DESIGN 2h, A6) her buyer has paid
+ * in full (`trade_buyer_paid`: once per order, with HER OWN amount AIAIC now holds for her, never the buyer's total). A
+ * kind not listed here is never shown. */
 export const TRADE_NOTICE_KINDS = [
   "trade_offer",
   "trade_order_step",
   "trade_order_cancelled",
+  "trade_buyer_paid",
 ] as const;
 export type TradeNoticeKind = (typeof TRADE_NOTICE_KINDS)[number];
 
@@ -125,6 +128,14 @@ export type TradeNotice = {
   problemKind: string | null;
   reasonCode: string | null;
   listingStatus: string | null;
+  /** HER OWN amount AIAIC received for her when the buyer paid in full (`trade_buyer_paid`'s `to_her_inr`; G-20: never
+   * the buyer's total); null when AIAIC did not send it. */
+  toHerInr?: number | null;
+  /** No real money moved (`test_mode`: a practice sale's TEST link). */
+  testMode?: boolean;
+  /** How a step is known, AIAIC's code (`evidence_kind`; `buyer_confirmed`: the buyer's own "It arrived"); a code not
+   * in AIAIC's list is none. */
+  evidenceKind?: string | null;
 };
 
 /** A notice AIAIC keeps for her (only the kinds this app says): her approval, a reply from the team, her money, her
@@ -197,6 +208,10 @@ export function tradeFactsOf(kind: string, body: Record<string, unknown>): Trade
     problemKind: textOf(body["problem_kind"]),
     reasonCode: textOf(body["reason_code"]),
     listingStatus: textOf(body["listing_status"]),
+    // her own amount, only from the buyer-paid notice's own field (G-20): never an `amount_inr` beside it
+    toHerInr: kind === "trade_buyer_paid" ? numberOf(body["to_her_inr"]) : null,
+    testMode: body["test_mode"] === true,
+    evidenceKind: evidenceKindOf(body["evidence_kind"]),
   };
 }
 
@@ -241,7 +256,21 @@ function tradeNoticeWords(t: Words, kind: TradeNoticeKind, n: TradeNotice): stri
       });
     return t("aiaic.notice.offer", { qty, price });
   }
+  if (kind === "trade_buyer_paid") {
+    // THE BUYER HAS PAID IN FULL (DESIGN 2h): her own amount AIAIC received for her, and that it is not in her account
+    // yet; no amount sent, the same sentence without it (ANN-1); TEST when no real money moved
+    const line =
+      typeof n.toHerInr === "number"
+        ? t("aiaic.notice.buyer_paid", { rs: rupees(n.toHerInr) })
+        : t("aiaic.notice.buyer_paid_no_rs");
+    return line + (n.testMode ? ` ${t("aiaic.money.test")}` : "");
+  }
   if (kind === "trade_order_step") {
+    // the buyer's own "It arrived" recorded the delivery (Round 2, R2-2's `buyer_confirmed`): said as the buyer's word
+    if (buyerSaidItArrived(n.stage, n.status, n.evidenceKind))
+      return (
+        t("aiaic.notice.buyer_said_arrived") + (n.simulated ? ` ${t("aiaic.notice.practice")}` : "")
+      );
     const stage = wordsOr(t, `aiaic.journey.stage.${n.stage}`) ?? t("aiaic.notice.step_other");
     const problem =
       n.stage === "delivery_exception" && n.status === "done" && n.problemKind

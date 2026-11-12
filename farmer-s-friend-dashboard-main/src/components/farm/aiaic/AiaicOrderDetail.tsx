@@ -463,6 +463,7 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
           dest={dest}
           collectThenPay={collectThenPay}
           notice={(data.mine as { x_notice?: XNotice | null }).x_notice}
+          calledOff={order.order_state === "cancelled"}
         />
         <MoneyCard order={order} />
         {listing ? (
@@ -530,6 +531,7 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
         dest={(data.mine as { x_destination?: XDestination | null }).x_destination}
         collectThenPay={(data.mine as { collect_then_pay?: boolean }).collect_then_pay === true}
         notice={(data.mine as { x_notice?: XNotice | null }).x_notice}
+        calledOff={order.order_state === "cancelled"}
       />
       <MoneyCard order={order} />
 

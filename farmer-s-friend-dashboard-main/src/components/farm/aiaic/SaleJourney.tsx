@@ -13,7 +13,13 @@ import {
   XCircle,
 } from "lucide-react";
 
-import { dayOf, quintalWords, type AiaicOrder, type AiaicStep } from "@/lib/aiaic-trade";
+import {
+  buyerSaidItArrived,
+  dayOf,
+  quintalWords,
+  type AiaicOrder,
+  type AiaicStep,
+} from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -115,8 +121,14 @@ export function SaleJourney({ order, bare = false }: { order: AiaicOrder; bare?:
               >
                 <Icon className="size-3.5" aria-hidden />
               </span>
-              <p className="text-sm font-bold text-foreground">
-                {t(`aiaic.journey.stage.${s.stage}`)}
+              <p
+                className="text-sm font-bold text-foreground"
+                data-testid="aiaic-journey-step-title"
+              >
+                {/* the buyer's own "It arrived" recorded the delivery (Round 2, R2-2's `buyer_confirmed`) */}
+                {buyerSaidItArrived(s.stage, s.status, s.evidence_kind)
+                  ? t("aiaic.journey.buyer_said_arrived")
+                  : t(`aiaic.journey.stage.${s.stage}`)}
                 {s.status !== "done" ? ` · ${t(`aiaic.journey.status.${s.status}`)}` : ""}
               </p>
               {facts.length ? (

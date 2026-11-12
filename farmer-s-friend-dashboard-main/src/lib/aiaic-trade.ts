@@ -112,7 +112,35 @@ export type AiaicStep = {
   detail?: Record<string, string | number | boolean> | null | undefined;
   /** What a process lost (sorting, drying), as recorded: quintals and the share of what went in. */
   loss?: { q: number; pct: number } | null | undefined;
+  /** How the step is known, AIAIC's code (`evidence_kind`, Round 2): `buyer_confirmed` is the buyer's own "It arrived";
+   * null when AIAIC sent none or a code not in its list (`EVIDENCE_KINDS`). */
+  evidence_kind?: string | null | undefined;
 };
+
+/** HOW A STEP IS KNOWN, AIAIC's closed list (its `trade.store.EVIDENCE_KINDS`, Round 2): a code not in it is none. */
+export const EVIDENCE_KINDS = [
+  "provider_reference",
+  "document_reference",
+  "operator_observed",
+  "partner_observed",
+  "buyer_confirmed",
+  "simulated",
+] as const;
+export function evidenceKindOf(v: unknown): string | null {
+  return typeof v === "string" && (EVIDENCE_KINDS as readonly string[]).includes(v) ? v : null;
+}
+/**
+ * "THE BUYER SAID IT ARRIVED" (Round 2, R2-3; DESIGN 4.4): the delivery recorded by the buyer's own word "received" (AIAIC's
+ * `buyer_confirmed`, a real order's; a practice order's says `simulated`, never this), on her sale's journey and in her
+ * step notice alike: only a delivery done, only on AIAIC's own code.
+ */
+export function buyerSaidItArrived(
+  stage: string | null | undefined,
+  status: string | null | undefined,
+  evidence: string | null | undefined,
+): boolean {
+  return stage === "delivered" && status === "done" && evidence === "buyer_confirmed";
+}
 
 export type AiaicPayment = {
   state: string;
@@ -1710,7 +1738,72 @@ export type FromAiaic = {
   } | null;
   /** Her steps as AIAIC says them (a hand-recorded transfer is "sent", never "reached"). */
   steps?: { buyer_paid: boolean; sent: boolean; reached: boolean } | null;
+  /** What AIAIC holds for her now (Round 2, R2-2's `from_aiaic.holds`): null until the buyer has paid in full, on a sale
+   * called off, and once her money left AIAIC; absent from an AIAIC not yet updated. */
+  holds?: Holds | null;
 };
+
+/** WHY AIAIC STILL HOLDS HER MONEY, AIAIC's closed codes (`from_aiaic.holds.waits_for`, its `farmer_payout.WAITS_FOR`): the
+ * pickup to be recorded, her UPI ID or bank account, AIAIC's team's press, a problem reported after the pickup, AIAIC's
+ * team to send again, the payments provider preparing it, an answer not known. A code this app does not hold is read as
+ * `not_known` (fail closed, as AIAIC itself does). */
+export const WAITS_FOR = [
+  "pickup",
+  "your_details",
+  "aiaic_team",
+  "problem",
+  "aiaic_team_again",
+  "provider",
+  "not_known",
+] as const;
+export type WaitsFor = (typeof WAITS_FOR)[number];
+/** What AIAIC holds for her: HER OWN amount (G-20: never the buyer's total), since when, and why it waits. */
+export type Holds = { amount_inr: number | null; since: string | null; waits_for: WaitsFor };
+
+/** AIAIC's `holds` block, field by field (an unknown `waits_for` is `not_known`); null when it is not one. */
+export function holdsOf(raw: unknown): Holds | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const code = typeof r["waits_for"] === "string" ? r["waits_for"] : "";
+  return {
+    amount_inr:
+      typeof r["amount_inr"] === "number" && Number.isFinite(r["amount_inr"])
+        ? r["amount_inr"]
+        : null,
+    since: typeof r["since"] === "string" ? r["since"] : null,
+    waits_for: (WAITS_FOR as readonly string[]).includes(code) ? (code as WaitsFor) : "not_known",
+  };
+}
+
+/**
+ * WHAT AIAIC HOLDS FOR HER NOW, ONLY AS AIAIC SAYS IT (Round 2, R2-3; DESIGN 2h, A5): its `holds` block, never worked out
+ * here from her steps (why it waits needs AIAIC's facts: the pickup, her details, a dispute). On a sale called off, none,
+ * whatever a block says (G-28: its payment goes back to the buyer).
+ */
+export function holdsShown(money: FromAiaic | null | undefined, calledOff: boolean): Holds | null {
+  if (calledOff || !money) return null;
+  return money.holds ?? null;
+}
+
+/**
+ * HER MONEY'S FOUR STEPS (DESIGN 2h): the buyer pays (done when paid) -> AIAIC holds your money (done while AIAIC holds
+ * it, or once it left AIAIC) -> AIAIC sends your money (done only once it left AIAIC) -> it reaches your bank (done only
+ * on AIAIC's `reached`, the payments provider's own word). An AIAIC that does not say its steps ticks only that the buyer
+ * paid.
+ */
+export function moneySteps(
+  money: FromAiaic,
+  calledOff: boolean,
+): { key: "buyer_paid" | "holds" | "sending" | "reached"; done: boolean }[] {
+  const said = money.steps ?? { buyer_paid: money.buyer_paid, sent: false, reached: false };
+  const held = holdsShown(money, calledOff) !== null;
+  return [
+    { key: "buyer_paid", done: said.buyer_paid },
+    { key: "holds", done: held || said.sent || said.reached },
+    { key: "sending", done: said.sent },
+    { key: "reached", done: said.reached },
+  ];
+}
 /** The notice she is shown before she gives her UPI ID or bank account (`x_notice`): its version and its paragraphs. */
 export type XNotice = { version: string; en: string[]; mr: string[]; hi: string[] };
 /** Where her money goes, as a masked hint (`x_destination`). */

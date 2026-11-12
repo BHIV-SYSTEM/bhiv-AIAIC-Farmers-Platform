@@ -30,9 +30,12 @@ import { useState } from "react";
 import { problemShown, useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import type { DestinationTyped, FromAiaic, XDestination, XNotice } from "@/lib/aiaic-trade";
 import {
+  dayOf,
   destinationGivenBefore,
   destinationName,
   destinationSaveOpen,
+  holdsShown,
+  moneySteps,
   pressDestination,
   pressed,
   problem as problemOf,
@@ -383,23 +386,26 @@ export function FromAiaicCard({
   dest,
   collectThenPay,
   notice,
+  calledOff = false,
 }: {
   money: FromAiaic | null | undefined;
   dest: XDestination | null | undefined;
   collectThenPay: boolean;
   notice?: XNotice | null | undefined;
+  /** her sale was called off (`order_state` cancelled): AIAIC holds nothing for her on it (G-28) */
+  calledOff?: boolean;
 }) {
   const { t } = useI18n();
   // the order's own link decides (MONEY-07): a sale already fixed by AIAIC's link shows even after the setting changed
   if (!money || (!collectThenPay && !money.fixed_by_link)) return null;
   const sending = money.sending;
-  // each step as AIAIC says it (MONEY-11); an AIAIC that does not say them ticks only what it said: the buyer paid
+  // each step as AIAIC says it (MONEY-11), with "AIAIC holds your money" between the buyer's payment and AIAIC's send
+  // (Round 2, R2-3; DESIGN 2h, A5); an AIAIC that does not say them ticks only what it said: the buyer paid
   const said = money.steps ?? { buyer_paid: money.buyer_paid, sent: false, reached: false };
-  const steps = [
-    { key: "buyer_paid", done: said.buyer_paid },
-    { key: "sending", done: said.sent },
-    { key: "reached", done: said.reached },
-  ];
+  const steps = moneySteps(money, calledOff);
+  // WHAT AIAIC HOLDS FOR HER NOW, only as AIAIC says it (`holds`): her own amount, never the buyer's total (G-20), and
+  // never on a sale called off (G-28)
+  const holds = holdsShown(money, calledOff);
   return (
     <section
       id="aiaic-from-aiaic"
@@ -414,6 +420,30 @@ export function FromAiaicCard({
       <p className="text-sm font-semibold text-muted-foreground">
         {t(money.fixed_by_link ? "aiaic.money.fixed" : "aiaic.money.now")}
       </p>
+      {holds ? (
+        <div
+          className="mt-3 space-y-1 rounded-2xl border-2 border-primary/40 bg-primary/10 p-3"
+          data-testid="aiaic-money-holds"
+          data-waits-for={holds.waits_for}
+        >
+          <p
+            className="text-base font-extrabold text-foreground"
+            data-testid="aiaic-money-holds-line"
+          >
+            {holds.amount_inr !== null
+              ? t("aiaic.money.holds.line", { rs: rupees(holds.amount_inr) })
+              : t("aiaic.money.holds.line_no_rs")}
+          </p>
+          <p className="text-sm font-semibold text-foreground" data-testid="aiaic-money-holds-why">
+            {t(`aiaic.money.holds.waits_for.${holds.waits_for}`)}
+          </p>
+          {holds.since ? (
+            <p className="text-xs font-semibold text-muted-foreground">
+              {t("aiaic.money.holds.since", { day: dayOf(holds.since) })}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       <dl className="mt-3 space-y-1 text-sm">
         <div className="flex justify-between gap-2">
           <dt className="font-semibold text-foreground">{t("aiaic.money.price")}</dt>
