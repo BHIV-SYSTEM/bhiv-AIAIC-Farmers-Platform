@@ -2384,3 +2384,95 @@ export function sendingLine(t: Words, order: AiaicOrder): string | null {
   const key = `aiaic.money.status.${sendingSaid(sending)}`;
   return t(key) === key ? null : t(key, { rs: rupees(sending.amount_inr) });
 }
+
+// --------------------------------------------------------------- what buyers see of her, and her one choice (Round 2)
+
+/** WHAT BUYERS READ OF HER NOW, AIAIC's codes (`buyers_see_now`, its `trade.sharing.SEES_NOW`): the terms of her offers
+ * and orders, her district (or her state while AIAIC's district switch is off), and while her lots are listed to buyers
+ * their crop, quantity left, least sale and days, with the taluka, grade and asking price only while their switches are
+ * on. Her name is never in it: that is her own choice. */
+export const SEES_NOW = [
+  "offer_and_order_terms",
+  "district",
+  "state",
+  "lot_crop",
+  "lot_quantity_left",
+  "lot_min_lot",
+  "lot_days",
+  "lot_taluka",
+  "lot_grade",
+  "lot_asking_price",
+] as const;
+/** Why AIAIC does not offer her a field now, its codes (`trade.sharing.WHY_NOT`); her app words each one. */
+export const SHARE_WHY_NOT = [
+  "field_not_held",
+  "no_name_held",
+  "name_holds_a_number",
+  "switched_off",
+  "not_open_yet",
+  "grievance_contact_not_set",
+] as const;
+/** One personal field as AIAIC says it to her (route 4): offered or why not, what a buyer would read (`held_as`, hers
+ * only), whether her yes stands under the current notice, since when, and the notice version she said yes to. */
+export type ShareField = {
+  field: string;
+  offered: boolean;
+  why_not: string | null;
+  held_as: string | null;
+  shared: boolean;
+  since: string | null;
+  version_given: string | null;
+};
+/** HER SHARING, AS AIAIC ANSWERS IT (GET /farmer/trade/sharing, contract 17n), kept small. */
+export type MySharing = {
+  practice: boolean;
+  /** the owner has opened names for real farmers (`AIAIC_SHARING_REAL_APPROVED`); before it a practice farmer's buyers
+   * read a practice name, never her own */
+  real_names_open: boolean;
+  /** the notice in en, mr and hi with its version; null when AIAIC sent none (no yes can be given then) */
+  notice: XNotice | null;
+  fields: ShareField[];
+  buyers_see_now: string[];
+};
+/** AIAIC's answer to her press (route 5): her yes kept (`shared: true`, since, the version) or ended (`ended_at`). */
+export type ShareAnswer = {
+  shared: boolean;
+  since: string | null;
+  ended_at: string | null;
+  notice_version: string | null;
+  unchanged: boolean;
+};
+
+/**
+ * HER NAME'S CHOICE NOW, FROM AIAIC'S ANSWER ALONE (Round 2, R2-3; DESIGN 2d, A1): `on` while her yes stands under the
+ * current notice and AIAIC offers it; `on_held` while her yes stands but AIAIC does not show it now (its team switched
+ * names off, or another reason it gives: she can still stop); `ask` while it is offered and her yes does not stand
+ * (`again`: she said yes to an older notice, so she is asked again); `held` while AIAIC does not offer it, with its
+ * reason's code; `unknown` when the answer names no name field. Never worked out from a switch's default here.
+ */
+export type NameChoice =
+  | { kind: "on"; since: string | null; shownAs: string | null }
+  | { kind: "on_held"; why: string; since: string | null }
+  | { kind: "ask"; again: boolean; shownAs: string | null }
+  | { kind: "held"; why: string }
+  | { kind: "unknown" };
+export function nameChoice(s: MySharing): NameChoice {
+  const f = s.fields.find((x) => x.field === "name");
+  if (!f) return { kind: "unknown" };
+  const why = f.why_not ?? "not_offered";
+  if (f.shared)
+    return f.offered
+      ? { kind: "on", since: f.since, shownAs: f.held_as }
+      : { kind: "on_held", why, since: f.since };
+  if (!f.offered) return { kind: "held", why };
+  if (!s.notice) return { kind: "held", why: "no_notice" };
+  return {
+    kind: "ask",
+    again: f.version_given !== null && f.version_given !== s.notice.version,
+    shownAs: f.held_as,
+  };
+}
+/** The fields AIAIC holds none of for buyers (`field_not_held`): said plainly, never offered. */
+export function fieldsNotHeld(s: MySharing): string[] {
+  return s.fields.filter((f) => !f.offered && f.why_not === "field_not_held").map((f) => f.field);
+}

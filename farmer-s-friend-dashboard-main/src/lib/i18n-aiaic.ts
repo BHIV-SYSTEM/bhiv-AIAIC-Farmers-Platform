@@ -1136,6 +1136,60 @@ export const AIAIC_EN: Dict = {
   "aiaic.notice.cancelled": "your sale of {qty} was called off.",
   "aiaic.notice.cancelled_no_qty": "your sale was called off.",
   "aiaic.notice.lot_open_again": "Your lot takes offers again.",
+  "aiaic.share.title": "What buyers see about you",
+  "aiaic.share.name_on": "Your name: shown to buyers",
+  "aiaic.share.name_off": "Your name: not shown to buyers",
+  "aiaic.share.never_phone": "AIAIC never shows buyers your phone number.",
+  "aiaic.share.sees.toggle": "What buyers see now ({n})",
+  "aiaic.share.sees.offer_and_order_terms":
+    "The buyer of each offer and order to you: its crop, quantity, grade, price and handover",
+  "aiaic.share.sees.district": "Your district",
+  "aiaic.share.sees.state": "Your state (not your district)",
+  "aiaic.share.sees.lot_crop": "Your lots' crop",
+  "aiaic.share.sees.lot_quantity_left": "How much of each lot is left",
+  "aiaic.share.sees.lot_min_lot": "The least each lot sells",
+  "aiaic.share.sees.lot_days": "The days each lot is ready",
+  "aiaic.share.sees.lot_taluka": "Your lots' taluka",
+  "aiaic.share.sees.lot_grade": "The grade you gave each lot",
+  "aiaic.share.sees.lot_asking_price": "Your asking price for each lot",
+  "aiaic.share.sees.other": "One more fact that this app cannot name yet",
+  "aiaic.share.not_held.phone":
+    "Your phone number: AIAIC holds none for buyers, so it is never shown.",
+  "aiaic.share.not_held.village": "Your village: AIAIC holds none, so it is never shown.",
+  "aiaic.share.q": "Show your name to buyers?",
+  "aiaic.share.again":
+    "AIAIC changed these words after you said yes. Your name is not shown until you say yes again.",
+  "aiaic.share.changed_now":
+    "AIAIC changed these words just now. Read them, then choose again. Nothing was changed.",
+  "aiaic.share.see": "Buyers see",
+  "aiaic.share.would_see": "Buyers would see",
+  "aiaic.share.practice_name": "A practice name, never your own",
+  "aiaic.share.farmer_of_district": "“A farmer of” your district",
+  "aiaic.share.farmer_of_state": "“A farmer of” your state",
+  "aiaic.share.yes": "Show my name to buyers",
+  "aiaic.share.no": "No, keep it hidden",
+  "aiaic.share.no_done": "Your name stays hidden. Nothing was sent.",
+  "aiaic.share.stop": "Stop showing my name",
+  "aiaic.share.on_since": "Shown since {day}.",
+  "aiaic.share.done_on": "Buyers who look at your lots now see your name.",
+  "aiaic.share.done_off":
+    "Buyers no longer see your name. A buyer who saw it before may remember it.",
+  "aiaic.share.on_held": "You said yes, but buyers do not see your name now:",
+  "aiaic.share.why.field_not_held":
+    "AIAIC holds no such fact of yours, so it is never shown to buyers.",
+  "aiaic.share.why.no_name_held": "Your AIAIC account holds no name, so there is no name to show.",
+  "aiaic.share.why.name_holds_a_number":
+    "Your account's name holds a number, so AIAIC never shows it to buyers.",
+  "aiaic.share.why.switched_off": "AIAIC's team has switched farmers' names off for buyers.",
+  "aiaic.share.why.not_open_yet":
+    "Showing a farmer's name to buyers is not open yet: AIAIC opens it once its words have been read by a lawyer and by native readers of Marathi and Hindi.",
+  "aiaic.share.why.grievance_contact_not_set":
+    "AIAIC has not yet named whom you can ask about this choice: it opens once it has.",
+  "aiaic.share.why.no_notice":
+    "AIAIC sent no words to read for this choice, so it cannot be given now.",
+  "aiaic.share.why.other": "AIAIC does not offer this choice now.",
+  "aiaic.share.reading": "Reading what buyers see...",
+  "aiaic.share.sign_in": "Sign in to see what buyers see about you, and to choose.",
   "aiaic.notice.buyer_paid":
     "the buyer has paid in full. AIAIC has received {rs} for you. It is not in your account yet.",
   "aiaic.notice.buyer_paid_no_rs":
@@ -2284,6 +2338,61 @@ export const AIAIC_MR: Dict = {
   "aiaic.notice.cancelled": "तुमची {qty} ची विक्री रद्द झाली.",
   "aiaic.notice.cancelled_no_qty": "तुमची विक्री रद्द झाली.",
   "aiaic.notice.lot_open_again": "तुमचा लॉट पुन्हा ऑफर घेतो.",
+  "aiaic.share.title": "खरेदीदारांना तुमच्याबद्दल काय दिसते",
+  "aiaic.share.name_on": "तुमचे नाव: खरेदीदारांना दिसते",
+  "aiaic.share.name_off": "तुमचे नाव: खरेदीदारांना दिसत नाही",
+  "aiaic.share.never_phone": "AIAIC खरेदीदारांना तुमचा फोन नंबर कधीही दाखवत नाही.",
+  "aiaic.share.sees.toggle": "खरेदीदारांना आता काय दिसते ({n})",
+  "aiaic.share.sees.offer_and_order_terms":
+    "तुम्हाला आलेल्या प्रत्येक ऑफर व ऑर्डरच्या खरेदीदाराला: त्याचे पीक, प्रमाण, दर्जा, किंमत आणि माल देण्याची पद्धत",
+  "aiaic.share.sees.district": "तुमचा जिल्हा",
+  "aiaic.share.sees.state": "तुमचे राज्य (तुमचा जिल्हा नाही)",
+  "aiaic.share.sees.lot_crop": "तुमच्या लॉटचे पीक",
+  "aiaic.share.sees.lot_quantity_left": "प्रत्येक लॉटमध्ये किती माल उरला आहे",
+  "aiaic.share.sees.lot_min_lot": "प्रत्येक लॉटची कमीत कमी विक्री",
+  "aiaic.share.sees.lot_days": "प्रत्येक लॉट तयार असण्याचे दिवस",
+  "aiaic.share.sees.lot_taluka": "तुमच्या लॉटचा तालुका",
+  "aiaic.share.sees.lot_grade": "तुम्ही प्रत्येक लॉटला दिलेला दर्जा",
+  "aiaic.share.sees.lot_asking_price": "प्रत्येक लॉटसाठी तुम्ही मागितलेली किंमत",
+  "aiaic.share.sees.other": "आणखी एक माहिती, जिचे नाव हे ॲप अजून सांगू शकत नाही",
+  "aiaic.share.not_held.phone":
+    "तुमचा फोन नंबर: AIAIC कडे खरेदीदारांसाठी तो नाही, म्हणून तो कधीही दाखवला जात नाही.",
+  "aiaic.share.not_held.village": "तुमचे गाव: AIAIC कडे ते नाही, म्हणून ते कधीही दाखवले जात नाही.",
+  "aiaic.share.q": "खरेदीदारांना तुमचे नाव दाखवायचे?",
+  "aiaic.share.again":
+    "तुम्ही होय म्हटल्यानंतर AIAIC ने हे शब्द बदलले. तुम्ही पुन्हा होय म्हणेपर्यंत तुमचे नाव दाखवले जात नाही.",
+  "aiaic.share.changed_now":
+    "AIAIC ने हे शब्द आत्ताच बदलले. ते वाचा, मग पुन्हा निवडा. काहीही बदलले नाही.",
+  "aiaic.share.see": "खरेदीदारांना दिसते",
+  "aiaic.share.would_see": "खरेदीदारांना दिसेल",
+  "aiaic.share.practice_name": "सरावाचे नाव, तुमचे स्वतःचे कधीच नाही",
+  "aiaic.share.farmer_of_district": "“तुमच्या जिल्ह्यातील एक शेतकरी”",
+  "aiaic.share.farmer_of_state": "“तुमच्या राज्यातील एक शेतकरी”",
+  "aiaic.share.yes": "माझे नाव खरेदीदारांना दाखवा",
+  "aiaic.share.no": "नको, नाव लपवलेलेच ठेवा",
+  "aiaic.share.no_done": "तुमचे नाव लपवलेलेच राहते. काहीही पाठवले नाही.",
+  "aiaic.share.stop": "माझे नाव दाखवणे थांबवा",
+  "aiaic.share.on_since": "{day} पासून दाखवले जाते.",
+  "aiaic.share.done_on": "तुमचे लॉट पाहणाऱ्या खरेदीदारांना आता तुमचे नाव दिसते.",
+  "aiaic.share.done_off":
+    "खरेदीदारांना आता तुमचे नाव दिसत नाही. आधी ज्या खरेदीदाराने ते पाहिले, त्याच्या ते लक्षात राहू शकते.",
+  "aiaic.share.on_held": "तुम्ही होय म्हटले, पण खरेदीदारांना आता तुमचे नाव दिसत नाही:",
+  "aiaic.share.why.field_not_held":
+    "AIAIC कडे तुमची अशी माहिती नाही, म्हणून ती खरेदीदारांना कधीही दाखवली जात नाही.",
+  "aiaic.share.why.no_name_held": "तुमच्या AIAIC खात्यात नाव नाही, म्हणून दाखवण्यासाठी नाव नाही.",
+  "aiaic.share.why.name_holds_a_number":
+    "तुमच्या खात्याच्या नावात एक नंबर आहे, म्हणून AIAIC ते खरेदीदारांना कधीही दाखवत नाही.",
+  "aiaic.share.why.switched_off": "AIAIC च्या टीमने खरेदीदारांसाठी शेतकऱ्यांची नावे बंद केली आहेत.",
+  "aiaic.share.why.not_open_yet":
+    "शेतकऱ्याचे नाव खरेदीदारांना दाखवणे अजून सुरू झालेले नाही: वकील आणि मराठी व हिंदीचे मूळ वाचक यांनी हे शब्द वाचल्यावर AIAIC ते सुरू करते.",
+  "aiaic.share.why.grievance_contact_not_set":
+    "या निवडीबद्दल तुम्ही कोणाला विचारू शकता हे AIAIC ने अजून सांगितलेले नाही: ते सांगितल्यावर हे सुरू होते.",
+  "aiaic.share.why.no_notice":
+    "या निवडीसाठी वाचायचे शब्द AIAIC ने पाठवले नाहीत, म्हणून ती आता देता येत नाही.",
+  "aiaic.share.why.other": "AIAIC आता ही निवड देत नाही.",
+  "aiaic.share.reading": "खरेदीदारांना काय दिसते ते वाचत आहे...",
+  "aiaic.share.sign_in":
+    "खरेदीदारांना तुमच्याबद्दल काय दिसते ते पाहण्यासाठी आणि निवडण्यासाठी साइन इन करा.",
   "aiaic.notice.buyer_paid":
     "खरेदीदाराने पूर्ण पैसे भरले. AIAIC कडे तुमच्यासाठी {rs} आले आहेत. ते अजून तुमच्या खात्यात नाहीत.",
   "aiaic.notice.buyer_paid_no_rs":
@@ -3414,6 +3523,63 @@ export const AIAIC_HI: Dict = {
   "aiaic.notice.cancelled": "आपकी {qty} की बिक्री रद्द हुई।",
   "aiaic.notice.cancelled_no_qty": "आपकी बिक्री रद्द हुई।",
   "aiaic.notice.lot_open_again": "आपका लॉट फिर से ऑफ़र लेता है।",
+  "aiaic.share.title": "खरीदारों को आपके बारे में क्या दिखता है",
+  "aiaic.share.name_on": "आपका नाम: खरीदारों को दिखता है",
+  "aiaic.share.name_off": "आपका नाम: खरीदारों को नहीं दिखता",
+  "aiaic.share.never_phone": "AIAIC खरीदारों को आपका फ़ोन नंबर कभी नहीं दिखाता।",
+  "aiaic.share.sees.toggle": "खरीदारों को अभी क्या दिखता है ({n})",
+  "aiaic.share.sees.offer_and_order_terms":
+    "आपको मिले हर ऑफ़र और ऑर्डर के खरीदार को: उसकी फ़सल, मात्रा, दर्जा, कीमत और माल सौंपने का तरीका",
+  "aiaic.share.sees.district": "आपका ज़िला",
+  "aiaic.share.sees.state": "आपका राज्य (आपका ज़िला नहीं)",
+  "aiaic.share.sees.lot_crop": "आपके लॉट की फ़सल",
+  "aiaic.share.sees.lot_quantity_left": "हर लॉट में कितना माल बचा है",
+  "aiaic.share.sees.lot_min_lot": "हर लॉट की कम से कम बिक्री",
+  "aiaic.share.sees.lot_days": "हर लॉट के तैयार होने के दिन",
+  "aiaic.share.sees.lot_taluka": "आपके लॉट की तहसील",
+  "aiaic.share.sees.lot_grade": "आपने हर लॉट को दिया दर्जा",
+  "aiaic.share.sees.lot_asking_price": "हर लॉट के लिए आपकी माँगी कीमत",
+  "aiaic.share.sees.other": "एक और जानकारी, जिसका नाम यह ऐप अभी नहीं बता सकता",
+  "aiaic.share.not_held.phone":
+    "आपका फ़ोन नंबर: AIAIC के पास खरीदारों के लिए वह नहीं है, इसलिए वह कभी नहीं दिखाया जाता।",
+  "aiaic.share.not_held.village":
+    "आपका गाँव: AIAIC के पास वह नहीं है, इसलिए वह कभी नहीं दिखाया जाता।",
+  "aiaic.share.q": "खरीदारों को अपना नाम दिखाएँ?",
+  "aiaic.share.again":
+    "आपके हाँ कहने के बाद AIAIC ने ये शब्द बदले। आपके फिर से हाँ कहने तक आपका नाम नहीं दिखाया जाता।",
+  "aiaic.share.changed_now":
+    "AIAIC ने ये शब्द अभी बदले। इन्हें पढ़ें, फिर से चुनें। कुछ भी नहीं बदला।",
+  "aiaic.share.see": "खरीदारों को दिखता है",
+  "aiaic.share.would_see": "खरीदारों को दिखेगा",
+  "aiaic.share.practice_name": "अभ्यास का नाम, आपका अपना कभी नहीं",
+  "aiaic.share.farmer_of_district": "“आपके ज़िले का एक किसान”",
+  "aiaic.share.farmer_of_state": "“आपके राज्य का एक किसान”",
+  "aiaic.share.yes": "मेरा नाम खरीदारों को दिखाएँ",
+  "aiaic.share.no": "नहीं, नाम छिपा ही रहने दें",
+  "aiaic.share.no_done": "आपका नाम छिपा ही रहता है। कुछ भी नहीं भेजा गया।",
+  "aiaic.share.stop": "मेरा नाम दिखाना बंद करें",
+  "aiaic.share.on_since": "{day} से दिखाया जाता है।",
+  "aiaic.share.done_on": "आपके लॉट देखने वाले खरीदारों को अब आपका नाम दिखता है।",
+  "aiaic.share.done_off":
+    "खरीदारों को अब आपका नाम नहीं दिखता। जिस खरीदार ने उसे पहले देखा, उसे वह याद रह सकता है।",
+  "aiaic.share.on_held": "आपने हाँ कहा, पर खरीदारों को अभी आपका नाम नहीं दिखता:",
+  "aiaic.share.why.field_not_held":
+    "AIAIC के पास आपकी ऐसी जानकारी नहीं है, इसलिए वह खरीदारों को कभी नहीं दिखाई जाती।",
+  "aiaic.share.why.no_name_held":
+    "आपके AIAIC खाते में कोई नाम नहीं है, इसलिए दिखाने के लिए कोई नाम नहीं है।",
+  "aiaic.share.why.name_holds_a_number":
+    "आपके खाते के नाम में एक नंबर है, इसलिए AIAIC उसे खरीदारों को कभी नहीं दिखाता।",
+  "aiaic.share.why.switched_off": "AIAIC की टीम ने खरीदारों के लिए किसानों के नाम बंद किए हैं।",
+  "aiaic.share.why.not_open_yet":
+    "किसान का नाम खरीदारों को दिखाना अभी शुरू नहीं हुआ है: वकील और मराठी व हिंदी के मूल पाठकों के ये शब्द पढ़ लेने पर AIAIC इसे शुरू करता है।",
+  "aiaic.share.why.grievance_contact_not_set":
+    "इस चुनाव के बारे में आप किससे पूछ सकते हैं, यह AIAIC ने अभी नहीं बताया है: बताने पर यह शुरू होता है।",
+  "aiaic.share.why.no_notice":
+    "इस चुनाव के लिए पढ़ने के शब्द AIAIC ने नहीं भेजे, इसलिए यह अभी नहीं दी जा सकती।",
+  "aiaic.share.why.other": "AIAIC अभी यह चुनाव नहीं देता।",
+  "aiaic.share.reading": "खरीदारों को क्या दिखता है, यह पढ़ रहे हैं...",
+  "aiaic.share.sign_in":
+    "खरीदारों को आपके बारे में क्या दिखता है यह देखने और चुनने के लिए साइन इन करें।",
   "aiaic.notice.buyer_paid":
     "खरीदार ने पूरा पैसा भर दिया। AIAIC को आपके लिए {rs} मिल गए हैं। वे अभी आपके खाते में नहीं हैं।",
   "aiaic.notice.buyer_paid_no_rs":

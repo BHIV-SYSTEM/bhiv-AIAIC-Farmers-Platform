@@ -8,6 +8,7 @@ import type {
   BuyersLooking,
   MinePace,
   MineForScreen,
+  MySharing,
   TradeMode,
 } from "./aiaic-trade";
 import { mineReadEvery } from "./aiaic-trade";
@@ -18,6 +19,7 @@ import { estateOf } from "./aiaic-analysis";
 import {
   getAiaicPricing,
   getBuyersLooking,
+  getMySharing,
   getMyTrade,
   getSalePrice,
   getTradeMode,
@@ -93,6 +95,8 @@ export const PERSONAL_READS = [
   "aiaic-buyers-looking",
   "aiaic-help",
   "aiaic-offer-compare",
+  // what buyers see of her and her choice (Round 2): it names her name as AIAIC holds it
+  "aiaic-sharing",
 ] as const;
 
 /** Who is signed in changed (signed in, signed out, account erased): one person's reads are dropped, so the next person
@@ -100,6 +104,19 @@ export const PERSONAL_READS = [
  * again: `mineShown`). */
 export function forgetPersonalReads(qc: QueryClient): void {
   for (const key of PERSONAL_READS) qc.removeQueries({ queryKey: [key] });
+}
+
+/** WHAT BUYERS SEE OF HER, AND HER ONE CHOICE (Round 2, R2-3; AIAIC's route 4), read only while she is signed in. Never
+ * kept past its use: a sign-out drops it with her other reads (`PERSONAL_READS`). */
+export function useMySharing(enabled = true) {
+  const fn = useServerFn(getMySharing);
+  return useQuery<AiaicResult<MySharing>>({
+    queryKey: ["aiaic-sharing"],
+    queryFn: () => fn(),
+    enabled,
+    staleTime: 10_000,
+    retry: 0,
+  });
 }
 
 /** Buyers looking for produce near her (AIAIC section 25, 27 Oct 2026). */

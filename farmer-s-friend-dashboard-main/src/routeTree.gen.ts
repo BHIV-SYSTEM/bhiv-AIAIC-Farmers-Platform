@@ -21,6 +21,7 @@ import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as ReviewRouteImport } from './routes/review'
+import { Route as SharingRouteImport } from './routes/sharing'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as StorageRouteImport } from './routes/storage'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -92,6 +93,11 @@ const ReviewRoute = ReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SharingRoute = SharingRouteImport.update({
+  id: '/sharing',
+  path: '/sharing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/sharing': typeof SharingRoute
   '/signin': typeof SigninRoute
   '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/sharing': typeof SharingRoute
   '/signin': typeof SigninRoute
   '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/result': typeof ResultRoute
   '/review': typeof ReviewRoute
+  '/sharing': typeof SharingRoute
   '/signin': typeof SigninRoute
   '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/result'
     | '/review'
+    | '/sharing'
     | '/signin'
     | '/storage'
     | '/terms'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/result'
     | '/review'
+    | '/sharing'
     | '/signin'
     | '/storage'
     | '/terms'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/result'
     | '/review'
+    | '/sharing'
     | '/signin'
     | '/storage'
     | '/terms'
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   ResultRoute: typeof ResultRoute
   ReviewRoute: typeof ReviewRoute
+  SharingRoute: typeof SharingRoute
   SigninRoute: typeof SigninRoute
   StorageRoute: typeof StorageRoute
   TermsRoute: typeof TermsRoute
@@ -402,6 +415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sharing': {
+      id: '/sharing'
+      path: '/sharing'
+      fullPath: '/sharing'
+      preLoaderRoute: typeof SharingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signin': {
       id: '/signin'
       path: '/signin'
@@ -488,6 +508,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   ResultRoute: ResultRoute,
   ReviewRoute: ReviewRoute,
+  SharingRoute: SharingRoute,
   SigninRoute: SigninRoute,
   StorageRoute: StorageRoute,
   TermsRoute: TermsRoute,
