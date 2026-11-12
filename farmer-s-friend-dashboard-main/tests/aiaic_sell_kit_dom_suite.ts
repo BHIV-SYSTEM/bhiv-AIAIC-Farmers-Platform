@@ -35,6 +35,12 @@
  * far price confirmed; listed for the main session to record from AIAIC. So her sale is driven from its first screen in
  * English (Nashik from her profile, held by AIAIC's English list) and from the crop on in Marathi, after her language is
  * changed on the page: a real path of her app, and one that keeps every answer given (C.6).
+ *
+ * HER PAYOUT DETAILS, AS THE FORM IS TODAY (KA7P, KA11P): the REAL `DestinationForm` of FromAiaicCard.tsx, not yet on
+ * the kit (its distress guards, the trade suite's A52 to A64 and the payout forms' DOM suite, hold its present shape; its
+ * conversion is left for a part of its own, as part A-b's progress file says), driven as the DOM suite drives it: AIAIC's
+ * notice of `collect_mine_paid` and the destination given before of `collect_mine_processing`, through `mineForBrowser`;
+ * her press given to `giveMyDestination`'s own validator, its handler never run (AIAIC is never asked).
  */
 process.env["AIAIC_BASE_URL"] = "http://127.0.0.1:9";
 // THE ROUTER'S BROWSER HALF IN JSDOM (as the kit suite): under Node, TanStack Router's `isServer` is true unless NODE_ENV is
@@ -191,8 +197,9 @@ async function loadApp() {
   const { DICTS, I18nProvider, useI18n } = await import("../src/lib/i18n");
   const { Route: SaleRoute } = await import("../src/routes/listing.new");
   const { scanFirst } = await import("../src/lib/aiaic-account.functions");
-  const { getMyTrade, getSalePrice, getTripTalukas, sellProduce } =
+  const { getMyTrade, getSalePrice, getTripTalukas, giveMyDestination, sellProduce } =
     await import("../src/lib/aiaic-trade.functions");
+  const { DestinationForm } = await import("../src/components/farm/aiaic/FromAiaicCard");
   const { getPlacesCrops, getPlacesDistricts } = await import("../src/lib/places.functions");
   const { mineForBrowser, referencePriceShown, refusalOf } =
     await import("../src/lib/aiaic-trade.server");
@@ -213,6 +220,8 @@ async function loadApp() {
     getMyTrade,
     getSalePrice,
     getTripTalukas,
+    giveMyDestination,
+    DestinationForm,
     sellProduce,
     getPlacesCrops,
     getPlacesDistricts,
@@ -320,7 +329,14 @@ function suite(app: App, window: Window & typeof globalThis) {
       missing.push(`sale: ${JSON.stringify({ ...sent, key: "(her key)" })}`);
       return unavailable();
     },
+    // her payout details: its OWN validator has let them through (above); its handler never runs, so AIAIC is never asked
+    giveMyDestination: (sent: Record<string, unknown>) => {
+      given.push(sent);
+      return { ok: true, data: { status: null } };
+    },
   } as const;
+  /** Each payout destination she gave, as its validator let it through. */
+  const given: Record<string, unknown>[] = [];
   /** Each read the page asked, in order, with what it sent. */
   const asked: { read: string; sent: Record<string, unknown> }[] = [];
 
@@ -333,6 +349,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     getTripTalukas: app.getTripTalukas,
     getSalePrice: app.getSalePrice,
     sellProduce: app.sellProduce,
+    giveMyDestination: app.giveMyDestination,
   };
   const rpc = {
     options: {
@@ -1328,6 +1345,176 @@ function suite(app: App, window: Window & typeof globalThis) {
       } finally {
         await p.unmount();
       }
+    });
+  });
+
+  // ======================================================= her payout details, as the form is today (not yet on the kit)
+  const NOTICE = (
+    app.mineForBrowser(recorded("collect_mine_paid")["answer"]) as { x_notice?: unknown }
+  ).x_notice;
+  const GIVEN_BEFORE = (
+    app.mineForBrowser(recorded("collect_mine_processing")["answer"]) as { x_destination?: unknown }
+  ).x_destination;
+  type DestState = "first" | "replace" | "nonotice";
+  /** The REAL `DestinationForm`, as the DOM suite opens it: her first destination, her replacement (Change tapped on the
+   *  one given before) or a form AIAIC sent no notice for; inside a router at "/" (its memory history kept). */
+  const mountDestination = async (lang: Lang, state: DestState = "first") => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    window.localStorage.setItem("aiaic.lang", lang);
+    const qc = new app.QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const R = app.router;
+    const entries = ["/"];
+    const router = R.createRouter({
+      routeTree: R.createRootRoute(),
+      history: R.createMemoryHistory({ initialEntries: entries }),
+    });
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const reactRoot = app.createRoot(container);
+    await act(async () => {
+      reactRoot.render(
+        h(R.RouterContextProvider, {
+          router: router as never,
+          children: h(app.QueryClientProvider, {
+            client: qc,
+            children: h(app.I18nProvider, {
+              initialLang: lang,
+              children: h(app.DestinationForm, {
+                dest: state === "replace" ? (GIVEN_BEFORE as never) : null,
+                notice: state === "nonotice" ? null : (NOTICE as never),
+                largeAmount: false,
+              }),
+            }),
+          }),
+        }),
+      );
+    });
+    await settle();
+    const q = (sel: string) => container.querySelector(sel);
+    const t = tOf(lang);
+    const byText = (sel: string, text: string) =>
+      [...container.querySelectorAll(sel)].find((b) => (b.textContent ?? "").trim() === text);
+    if (state === "replace") await tap(byText("button", t("aiaic.dest.change")), "Change");
+    const scope = () => q('[data-testid="aiaic-destination-form"]') ?? container;
+    return {
+      container,
+      qc,
+      entries,
+      scope,
+      box: (key: string) =>
+        [...scope().querySelectorAll("label")]
+          .find((l) => (l.firstChild?.textContent ?? "").trim() === t(key))
+          ?.querySelector("input") as HTMLInputElement | null,
+      choose: (kind: "upi_id" | "bank_account") =>
+        tap(byText('[role="radio"]', t(`aiaic.dest.kind.${kind}`)), kind),
+      tick: () => tap(scope().querySelector('input[type="checkbox"]'), "her tick"),
+      save: () => byText("button", t("aiaic.dest.save")) as HTMLButtonElement | undefined,
+      unmount: async () => {
+        await act(async () => reactRoot.unmount());
+        container.remove();
+        qc.clear();
+      },
+    };
+  };
+  /** Payout words a Marathi or Hindi screen may carry: AIAIC's name, its payments provider's (as AIAIC names it), and the
+   *  codes of a payment's kinds and a bank's branch, as the trade suite's word tests hold them (UPI, IFSC, PAN). */
+  const PAYOUT_LATIN = new Set(["AIAIC", "Cashfree", "UPI", "IFSC", "PAN"]);
+
+  test("KA11P her payout details, as the form is today: her UPI ID, account number, IFSC and name are kept nowhere, never in the address, localStorage, sessionStorage or the query cache, after her press as before it", async () => {
+    await inStart(async () => {
+      const VALUES = {
+        name: "Recording Farmer",
+        account: shared.TEST_BANK.account,
+        ifsc: shared.TEST_BANK.ifsc,
+        upi: "success@upi",
+      };
+      for (const kind of ["bank_account", "upi_id"] as const) {
+        const f = await mountDestination("en");
+        const kept = () => {
+          const stores = [window.localStorage, window.sessionStorage].flatMap((s) =>
+            Array.from({ length: s.length }, (_, i) => {
+              const key = s.key(i) ?? "";
+              return `${key}=${s.getItem(key) ?? ""}`;
+            }),
+          );
+          const cache = f.qc
+            .getQueryCache()
+            .getAll()
+            .map((q) => JSON.stringify({ key: q.queryKey, data: q.state.data }));
+          const mutations = f.qc
+            .getMutationCache()
+            .getAll()
+            .map((m) => JSON.stringify(m.state));
+          return [...f.entries, ...stores, ...cache, ...mutations, document.title].join("\n");
+        };
+        try {
+          given.length = 0;
+          await f.choose(kind);
+          const fill =
+            kind === "upi_id"
+              ? [["aiaic.dest.upi", VALUES.upi]]
+              : [
+                  ["aiaic.dest.name", VALUES.name],
+                  ["aiaic.dest.account", VALUES.account],
+                  ["aiaic.dest.ifsc", VALUES.ifsc],
+                ];
+          for (const [key, value] of fill) {
+            const box = f.box(key as string);
+            ok(box, `${kind}: the box ${key}`);
+            await type(box, value as string);
+          }
+          await f.tick();
+          const typedValues = fill.map(([, v]) => v as string);
+          for (const v of typedValues) ok(!kept().includes(v), `${kind}, typed: ${v} kept nowhere`);
+          await tap(f.save(), "Save");
+          assert.equal(given.length, 1, `${kind}: her details given to AIAIC's route, once`);
+          for (const v of typedValues)
+            ok(!kept().includes(v), `${kind}, after her press: ${v} kept nowhere`);
+          ok(
+            !kept().includes(VALUES.account.slice(0, 8)),
+            `${kind}: no part of her account number`,
+          );
+        } finally {
+          await f.unmount();
+        }
+      }
+    });
+  });
+
+  test("KA7P her payout details, as the form is today: on Marathi and Hindi screens no English word, hidden text included, in each of its states (her first, a replacement, no notice), for a UPI ID and a bank, and with a refusal said", async () => {
+    await inStart(async () => {
+      for (const lang of ["mr", "hi"] as const)
+        for (const state of ["first", "replace", "nonotice"] as const)
+          for (const kind of ["upi_id", "bank_account"] as const) {
+            const f = await mountDestination(lang, state);
+            try {
+              await f.choose(kind);
+              if (state !== "nonotice") await f.tick();
+              // a UPI ID with no @, or a name of two letters (Cashfree's rule takes it; AIAIC's four letters do not):
+              // this phone's own refusal, said after the scan
+              const box = f.box(kind === "upi_id" ? "aiaic.dest.upi" : "aiaic.dest.name");
+              ok(box, `${lang} ${state} ${kind}: her box`);
+              await type(box, kind === "upi_id" ? "abc" : "Ra");
+              await tap(f.save(), "Save");
+              const refusal = words(
+                lang,
+                kind === "upi_id"
+                  ? "aiaic.refused.upi_id_not_valid"
+                  : "aiaic.refused.account_name_not_valid",
+              );
+              ok(
+                (f.scope().textContent ?? "").includes(refusal),
+                `${lang} ${state} ${kind}: the refusal said, in her words`,
+              );
+              const english = everyText(f.container).flatMap((s) =>
+                (s.match(/[A-Za-z]{2,}/g) ?? []).filter((w) => !PAYOUT_LATIN.has(w)),
+              );
+              assert.deepEqual(english, [], `${lang} ${state} ${kind}: no English word`);
+            } finally {
+              await f.unmount();
+            }
+          }
     });
   });
 
