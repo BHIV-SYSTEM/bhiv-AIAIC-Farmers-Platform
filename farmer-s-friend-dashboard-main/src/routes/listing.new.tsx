@@ -21,12 +21,15 @@ import { useI18n } from "@/lib/i18n";
 import { createListing } from "@/lib/transactions.functions";
 import type { ProduceQualityGrade } from "@/lib/transaction-types";
 
+// `step`: the step of her sale's flow (Round 2, R2-3 lane A part A-b), kept as the text it was, so the page's one gate
+// reads it for distress as it reads every box of an address (F12); only one of the flow's own step names opens a step
 const searchSchema = z.object({
   crop: addressBox,
   region: addressBox,
   mandi: addressBox,
   price: addressBox,
   decisionId: addressBox,
+  step: addressBox,
 });
 
 export const Route = createFileRoute("/listing/new")({

@@ -439,8 +439,9 @@ export function ChoiceList({
 }
 
 /** The kit's Continue: never disabled; while it waits on a read it says so to a screen reader and takes no second
- *  press (`aria-disabled`, still reachable). */
-function ContinueButton({
+ *  press (`aria-disabled`, still reachable). Exported for a step whose controls are its own (the sale's place: a state,
+ *  a district and a taluka), which checks itself on this press as `ChoiceList` does. */
+export function ContinueButton({
   onClick,
   testid,
   label,

@@ -798,7 +798,13 @@ export async function getPrice(q: {
   if (refused) return { ok: false, problem: refused };
   const r = await call<unknown>({ path: "/farmer/trade/price", query: q, as: "trade" });
   if (!r.ok) return r;
-  return { ok: true, data: pick<ReferencePrice>(r.data, REFERENCE_KEYS) };
+  return { ok: true, data: referencePriceShown(r.data) };
+}
+
+/** What of AIAIC's mandi prices for her sale leaves this server (`GET /farmer/trade/price`): its reference keys only.
+ *  Exported so her sale's page test reads AIAIC's recorded answer as this server reads it (R2-3 lane A part A-b). */
+export function referencePriceShown(answer: unknown): ReferencePrice {
+  return pick<ReferencePrice>(answer, REFERENCE_KEYS);
 }
 
 async function write<T>(path: string, key: string, body: unknown): Promise<AiaicResult<T>> {
