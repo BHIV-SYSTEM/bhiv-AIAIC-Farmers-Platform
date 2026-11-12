@@ -1,7 +1,15 @@
 import { ArrowRight, Check, Loader2, RefreshCw } from "lucide-react";
-import { useEffect, useRef, useState, type FormEvent, type ReactNode, type Ref } from "react";
+import { useContext, useEffect, useRef, useState, type ReactNode, type Ref } from "react";
 
 import { TalukaSelect } from "@/components/farm/aiaic/TalukaSelect";
+import {
+  BoxStep,
+  ChoiceButton,
+  ChoiceStep,
+  Step,
+  type CrisisRead,
+} from "@/components/farm/aiaic/kit/StepFlow";
+import { FlowContext, type StepState } from "@/components/farm/aiaic/kit/useStepFlow";
 import {
   EXAMPLE,
   QUANTITY_CHIPS,
@@ -10,19 +18,24 @@ import {
   type StoreChoice,
   type StoreQuantity,
 } from "@/lib/aiaic-storage";
-import { WORDS_PAUSE_MS } from "@/lib/aiaic-heard";
 import { quintalWords } from "@/lib/aiaic-trade";
 import type { Estate } from "@/lib/aiaic-trip";
 import { sameName } from "@/lib/farm-storage";
 import { useI18n } from "@/lib/i18n";
 import type { CropItem, DistrictItem } from "@/lib/places.functions";
-import { cn } from "@/lib/utils";
 
 /*
  * THE STORAGE PAGE'S STEPS (31 Oct 2026; the owner: "inputs are easy to give and automatically loaded with good UI/UX and in
  * a step by step manner"): 1 Where, 2 Crop, 3 How much, 4 The answer, the same four in every app. The step in hand is open
  * with big buttons, a finished one folds to one line with a Change button, a step not reached is its number and title.
  * `aria-current="step"` names the open one. The page decides which step is open (`routes/storage.tsx`); these are its parts.
+ *
+ * ON THE STEP KIT SINCE ROUND 2 (R2-3 lane A, 12 Nov 2026; DESIGN_UPDATE C.2, C.13: the storage steps move first): a step is
+ * the kit's `Step`, a choice the kit's `ChoiceButton` or `ChoiceStep`, the Other box the kit's `BoxStep`. What they add:
+ * each step's state in words to a screen reader, "2 of 4" in view, the page title with the open step; a Continue never
+ * greyed (the owner's QK6 answer of 11 Nov: pressed too early it says beside the box what is missing); the box's error
+ * beside it, in the reader's language; and every press that leaves the box (a chip, Skip, Other closed) has the words
+ * typed in it read for distress first (the website audit's AW-01).
  */
 
 export const STEP_COUNT = 4;
@@ -40,15 +53,9 @@ export type ListRead<T> = {
   onRetry: () => void;
 };
 
-//: whole classes (a class built at run time is dropped from the build)
-const BADGE = {
-  done: "bg-primary text-primary-foreground",
-  open: "border-2 border-primary bg-card text-primary",
-  todo: "border-2 border-border bg-muted text-muted-foreground",
-} as const;
-
-/** One step: `done` folds to one line, `open` shows its buttons, `todo` is its number and title. `focusRef` takes the open
- *  step's title, so that the screen and a screen reader move on with the page. */
+/** One step: `done` folds to one line, `open` shows its buttons, `todo` is its number and title, `again` an answer to
+ *  check again. The kit's `Step` with this page's test ids and its count of four; `focusRef` takes the step's title, so
+ *  that the screen and a screen reader move on with the page. */
 export function StepRow({
   n,
   title,
@@ -56,106 +63,37 @@ export function StepRow({
   summary = null,
   onChange = null,
   focusRef = null,
+  total = STEP_COUNT,
+  flowTitle = null,
+  again = false,
   children = null,
 }: {
   n: number;
   title: string;
-  state: "done" | "open" | "todo";
+  state: StepState;
   summary?: string | null;
   onChange?: (() => void) | null;
-  focusRef?: Ref<HTMLHeadingElement> | null;
+  focusRef?: Ref<HTMLHeadingElement> | ((el: HTMLElement | null) => void) | null;
+  total?: number | null;
+  flowTitle?: string | null;
+  again?: boolean;
   children?: ReactNode;
 }) {
-  const { t } = useI18n();
-  const open = state === "open";
-  const done = state === "done";
   return (
-    <li
-      aria-current={open ? "step" : undefined}
-      data-testid={`store-step-${n}`}
-      data-state={state}
-      className={cn(
-        "rounded-2xl border-2 bg-card",
-        open ? "border-primary" : "border-border",
-        open && children ? "p-3.5 sm:p-4" : "px-3.5 py-2",
-      )}
+    <Step
+      n={n}
+      total={total}
+      state={state}
+      title={title}
+      summary={summary}
+      onChange={onChange}
+      headingRef={focusRef}
+      testid={`store-step-${n}`}
+      flowTitle={flowTitle}
+      again={again}
     >
-      <div className="flex min-h-11 flex-wrap items-center gap-x-2.5 gap-y-1">
-        <span
-          aria-hidden
-          className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-full text-base font-extrabold",
-            BADGE[state],
-          )}
-        >
-          {done ? <Check className="size-5" /> : n}
-        </span>
-        <h2
-          ref={open ? focusRef : null}
-          tabIndex={-1}
-          className={cn(
-            "scroll-mt-24 outline-none",
-            open ? "text-xl font-extrabold text-foreground" : "text-base font-bold",
-            !open && !done && "text-muted-foreground",
-            done && "text-foreground/75",
-          )}
-        >
-          <span className="sr-only">{t("aiaic.store.step.of", { n, total: STEP_COUNT })} </span>
-          {title}
-        </h2>
-        {done && summary ? (
-          <p
-            className="min-w-0 flex-1 break-words text-base font-bold text-foreground"
-            data-testid={`store-step-${n}-summary`}
-          >
-            {summary}
-          </p>
-        ) : null}
-        {done && onChange ? (
-          <button
-            type="button"
-            onClick={onChange}
-            aria-label={t("aiaic.store.step.change_named", { step: title })}
-            className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-xl border-2 border-border bg-background px-3.5 text-sm font-bold text-foreground hover:bg-muted"
-            data-testid={`store-step-${n}-change`}
-          >
-            {t("aiaic.store.step.change")}
-          </button>
-        ) : null}
-      </div>
-      {open && children ? <div className="mt-3 space-y-3">{children}</div> : null}
-    </li>
-  );
-}
-
-/** A big button of a step; pressed when it is the one chosen, shown by its colour, its mark and `aria-pressed`. */
-function ChoiceButton({
-  label,
-  pressed,
-  onClick,
-  testid,
-}: {
-  label: string;
-  pressed: boolean;
-  onClick: () => void;
-  testid?: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      data-testid={testid}
-      className={cn(
-        "flex min-h-14 items-center justify-between gap-2 rounded-2xl border-2 px-3.5 py-2 text-left text-base font-bold transition-colors touch-manipulation sm:text-lg",
-        pressed
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border bg-background text-foreground hover:bg-muted",
-      )}
-    >
-      <span className="min-w-0 break-words">{label}</span>
-      {pressed ? <Check aria-hidden className="size-5 shrink-0" /> : null}
-    </button>
+      {children}
+    </Step>
   );
 }
 
@@ -387,21 +325,14 @@ export function CropStep({
           <p className="text-sm font-semibold text-muted-foreground sm:text-base">
             {t(firstPage.length ? "aiaic.store.crop.hint" : "aiaic.store.crop.not_grown")}
           </p>
-          <div
-            role="group"
-            aria-label={t("ask.crop")}
+          <ChoiceStep
+            label={t("ask.crop")}
+            choices={shown.map((c) => ({ value: c, label: c.name }))}
+            pressed={(c) => sameName(c.crop, chosen) || sameName(c.name_en, chosen)}
+            onChoose={(c) => onChoose(c.crop)}
+            testid="store-crops"
             className="grid grid-cols-1 gap-2 min-[350px]:grid-cols-2 sm:grid-cols-3"
-            data-testid="store-crops"
-          >
-            {shown.map((c) => (
-              <ChoiceButton
-                key={c.crop}
-                label={c.name}
-                pressed={sameName(c.crop, chosen) || sameName(c.name_en, chosen)}
-                onClick={() => onChoose(c.crop)}
-              />
-            ))}
-          </div>
+          />
         </>
       ) : null}
       {more.length ? (
@@ -419,110 +350,104 @@ export function CropStep({
   );
 }
 
-/** How long a box waits after the last key before its words are read (never per key), as the dashboard's boxes do. */
+/** Nothing to read: a part drawn alone, outside the page (a test's rendering). The page always gives its reader. */
+const READS_NOTHING: CrisisRead = async () => false;
 
 /**
- * Step 3: a tap finishes it. `Other` opens one box; Skip uses AIAIC's labelled example.
+ * Step 3: a tap finishes it. `Other` opens one box, and the cursor goes into it; Skip uses AIAIC's labelled example.
  *
  * NO BOX IS BLIND TO A PERSON IN CRISIS (the platform's rule D-105; the walk of 1 Nov 2026). This box kept only digits, so words
  * typed in it vanished, its button stayed grey and no helpline could come. It now keeps what is typed, reads the number from a
- * copy, and hands anything but a plain number to `onWords`, after a pause and on the button, before the quantity is used; the
- * page has AIAIC read it (`/safety/check`, which keeps nothing). A number out of range still leaves the button grey.
+ * copy, and hands anything but a plain number to `onWords` (the page has AIAIC read it: `/safety/check`, which keeps nothing):
+ * after a pause, on its Continue, and before any press that leaves it (a chip, Skip, Other closed), before the quantity is
+ * used. Its Continue is never greyed: pressed with no number that fits, it says so beside the box (the owner's QK6 answer).
  */
 export function QuantityStep({
   value,
   onChoose,
-  onWords,
+  onWords = READS_NOTHING,
 }: {
   value: StoreQuantity | null;
   onChoose: (q: StoreQuantity) => void;
-  onWords?: (words: string) => Promise<void> | void;
+  onWords?: CrisisRead;
 }) {
   const { t } = useI18n();
+  const flow = useContext(FlowContext);
+  const leave = flow ? flow.leave : (fn: () => void) => fn();
   const kept = typeof value === "number" ? value : null;
   const onChip = (QUANTITY_CHIPS as readonly number[]).includes(kept ?? -1);
   const [other, setOther] = useState(kept !== null && !onChip);
-  const [typed, setTyped] = useState(kept !== null && !onChip ? String(kept) : "");
-  const said = typed.trim();
-  const { q, fits, words } = quantityTyped(typed);
-  const read = useRef("");
-  const readWords = async () => {
-    if (read.current === said) return;
-    read.current = said;
-    await onWords?.(said);
-  };
+  // what the box holds, kept here while it is closed (in memory only): Other pressed again finds it as it was left
+  const typed = useRef(kept !== null && !onChip ? String(kept) : "");
+  const box = useRef<HTMLElement | null>(null);
+  const opening = useRef(false);
   useEffect(() => {
-    if (!words) return undefined;
-    const id = setTimeout(() => void readWords(), WORDS_PAUSE_MS);
-    return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [said, words]);
-  const use = async (e: FormEvent) => {
-    e.preventDefault();
-    if (words) await readWords();
-    if (fits && q !== null) onChoose(q);
-  };
+    if (!opening.current) return;
+    opening.current = false;
+    box.current?.focus(); // a press on Other: the cursor goes into its box, and a phone opens its keypad
+  }, [other]);
   return (
     <>
       <p className="text-lg font-bold text-foreground">{t("aiaic.store.qty.label")}</p>
-      <div
-        role="group"
-        aria-label={t("aiaic.store.qty.label")}
+      <ChoiceStep
+        label={t("aiaic.store.qty.label")}
+        choices={QUANTITY_CHIPS.map((n) => ({
+          value: n,
+          label: quintalWords(t, n),
+          testid: `store-qty-${n}`,
+        }))}
+        pressed={(n) => kept === n}
+        onChoose={(n) => onChoose(n)}
+        testid="store-qty"
         className="grid grid-cols-2 gap-2 sm:grid-cols-5"
-        data-testid="store-qty"
       >
-        {QUANTITY_CHIPS.map((n) => (
-          <ChoiceButton
-            key={n}
-            label={quintalWords(t, n)}
-            pressed={kept === n}
-            onClick={() => onChoose(n)}
-            testid={`store-qty-${n}`}
-          />
-        ))}
         <ChoiceButton
           label={t("aiaic.store.qty.other")}
           pressed={other}
-          onClick={() => setOther((o) => !o)}
+          onClick={() => {
+            if (other) void leave(() => setOther(false));
+            else {
+              opening.current = true;
+              setOther(true);
+            }
+          }}
           testid="store-qty-other"
         />
-      </div>
+      </ChoiceStep>
       {other ? (
-        <form className="space-y-2" onSubmit={(e) => void use(e)}>
-          <label className="block">
-            <span className="text-base font-bold text-foreground">
-              {t("aiaic.store.qty.other_label")}
-            </span>
-            <input
-              inputMode="decimal"
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              className="mt-1.5 block min-h-14 w-full rounded-2xl border-2 border-input bg-background px-4 text-xl font-bold text-foreground outline-none focus:border-ring"
-              data-testid="store-qty-typed"
-            />
-          </label>
-          {typed !== "" && !fits ? (
-            <p
-              role="alert"
-              className="text-sm font-bold text-destructive"
-              data-testid="store-qty-range"
-            >
-              {t("aiaic.store.qty.range")}
-            </p>
-          ) : null}
-          <button
-            type="submit"
-            disabled={!fits && !words}
-            className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-primary px-5 text-lg font-extrabold text-primary-foreground shadow-md hover:bg-primary/90 disabled:opacity-60"
-            data-testid="store-qty-use"
-          >
-            {t("aiaic.store.qty.use")}
-          </button>
-        </form>
+        <BoxStep
+          testid="store-qty-box"
+          boxes={[
+            {
+              name: "quintals",
+              label: t("aiaic.store.qty.other_label"),
+              value: typed.current,
+              inputMode: "decimal",
+              words: (text) => (quantityTyped(text).words ? text.trim() : null),
+              check: (text) => (quantityTyped(text).fits ? null : "aiaic.store.qty.range"),
+              testid: "store-qty-typed",
+              errorTestid: "store-qty-range",
+            },
+          ]}
+          read={onWords}
+          readAfterPause
+          boxRef={(el) => {
+            box.current = el;
+          }}
+          onType={(_, text) => {
+            typed.current = text;
+          }}
+          continueLabel={t("aiaic.store.qty.use")}
+          continueTestid="store-qty-use"
+          onDone={(v) => {
+            const { q, fits } = quantityTyped(v["quintals"] ?? "");
+            if (fits && q !== null) onChoose(q);
+          }}
+        />
       ) : null}
       <button
         type="button"
-        onClick={() => onChoose(EXAMPLE)}
+        onClick={() => void leave(() => onChoose(EXAMPLE))}
         className="flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-border bg-background px-4 text-base font-bold text-foreground hover:bg-muted"
         data-testid="store-qty-skip"
       >

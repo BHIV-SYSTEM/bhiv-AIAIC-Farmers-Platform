@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Loading } from "@/components/farm/aiaic/AiaicBits";
 import { FarmGate } from "@/components/farm/aiaic/FarmGate";
+import { Flow } from "@/components/farm/aiaic/kit/StepFlow";
+import { readForCrisis, useStepFlow } from "@/components/farm/aiaic/kit/useStepFlow";
 import {
   PlanEmpty,
   PlanFailed,
@@ -18,21 +20,19 @@ import {
   type ListRead,
 } from "@/components/farm/aiaic/storage/StorageSteps";
 import { useRaiseCrisis } from "@/lib/aiaic-crisis";
-import { farmSearchSchema } from "@/lib/aiaic-query";
+import { addressBox, farmSearchSchema } from "@/lib/aiaic-query";
 import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import {
   choiceFrom,
   cropIn,
   cropStands,
   farmWith,
-  firstToDo,
   planShown,
   regionStands,
   searchOf,
   useStoragePlan,
   type StoreChoice,
   type StoreQuantity,
-  type StoreStep,
 } from "@/lib/aiaic-storage";
 import { problem, quintalWords } from "@/lib/aiaic-trade";
 import { getTripTalukas } from "@/lib/aiaic-trade.functions";
@@ -47,14 +47,27 @@ import { getPlacesCrops, getPlacesDistricts } from "@/lib/places.functions";
  *
  * Four steps, the same in every app: 1 Where, 2 Crop, 3 How much, 4 The answer. The farmer's saved farm fills them, so a
  * returning farmer lands on the answer, and every change is one tap on its step's Change button. Which step is open is worked
- * out from what is known; `open` holds a step only while a person is in it (Change, or the place until Next, for its taluka).
+ * out from what is known; a step is held open only while a person is in it (Change, or the place until Next, for its taluka).
  * What is chosen goes into the same saved farm the other pages use, and into the address, so a reload shows the same page.
+ *
+ * ON THE STEP KIT (Round 2, R2-3 lane A, 12 Nov 2026; DESIGN_UPDATE C.2-C.7, C.13): the flow is the kit's (`useStepFlow`),
+ * its four steps the kit's parts. The step in hand is in the address too (`?step=crop`), so the phone's back button goes
+ * back one step and never out of the page; a reload of a step whose earlier answers are not known opens the first step that
+ * needs one, and says so. The focus moves only on a person's move (a tap, Next, Continue, Enter, Change, Back): opening the
+ * page, a list arriving or a timer moves nothing (QK1's default). A district changed under a chosen crop it does not offer
+ * marks the crop's step "check again" (C.6): nothing is dropped unsaid.
  *
  * THE ANSWER IS AIAIC'S (`StorageAnswer`): no number is computed here. Reading, a failure and an empty answer are each said
  * in words; a refusal, or an AIAIC server without the route, says so and leads to the storage advice page.
  */
+
+/** The page's address: a farm page's own boxes, and the step of its flow. `step` is kept as the text it was, so the page's
+ *  one gate reads it for distress as it reads every box of an address (F12); only one of the flow's own step names opens a
+ *  step (`useStepFlow`), and nothing else of it is printed or kept. */
+const storageSearchSchema = farmSearchSchema.extend({ step: addressBox });
+
 export const Route = createFileRoute("/storage")({
-  validateSearch: farmSearchSchema,
+  validateSearch: storageSearchSchema,
   head: () => ({
     meta: [
       { title: "Store or Sell Now — AIAIC Kisan" },
@@ -91,6 +104,15 @@ function StoragePage() {
   );
 }
 
+/** The flow's four steps, by the names its address uses. */
+const STORE_STEPS = [{ id: "where" }, { id: "crop" }, { id: "quantity" }, { id: "answer" }];
+
+/** The address's own boxes as the page writes them, whatever their order: `step` is the flow's, never compared here. */
+const sameAddress = (a: Readonly<Record<string, unknown>>, b: Readonly<Record<string, unknown>>) =>
+  [...new Set([...Object.keys(a), ...Object.keys(b)])]
+    .filter((k) => k !== "step")
+    .every((k) => (a[k] ?? "") === (b[k] ?? ""));
+
 function StorageFlow() {
   const { t, lang } = useI18n();
   const search = Route.useSearch();
@@ -98,7 +120,6 @@ function StorageFlow() {
   const [choice, setChoice] = useState<StoreChoice>(() => choiceFrom(search, null));
   // the saved farm lives in the browser, so it is read after hydration; until then the page says it is reading
   const [ready, setReady] = useState(false);
-  const [open, setOpen] = useState<StoreStep | null>(null);
   // What the farmer said of a loan, on the answer's own question: for this answer only, so never saved and never in the address.
   const [loanDueInDays, setLoanDueInDays] = useState<number | null>(null);
 
@@ -108,6 +129,13 @@ function StorageFlow() {
   useEffect(() => {
     if (scan.inCrisis) raise?.(problem("crisis", { crisis: scan.crisis }));
   }, [scan.inCrisis, scan.crisis, raise]);
+  // the steps' boxes read for distress by the same scan, before any press that leaves them (true on a crisis)
+  const scanNow = useRef(scan);
+  scanNow.current = scan;
+  const readWords = useCallback(
+    (words: string) => readForCrisis(scanNow.current, words, lang),
+    [lang],
+  );
 
   useEffect(() => {
     setChoice(choiceFrom(search, loadFarm()));
@@ -154,19 +182,9 @@ function StorageFlow() {
   }, [taluka, talukaRows]);
 
   // A crop stays only while the district's own list offers it: until that is known no step opens and nothing is asked.
-  // WHAT IS DROPPED IS READ FIRST (F12): the page's gate has read the address, and this reads what a saved farm brought.
   const cropStays = cropStands(cropRows, crop);
-  useEffect(() => {
-    if (!ready || cropStays) return;
-    const dropped = crop;
-    void scan.refuse(dropped, lang, "", () => undefined);
-    setChoice((c) => (c.crop === dropped ? { ...c, crop: "" } : c));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, cropStays]);
-
   const settling =
     !ready || !regionStays || !cropStays || Boolean(region && crop && cropsRead.isPending);
-  const step = open ?? (settling ? null : firstToDo(choice));
 
   // Saved only once the lists hold all of it: `saveFarm` never keeps words (F12).
   const held =
@@ -177,30 +195,55 @@ function StorageFlow() {
   useEffect(() => {
     if (ready && held) saveFarm(farmWith(loadFarm(), choice));
   }, [ready, choice, held]);
+  // The place and crop in the address, the flow's step kept as it stands: replaced in place, so only the flow's own moves add
+  // a history entry. Written before the flow's own move (the effects run in order), and again after the phone's back button,
+  // so the address always says what the screen holds.
   useEffect(() => {
     if (!ready) return;
     const address = searchOf(choice);
-    if (JSON.stringify(address) !== JSON.stringify(search))
-      void navigate({ to: "/storage", search: address, replace: true, resetScroll: false });
+    if (!sameAddress(address, search))
+      void navigate({
+        to: "/storage",
+        search: (prev) => ({ ...address, ...(prev.step ? { step: prev.step } : {}) }),
+        replace: true,
+        resetScroll: false,
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, choice]);
+  }, [ready, choice, search]);
 
-  // A person's move takes the screen and a screen reader to the step that opens; opening the page moves nothing.
-  const heading = useRef<HTMLHeadingElement | null>(null);
-  const moved = useRef(false);
+  const flow = useStepFlow("store", STORE_STEPS, {
+    fixedCount: true,
+    settling,
+    title: t("aiaic.store.title"),
+    answers: { where: region || null, crop: crop || null, quantity, answer: null },
+  });
+  const step = flow.open;
+  /** A step's row, as the flow has it: its number of four, its state in words, its heading for the focus, its Change. */
+  const row = (id: string) => {
+    const p = flow.stepProps(id);
+    return {
+      n: p.n,
+      total: p.total,
+      state: p.state,
+      again: p.again,
+      flowTitle: p.flowTitle,
+      focusRef: p.headingRef,
+      onChange: p.onChange,
+    };
+  };
+
+  // WHAT IS DROPPED IS READ FIRST (F12): the page's gate has read the address, and this reads what a saved farm brought. A crop
+  // dropped because the person changed the district marks its step "check again" (C.6), so the drop is never silent.
+  const placeChanged = useRef<string | null>(null);
   useEffect(() => {
-    if (!moved.current || !heading.current) return;
-    heading.current.focus();
-    moved.current = false;
-  }, [step]);
-  const finish = () => {
-    moved.current = true;
-    setOpen(null);
-  };
-  const change = (n: StoreStep) => () => {
-    moved.current = true;
-    setOpen(n);
-  };
+    if (!ready || cropStays) return;
+    const dropped = crop;
+    void scan.refuse(dropped, lang, "", () => undefined);
+    setChoice((c) => (c.crop === dropped ? { ...c, crop: "" } : c));
+    if (placeChanged.current && sameName(placeChanged.current, region)) flow.markAgain("crop");
+    placeChanged.current = null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, cropStays]);
 
   const plan = useStoragePlan({
     crop,
@@ -209,7 +252,7 @@ function StorageFlow() {
     quantity,
     taluka,
     loanDueInDays,
-    enabled: ready && step === 4,
+    enabled: ready && step === "answer",
   });
   const shown = planShown(plan);
   const answer = shown.show === "answer" ? shown.plan : null;
@@ -234,9 +277,6 @@ function StorageFlow() {
         ? t("aiaic.store.qty.example", { q: quintalWords(t, exampleQ) })
         : t("aiaic.store.qty.example_plain");
 
-  const stepState = (n: StoreStep) =>
-    step === n ? "open" : (n === 1 ? region : n === 2 ? crop : quantity) ? "done" : "todo";
-
   const districts: ListRead<(typeof districtRows)[number]> = {
     rows: districtRows,
     reading: districtsRead.isPending,
@@ -250,21 +290,25 @@ function StorageFlow() {
     onRetry: () => void cropsRead.refetch(),
   };
 
-  const chooseState = (next: StoreChoice["state"]) =>
+  // another state clears its district, and the crop chosen there: the crop's step says "check again" (C.6), never silently
+  const chooseState = (next: StoreChoice["state"]) => {
+    if (next !== state && crop) flow.markAgain("crop");
     setChoice((c) =>
       c.state === next ? c : { ...c, state: next, region: "", taluka: "", crop: "" },
     );
+  };
   const chooseDistrict = (key: string) => {
+    if (crop && !sameName(region, key)) placeChanged.current = key;
     setChoice((c) => ({ ...c, region: key, taluka: sameName(c.region, key) ? c.taluka : "" }));
-    setOpen(1);
+    flow.hold("where");
   };
   const chooseCrop = (next: string) => {
     setChoice((c) => ({ ...c, crop: next }));
-    finish();
+    void flow.finish();
   };
   const chooseQuantity = (next: StoreQuantity) => {
     setChoice((c) => ({ ...c, quantity: next }));
-    finish();
+    void flow.finish();
   };
 
   const advice = (
@@ -283,15 +327,13 @@ function StorageFlow() {
 
   return (
     <div className="mt-4 space-y-4">
-      <ol className="space-y-2" aria-label={t("aiaic.store.step.list")} data-testid="store-steps">
-        <StepRow
-          n={1}
-          title={t("aiaic.store.step.where")}
-          state={stepState(1)}
-          summary={whereLine}
-          onChange={change(1)}
-          focusRef={heading}
-        >
+      <Flow
+        flow={flow}
+        label={t("aiaic.store.step.list")}
+        testid="store-flow"
+        listTestid="store-steps"
+      >
+        <StepRow {...row("where")} title={t("aiaic.store.step.where")} summary={whereLine}>
           <PlaceStep
             choice={choice}
             districts={districts}
@@ -299,40 +341,17 @@ function StorageFlow() {
             onState={chooseState}
             onDistrict={chooseDistrict}
             onTaluka={(next) => setChoice((c) => ({ ...c, taluka: next }))}
-            onNext={finish}
+            onNext={() => void flow.finish()}
           />
         </StepRow>
-        <StepRow
-          n={2}
-          title={t("aiaic.store.step.crop")}
-          state={stepState(2)}
-          summary={cropLine}
-          onChange={change(2)}
-          focusRef={heading}
-        >
+        <StepRow {...row("crop")} title={t("aiaic.store.step.crop")} summary={cropLine}>
           <CropStep crops={crops} firstPage={firstPage} chosen={crop} onChoose={chooseCrop} />
         </StepRow>
-        <StepRow
-          n={3}
-          title={t("aiaic.store.step.how_much")}
-          state={stepState(3)}
-          summary={quantityLine}
-          onChange={change(3)}
-          focusRef={heading}
-        >
-          <QuantityStep
-            value={quantity}
-            onChoose={chooseQuantity}
-            onWords={(words) => scan.refuse(words, lang, "", () => undefined)}
-          />
+        <StepRow {...row("quantity")} title={t("aiaic.store.step.how_much")} summary={quantityLine}>
+          <QuantityStep value={quantity} onChoose={chooseQuantity} onWords={readWords} />
         </StepRow>
-        <StepRow
-          n={4}
-          title={t("aiaic.store.step.answer")}
-          state={step === 4 ? "open" : "todo"}
-          focusRef={heading}
-        />
-      </ol>
+        <StepRow {...row("answer")} title={t("aiaic.store.step.answer")} onChange={null} />
+      </Flow>
       {step === null ? (
         <p
           role="status"
@@ -342,10 +361,10 @@ function StorageFlow() {
           {t("aiaic.store.step.settling")}
         </p>
       ) : null}
-      {step === 4 && shown.show === "loading" ? (
+      {step === "answer" && shown.show === "loading" ? (
         <Loading label={t("aiaic.store.plan_loading")} />
       ) : null}
-      {step === 4 && shown.show === "failed" ? (
+      {step === "answer" && shown.show === "failed" ? (
         <PlanFailed
           problem={shown.problem}
           busy={plan.isFetching}
@@ -353,10 +372,12 @@ function StorageFlow() {
           advice={advice}
         />
       ) : null}
-      {step === 4 && shown.show === "empty" ? (
+      {step === "answer" && shown.show === "empty" ? (
         <PlanEmpty busy={plan.isFetching} onRetry={retry} advice={advice} />
       ) : null}
-      {step === 4 && answer ? <StorageAnswer plan={answer} onLoan={setLoanDueInDays} /> : null}
+      {step === "answer" && answer ? (
+        <StorageAnswer plan={answer} onLoan={setLoanDueInDays} />
+      ) : null}
     </div>
   );
 }
