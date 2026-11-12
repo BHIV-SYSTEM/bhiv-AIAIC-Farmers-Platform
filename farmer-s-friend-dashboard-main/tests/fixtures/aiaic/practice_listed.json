@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "POST /farmer/trade/listings",
-    "at": "2026-11-06T10:33:54+00:00",
+    "at": "2026-11-12T16:29:37+00:00",
     "status": 201,
     "replay": "false",
     "signed_in": true,
@@ -18,10 +18,10 @@
     "provider": "razorpay (named in-process)"
   },
   "answer": {
-    "listing_id": "lst_4108b0f8522c3b5afa9e",
-    "lot_id": "lot_6acb2e46c76325e7b0f3",
+    "listing_id": "lst_77532011bfe387cf6037",
+    "lot_id": "lot_fa11d77964cc0057a529",
     "tenant_id": "rec-farmer",
-    "farmer_id": "frm_64959269259eea3a0964",
+    "farmer_id": "frm_a7c56e64ea549bec31a2",
     "crop": "onion",
     "variety": null,
     "grade": null,
@@ -115,11 +115,11 @@
       "middle_of_all_per_q": 3930.0
     },
     "synthetic": true,
-    "trace_id": "b6d8bafc12784089b1bb80219e510505",
-    "created_at": "2026-11-06T10:33:54.626647+00:00",
-    "updated_at": "2026-11-06T10:33:54.626647+00:00",
+    "trace_id": "11de523ae9cd4f2ba32fb46b3a49d09f",
+    "created_at": "2026-11-12T16:29:37.287635+00:00",
+    "updated_at": "2026-11-12T16:29:37.287635+00:00",
     "trace": {
-      "request_id": "b6d8bafc12784089b1bb80219e510505",
+      "request_id": "11de523ae9cd4f2ba32fb46b3a49d09f",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

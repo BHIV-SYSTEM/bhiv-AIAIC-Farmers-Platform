@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trip_and_payout_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-11-06T10:31:54+00:00",
+    "at": "2026-11-12T16:28:26+00:00",
     "status": 200,
     "request": {
       "params": {}
@@ -18,7 +18,7 @@
     "practice": true,
     "practice_note": "This is a practice account: what it sells is kept as rehearsal data (synthetic, marked so on the operators' dashboard too). No real money moves for it: a payment link for its orders is made only with Cashfree's test keys. Nothing of it counts as a farmer's income.",
     "party": {
-      "party_id": "frm_e24e79382e7e2e183134",
+      "party_id": "frm_cbcd24c437b6fa90a368",
       "kind": "farmer",
       "buyer_type": null,
       "tenant_id": "rec-trip",
@@ -30,16 +30,16 @@
       "consent_withdrawn_at": null,
       "interests": {},
       "synthetic": true,
-      "trace_id": "ccba3f529b2f46528164d147da6e78df",
-      "created_at": "2026-11-06T10:31:38.528756+00:00",
+      "trace_id": "a540545dafd44cb097f5d2240e474e71",
+      "created_at": "2026-11-12T16:28:21.715085+00:00",
       "from_the_app": true
     },
     "listings": [
       {
-        "listing_id": "lst_dea440015ca7cc0fa76c",
-        "lot_id": "lot_44792fe15d6de4e4ebfa",
+        "listing_id": "lst_a19f427476bafce1b035",
+        "lot_id": "lot_3954454f832b76f95d51",
         "tenant_id": "rec-trip",
-        "farmer_id": "frm_e24e79382e7e2e183134",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -133,15 +133,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": true,
-        "trace_id": "ccba3f529b2f46528164d147da6e78df",
-        "created_at": "2026-11-06T10:31:38.528756+00:00",
-        "updated_at": "2026-11-06T10:31:48.168821+00:00",
+        "trace_id": "a540545dafd44cb097f5d2240e474e71",
+        "created_at": "2026-11-12T16:28:21.715085+00:00",
+        "updated_at": "2026-11-12T16:28:25.466380+00:00",
         "offers": [
           {
-            "offer_id": "ofr_dce6959d84d32d485d7c",
+            "offer_id": "ofr_4aa36c2176232787059f",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_dea440015ca7cc0fa76c",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_a19f427476bafce1b035",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 2500.0,
             "quantity_q": 4.0,
             "delivery_terms": "as agreed",
@@ -150,9 +150,9 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "d71ed8def58e4e51a4f5f4377bde3f6a",
-            "created_at": "2026-11-06T10:31:47.408235+00:00",
-            "updated_at": "2026-11-06T10:31:48.168821+00:00",
+            "trace_id": "85676e8dad8c4c0c83aee320d533e9fe",
+            "created_at": "2026-11-12T16:28:25.110203+00:00",
+            "updated_at": "2026-11-12T16:28:25.466380+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -180,10 +180,10 @@
             "pool": null
           },
           {
-            "offer_id": "ofr_517b6b3ea127470cd13f",
+            "offer_id": "ofr_3adb231b6b912ee86312",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_dea440015ca7cc0fa76c",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_a19f427476bafce1b035",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 2500.0,
             "quantity_q": 4.0,
             "delivery_terms": "as agreed",
@@ -192,9 +192,9 @@
             "status": "withdrawn",
             "closed_reason": "lot_sold",
             "synthetic": true,
-            "trace_id": "8e11dbc2cab64e399e9fe46da84477a8",
-            "created_at": "2026-11-06T10:31:47.871969+00:00",
-            "updated_at": "2026-11-06T10:31:48.168821+00:00",
+            "trace_id": "20409ef247a940f6be5580fed09256e7",
+            "created_at": "2026-11-12T16:28:25.337450+00:00",
+            "updated_at": "2026-11-12T16:28:25.466380+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -228,14 +228,14 @@
     ],
     "orders": [
       {
-        "order_id": "ord_1f6781a07f8a7a700165",
-        "transaction_id": "txn_756524320ec9da3a6706",
+        "order_id": "ord_29dab228260733a8a648",
+        "transaction_id": "txn_4d7b2c94ca8a5770514f",
         "tenant_id": "rec-trip",
-        "offer_id": "ofr_dce6959d84d32d485d7c",
-        "listing_id": "lst_dea440015ca7cc0fa76c",
-        "lot_id": "lot_44792fe15d6de4e4ebfa",
-        "farmer_id": "frm_e24e79382e7e2e183134",
-        "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+        "offer_id": "ofr_4aa36c2176232787059f",
+        "listing_id": "lst_a19f427476bafce1b035",
+        "lot_id": "lot_3954454f832b76f95d51",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
+        "buyer_id": "byr_7feefe1e32d1e869f058",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -255,17 +255,23 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": true,
-        "trace_id": "a478aeb11e0f494e89e179499d741780",
-        "created_at": "2026-11-06T10:31:48.168821+00:00",
-        "updated_at": "2026-11-06T10:31:51.812231+00:00",
+        "trace_id": "370caed3d8184117a7bdeb1ae7bae009",
+        "created_at": "2026-11-12T16:28:25.466380+00:00",
+        "updated_at": "2026-11-12T16:28:25.926151+00:00",
         "pool_id": null,
         "buyer_name": "Recording Traders (test)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
+        "lane": {
+          "code": "on_the_way",
+          "since": "2026-11-12T16:28:25.926151+00:00",
+          "waiting_on": "team",
+          "synthetic": true
+        },
         "fulfilment": [
           {
-            "event_id": "ful_2c5ca0735a88389a038d",
-            "order_id": "ord_1f6781a07f8a7a700165",
+            "event_id": "ful_2d5be6753648a5114556",
+            "order_id": "ord_29dab228260733a8a648",
             "stage": "pickup",
             "status": "done",
             "reference": null,
@@ -274,8 +280,8 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "94dcb51f55714eaf94481ad5eeea6cb9",
-            "created_at": "2026-11-06T10:31:51.812231+00:00"
+            "trace_id": "2bd87ed413d645599e66b02223cfc674",
+            "created_at": "2026-11-12T16:28:25.926151+00:00"
           }
         ],
         "reconciliation": null,
@@ -354,8 +360,8 @@
             "status": "processed",
             "rail": "cashfree",
             "amount_inr": 9882.0,
-            "utr": "UTR1375224611006",
-            "updated_at": "2026-11-06T10:31:54.053721+00:00",
+            "utr": "UTR1018827661006",
+            "updated_at": "2026-11-12T16:28:26.461034+00:00",
             "test_mode": true,
             "stale": false,
             "stage": "reached"
@@ -365,7 +371,8 @@
             "buyer_paid": true,
             "sent": true,
             "reached": true
-          }
+          },
+          "holds": null
         }
       }
     ],
@@ -450,7 +457,7 @@
       }
     },
     "x_destination": {
-      "destination_id": "xds_210931900a639d4f2b7d",
+      "destination_id": "xds_6bfd47eeb190a0e3b94f",
       "kind": "upi_id",
       "hint": "su***@upi",
       "status": "ready",
@@ -459,7 +466,7 @@
       "refused_code": null,
       "closure": "none",
       "consent_basis": "her_own_press",
-      "created_at": "2026-11-06T10:31:53.366878+00:00",
+      "created_at": "2026-11-12T16:28:26.013558+00:00",
       "provider": "cashfree"
     },
     "collect_then_pay": true,
@@ -493,7 +500,7 @@
     "payout_notice": null,
     "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Cashfree's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. AIAIC collects, then pays, on this server: the buyer pays their whole total, the payment fee with it, through a Cashfree payment link into AIAIC's account, and AIAIC sends the farmer their amount (the link's own figure) to their UPI ID or bank account through Cashfree Payouts on an operator's press, once per order and only after their produce has left them, or AIAIC's team records a bank transfer it made by hand, with its UTR. Each order's from_aiaic says its step: being prepared, not sent yet, while Cashfree holds the transfer (queued or pending); sent once the money has left AIAIC's account (Cashfree sent it to the farmer's bank) or a transfer made by hand is recorded; reached only on Cashfree's word that the farmer's bank credited it. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "6363cc24f10c428d9c85a654dfb9c6fc",
+      "request_id": "1a6e17c87239425cb5c52590f42eb4cf",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

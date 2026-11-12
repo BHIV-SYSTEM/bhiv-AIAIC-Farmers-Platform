@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_buyer_portal_answers.py",
     "route": "GET /notifications",
-    "at": "2026-11-06T10:33:05+00:00",
+    "at": "2026-11-12T16:28:57+00:00",
     "status": 200,
     "request": {
       "params": {},
@@ -11,25 +11,25 @@
     "note": "A real answer of the real route on a *_test database, in the workspace rec-buyer: practice farmer accounts and practice buyers (rehearsal data), Cashfree stood in for on the recording machine (its sandbox, test-only keys), no road key, the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
   },
   "answer": {
-    "unread": 7,
+    "unread": 8,
     "notifications": [
       {
-        "notification_id": 45,
+        "notification_id": 70,
         "rule_id": null,
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_7e63abd480e3e7d4293c",
-          "farmer_id": "frm_8685a94f42562f78959a",
+          "offer_id": "ofr_5cd35540ac436c5a3e4d",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
           "more_time": true,
           "buyer_type": "retailer",
-          "listing_id": "lst_6928527058ba0845013a",
+          "listing_id": "lst_18fdf262eded23d8f30f",
           "quantity_q": 4.0,
           "price_per_q": 2500.0,
-          "valid_until": "2026-11-10",
+          "valid_until": "2026-11-16",
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-06T10:33:05.054772+00:00",
+        "created_at": "2026-11-12T16:28:57.271049+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -40,21 +40,21 @@
         ]
       },
       {
-        "notification_id": 43,
+        "notification_id": 68,
         "rule_id": null,
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_7e63abd480e3e7d4293c",
-          "farmer_id": "frm_8685a94f42562f78959a",
+          "offer_id": "ofr_5cd35540ac436c5a3e4d",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
           "buyer_type": "retailer",
-          "listing_id": "lst_6928527058ba0845013a",
+          "listing_id": "lst_18fdf262eded23d8f30f",
           "quantity_q": 4.0,
           "price_per_q": 2500.0,
-          "valid_until": "2026-11-09",
+          "valid_until": "2026-11-15",
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-06T10:33:03.892912+00:00",
+        "created_at": "2026-11-12T16:28:56.727248+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -65,21 +65,44 @@
         ]
       },
       {
-        "notification_id": 42,
+        "notification_id": 67,
+        "rule_id": null,
+        "kind": "trade_buyer_paid",
+        "body": {
+          "crop": "onion",
+          "order_id": "ord_dd48271ffdf68187c769",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
+          "test_mode": true,
+          "listing_id": "lst_ccca9389540536103174",
+          "quantity_q": 3.0,
+          "to_her_inr": 7411.5
+        },
+        "created_at": "2026-11-12T16:28:55.689230+00:00",
+        "read_at": null,
+        "deliveries": [
+          {
+            "channel": "in_app",
+            "status": "delivered",
+            "detail": "Shown in the app's notification list."
+          }
+        ]
+      },
+      {
+        "notification_id": 65,
         "rule_id": null,
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_61802555dbce35509988",
-          "farmer_id": "frm_8685a94f42562f78959a",
+          "offer_id": "ofr_b1eac0f6648bbafada9e",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
           "buyer_type": "wholesaler",
-          "listing_id": "lst_abbf71dbcaf6e4187c27",
+          "listing_id": "lst_ccca9389540536103174",
           "quantity_q": 3.0,
           "price_per_q": 2500.0,
           "valid_until": null,
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-06T10:33:01.401938+00:00",
+        "created_at": "2026-11-12T16:28:55.555391+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -90,21 +113,21 @@
         ]
       },
       {
-        "notification_id": 41,
+        "notification_id": 62,
         "rule_id": null,
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_c4540a8b1cde745d8cad",
-          "farmer_id": "frm_8685a94f42562f78959a",
+          "offer_id": "ofr_047a1d259cce183a5be1",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
           "buyer_type": "wholesaler",
-          "listing_id": "lst_294588d032c939e5f73f",
+          "listing_id": "lst_c974de45691b91f281d1",
           "quantity_q": 1.0,
           "price_per_q": 2500.0,
           "valid_until": null,
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-06T10:32:59.080820+00:00",
+        "created_at": "2026-11-12T16:28:54.570220+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -115,21 +138,21 @@
         ]
       },
       {
-        "notification_id": 40,
+        "notification_id": 60,
         "rule_id": null,
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_c8a1208e9bc5266a47f6",
-          "farmer_id": "frm_8685a94f42562f78959a",
+          "offer_id": "ofr_7ea82457f13c56f75273",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
           "buyer_type": "wholesaler",
-          "listing_id": "lst_65ab6f3216efe7bff85e",
+          "listing_id": "lst_67ec07d20530b6eb1e87",
           "quantity_q": 2.0,
           "price_per_q": 2500.0,
           "valid_until": null,
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-06T10:32:58.435587+00:00",
+        "created_at": "2026-11-12T16:28:54.286937+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -140,21 +163,21 @@
         ]
       },
       {
-        "notification_id": 37,
+        "notification_id": 57,
         "rule_id": null,
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_5d3158038dd067d9d102",
-          "farmer_id": "frm_8685a94f42562f78959a",
+          "offer_id": "ofr_827da3426b804a133a94",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
           "buyer_type": "wholesaler",
-          "listing_id": "lst_2be0e2b83586ed7285e2",
+          "listing_id": "lst_3eeba468d54dd293df23",
           "quantity_q": 3.0,
           "price_per_q": 2500.0,
           "valid_until": null,
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-06T10:32:52.720187+00:00",
+        "created_at": "2026-11-12T16:28:51.509611+00:00",
         "read_at": null,
         "deliveries": [
           {
@@ -165,21 +188,21 @@
         ]
       },
       {
-        "notification_id": 26,
+        "notification_id": 36,
         "rule_id": null,
         "kind": "trade_offer",
         "body": {
           "crop": "onion",
-          "offer_id": "ofr_80ae4cfe2ac0908264c7",
-          "farmer_id": "frm_8685a94f42562f78959a",
+          "offer_id": "ofr_d04e31dd21d2de215db4",
+          "farmer_id": "frm_dd9e65f420b3e54fcc97",
           "buyer_type": "wholesaler",
-          "listing_id": "lst_b3d5c815f13874de28f8",
+          "listing_id": "lst_71baf668e83f6a328070",
           "quantity_q": 8.0,
           "price_per_q": 2500.0,
           "valid_until": null,
           "buyer_district": "Pune"
         },
-        "created_at": "2026-11-06T10:32:42.570370+00:00",
+        "created_at": "2026-11-12T16:28:46.157965+00:00",
         "read_at": null,
         "deliveries": [
           {

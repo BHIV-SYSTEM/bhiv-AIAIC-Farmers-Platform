@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trip_and_payout_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-11-06T10:32:00+00:00",
+    "at": "2026-11-12T16:28:29+00:00",
     "status": 200,
     "request": {
       "params": {}
@@ -18,7 +18,7 @@
     "practice": true,
     "practice_note": "This is a practice account: what it sells is kept as rehearsal data (synthetic, marked so on the operators' dashboard too). No real money moves for it: a payment link for its orders is made only with Cashfree's test keys. Nothing of it counts as a farmer's income.",
     "party": {
-      "party_id": "frm_e24e79382e7e2e183134",
+      "party_id": "frm_cbcd24c437b6fa90a368",
       "kind": "farmer",
       "buyer_type": null,
       "tenant_id": "rec-trip",
@@ -30,16 +30,16 @@
       "consent_withdrawn_at": null,
       "interests": {},
       "synthetic": true,
-      "trace_id": "ccba3f529b2f46528164d147da6e78df",
-      "created_at": "2026-11-06T10:31:38.528756+00:00",
+      "trace_id": "a540545dafd44cb097f5d2240e474e71",
+      "created_at": "2026-11-12T16:28:21.715085+00:00",
       "from_the_app": true
     },
     "listings": [
       {
-        "listing_id": "lst_5b7211103fa989ccfd0b",
-        "lot_id": "lot_fc40ee92d6c02d0c4182",
+        "listing_id": "lst_0c2809eadfcf10e9b30a",
+        "lot_id": "lot_bce51f850b0ca7f91582",
         "tenant_id": "rec-trip",
-        "farmer_id": "frm_e24e79382e7e2e183134",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -133,15 +133,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": true,
-        "trace_id": "faee21fe54dd421a8ec882c3718eddbb",
-        "created_at": "2026-11-06T10:31:59.641483+00:00",
-        "updated_at": "2026-11-06T10:32:00.194672+00:00",
+        "trace_id": "f356d8a6230a44998f7c7c0c74ebe84b",
+        "created_at": "2026-11-12T16:28:28.621809+00:00",
+        "updated_at": "2026-11-12T16:28:28.741896+00:00",
         "offers": [
           {
-            "offer_id": "ofr_153c2faf53932b3a3872",
+            "offer_id": "ofr_aaf8fdadd76dc63d5979",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_5b7211103fa989ccfd0b",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_0c2809eadfcf10e9b30a",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 2500.0,
             "quantity_q": 1.0,
             "delivery_terms": "as agreed",
@@ -150,9 +150,9 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "2e577500f621419d991847c626ae5bf5",
-            "created_at": "2026-11-06T10:32:00.105004+00:00",
-            "updated_at": "2026-11-06T10:32:00.194672+00:00",
+            "trace_id": "676760360be14d3da4bade840eaf6e0a",
+            "created_at": "2026-11-12T16:28:28.709541+00:00",
+            "updated_at": "2026-11-12T16:28:28.741896+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -184,10 +184,10 @@
         "group_plan": null
       },
       {
-        "listing_id": "lst_2f3616e869c96dc606a8",
-        "lot_id": "lot_8280b86108b8a800b367",
+        "listing_id": "lst_7bee5f257c90fd4874d6",
+        "lot_id": "lot_11c31da7c0a2db969da4",
         "tenant_id": "rec-trip",
-        "farmer_id": "frm_e24e79382e7e2e183134",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -281,15 +281,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": true,
-        "trace_id": "ed0c36657d4e4e458a263620e641ae08",
-        "created_at": "2026-11-06T10:31:58.458095+00:00",
-        "updated_at": "2026-11-06T10:31:58.852973+00:00",
+        "trace_id": "9741609496d34c76bd2f99e68e9b2c8a",
+        "created_at": "2026-11-12T16:28:28.074050+00:00",
+        "updated_at": "2026-11-12T16:28:28.234006+00:00",
         "offers": [
           {
-            "offer_id": "ofr_9a8f470d4a48b3e9e041",
+            "offer_id": "ofr_aca9ea788c4ec98c20d0",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_2f3616e869c96dc606a8",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_7bee5f257c90fd4874d6",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 2500.0,
             "quantity_q": 2.0,
             "delivery_terms": "as agreed",
@@ -298,9 +298,9 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "7bf041205cf349a7bbd5e23411a40402",
-            "created_at": "2026-11-06T10:31:58.733220+00:00",
-            "updated_at": "2026-11-06T10:31:58.852973+00:00",
+            "trace_id": "f9acfa5601684a92a08d03bf41d6a1e7",
+            "created_at": "2026-11-12T16:28:28.179533+00:00",
+            "updated_at": "2026-11-12T16:28:28.234006+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -332,10 +332,10 @@
         "group_plan": null
       },
       {
-        "listing_id": "lst_678d372e580d64c2145b",
-        "lot_id": "lot_41a01ea0962ef8c41f64",
+        "listing_id": "lst_8cb3c59f86c8c969063c",
+        "lot_id": "lot_60865d2d8ed59f5eeeb0",
         "tenant_id": "rec-trip",
-        "farmer_id": "frm_e24e79382e7e2e183134",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -429,15 +429,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": true,
-        "trace_id": "928d1d4fe0e04f219915c37a17e545f6",
-        "created_at": "2026-11-06T10:31:57.530847+00:00",
-        "updated_at": "2026-11-06T10:31:57.530847+00:00",
+        "trace_id": "0a61f90152a64b679486d00d42b5d2c8",
+        "created_at": "2026-11-12T16:28:27.704748+00:00",
+        "updated_at": "2026-11-12T16:28:27.704748+00:00",
         "offers": [
           {
-            "offer_id": "ofr_f9f9f5c2b312d20b36ed",
+            "offer_id": "ofr_a6b8798ba04cfd8d6bc1",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_678d372e580d64c2145b",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_8cb3c59f86c8c969063c",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 2500.0,
             "quantity_q": 1.0,
             "delivery_terms": "as agreed",
@@ -446,9 +446,9 @@
             "status": "open",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "0274198f973f4e218981b8f3aed2a70c",
-            "created_at": "2026-11-06T10:31:57.810795+00:00",
-            "updated_at": "2026-11-06T10:31:57.810795+00:00",
+            "trace_id": "e4c5e3f897d340fea43e1e07dc259672",
+            "created_at": "2026-11-12T16:28:27.805409+00:00",
+            "updated_at": "2026-11-12T16:28:27.805409+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": true,
@@ -473,10 +473,10 @@
             "pool": null
           },
           {
-            "offer_id": "ofr_da07f4e0cc47f24f27be",
+            "offer_id": "ofr_d9edc9029c85be995e71",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_678d372e580d64c2145b",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_8cb3c59f86c8c969063c",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 3716.0,
             "quantity_q": 1.0,
             "delivery_terms": "as agreed",
@@ -485,9 +485,9 @@
             "status": "open",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "cacbc5544916439f8163c16e9e840704",
-            "created_at": "2026-11-06T10:31:58.152400+00:00",
-            "updated_at": "2026-11-06T10:31:58.152400+00:00",
+            "trace_id": "cf8a35a354c341e997200745d16d5473",
+            "created_at": "2026-11-12T16:28:27.939268+00:00",
+            "updated_at": "2026-11-12T16:28:27.939268+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": true,
@@ -516,10 +516,10 @@
         "group_plan": null
       },
       {
-        "listing_id": "lst_dea440015ca7cc0fa76c",
-        "lot_id": "lot_44792fe15d6de4e4ebfa",
+        "listing_id": "lst_a19f427476bafce1b035",
+        "lot_id": "lot_3954454f832b76f95d51",
         "tenant_id": "rec-trip",
-        "farmer_id": "frm_e24e79382e7e2e183134",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -613,15 +613,15 @@
           "middle_of_all_per_q": 3930.0
         },
         "synthetic": true,
-        "trace_id": "ccba3f529b2f46528164d147da6e78df",
-        "created_at": "2026-11-06T10:31:38.528756+00:00",
-        "updated_at": "2026-11-06T10:31:48.168821+00:00",
+        "trace_id": "a540545dafd44cb097f5d2240e474e71",
+        "created_at": "2026-11-12T16:28:21.715085+00:00",
+        "updated_at": "2026-11-12T16:28:25.466380+00:00",
         "offers": [
           {
-            "offer_id": "ofr_dce6959d84d32d485d7c",
+            "offer_id": "ofr_4aa36c2176232787059f",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_dea440015ca7cc0fa76c",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_a19f427476bafce1b035",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 2500.0,
             "quantity_q": 4.0,
             "delivery_terms": "as agreed",
@@ -630,9 +630,9 @@
             "status": "accepted",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "d71ed8def58e4e51a4f5f4377bde3f6a",
-            "created_at": "2026-11-06T10:31:47.408235+00:00",
-            "updated_at": "2026-11-06T10:31:48.168821+00:00",
+            "trace_id": "85676e8dad8c4c0c83aee320d533e9fe",
+            "created_at": "2026-11-12T16:28:25.110203+00:00",
+            "updated_at": "2026-11-12T16:28:25.466380+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -660,10 +660,10 @@
             "pool": null
           },
           {
-            "offer_id": "ofr_517b6b3ea127470cd13f",
+            "offer_id": "ofr_3adb231b6b912ee86312",
             "tenant_id": "rec-trip",
-            "listing_id": "lst_dea440015ca7cc0fa76c",
-            "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+            "listing_id": "lst_a19f427476bafce1b035",
+            "buyer_id": "byr_7feefe1e32d1e869f058",
             "price_per_q": 2500.0,
             "quantity_q": 4.0,
             "delivery_terms": "as agreed",
@@ -672,9 +672,9 @@
             "status": "withdrawn",
             "closed_reason": "lot_sold",
             "synthetic": true,
-            "trace_id": "8e11dbc2cab64e399e9fe46da84477a8",
-            "created_at": "2026-11-06T10:31:47.871969+00:00",
-            "updated_at": "2026-11-06T10:31:48.168821+00:00",
+            "trace_id": "20409ef247a940f6be5580fed09256e7",
+            "created_at": "2026-11-12T16:28:25.337450+00:00",
+            "updated_at": "2026-11-12T16:28:25.466380+00:00",
             "pool_id": null,
             "expired": false,
             "can_accept": false,
@@ -708,14 +708,14 @@
     ],
     "orders": [
       {
-        "order_id": "ord_234cf445eeb2bf2c4579",
-        "transaction_id": "txn_bbe571e8366c7b162311",
+        "order_id": "ord_a12a16d6f9f433e699e6",
+        "transaction_id": "txn_305ffab213f887b17782",
         "tenant_id": "rec-trip",
-        "offer_id": "ofr_153c2faf53932b3a3872",
-        "listing_id": "lst_5b7211103fa989ccfd0b",
-        "lot_id": "lot_fc40ee92d6c02d0c4182",
-        "farmer_id": "frm_e24e79382e7e2e183134",
-        "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+        "offer_id": "ofr_aaf8fdadd76dc63d5979",
+        "listing_id": "lst_0c2809eadfcf10e9b30a",
+        "lot_id": "lot_bce51f850b0ca7f91582",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
+        "buyer_id": "byr_7feefe1e32d1e869f058",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -735,17 +735,23 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": true,
-        "trace_id": "3401bbbd331b48f89cb3adb358e68682",
-        "created_at": "2026-11-06T10:32:00.194672+00:00",
-        "updated_at": "2026-11-06T10:32:00.440617+00:00",
+        "trace_id": "1afa413a39ca4bb78f71516ac0ad05f3",
+        "created_at": "2026-11-12T16:28:28.741896+00:00",
+        "updated_at": "2026-11-12T16:28:28.862983+00:00",
         "pool_id": null,
         "buyer_name": "Recording Traders (test)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
+        "lane": {
+          "code": "on_the_way",
+          "since": "2026-11-12T16:28:28.862983+00:00",
+          "waiting_on": "team",
+          "synthetic": true
+        },
         "fulfilment": [
           {
-            "event_id": "ful_0ca004ed41b623b6bf14",
-            "order_id": "ord_234cf445eeb2bf2c4579",
+            "event_id": "ful_22891a0e241ec79c6d02",
+            "order_id": "ord_a12a16d6f9f433e699e6",
             "stage": "pickup",
             "status": "done",
             "reference": null,
@@ -754,8 +760,8 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "d2b24aafa5c64250ba71d153353b10d7",
-            "created_at": "2026-11-06T10:32:00.440617+00:00"
+            "trace_id": "7b42c1f09a43466d91050a34aa191fff",
+            "created_at": "2026-11-12T16:28:28.862983+00:00"
           }
         ],
         "reconciliation": null,
@@ -835,7 +841,7 @@
             "rail": "cashfree",
             "amount_inr": 2470.5,
             "utr": null,
-            "updated_at": "2026-11-06T10:32:00.562711+00:00",
+            "updated_at": "2026-11-12T16:28:28.934378+00:00",
             "test_mode": true,
             "stale": false,
             "stage": "being_prepared",
@@ -850,18 +856,23 @@
             "buyer_paid": true,
             "sent": false,
             "reached": false
+          },
+          "holds": {
+            "amount_inr": 2470.5,
+            "since": "2026-11-12T16:28:28.825682+00:00",
+            "waits_for": "provider"
           }
         }
       },
       {
-        "order_id": "ord_7a4864ca55f040498f39",
-        "transaction_id": "txn_bd531081f217689969d5",
+        "order_id": "ord_de7df6e3218ac235350a",
+        "transaction_id": "txn_5014e3ed841b7e790033",
         "tenant_id": "rec-trip",
-        "offer_id": "ofr_9a8f470d4a48b3e9e041",
-        "listing_id": "lst_2f3616e869c96dc606a8",
-        "lot_id": "lot_8280b86108b8a800b367",
-        "farmer_id": "frm_e24e79382e7e2e183134",
-        "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+        "offer_id": "ofr_aca9ea788c4ec98c20d0",
+        "listing_id": "lst_7bee5f257c90fd4874d6",
+        "lot_id": "lot_11c31da7c0a2db969da4",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
+        "buyer_id": "byr_7feefe1e32d1e869f058",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -881,17 +892,23 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": true,
-        "trace_id": "eb42a3f0b65243188f1bfcd514d48cba",
-        "created_at": "2026-11-06T10:31:58.852973+00:00",
-        "updated_at": "2026-11-06T10:31:59.160194+00:00",
+        "trace_id": "2d2ec4903c1048bc9cfcab9a6fb7f9fc",
+        "created_at": "2026-11-12T16:28:28.234006+00:00",
+        "updated_at": "2026-11-12T16:28:28.385213+00:00",
         "pool_id": null,
         "buyer_name": "Recording Traders (test)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
+        "lane": {
+          "code": "on_the_way",
+          "since": "2026-11-12T16:28:28.385213+00:00",
+          "waiting_on": "team",
+          "synthetic": true
+        },
         "fulfilment": [
           {
-            "event_id": "ful_c3a20c51eaa410359f37",
-            "order_id": "ord_7a4864ca55f040498f39",
+            "event_id": "ful_a2820fcd23af4fc23563",
+            "order_id": "ord_de7df6e3218ac235350a",
             "stage": "pickup",
             "status": "done",
             "reference": null,
@@ -900,8 +917,8 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "473112794f9a4ffb83a26600e990f415",
-            "created_at": "2026-11-06T10:31:59.160194+00:00"
+            "trace_id": "fcb86d06e80640d695f8ae7218219b7c",
+            "created_at": "2026-11-12T16:28:28.385213+00:00"
           }
         ],
         "reconciliation": null,
@@ -981,7 +998,7 @@
             "rail": "cashfree",
             "amount_inr": 4941.0,
             "utr": null,
-            "updated_at": "2026-11-06T10:26:59.365843+00:00",
+            "updated_at": "2026-11-12T16:23:28.513467+00:00",
             "test_mode": true,
             "stale": true,
             "stage": "not_known"
@@ -991,18 +1008,23 @@
             "buyer_paid": true,
             "sent": false,
             "reached": false
+          },
+          "holds": {
+            "amount_inr": 4941.0,
+            "since": "2026-11-12T16:28:28.339961+00:00",
+            "waits_for": "not_known"
           }
         }
       },
       {
-        "order_id": "ord_1f6781a07f8a7a700165",
-        "transaction_id": "txn_756524320ec9da3a6706",
+        "order_id": "ord_29dab228260733a8a648",
+        "transaction_id": "txn_4d7b2c94ca8a5770514f",
         "tenant_id": "rec-trip",
-        "offer_id": "ofr_dce6959d84d32d485d7c",
-        "listing_id": "lst_dea440015ca7cc0fa76c",
-        "lot_id": "lot_44792fe15d6de4e4ebfa",
-        "farmer_id": "frm_e24e79382e7e2e183134",
-        "buyer_id": "byr_b404d4fe02f8dcbccbdc",
+        "offer_id": "ofr_4aa36c2176232787059f",
+        "listing_id": "lst_a19f427476bafce1b035",
+        "lot_id": "lot_3954454f832b76f95d51",
+        "farmer_id": "frm_cbcd24c437b6fa90a368",
+        "buyer_id": "byr_7feefe1e32d1e869f058",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -1022,17 +1044,23 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": true,
-        "trace_id": "a478aeb11e0f494e89e179499d741780",
-        "created_at": "2026-11-06T10:31:48.168821+00:00",
-        "updated_at": "2026-11-06T10:31:51.812231+00:00",
+        "trace_id": "370caed3d8184117a7bdeb1ae7bae009",
+        "created_at": "2026-11-12T16:28:25.466380+00:00",
+        "updated_at": "2026-11-12T16:28:25.926151+00:00",
         "pool_id": null,
         "buyer_name": "Recording Traders (test)",
         "buyer_type": "wholesaler",
         "buyer_district": "Pune",
+        "lane": {
+          "code": "on_the_way",
+          "since": "2026-11-12T16:28:25.926151+00:00",
+          "waiting_on": "team",
+          "synthetic": true
+        },
         "fulfilment": [
           {
-            "event_id": "ful_2c5ca0735a88389a038d",
-            "order_id": "ord_1f6781a07f8a7a700165",
+            "event_id": "ful_2d5be6753648a5114556",
+            "order_id": "ord_29dab228260733a8a648",
             "stage": "pickup",
             "status": "done",
             "reference": null,
@@ -1041,8 +1069,8 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "94dcb51f55714eaf94481ad5eeea6cb9",
-            "created_at": "2026-11-06T10:31:51.812231+00:00"
+            "trace_id": "2bd87ed413d645599e66b02223cfc674",
+            "created_at": "2026-11-12T16:28:25.926151+00:00"
           }
         ],
         "reconciliation": null,
@@ -1121,8 +1149,8 @@
             "status": "processed",
             "rail": "cashfree",
             "amount_inr": 9882.0,
-            "utr": "UTR1375224611006",
-            "updated_at": "2026-11-06T10:31:54.053721+00:00",
+            "utr": "UTR1018827661006",
+            "updated_at": "2026-11-12T16:28:26.461034+00:00",
             "test_mode": true,
             "stale": false,
             "stage": "reached"
@@ -1132,7 +1160,8 @@
             "buyer_paid": true,
             "sent": true,
             "reached": true
-          }
+          },
+          "holds": null
         }
       }
     ],
@@ -1217,7 +1246,7 @@
       }
     },
     "x_destination": {
-      "destination_id": "xds_210931900a639d4f2b7d",
+      "destination_id": "xds_6bfd47eeb190a0e3b94f",
       "kind": "upi_id",
       "hint": "su***@upi",
       "status": "ready",
@@ -1226,7 +1255,7 @@
       "refused_code": null,
       "closure": "none",
       "consent_basis": "her_own_press",
-      "created_at": "2026-11-06T10:31:53.366878+00:00",
+      "created_at": "2026-11-12T16:28:26.013558+00:00",
       "provider": "cashfree"
     },
     "collect_then_pay": true,
@@ -1260,7 +1289,7 @@
     "payout_notice": null,
     "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Cashfree's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. AIAIC collects, then pays, on this server: the buyer pays their whole total, the payment fee with it, through a Cashfree payment link into AIAIC's account, and AIAIC sends the farmer their amount (the link's own figure) to their UPI ID or bank account through Cashfree Payouts on an operator's press, once per order and only after their produce has left them, or AIAIC's team records a bank transfer it made by hand, with its UTR. Each order's from_aiaic says its step: being prepared, not sent yet, while Cashfree holds the transfer (queued or pending); sent once the money has left AIAIC's account (Cashfree sent it to the farmer's bank) or a transfer made by hand is recorded; reached only on Cashfree's word that the farmer's bank credited it. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "d2ff38c06bce4f71a98e7f37803a26ad",
+      "request_id": "8743539276444710bda974eddb3b232b",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",
