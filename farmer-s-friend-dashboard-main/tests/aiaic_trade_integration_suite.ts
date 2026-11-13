@@ -7098,21 +7098,26 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
     }
     return out;
   };
-  const listAfter = (text: string, lead: string): string[] => {
+  // the words after a lead, up to the next ". " (or the text's end), without the sentence's own full stop
+  const bodyAfter = (text: string, lead: string): string => {
     const at = text.indexOf(lead);
     assert.ok(at > -1, `"${lead}" is not said`);
     const from = at + lead.length;
     const end = text.indexOf(". ", from);
-    return partsOf((end < 0 ? text.slice(from) : text.slice(from, end)).replace(/\.$/, ""));
+    return (end < 0 ? text.slice(from) : text.slice(from, end)).replace(/\.$/, "");
   };
+  const listAfter = (text: string, lead: string): string[] => partsOf(bodyAfter(text, lead));
+  // FOUR LISTS since AIAIC's R2-4 lane FIX-5 (its skeptics' AE4-03-V7): the third, what an officer reads of a consent
   const RULE = [
     "Of money, an officer reads only the trade's own prices and amounts: ",
     "and only while its switch is on: ",
+    "Of a consent, an officer reads only ",
     "An officer never sees ",
   ];
   const PAGE = [
     "Of money, they see only the trade's own prices and amounts: ",
     "and only while AIAIC's team allows it (by default it does): ",
+    "Of a consent, they see only ",
     "They never see ",
   ];
   const page = fs
@@ -7121,18 +7126,57 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
   const lines = page.split("\n");
   const officers = lines.find((l) => l.startsWith("- **What officers see of your sales:**"));
   assert.ok(officers, "her page names the officers");
-  const [prices, states, never] = RULE.map((lead) => listAfter(rule.description, lead));
-  const [pagePrices, pageStates, pageNever] = PAGE.map((lead) => listAfter(officers, lead));
+  const [prices, states, consent, never] = RULE.map((lead) => listAfter(rule.description, lead));
+  const [pagePrices, pageStates, pageConsent, pageNever] = PAGE.map((lead) =>
+    listAfter(officers, lead),
+  );
+  assert.ok(prices.length >= 4 && states.length >= 6 && never.length >= 4, "the rule's four lists");
+  // what an officer reads of a consent (every officer reads each farmer's consent state on the Farm stage's records)
+  assert.deepEqual(consent, [
+    "whether a farmer's consent stands",
+    "when it was recorded or she withdrew it",
+  ]);
   assert.ok(
-    prices.length >= 4 && states.length >= 6 && never.length >= 4,
-    "the rule's three lists",
+    never.includes("a consent's record (its basis and its words)") && !never.includes("a consent"),
   );
   // EACH LIST EQUALS THE RULE'S, AS A SET: nothing the rule names left out, nothing it does not name added
   assert.deepEqual(new Set(pagePrices), new Set(prices), "what they see of money");
   assert.deepEqual(new Set(pageStates), new Set(states), "what they see of a payment");
+  assert.deepEqual(new Set(pageConsent), new Set(consent), "what they see of a consent");
   assert.deepEqual(new Set(pageNever), new Set(never), "what they never see");
-  for (const part of [...pagePrices, ...pageStates])
+  for (const part of [...pagePrices, ...pageStates, ...pageConsent])
     assert.ok(!never.includes(part), `"${part}" is said as seen, and the rule says never`);
+  // HER OFFICERS' LINE, WHOLE (AIAIC's R2-4 lane FIX-5, its skeptics' AE4-03-V8: a sentence after the lists could
+  // contradict them and pass): her two own sentences, then the rule's four sentences after her page's leads, and nothing
+  // else; the rule itself is its four sentences and nothing else
+  const SENTENCES = [
+    "Of money, an officer reads only the trade's own prices and amounts: ",
+    "Of a payment, an officer reads only its states, never an amount, and only while its switch is on: ",
+    "Of a consent, an officer reads only ",
+    "An officer never sees ",
+  ];
+  const HER_SENTENCES = [
+    "Of money, they see only the trade's own prices and amounts: ",
+    "Of a payment, they see only its states, never an amount, and only while AIAIC's team allows it (by default it does): ",
+    "Of a consent, they see only ",
+    "They never see ",
+  ];
+  const bodies = SENTENCES.map((lead) => bodyAfter(rule.description, lead));
+  assert.equal(
+    rule.description,
+    SENTENCES.map((lead, i) => `${lead}${bodies[i]}.`).join(" "),
+    "the rule, whole",
+  );
+  const HER_OPENING =
+    "- **What officers see of your sales:** your sales are kept in AIAIC's farmers' workspace, where the officers of " +
+    "an organisation working with AIAIC (on its operations portal) are told of an offer you accept and may record your " +
+    "order's steps (never its delivery), as AIAIC's team allows by AIAIC's own settings. They see your lots' and " +
+    "orders' crop, quantity and district and your farmer record's id, never your name, your phone number or your account.";
+  assert.equal(
+    officers,
+    [HER_OPENING, ...HER_SENTENCES.map((lead, i) => `${lead}${bodies[i]}.`)].join(" "),
+    "her officers' line, whole",
+  );
   // of her: never her name (an officer never reads the name of a farmer who sells in her own app), her phone or account
   assert.ok(
     officers.includes("officers of an organisation working with AIAIC (on its operations portal)"),
@@ -7147,9 +7191,10 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
   assert.ok(partners, "her page names the partners");
   assert.ok(
     partners.includes(
-      "never your name or number, the buyer's name, your sale's price or its payment",
+      "never your name or number, the buyer's name, your sale's price or its payment (a transporter or an aggregator " +
+        "sees AIAIC's own estimate of each trip's cost).",
     ),
-    "what partners never see",
+    "what partners never see, and AIAIC's own trip estimate a transporter or an aggregator sees",
   );
   // HER "ONLY AS DESCRIBED ABOVE" LIST HOLDS BOTH
   const only = lines.find((l) => l.startsWith("Only as described above:"));
