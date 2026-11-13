@@ -1,0 +1,15 @@
+{
+ "what": "AIAIC's fixed rule of what officers see (officers_see_no_money_phones_or_consents), as AIAIC's GET /trade/settings answers it: its entry of `answer.fixed`, copied word for word from AIAIC's own recording of that route (made by AIAIC's role recorder on a test database), never edited by hand. Read by tests/aiaic_trade_integration_suite.ts (A77), which holds her privacy page's officers' paragraph to its three lists, and checks these words by their sha256. Never shown to a farmer. When AIAIC's rule changes, copy it again from AIAIC's recording, with its commit and sha256.",
+ "recorded_from": {
+  "repository": "AIAIC (BHIV-Engineering-Exchange/bhiv-AIAIC_farmers-Backend)",
+  "commit": "14e0bb4b927b487ba1856605741b7e6624a93b34",
+  "subject": "The officers' fixed rule now names every money part an officer reads, in three lists, and two pinned links hold it there: an engine test maps every money or pay...",
+  "path": "aiaic-frontend/src/test/recorded_trade/role_settings.json",
+  "sha256": "fe77daf39188a117b86d933bfe31eba4bcf76d9c2dba7dee5580b33f7180e15f",
+  "bytes": 38164,
+  "field": "answer.fixed[code=officers_see_no_money_phones_or_consents].description"
+ },
+ "code": "officers_see_no_money_phones_or_consents",
+ "description": "Of money, an officer reads only the trade's own prices and amounts: a lot's asking price, an offer's and an order's price and amount, a reconciliation's amount for the quantity accepted, the mandis' public prices, and whether a buyer's top price reaches a lot's asking price (never that top price). Of a payment, an officer reads only its states, never an amount, and only while its switch is on: whether the buyer has paid, the payment link's state (made, cancelled, or run out unpaid, and the day the buyer asked for a new one), the settlement to the farmer, the fee rule, the payment route and its timing, a refund owed to the buyer, and whether the farmer has been paid (with the days she has waited). An officer never sees an amount of a payment or payout, a provider's id, a phone number, or a consent.",
+ "description_sha256": "63ebd872dc3b9960bb9c5493c191fcd15ff3d2e83278d7643a42a8bd5b18a2c6"
+}

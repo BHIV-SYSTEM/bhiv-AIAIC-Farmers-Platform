@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { PolicyPage } from "@/components/farm/PolicyPage";
+import { PAGE_UPDATED } from "@/lib/business";
 
 import text from "../content/policies/privacy.md?raw";
 
@@ -18,6 +19,9 @@ export const Route = createFileRoute("/privacy")({
   component: PrivacyPage,
 });
 
+/** The page's own day (`PAGE_UPDATED`): its words changed since the other pages'. */
+const FIELDS = { last_updated: PAGE_UPDATED.privacy };
+
 function PrivacyPage() {
-  return <PolicyPage text={text} kind="policy" />;
+  return <PolicyPage text={text} kind="policy" fields={FIELDS} />;
 }

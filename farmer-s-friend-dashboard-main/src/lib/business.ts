@@ -30,6 +30,13 @@ export const BUSINESS = {
   lastUpdated: "4 November 2026",
 } as const;
 
+/**
+ * A PAGE WHOSE WORDS CHANGED SINCE (14 Nov 2026, India's day; AIAIC's audit AE4-03-V3): its own day, so the date at
+ * the top of the other pages stays true. The privacy page names the officers of an organisation working with AIAIC
+ * and the partners, and what each reads of her sale (its words also changed on 13 Nov, with what buyers see).
+ */
+export const PAGE_UPDATED = { privacy: "14 November 2026" } as const;
+
 /** Krishi Sampada (AIAIC), where real sales and their payments are made. Its home page links all its own policies. */
 export const AIAIC_SITE_URL = "https://krishisampada.blackholeinfiverse.com/";
 

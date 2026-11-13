@@ -173,7 +173,7 @@ import * as identity from "../src/lib/aiaic-identity.server";
 import { useMandiTrip } from "../src/lib/aiaic-trip";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
 import { getPlacesDistricts } from "../src/lib/places.functions";
-import { commissionSentence } from "../src/lib/business";
+import { PAGE_UPDATED, commissionSentence } from "../src/lib/business";
 import { pricingOf, rupeeRange, type TripWays } from "../src/lib/aiaic-trade";
 
 import {
@@ -7054,6 +7054,119 @@ test("B21 AN-1 a form this phone would not refuse goes to AIAIC, whose crisis mi
   } finally {
     await s.close();
   }
+});
+
+test("A77 AE4-03-V3 her privacy page names the officers of an organisation working with AIAIC and what they read of her sale, AIAIC's fixed rule list for list and both ways (its words her own fixture's, held by their sha256), never her name; and the partners; her Only list holds both; the page's own date", () => {
+  // AIAIC'S RULE, AS AIAIC'S GET /trade/settings ANSWERS IT (her fixture, copied from AIAIC's recording with its commit
+  // and sha256; never read from AIAIC's tree): its words are the ones copied
+  const rule = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "officers_fixed_rule.json"), "utf-8"),
+  ) as {
+    code: string;
+    description: string;
+    description_sha256: string;
+    recorded_from: { sha256: string };
+  };
+  assert.equal(rule.code, "officers_see_no_money_phones_or_consents");
+  assert.equal(
+    createHash("sha256").update(Buffer.from(rule.description, "utf-8")).digest("hex"),
+    rule.description_sha256,
+    "the rule's words are not the ones copied from AIAIC",
+  );
+  assert.match(rule.recorded_from.sha256, /^[0-9a-f]{64}$/);
+  // a list's parts, as AIAIC's own tests cut the rule: at ", " outside brackets, the last without its ", and" or ", or"
+  const partsOf = (body: string): string[] => {
+    const out: string[] = [];
+    let cur = "";
+    let depth = 0;
+    for (let i = 0; i < body.length; i += 1) {
+      const ch = body[i];
+      if (ch === "(") depth += 1;
+      if (ch === ")") depth -= 1;
+      if (depth === 0 && body.startsWith(", ", i)) {
+        out.push(cur);
+        cur = "";
+        i += 1;
+        continue;
+      }
+      cur += ch;
+    }
+    out.push(cur);
+    for (const join of ["and ", "or "]) {
+      const last = out[out.length - 1];
+      if (out.length > 1 && last.startsWith(join)) out[out.length - 1] = last.slice(join.length);
+    }
+    return out;
+  };
+  const listAfter = (text: string, lead: string): string[] => {
+    const at = text.indexOf(lead);
+    assert.ok(at > -1, `"${lead}" is not said`);
+    const from = at + lead.length;
+    const end = text.indexOf(". ", from);
+    return partsOf((end < 0 ? text.slice(from) : text.slice(from, end)).replace(/\.$/, ""));
+  };
+  const RULE = [
+    "Of money, an officer reads only the trade's own prices and amounts: ",
+    "and only while its switch is on: ",
+    "An officer never sees ",
+  ];
+  const PAGE = [
+    "Of money, they see only the trade's own prices and amounts: ",
+    "and only while AIAIC's team allows it (by default it does): ",
+    "They never see ",
+  ];
+  const page = fs
+    .readFileSync(path.join(APP, "src", "content", "policies", "privacy.md"), "utf-8")
+    .replace(/\r\n/g, "\n");
+  const lines = page.split("\n");
+  const officers = lines.find((l) => l.startsWith("- **What officers see of your sales:**"));
+  assert.ok(officers, "her page names the officers");
+  const [prices, states, never] = RULE.map((lead) => listAfter(rule.description, lead));
+  const [pagePrices, pageStates, pageNever] = PAGE.map((lead) => listAfter(officers, lead));
+  assert.ok(
+    prices.length >= 4 && states.length >= 6 && never.length >= 4,
+    "the rule's three lists",
+  );
+  // EACH LIST EQUALS THE RULE'S, AS A SET: nothing the rule names left out, nothing it does not name added
+  assert.deepEqual(new Set(pagePrices), new Set(prices), "what they see of money");
+  assert.deepEqual(new Set(pageStates), new Set(states), "what they see of a payment");
+  assert.deepEqual(new Set(pageNever), new Set(never), "what they never see");
+  for (const part of [...pagePrices, ...pageStates])
+    assert.ok(!never.includes(part), `"${part}" is said as seen, and the rule says never`);
+  // of her: never her name (an officer never reads the name of a farmer who sells in her own app), her phone or account
+  assert.ok(
+    officers.includes("officers of an organisation working with AIAIC (on its operations portal)"),
+    "whose officers",
+  );
+  assert.ok(
+    officers.includes("never your name, your phone number or your account"),
+    "never her name",
+  );
+  // THE PARTNERS AIAIC'S TEAM ASSIGNS TO HER ORDER: what they read, never her name or her sale's price
+  const partners = lines.find((l) => l.startsWith("- **What partners see of your sales:**"));
+  assert.ok(partners, "her page names the partners");
+  assert.ok(
+    partners.includes(
+      "never your name or number, the buyer's name, your sale's price or its payment",
+    ),
+    "what partners never see",
+  );
+  // HER "ONLY AS DESCRIBED ABOVE" LIST HOLDS BOTH
+  const only = lines.find((l) => l.startsWith("Only as described above:"));
+  assert.ok(only, "her sharing list");
+  for (const who of [
+    "the officers of an organisation working with AIAIC (only what is described under Selling)",
+    "the partners AIAIC assigns to an order (only what is described under Selling)",
+    "the buyers who buy through AIAIC (only what is described under Selling)",
+  ])
+    assert.ok(only.includes(who), `the sharing list leaves out ${who}`);
+  // THE PAGE'S OWN DATE (its words changed since the other pages'): said at its top by its own route
+  assert.equal(PAGE_UPDATED.privacy, "14 November 2026");
+  const route = fs.readFileSync(path.join(APP, "src", "routes", "privacy.tsx"), "utf-8");
+  assert.ok(
+    route.includes("last_updated: PAGE_UPDATED.privacy") && route.includes("fields={FIELDS}"),
+    "its route",
+  );
 });
 
 // ------------------------------------------------------------------------------------------------ run
