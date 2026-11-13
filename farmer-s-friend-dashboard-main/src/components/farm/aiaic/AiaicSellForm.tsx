@@ -352,55 +352,61 @@ function SellForm({
 
   // ONE PRESS, ONE RECORD (C.8; R2-4's AP4-06): her sale on its way takes no second press, from her sale's button or from
   // her yes to AIAIC's question about her price: a ref set before the first await, so a second tap in the same moment,
-  // before React draws "Sending...", sends nothing (as the sharing card's press does); it goes with `sending`
+  // before React draws "Sending...", sends nothing (as the sharing card's press does); it goes with `sending`, on every way
+  // out of the press, a throw included (R2-4's VAP404-4: a `finally`, so no answer, however malformed, leaves it stuck)
   const onItsWay = useRef(false);
   const send = async (confirmed: boolean) => {
     if (!district || !crop || qty === null || price === null) return;
     if (onItsWay.current) return;
     onItsWay.current = true;
     setSending(true);
-    setRefusal(null);
-    setRetry(false);
-    SELL_PRESS.sent(pressKey);
-    const r = await press(() =>
-      sellFn({
-        data: {
-          key: pressKey,
-          state: estate,
-          district,
-          crop,
-          quantity_q: Math.round(qty * 100) / 100,
-          ask_price_per_q: Math.round(price * 100) / 100,
-          grade: grade === "none" ? null : grade,
-          ...(confirmed ? { price_confirmed: true } : {}),
-          ...(taluka ? { taluka } : {}),
-        },
-      }),
-    );
-    SELL_PRESS.answered(pressKey, r);
-    if (r.ok) {
-      listedNow.current = true;
-      setListed(r.data.listing_id);
-      setAskBack(null);
-      setPressKey(newPressKey());
-      flow.end();
-    } else if (r.problem.code === "price_far_from_market" && !confirmed) {
-      // AIAIC kept nothing and no key: the SAME press goes again once she says her price is right.
-      const range = r.problem.facts?.["range"];
-      setAskBack(range && typeof range === "object" && !Array.isArray(range) ? range : {});
-    } else {
-      setRefusal(r.problem);
-      if (answerLanded(r)) setPressKey(newPressKey());
-      // no answer came: the same press goes again, with its same key (C.10): the button's "Try again", or her yes
-      // again while AIAIC's question about her price is still on the screen
-      else setRetry(!confirmed);
-      // a refusal that names a field opens that field's step again, with AIAIC's words in it (C.3)
-      const step = stepOfRefusal(r.problem);
-      if (step) void flow.change(step);
+    let listedNowOk = false;
+    try {
+      setRefusal(null);
+      setRetry(false);
+      SELL_PRESS.sent(pressKey);
+      const r = await press(() =>
+        sellFn({
+          data: {
+            key: pressKey,
+            state: estate,
+            district,
+            crop,
+            quantity_q: Math.round(qty * 100) / 100,
+            ask_price_per_q: Math.round(price * 100) / 100,
+            grade: grade === "none" ? null : grade,
+            ...(confirmed ? { price_confirmed: true } : {}),
+            ...(taluka ? { taluka } : {}),
+          },
+        }),
+      );
+      SELL_PRESS.answered(pressKey, r);
+      if (r.ok) {
+        listedNowOk = true;
+        listedNow.current = true;
+        setListed(r.data.listing_id);
+        setAskBack(null);
+        setPressKey(newPressKey());
+        flow.end();
+      } else if (r.problem.code === "price_far_from_market" && !confirmed) {
+        // AIAIC kept nothing and no key: the SAME press goes again once she says her price is right.
+        const range = r.problem.facts?.["range"];
+        setAskBack(range && typeof range === "object" && !Array.isArray(range) ? range : {});
+      } else {
+        setRefusal(r.problem);
+        if (answerLanded(r)) setPressKey(newPressKey());
+        // no answer came: the same press goes again, with its same key (C.10): the button's "Try again", or her yes
+        // again while AIAIC's question about her price is still on the screen
+        else setRetry(!confirmed);
+        // a refusal that names a field opens that field's step again, with AIAIC's words in it (C.3)
+        const step = stepOfRefusal(r.problem);
+        if (step) void flow.change(step);
+      }
+    } finally {
+      setSending(false);
+      onItsWay.current = false;
     }
-    setSending(false);
-    onItsWay.current = false;
-    if (r.ok) await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
+    if (listedNowOk) await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
   };
 
   // HER PRESS IS ANSWERED (C.3): the answer is said where she pressed, with the focus on it; no other card opens

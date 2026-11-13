@@ -1477,6 +1477,37 @@ function suite(app: App, window: Window & typeof globalThis) {
       }
     });
   });
+  // R2-4's VAP404-4 (VERIFY's VP4): her press is given back on every way out of it, a throw included. The answer is
+  // DERIVED and labelled: `{ ok: false }` with no problem, which her server never sends (its every failure carries a
+  // problem), so her page's reading of it throws after the press was taken.
+  test("KA5D3 C.8 on her sale: an answer with no problem ({ ok: false }, which her server never sends) throws inside her press, and the press is still given back: the button neither says Sending... nor is marked, and her next press sends her sale again", async () => {
+    await inStart(async () => {
+      const p = await toCheck(40);
+      const holder = answers as unknown as Record<string, unknown>;
+      const real = holder["sellProduce"];
+      try {
+        holder["sellProduce"] = (sent: Record<string, unknown>) => {
+          sales.push(sent);
+          return { ok: false };
+        };
+        sales.length = 0;
+        await tap(press(p), "her sale's button");
+        assert.equal(sales.length, 1, "her press: one sale sent");
+        const button = press(p) as HTMLButtonElement;
+        assert.notEqual(
+          (button.textContent ?? "").trim(),
+          words("mr", "aiaic.kit.sending"),
+          "her press given back: not stuck saying Sending...",
+        );
+        assert.notEqual(button.getAttribute("aria-disabled"), "true", "and not marked busy");
+        await tap(button, "her press again");
+        assert.equal(sales.length, 2, "her next press sends her sale again");
+      } finally {
+        holder["sellProduce"] = real;
+        await p.unmount();
+      }
+    });
+  });
 
   // ======================================================================================== KA6
   test("KA6 K6 on her sale: a crisis typed in her price box or her quantity box gets the helplines first, on Continue and on a chip, and her sale does not move", async () => {
