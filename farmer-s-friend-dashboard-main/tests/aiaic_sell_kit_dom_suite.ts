@@ -1185,6 +1185,110 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
   });
 
+  // THE BOX SHE EMPTIES OR RETYPES (R2-4's VFX2-1, from the skeptic's VQ1, VQ2 and VQ6): the fix's two claims that KA12L1-4
+  // never held. The hint is said "never once she typed", even when she types AIAIC's middle back herself; and the total
+  // and her marker sit "at what the box holds": an empty box holds no price, so neither is drawn, whatever AIAIC holds.
+  /** One keystroke in her box (a character erased, or one typed): one input event that leaves the box holding `text`, as
+   *  her keyboard sends it. */
+  const keystroke = async (box: HTMLInputElement, text: string) => {
+    await land(box);
+    await act(async () => {
+      valueSetter.call(box, text);
+      box.dispatchEvent(new window.Event("input", { bubbles: true }));
+    });
+  };
+
+  test("KA12L5 she types in her price box while the read has failed, erases what she typed, then Try again answers (the skeptic's VQ1): her box stays empty, never refilled from AIAIC's middle, with no hint, the total '—' and no marker of hers, AIAIC's range drawn with its middle, in Marathi and English; Use this price says the box is empty and the step does not move", async () => {
+    await inStart(async () => {
+      priceAnswer = () => unavailable();
+      const p = await toPrice(40);
+      try {
+        await waitFor(() => p.q('[data-testid="sell-price-failed"]'), "the failed card");
+        const box = p.box("sell-price-typed") as HTMLInputElement;
+        await type(box, "4");
+        await keystroke(box, "");
+        agreesWithBox(p, "mr", 40, "", false, "typed and erased, the read failed, mr");
+        priceAnswer = null; // AIAIC's recording answers the next read
+        await tap(tryAgainOn(p, "mr"), "Try again");
+        await waitFor(
+          () => p.q('[data-testid="sell-price-range"]'),
+          "AIAIC's range, after Try again",
+        );
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          const what = `typed, erased, then answered on Try again, ${lang}`;
+          noEl(p.q('[data-testid="sell-price-failed"]'), `${what}: the failed card is gone`);
+          ok(
+            p.q('[data-testid="sell-price-middle"]'),
+            `${what}: AIAIC's middle stays on its range`,
+          );
+          agreesWithBox(p, lang, 40, "", false, what);
+        }
+        await p.setLang("mr");
+        await tap(p.q('[data-testid="sell-price-use"]'), "Use this price, the box erased");
+        ok(p.q('[data-testid="sell-price-error"]'), "the erased box: said beside it");
+        assert.equal(p.stateOf("price"), "open", "the step does not move");
+      } finally {
+        priceAnswer = null;
+        await p.unmount();
+      }
+    });
+  });
+
+  test("KA12L6 the hint goes at her first keystroke, and AIAIC's middle typed back by her is her own figure (the skeptic's VQ2): filled from the middle, the hint said; one character erased, no hint, the total and her marker at the box; the character typed back, still no hint, the total and her marker at her figure; in Marathi and English", async () => {
+    await inStart(async () => {
+      const p = await toPrice(40);
+      try {
+        await waitFor(() => p.q('[data-testid="sell-price-range"]'), "AIAIC's range");
+        agreesWithBox(p, "mr", 40, SUGGESTED, true, "filled from the middle, before she types");
+        const short = SUGGESTED.slice(0, -1);
+        await keystroke(p.box("sell-price-typed") as HTMLInputElement, short);
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          agreesWithBox(p, lang, 40, short, false, `one character erased, ${lang}`);
+        }
+        await p.setLang("mr");
+        await keystroke(p.box("sell-price-typed") as HTMLInputElement, SUGGESTED);
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          agreesWithBox(
+            p,
+            lang,
+            40,
+            SUGGESTED,
+            false,
+            `AIAIC's middle typed back by her: her own figure, ${lang}`,
+          );
+        }
+      } finally {
+        await p.unmount();
+      }
+    });
+  });
+
+  test("KA12L7 her box emptied under AIAIC's held price (the skeptic's VQ6): no total, no marker of hers and no hint, AIAIC's range still drawn, in Marathi and English; Use this price says the box is empty and the step does not move", async () => {
+    await inStart(async () => {
+      const p = await toPrice(40);
+      try {
+        await waitFor(() => p.q('[data-testid="sell-price-range"]'), "AIAIC's range");
+        agreesWithBox(p, "mr", 40, SUGGESTED, true, "filled from the middle");
+        await keystroke(p.box("sell-price-typed") as HTMLInputElement, "");
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          const what = `emptied under a held price, ${lang}`;
+          ok(p.q('[data-testid="sell-price-range"]'), `${what}: AIAIC's range still drawn`);
+          agreesWithBox(p, lang, 40, "", false, what);
+        }
+        await p.setLang("mr");
+        await tap(p.q('[data-testid="sell-price-use"]'), "Use this price, the box empty");
+        ok(p.q('[data-testid="sell-price-error"]'), "the empty box: said beside it");
+        assert.equal(p.stateOf("price"), "open", "the step does not move");
+      } finally {
+        await p.unmount();
+      }
+    });
+  });
+
   // ======================================================================================== KA1
   test("KA1 K1 on her sale: opening it moves no focus; a choice opens the next step and takes the focus to it (its heading, or its box); typing to any length moves nothing; leaving a box checks nothing", async () => {
     await inStart(async () => {
