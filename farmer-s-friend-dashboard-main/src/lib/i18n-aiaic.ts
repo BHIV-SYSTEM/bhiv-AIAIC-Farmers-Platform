@@ -716,6 +716,11 @@ export const AIAIC_EN: Dict = {
   "aiaic.pay.title": "Payment",
   "aiaic.pay.no_link":
     "No payment link yet: agree the payment with the buyer before you hand over.",
+  // WF-05 (the walk of 13 Nov 2026): no link yet, as AIAIC says it now: being made, or AIAIC's to make
+  "aiaic.pay.link_being_made":
+    "AIAIC is making the buyer's payment link now. This page shows it in a moment.",
+  "aiaic.pay.link_by_aiaic":
+    "No payment link yet: AIAIC makes it for the buyer, and this page shows it once it is made.",
   "aiaic.pay.state.not_connected": "No payment yet",
   "aiaic.pay.state.link_created": "Link sent to the buyer: not paid yet",
   "aiaic.pay.state.partially_paid": "The buyer paid part",
@@ -1915,6 +1920,10 @@ export const AIAIC_MR: Dict = {
   "aiaic.pay.title": "पेमेंट",
   "aiaic.pay.no_link":
     "अजून पेमेंट लिंक नाही: माल देण्यापूर्वी खरेदीदारासोबत पैसे कसे द्यायचे ते ठरवा.",
+  "aiaic.pay.link_being_made":
+    "AIAIC आत्ता खरेदीदारासाठी पेमेंट लिंक तयार करत आहे. हे पान ती थोड्याच वेळात दाखवेल.",
+  "aiaic.pay.link_by_aiaic":
+    "अजून पेमेंट लिंक नाही: AIAIC ती खरेदीदारासाठी तयार करते, आणि ती तयार झाली की हे पान ती दाखवेल.",
   "aiaic.pay.state.not_connected": "अजून पेमेंट नाही",
   "aiaic.pay.state.link_created": "खरेदीदाराला लिंक पाठवली: अजून भरलेले नाही",
   "aiaic.pay.state.partially_paid": "खरेदीदाराने काही भाग भरला",
@@ -3106,6 +3115,10 @@ export const AIAIC_HI: Dict = {
 
   "aiaic.pay.title": "भुगतान",
   "aiaic.pay.no_link": "अभी भुगतान लिंक नहीं: माल सौंपने से पहले खरीदार के साथ भुगतान तय करें।",
+  "aiaic.pay.link_being_made":
+    "AIAIC अभी खरीदार के लिए भुगतान लिंक बना रहा है। यह पेज उसे थोड़ी देर में दिखाएगा।",
+  "aiaic.pay.link_by_aiaic":
+    "अभी भुगतान लिंक नहीं: AIAIC इसे खरीदार के लिए बनाता है, और बनते ही यह पेज इसे दिखाएगा।",
   "aiaic.pay.state.not_connected": "अभी भुगतान नहीं",
   "aiaic.pay.state.link_created": "खरीदार को लिंक भेजा: अभी भुगतान नहीं हुआ",
   "aiaic.pay.state.partially_paid": "खरीदार ने कुछ भाग भरा",

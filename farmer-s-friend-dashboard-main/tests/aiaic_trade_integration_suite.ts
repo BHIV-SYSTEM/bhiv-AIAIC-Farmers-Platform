@@ -32,6 +32,7 @@ import ts from "typescript";
 
 import { NotRefreshedLine, ProblemCard } from "../src/components/farm/aiaic/AiaicBits";
 import { EachSale } from "../src/components/farm/aiaic/AiaicPayments";
+import { PaymentCard } from "../src/components/farm/aiaic/AiaicOrderDetail";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
 import { DestinationForm, FromAiaicCard } from "../src/components/farm/aiaic/FromAiaicCard";
 import { GroupOfferSteps, GroupSaleSteps } from "../src/components/farm/aiaic/GroupPages";
@@ -87,6 +88,14 @@ import {
   sendingSaid,
   answerLanded,
   mineReadEvery,
+  // WF-05 (R2-4 lane PA): her accept read again soon, and the no-link line from AIAIC's facts
+  AFTER_ACCEPT_EVERY_MS,
+  AFTER_ACCEPT_MS,
+  acceptedRecently,
+  linkMayCome,
+  noLinkByAiaic,
+  noteAccepted,
+  type AiaicMoney,
   mineShown,
   pressKeyHolder,
   bankBoxWords,
@@ -347,8 +356,13 @@ test("A3 a link that does not carry her share is said to pay AIAIC's account, ne
   assert.equal(paymentLine(plain).notOnward, true);
   const noLink = mineOf("farmer_app_mine_after_pickup").orders[0] as AiaicOrder;
   assert.equal(noLink.payment.link_made, false);
+  // (R2-4 lane PA, WF-05: CHANGED ON PURPOSE. A real order, picked up, on a server that takes no word of a payment
+  // outside AIAIC: AIAIC says `direct_payment_not_approved`, neither that it can still make the link nor that none can be
+  // made, so its payment's own state is said ("No payment yet"), never "agree the payment with the buyer before you hand
+  // over", which tells her to arrange it by hand and was untrue after a pickup besides. A75 holds every position.)
+  assert.equal(noLink.money?.why_not_report?.code, "direct_payment_not_approved");
   assert.deepEqual(paymentLine(noLink), {
-    key: "aiaic.pay.no_link",
+    key: "aiaic.pay.state.not_connected",
     state: noLink.payment.state,
     notOnward: false,
   });
@@ -4105,6 +4119,228 @@ test('A74 A5 "AIAIC holds your money" on her money card (AIAIC\'s recorded answe
     (page.match(/calledOff=\{order\.order_state === "cancelled"\}/g) ?? []).length,
     2,
     "both money cards of the order page are told of a call-off",
+  );
+});
+
+// ------------------------------------- A, R2-4 lane PA (13 Nov 2026): the walk's WF-05, her page right after she accepts
+
+/** One order of a recording of GET /farmer/trade, read through this server, found by `which`; the test fails without it. */
+const orderIn = (name: string, which: (o: AiaicOrder) => boolean): AiaicOrder => {
+  const o = mineOf(name).orders.find(which);
+  assert.ok(o, `${name}: the recording holds the order`);
+  return o;
+};
+const noLinkYet = (o: AiaicOrder) => !o.payment.link_made && o.order_state !== "cancelled";
+/** The order of a read replaced by `o`, the rest of the read as recorded. */
+const readWith = (name: string, o: AiaicOrder) => {
+  const read = readOf(name);
+  return { ...read, data: { ...read.data, mine: { ...read.data.mine, orders: [o] } } } as never;
+};
+
+test("A75 WF-05 no payment link yet, said as AIAIC says it now (the walk of 13 Nov 2026): right after her accept AIAIC makes the buyer's link by itself, so her sale page's payment card and her Payments page say AIAIC is making it, or makes it, never \"agree the payment with the buyer before you hand over\"; that is said only where AIAIC says no link can be made; AIAIC's recorded answers, the link being made DERIVED", () => {
+  // THE WALK'S MOMENT, RECORDED (AIAIC's record_buyer_portal_answers.py): an accepted practice order on a server that
+  // collects, then pays her, its buyer's link not made yet, AIAIC saying it can still make it (`link_still_possible`)
+  const collect = orderIn("buyer_farmer_mine_more_time", noLinkYet);
+  assert.equal(
+    collect.money?.why_not_report?.code,
+    "link_still_possible",
+    "AIAIC: it can still make the link",
+  );
+  assert.equal(paymentLine(collect).key, "aiaic.pay.link_by_aiaic");
+  // the same on a server whose links carry her share (Razorpay Route): AIAIC's recorded answer
+  const route = orderIn("payout_mine_offered", noLinkYet);
+  assert.equal(route.money?.why_not_report?.code, "link_still_possible");
+  assert.equal(paymentLine(route).key, "aiaic.pay.link_by_aiaic");
+  // DERIVED, LABELLED: the seconds while AIAIC asks its provider for the link (no recording holds them: AIAIC's recorders
+  // read once a link is made). AIAIC's own code and sentence for a link live or being made, as its recordings hold them
+  // on a made link (`payment_route_is_razorpay`), on the walk's order with no link made yet
+  const said = mineOf("buyer_farmer_mine_more_time").orders.find(
+    (o) => o.payment.link_made && o.money?.why_not_report?.code === "payment_route_is_razorpay",
+  )?.money?.why_not_report;
+  assert.ok(said, "a recorded order holds AIAIC's code and sentence for it");
+  assert.match(said.why, /being made/, "AIAIC's sentence: a link live or being made");
+  const beingMade = {
+    ...collect,
+    money: { ...(collect.money as AiaicMoney), why_not_report: said },
+  } as AiaicOrder;
+  assert.equal(paymentLine(beingMade).key, "aiaic.pay.link_being_made");
+  // AIAIC SAYS NO LINK CAN BE MADE, the payment being between her and the buyer: only there is she told to agree it
+  const direct = orderIn("payout_mine_dlite_direct", (o) => o.money?.route === "direct");
+  const notYet = orderIn(
+    "connected_farmer_mine_journey",
+    (o) => o.money?.why_not_report?.code === "not_handed_over_yet",
+  );
+  for (const o of [direct, notYet]) {
+    assert.equal(noLinkByAiaic(o), true, o.order_id);
+    assert.equal(paymentLine(o).key, "aiaic.pay.no_link", o.order_id);
+  }
+  // AIAIC SAYS NEITHER: a real order on a server that takes no word of a payment outside AIAIC; a sale called off; a code
+  // this app does not know (DERIVED); no money block (an AIAIC that sends none, DERIVED): the payment's own state ("No
+  // payment yet"), never "agree it by hand", never a link promised
+  const real = orderIn(
+    "farmer_app_mine_refund_owed",
+    (o) => noLinkYet(o) && o.money?.why_not_report?.code === "direct_payment_not_approved",
+  );
+  const called = orderIn("farmer_app_mine_offer_expired", (o) => o.order_state === "cancelled");
+  const unknown = {
+    ...collect,
+    money: {
+      ...(collect.money as AiaicMoney),
+      why_not_report: { code: "a_code_not_held", why: "" },
+    },
+  } as AiaicOrder;
+  const noMoney = { ...collect, money: undefined } as AiaicOrder;
+  for (const [o, what] of [
+    [real, "a real order, direct_payment_not_approved"],
+    [called, "a sale called off"],
+    [unknown, "a code this app does not know"],
+    [noMoney, "no money block"],
+  ] as const) {
+    assert.equal(o.payment.state, "not_connected", what);
+    assert.equal(paymentLine(o).key, "aiaic.pay.state.not_connected", what);
+  }
+  // a link made: its own state, as before
+  const made = orderIn("practice_mine_link_made", (o) => o.payment.link_made);
+  assert.equal(paymentLine(made).key, `aiaic.pay.state.${made.payment.state}`);
+  // DRAWN in each language, as her sale page's payment card and her Payments page's sale card draw it
+  const page = (o: AiaicOrder, lang: (typeof LANGS)[number]) => [
+    inApp(createElement(PaymentCard, { order: o }), lang),
+    inApp(
+      createElement(EachSale, {
+        data: {
+          mine: { ...mineOf("buyer_farmer_mine_more_time"), orders: [o] },
+          cropNames: {},
+          districtNames: {},
+        },
+      }),
+      lang,
+    ),
+  ];
+  for (const lang of LANGS) {
+    const t = wordsIn(lang);
+    const byHand = escHtml(t("aiaic.pay.no_link"));
+    for (const [o, key] of [
+      [collect, "aiaic.pay.link_by_aiaic"],
+      [route, "aiaic.pay.link_by_aiaic"],
+      [beingMade, "aiaic.pay.link_being_made"],
+      [real, "aiaic.pay.state.not_connected"],
+    ] as const) {
+      for (const html of page(o, lang)) {
+        assert.ok(html.includes(escHtml(t(key))), `${lang} ${o.order_id}: ${key} said`);
+        assert.ok(!html.includes(byHand), `${lang} ${o.order_id}: never "agree it by hand"`);
+      }
+    }
+    for (const html of page(direct, lang))
+      assert.ok(html.includes(byHand), `${lang}: said where AIAIC says no link can be made`);
+    if (lang !== "en")
+      for (const key of ["aiaic.pay.link_being_made", "aiaic.pay.link_by_aiaic"])
+        assert.deepEqual(latinIn(t(key)), [], `${lang} ${key}: no English word`);
+  }
+  // the English says what is true, in substance: AIAIC makes the link, and nothing is hers to arrange by hand
+  for (const key of ["aiaic.pay.link_being_made", "aiaic.pay.link_by_aiaic"]) {
+    const en = DICTS.en[key] ?? "";
+    assert.ok(en.includes("AIAIC") && en.includes("link"), `${key}: "${en}"`);
+    assert.doesNotMatch(en, /agree|hand over|arrange/i, key);
+  }
+});
+
+test("A76 WF-05 her accept read again soon: AIAIC makes the buyer's link once its answer is sent, so for a minute after her own accept her order page reads her sale every 3 s while that link may yet come, then as before; never for a sale whose link is made, one called off, a group sale's, or one AIAIC says no link can come to", () => {
+  // THE WALK'S MOMENT, RECORDED (as A75): her accepted order, no link yet, AIAIC able to make it
+  const name = "buyer_farmer_mine_more_time";
+  const read = readOf(name);
+  const order = orderIn(name, noLinkYet);
+  assert.equal(linkMayCome(order), true, "the recording: a link that may yet come");
+  assert.equal(AFTER_ACCEPT_EVERY_MS, 3_000);
+  assert.equal(AFTER_ACCEPT_MS, 60_000);
+  const now = 1_800_000_000_000;
+  const justNow = new Map([[order.order_id, now - 1_000]]);
+  assert.equal(
+    mineReadEvery("money", read, justNow, now),
+    3_000,
+    "the order page, right after her accept",
+  );
+  assert.equal(
+    mineReadEvery("money", read, new Map([[order.order_id, now - AFTER_ACCEPT_MS]]), now),
+    3_000,
+    "still within the minute",
+  );
+  for (const [accepted, what] of [
+    [new Map([[order.order_id, now - AFTER_ACCEPT_MS - 1]]), "a minute on"],
+    [new Map(), "no accept of hers here"],
+    [new Map([["ord_another_one", now - 1_000]]), "another order's accept"],
+    [new Map([[order.order_id, now + 1_000]]), "a time after now (the phone's clock set back)"],
+  ] as const)
+    assert.equal(mineReadEvery("money", read, accepted, now), 15_000, what);
+  assert.equal(
+    mineReadEvery("live", read, justNow, now),
+    15_000,
+    "a page of lots, offers or money: 15 s",
+  );
+  assert.equal(
+    mineReadEvery("opened", read, justNow, now),
+    false,
+    "the sell form: never by itself",
+  );
+  assert.equal(mineReadEvery("money", undefined, justNow, now), 15_000, "nothing read yet");
+  // the link made (DERIVED: the same order as AIAIC's next read says it, its link's recorded state), the sale called off,
+  // AIAIC saying no link can be made (its code, DERIVED on this order), a group sale's order (D-239): as before
+  for (const [o, what] of [
+    [
+      { ...order, payment: { ...order.payment, link_made: true, state: "link_created" } },
+      "its link made",
+    ],
+    [{ ...order, order_state: "cancelled" }, "called off"],
+    [
+      {
+        ...order,
+        money: {
+          ...(order.money as AiaicMoney),
+          why_not_report: { code: "not_handed_over_yet", why: "" },
+        },
+      },
+      "AIAIC: no link can be made",
+    ],
+    [{ ...order, pool_id: "pool_a_group_sale" }, "a group sale's order"],
+  ] as const) {
+    assert.equal(linkMayCome(o as AiaicOrder), false, what);
+    assert.equal(
+      mineReadEvery("money", readWith(name, o as AiaicOrder), justNow, now),
+      15_000,
+      what,
+    );
+  }
+  // while AIAIC's send of her money moves: every 5 s, as before (A30)
+  assert.equal(mineReadEvery("money", readOf("collect_mine_processing"), justNow, now), 5_000);
+  // her accept is kept with this phone's time, and forgotten after the minute or when the clock is set back
+  try {
+    noteAccepted("ord_a76_accept", now);
+    assert.equal(acceptedRecently(now + 1_000).get("ord_a76_accept"), now, "kept");
+    assert.equal(
+      acceptedRecently(now + AFTER_ACCEPT_MS + 1).has("ord_a76_accept"),
+      false,
+      "a minute on",
+    );
+    noteAccepted("ord_a76_accept", now);
+    assert.equal(acceptedRecently(now - 1).has("ord_a76_accept"), false, "the clock set back");
+  } finally {
+    acceptedRecently(Number.MAX_SAFE_INTEGER);
+  }
+  // HER PRESS NOTES IT, BEFORE THE READ IT MAKES AT ONCE (the offer page's `answer`): her accept answered with its order
+  const src = fs.readFileSync(
+    path.join(APP, "src", "components", "farm", "aiaic", "AiaicOrderDetail.tsx"),
+    "utf-8",
+  );
+  const press = src.slice(
+    src.indexOf("const answer = async"),
+    src.indexOf("// A GROUP SALE'S INVITATION"),
+  );
+  const noted = press.indexOf(
+    'if (r.ok && which === "accept" && r.data.order_id) noteAccepted(r.data.order_id);',
+  );
+  assert.ok(noted > 0, "her accept answered with its order is noted");
+  assert.ok(
+    noted < press.indexOf('invalidateQueries({ queryKey: ["aiaic-mine"] })'),
+    "before the read her press makes at once",
   );
 });
 

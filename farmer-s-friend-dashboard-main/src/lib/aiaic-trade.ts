@@ -650,12 +650,48 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
  * never hers, ONLY where AIAIC says so for the order (`payment.not_onward`, the server's own sentence), and only once a
  * link was made. Never worked out here: a collect order's money reaches her through AIAIC's own send (the re-check of 28
  * Oct 2026, MONEY-06), which no rule of this app could tell from the link.
+ *
+ * NO LINK YET, SAID AS AIAIC SAYS IT NOW (the walk of 13 Nov 2026, WF-05: right after she accepted, her page told her to
+ * agree the payment with the buyer before she hands over, while AIAIC was making the buyer's link by itself). AIAIC says
+ * per order whether a link can still come, in `money.why_not_report` (its `payout_store.her_report_refusal`):
+ * `payment_route_is_razorpay` with no link made is a link BEING MADE now (a live link is a made one); `link_still_possible`,
+ * AIAIC can still make it, by itself or by its team. Only where AIAIC says no link can be made, the payment being between
+ * her and the buyer (`noLinkByAiaic`), is she told to agree it with the buyer before she hands over. Whatever else AIAIC
+ * says (a real order on a server that takes no word of a payment outside AIAIC, `direct_payment_not_approved`; a code this
+ * app does not know; no money block; a sale called off) is said as the payment's own state ("No payment yet"): never a
+ * promise of a link, never "agree it by hand".
  */
 export function paymentLine(order: AiaicOrder): { key: string; state: string; notOnward: boolean } {
   const notOnward = order.payment.link_made && Boolean(order.payment.not_onward);
-  if (!order.payment.link_made)
-    return { key: "aiaic.pay.no_link", state: order.payment.state, notOnward };
-  return { key: `aiaic.pay.state.${order.payment.state}`, state: order.payment.state, notOnward };
+  if (order.payment.link_made)
+    return { key: `aiaic.pay.state.${order.payment.state}`, state: order.payment.state, notOnward };
+  return { key: noLinkKey(order), state: order.payment.state, notOnward };
+}
+
+/**
+ * AIAIC SAYS NO LINK CAN BE MADE FOR THIS ORDER, its payment being between her and the buyer (WF-05): AIAIC's
+ * `not_handed_over_yet` (no link possible, her produce not handed over yet), her own word of a payment outside AIAIC taken
+ * (`can_report`: only where no link can be made), or the payment recorded as made outside AIAIC (`route: direct`).
+ */
+export function noLinkByAiaic(order: AiaicOrder): boolean {
+  const m = order.money;
+  return Boolean(
+    m &&
+    (m.route === "direct" ||
+      m.can_report === true ||
+      m.why_not_report?.code === "not_handed_over_yet"),
+  );
+}
+
+/** Her payment line while no link is made (`paymentLine`), from AIAIC's own facts of the order. */
+function noLinkKey(order: AiaicOrder): string {
+  if (order.order_state !== "cancelled") {
+    const code = order.money?.why_not_report?.code ?? null;
+    if (code === "payment_route_is_razorpay") return "aiaic.pay.link_being_made";
+    if (code === "link_still_possible") return "aiaic.pay.link_by_aiaic";
+    if (noLinkByAiaic(order)) return "aiaic.pay.no_link";
+  }
+  return `aiaic.pay.state.${order.payment.state}`;
 }
 
 // --------------------------------------------------------------------------------------- her money, in words
@@ -1680,13 +1716,68 @@ export function moneyMoving(got: AiaicResult<MineForScreen> | undefined): boolea
  */
 export type MinePace = "money" | "live" | "opened";
 
-/** Milliseconds until the page reads the farmer's sale again by itself (`MinePace`), or `false` for never. */
+/**
+ * HER OWN ACCEPT, READ AGAIN SOON (the walk of 13 Nov 2026, WF-05): AIAIC sends her accept's answer FIRST and makes the
+ * buyer's payment link AFTER it (its `farmer_trade_routes.accept` runs the link once the answer is sent), so the read her
+ * press makes at once can come before the link, and the order page read her sale again only 15 s later. For
+ * `AFTER_ACCEPT_MS` after her own accept in this app (this phone's own clock, never compared with AIAIC's), the order page
+ * reads her sale every `AFTER_ACCEPT_EVERY_MS` while that order waits for a link AIAIC may yet make (`linkMayCome`).
+ */
+export const AFTER_ACCEPT_MS = 60_000;
+export const AFTER_ACCEPT_EVERY_MS = 3_000;
+/** Her accepts in this app: order id -> this phone's time of AIAIC's answer (only ids and times; nothing of hers). */
+const acceptedHere = new Map<string, number>();
+
+/** Her accept of an offer, answered by AIAIC with its order (the offer page's press): kept with this phone's time. */
+export function noteAccepted(orderId: string, at: number = Date.now()): void {
+  acceptedHere.set(orderId, at);
+}
+
+/** The orders she accepted in this app within `AFTER_ACCEPT_MS` of `now`; older ones (or a clock set back) forgotten. */
+export function acceptedRecently(now: number = Date.now()): ReadonlyMap<string, number> {
+  for (const [id, at] of acceptedHere)
+    if (at > now || now - at > AFTER_ACCEPT_MS) acceptedHere.delete(id);
+  return new Map(acceptedHere);
+}
+
+/**
+ * Whether AIAIC may yet make this order's link (WF-05): no link made, her sale not called off, no group sale's order (its
+ * link waits for the group's answers, the owner's D-239), and AIAIC has not said none can be made (`noLinkByAiaic`).
+ */
+export function linkMayCome(order: AiaicOrder): boolean {
+  if (order.payment.link_made || order.order_state === "cancelled") return false;
+  if (order.pool_id || order.pool) return false;
+  return !noLinkByAiaic(order);
+}
+
+/** An order she accepted here within `AFTER_ACCEPT_MS` of `now` that, in AIAIC's answer, still waits for its link. */
+export function linkAwaited(
+  got: AiaicResult<MineForScreen> | undefined,
+  accepted: ReadonlyMap<string, number>,
+  now: number,
+): boolean {
+  if (!got || !got.ok || accepted.size === 0) return false;
+  return got.data.mine.orders.some((o) => {
+    const at = accepted.get(o.order_id);
+    return at !== undefined && at <= now && now - at <= AFTER_ACCEPT_MS && linkMayCome(o);
+  });
+}
+
+/**
+ * Milliseconds until the page reads the farmer's sale again by itself (`MinePace`), or `false` for never: on the order
+ * page every 5 s while AIAIC's send of her money moves, every `AFTER_ACCEPT_EVERY_MS` for a minute after her own accept
+ * while its link may yet come (`linkAwaited`), else every 15 s; `accepted` and `now` are the phone's (given in tests).
+ */
 export function mineReadEvery(
   pace: MinePace,
   got: AiaicResult<MineForScreen> | undefined,
+  accepted: ReadonlyMap<string, number> = acceptedRecently(),
+  now: number = Date.now(),
 ): number | false {
   if (pace === "opened") return false;
-  return pace === "money" && moneyMoving(got) ? 5_000 : 15_000;
+  if (pace !== "money") return 15_000;
+  if (moneyMoving(got)) return 5_000;
+  return linkAwaited(got, accepted, now) ? AFTER_ACCEPT_EVERY_MS : 15_000;
 }
 
 /** What a sale page shows from its read of the farmer's records (`mineShown`). */
