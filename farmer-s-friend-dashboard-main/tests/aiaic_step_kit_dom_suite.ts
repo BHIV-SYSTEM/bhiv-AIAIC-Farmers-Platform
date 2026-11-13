@@ -1081,6 +1081,80 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
   });
 
+  // A VALUE GIVEN LATER IS READ LIKE TYPING (R2-4's VFX2-5, from the skeptic's VK1): `given` marks only what a box opened
+  // with (an answer given before, not read again); words its page gives it later, while the person has not typed in it,
+  // are read for distress on Continue as typing is, and a crisis among them holds the step. Today only her price box is
+  // given a value later, and only AIAIC's digits: this holds the kit's rule for the next page that gives words. One box
+  // drawn alone from the kit's BoxStep; its crisis reader a stand-in that keeps what it is asked and says a crisis for
+  // the copied crisis phrases.
+  test("KA2L2 words given later to a box the person has not typed in are read for distress on Continue, like typing: the words it opened with (given) are not read again; a crisis given later holds the step, and nothing is given on", async () => {
+    await inStart(async () => {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      const root = app.createRoot(container);
+      const givenReads: string[] = [];
+      const givenDone: Record<string, string>[] = [];
+      const draw = (a: string) =>
+        h(app.I18nProvider, {
+          initialLang: "en",
+          children: h(kit.BoxStep, {
+            testid: "given",
+            read: async (w: string) => {
+              givenReads.push(w);
+              return PHRASES.some((p) => w.toLowerCase().includes(p.toLowerCase()));
+            },
+            onDone: (v: Readonly<Record<string, string>>) => {
+              givenDone.push({ ...v });
+            },
+            boxes: [
+              {
+                name: "a",
+                label: "Note",
+                value: a,
+                given: true,
+                inputMode: "text" as const,
+                testid: "given-a",
+              },
+            ],
+          }),
+        });
+      await act(async () => {
+        root.render(draw("words it opened with"));
+      });
+      try {
+        const box = () => container.querySelector('[data-testid="given-a"]') as HTMLInputElement;
+        const go = () => tap(container.querySelector('[data-testid="given-continue"]'), "Continue");
+        await act(async () => {
+          root.render(draw("words given later"));
+        });
+        await settle();
+        assert.equal(
+          box().value,
+          "words given later",
+          "the untouched box takes the words given later",
+        );
+        await go();
+        assert.deepEqual(
+          givenReads,
+          ["words given later"],
+          "Continue reads the words given later, never those the box opened with",
+        );
+        assert.deepEqual(givenDone, [{ a: "words given later" }], "then gives what the box holds");
+        await act(async () => {
+          root.render(draw(CRISIS_EN));
+        });
+        await settle();
+        assert.equal(box().value, CRISIS_EN, "still untouched, the box holds what is given now");
+        await go();
+        assert.equal(givenReads.at(-1), CRISIS_EN, "the crisis given later is read on Continue");
+        assert.equal(givenDone.length, 1, "a crisis holds the step: nothing is given on");
+      } finally {
+        await act(async () => root.unmount());
+        container.remove();
+      }
+    });
+  });
+
   // ======================================================================================== KA3
   test("KA3 K3: three answers, Change on the first, then on: the later ones are kept; a change that no longer fits marks the later step check again and opens it; the address holds the step's name and never a quantity or typed words; the back button goes back one step", async () => {
     await inStart(async () => {
