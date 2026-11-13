@@ -342,8 +342,14 @@ function SellForm({
     void flow.finish();
   };
 
+  // ONE PRESS, ONE RECORD (C.8; R2-4's AP4-06): her sale on its way takes no second press, from her sale's button or from
+  // her yes to AIAIC's question about her price: a ref set before the first await, so a second tap in the same moment,
+  // before React draws "Sending...", sends nothing (as the sharing card's press does); it goes with `sending`
+  const onItsWay = useRef(false);
   const send = async (confirmed: boolean) => {
     if (!district || !crop || qty === null || price === null) return;
+    if (onItsWay.current) return;
+    onItsWay.current = true;
     setSending(true);
     setRefusal(null);
     setRetry(false);
@@ -385,6 +391,7 @@ function SellForm({
       if (step) void flow.change(step);
     }
     setSending(false);
+    onItsWay.current = false;
     if (r.ok) await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
   };
 
@@ -648,7 +655,7 @@ function SellForm({
                 crop: cropLabel,
                 price: rupees(price),
               })}
-              onPress={() => void send(false)}
+              onPress={() => send(false)}
               pending={sending}
               retry={retry}
               held={askBack ? t("aiaic.sell.far.held") : null}

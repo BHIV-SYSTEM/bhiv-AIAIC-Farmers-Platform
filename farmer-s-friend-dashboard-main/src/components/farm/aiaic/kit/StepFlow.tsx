@@ -760,9 +760,11 @@ export function BoxStep({
  * The review before money or a record that cannot be undone (C.8): each part with Change, then ONE button that names the
  * action and the amount (`action`). `held`: AIAIC holds the press shut, and this is why: the button stays visible and
  * reachable (`aria-disabled`, its reason read with it); a press says why again and sends nothing. While `pending` it says
- * "Sending..." and takes no second press (the caller keeps one key for the request until it lands). The answer is said in
- * `role="status"`, and nothing else opens. `retry`: the last press got no answer: the button says "Try again" with the
- * action, and the caller sends the same request with the same key (C.10).
+ * "Sending..." and takes no second press (the caller keeps one key for the request until it lands). An `onPress` that
+ * returns its request's promise is held by the step itself until that promise settles, so a second tap in the same moment
+ * as the first, before the caller's `pending` is drawn, sends nothing (R2-4's AP4-06, as the sharing card's press holds
+ * itself). The answer is said in `role="status"`, and nothing else opens. `retry`: the last press got no answer: the button
+ * says "Try again" with the action, and the caller sends the same request with the same key (C.10).
  */
 export function CheckStep({
   parts,
@@ -777,7 +779,8 @@ export function CheckStep({
 }: {
   parts: readonly { key: string; label: string; value: ReactNode; onChange?: () => void }[];
   action: string;
-  onPress: () => void;
+  /** The press; one that sends a request returns its promise, and the step takes no other press until it settles. */
+  onPress: () => void | Promise<unknown>;
   testid: string;
   held?: string | null;
   pending?: boolean;
@@ -788,13 +791,23 @@ export function CheckStep({
   const { t } = useI18n();
   const rid = useId();
   const [heldSaid, setHeldSaid] = useState(false);
+  // ONE PRESS, ONE RECORD (C.8): a press on its way, in a ref, so a second tap before React draws `pending` is turned away
+  const onItsWay = useRef(false);
   const press = () => {
     if (held) {
       setHeldSaid(true);
       return;
     }
     if (pending) return;
-    onPress();
+    if (onItsWay.current) return;
+    const sent = onPress();
+    if (sent instanceof Promise) {
+      onItsWay.current = true;
+      const landed = () => {
+        onItsWay.current = false;
+      };
+      void sent.then(landed, landed);
+    }
   };
   return (
     <div className="space-y-3" data-testid={testid} data-kit="check">

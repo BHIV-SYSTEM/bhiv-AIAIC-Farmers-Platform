@@ -294,6 +294,9 @@ function suite(app: App, window: Window & typeof globalThis) {
   /** AIAIC's answer to her price read when a case sets it (R2-4's AP4-04: a read that fails three ways, or one that holds
    *  no price); null, AIAIC's recordings as below. Each case sets it back to null in its `finally`. */
   let priceAnswer: ((sent: Record<string, unknown>) => unknown) | null = null;
+  /** Her sale's answer held until a case lets it land (R2-4's AP4-06: a press on its way); null, it lands at once. The
+   *  sale is kept in `sales` when it is sent, before this. */
+  let saleHeld: Promise<void> | null = null;
   const answers = {
     getMyTrade: () => ({
       ok: true,
@@ -374,7 +377,9 @@ function suite(app: App, window: Window & typeof globalThis) {
             "validator",
           )) as Record<string, unknown>;
           asked.push({ read: name, sent });
-          return { ...ctx, result: answers[name as keyof typeof answers](sent) };
+          const result = answers[name as keyof typeof answers](sent);
+          if (name === "sellProduce" && saleHeld) await saleHeld;
+          return { ...ctx, result };
         }
         seen.unanswered.push(String(name ?? "a server function this suite does not know"));
         throw new Error("a server function this suite does not answer");
@@ -1167,6 +1172,76 @@ function suite(app: App, window: Window & typeof globalThis) {
         assert.equal(p.search()["step"], undefined, "the flow's step goes out of the address");
       } finally {
         await p.unmount();
+      }
+    });
+  });
+
+  // ================================================================== KA5D1, KA5D2 (R2-4's AP4-06)
+  // ONE PRESS, ONE RECORD (DESIGN_UPDATE C.8): two taps in the same moment come before React draws "Sending...", on her
+  // sale's button (KA5D1) and on her yes to AIAIC's question about her price, which is a button of its own (KA5D2).
+  test("KA5D1 C.8 on her sale: two taps on her sale's button in the same moment send one sale; while it is on its way the button says Sending..., marked, and a tap sends nothing; then AIAIC's answer is said", async () => {
+    await inStart(async () => {
+      const p = await toCheck(40);
+      let letItLand: () => void = () => undefined;
+      try {
+        saleHeld = new Promise<void>((landed) => {
+          letItLand = landed;
+        });
+        sales.length = 0;
+        const button = press(p) as HTMLButtonElement;
+        await land(button);
+        await act(async () => {
+          button.click();
+          button.click();
+        });
+        await settle();
+        assert.equal(sales.length, 1, "two taps in the same moment: one sale");
+        assert.equal(
+          (button.textContent ?? "").trim(),
+          words("mr", "aiaic.kit.sending"),
+          "Sending... said, in her words, while it is on its way",
+        );
+        assert.equal(button.getAttribute("aria-disabled"), "true", "and marked");
+        await tap(button, "a tap while it is on its way");
+        assert.equal(sales.length, 1, "a tap while it is on its way sends nothing");
+        await act(async () => {
+          letItLand();
+        });
+        saleHeld = null;
+        await waitFor(() => p.q('[data-testid="sell-done"]'), "AIAIC's answer, said");
+        assert.equal(sales.length, 1, "one sale in all");
+      } finally {
+        letItLand();
+        saleHeld = null;
+        await p.unmount();
+      }
+    });
+  });
+  test("KA5D2 C.8 on her sale: two taps in the same moment on her yes to AIAIC's question about her price send her sale once more, never twice", async () => {
+    await inStart(async () => {
+      const f = await toCheck(10, "394200");
+      try {
+        sales.length = 0;
+        await tap(press(f), "her sale's button");
+        await waitFor(() => f.q('[data-testid="sell-far"]'), "AIAIC's question back");
+        assert.equal(sales.length, 1, "her first press: one sale, which AIAIC kept nothing of");
+        const yes = f.q('[data-testid="sell-far-yes"]') as HTMLButtonElement | null;
+        ok(yes, "her yes");
+        await land(yes);
+        await act(async () => {
+          yes.click();
+          yes.click();
+        });
+        await settle();
+        assert.equal(
+          sales.length,
+          2,
+          "two taps on her yes in the same moment: one sale more, not two",
+        );
+        assert.equal(sales[1]?.["price_confirmed"], true, "saying her price is right");
+        assert.equal(sales[1]?.["key"], sales[0]?.["key"], "the same press: its same key");
+      } finally {
+        await f.unmount();
       }
     });
   });

@@ -527,7 +527,10 @@ function suite(app: App, window: Window & typeof globalThis) {
   type KitProps = {
     fixed: boolean;
     held: string | null;
-    onSend: () => void;
+    /** The money press; a press whose request goes out returns its promise, as her sale's does (R2-4's AP4-06). */
+    onSend: () => void | Promise<void>;
+    /** The flow's own word that a press of its is on its way (one it started elsewhere): the check step's `pending`. */
+    pending: boolean;
     answer: string | null;
     personal: boolean;
   };
@@ -559,6 +562,15 @@ function suite(app: App, window: Window & typeof globalThis) {
       fixedCount: props.fixed,
       title: "Kit",
     });
+    // a press whose request is on its way says "Sending..." until it is answered, as her sale's `sending` does
+    const [sending, setSending] = React.useState(false);
+    const send = () => {
+      const out = props.onSend();
+      if (!(out instanceof Promise)) return;
+      setSending(true);
+      const answered = () => setSending(false);
+      return out.then(answered, answered);
+    };
     const a = flow.answers as Record<string, Record<string, string> | string | undefined>;
     const details = (a["details"] ?? {}) as Record<string, string>;
     const name = (a["name"] ?? {}) as Record<string, string>;
@@ -694,7 +706,8 @@ function suite(app: App, window: Window & typeof globalThis) {
             },
           ],
           action: "Send ₹4,350 to UPI ••••",
-          onPress: props.onSend,
+          onPress: send,
+          pending: sending || props.pending,
           held: props.held,
           answer: props.answer,
         }),
@@ -713,7 +726,10 @@ function suite(app: App, window: Window & typeof globalThis) {
     let props: KitProps = {
       fixed: true,
       held: null,
-      onSend: () => presses.push(Date.now()),
+      onSend: () => {
+        presses.push(Date.now());
+      },
+      pending: false,
       answer: null,
       personal: true,
       ...over,
@@ -1156,6 +1172,88 @@ function suite(app: App, window: Window & typeof globalThis) {
         await tap(k.q('[data-testid="kit-check-change-name"]'), "Change: name");
         assert.equal(k.stateOf("name"), "open", "Change opens its step");
         assert.equal(k.box("name", "name")?.value, "Recording Farmer", "with its answer");
+      } finally {
+        await k.unmount();
+      }
+    });
+  });
+
+  // ================================================================== KA5D1, KA5D2 (R2-4's AP4-06)
+  // ONE PRESS, ONE RECORD (DESIGN_UPDATE C.8): "The button says 'Sending...' and takes no second press." Two taps in the
+  // same moment come before React draws the caller's `pending`; the check step holds a press whose request is on its way
+  // itself (KA5D1), and while the flow says a press of its is on its way, a tap sends nothing (KA5D2).
+  /** The kit's money flow on to its check step, as KA5 goes. */
+  const kitToCheck = async (k: KitPage) => {
+    await kitToName(k);
+    await type(k.box("name", "name") as HTMLInputElement, "Recording Farmer");
+    await tap(k.q('[data-testid="kit-name-continue"]'), "Continue");
+    assert.equal(k.stateOf("check"), "open", "the check step");
+    const button = k.q('[data-testid="kit-check-press"]') as HTMLButtonElement | null;
+    ok(button, "the check step's one button");
+    return button;
+  };
+  test("KA5D1 C.8 on the kit's check step: two taps in the same moment make one request; while it is on its way the button says Sending..., marked, and a tap sends nothing; once it is answered the button says its action and takes a press again", async () => {
+    await inStart(async () => {
+      const sent: number[] = [];
+      const answers: (() => void)[] = [];
+      const k = await mountKit("en", {
+        onSend: () => {
+          sent.push(Date.now());
+          return new Promise<void>((answered) => {
+            answers.push(answered);
+          });
+        },
+      });
+      try {
+        const button = await kitToCheck(k);
+        await land(button);
+        await act(async () => {
+          button.click();
+          button.click();
+        });
+        await settle();
+        assert.equal(sent.length, 1, "two taps in the same moment: one request");
+        assert.equal(
+          (button.textContent ?? "").trim(),
+          words("en", "aiaic.kit.sending"),
+          "Sending... said while it is on its way",
+        );
+        assert.equal(button.getAttribute("aria-disabled"), "true", "and marked");
+        await tap(button, "a tap while it is on its way");
+        assert.equal(sent.length, 1, "a tap while it is on its way sends nothing");
+        await act(async () => {
+          for (const answered of answers.splice(0)) answered();
+        });
+        await settle();
+        assert.equal(button.textContent, "Send ₹4,350 to UPI ••••", "answered: its action again");
+        await tap(button, "a press after the answer");
+        assert.equal(sent.length, 2, "a press after the answer is taken");
+        await act(async () => {
+          for (const answered of answers.splice(0)) answered();
+        });
+        await settle();
+      } finally {
+        await k.unmount();
+      }
+    });
+  });
+  test("KA5D2 C.8 on the kit's check step: while the flow says a press of its is on its way (pending), the button says Sending..., marked, and a tap sends nothing; once it is not, a press is taken", async () => {
+    await inStart(async () => {
+      const k = await mountKit("en");
+      try {
+        const button = await kitToCheck(k);
+        await k.rerender({ pending: true });
+        assert.equal(
+          (button.textContent ?? "").trim(),
+          words("en", "aiaic.kit.sending"),
+          "Sending... said",
+        );
+        assert.equal(button.getAttribute("aria-disabled"), "true", "and marked");
+        await tap(button, "a tap while it is on its way");
+        assert.equal(k.presses.length, 0, "a tap while it is on its way sends nothing");
+        await k.rerender({ pending: false });
+        await tap(button, "a press once it is answered");
+        assert.equal(k.presses.length, 1, "a press once it is answered is taken");
       } finally {
         await k.unmount();
       }
