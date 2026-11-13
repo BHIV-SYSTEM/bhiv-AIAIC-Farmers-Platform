@@ -291,6 +291,9 @@ function suite(app: App, window: Window & typeof globalThis) {
   /** Each sale she sent, in order: its key and what the validator let through. */
   const sales: Record<string, unknown>[] = [];
   const unavailable = () => ({ ok: false, problem: app.problem("aiaic_unavailable") });
+  /** AIAIC's answer to her price read when a case sets it (R2-4's AP4-04: a read that fails three ways, or one that holds
+   *  no price); null, AIAIC's recordings as below. Each case sets it back to null in its `finally`. */
+  let priceAnswer: ((sent: Record<string, unknown>) => unknown) | null = null;
   const answers = {
     getMyTrade: () => ({
       ok: true,
@@ -313,6 +316,7 @@ function suite(app: App, window: Window & typeof globalThis) {
       return unavailable();
     },
     getSalePrice: (sent: Record<string, unknown>) => {
+      if (priceAnswer) return priceAnswer(sent);
       if (inNashik(sent) && lower(sent["crop"]) === "onion")
         return { ok: true, data: app.referencePriceShown(PRICE["answer"]) };
       missing.push(`price: ${JSON.stringify(sent)}`);
@@ -775,6 +779,142 @@ function suite(app: App, window: Window & typeof globalThis) {
         );
       } finally {
         await f.unmount();
+      }
+    });
+  });
+
+  // ================================================================== KA12F, KA12N (R2-4's AP4-04)
+  // HER PRICE STEP WHEN AIAIC'S PRICE READ FAILS, OR HOLDS NO PRICE. DESIGN_UPDATE E.0: "a read that fails says so". The
+  // failed card says the mandi prices could not be read, with Try again; "none held" is a claim about the mandis, so a
+  // failed read is never drawn as it (it would be false and would take her Try again away), and a read that holds no
+  // price is never drawn as failed. The price step is reached in Marathi (no recording holds Nashik's crops in English),
+  // then her language is changed to English on the page: the price read's key holds no language, so nothing is read again.
+  /** The parts of AIAIC's range on the price step: none of them is drawn when AIAIC's range is not held. */
+  const RANGE_PARTS = [
+    "sell-price-range",
+    "sell-price-low",
+    "sell-price-middle",
+    "sell-price-high",
+    "sell-price-source",
+    "sell-price-yours",
+  ];
+  /** The price step holds no rupee figure (its box's label says "(₹)", a sign with no amount) and no total. */
+  const noFigureOnPrice = (p: Page, what: string) => {
+    for (const id of RANGE_PARTS) noEl(p.q(`[data-testid="${id}"]`), `${what}: no ${id}`);
+    ok(
+      !/₹\s*[0-9०-९]/.test(p.step("price")?.textContent ?? ""),
+      `${what}: no rupee figure on the step`,
+    );
+    assert.equal(
+      (p.box("sell-price-typed") as HTMLInputElement | null)?.value,
+      "",
+      `${what}: the box empty`,
+    );
+    ok((p.q('[data-testid="sell-total"]')?.textContent ?? "").includes("—"), `${what}: no total`);
+  };
+  /** The three ways AIAIC's price read fails: each as her server hands it to her page. */
+  const PRICE_FAILS: [string, string, () => unknown][] = [
+    ["KA12F1", "AIAIC unreachable", () => unavailable()],
+    [
+      "KA12F2",
+      "refused: AIAIC's 422 district_required, the contract's refusal of this read, handed on by her server unchanged",
+      () => ({ ok: false, problem: app.problem("district_required", { status: 422 }) }),
+    ],
+    [
+      "KA12F3",
+      "a read that throws on its way (her page's query in error)",
+      () => {
+        throw new Error(
+          "the price read threw (this suite's stand-in for a read that fails on its way)",
+        );
+      },
+    ],
+  ];
+  for (const [id, how, failing] of PRICE_FAILS)
+    test(`${id} her sale's price step when AIAIC's price read fails, ${how}: in Marathi and English the failed card in role=alert with its words and Try again; never "none held"; no range and no figure; the box empty; Try again reads once more`, async () => {
+      await inStart(async () => {
+        priceAnswer = failing;
+        const p = await toPrice(40);
+        try {
+          for (const lang of ["mr", "en"] as const) {
+            if (lang === "en") await p.setLang("en");
+            const what = `${how}, ${lang}`;
+            const card = await waitFor(
+              () => p.q('[data-testid="sell-price-failed"]'),
+              `${what}: the failed card`,
+            );
+            assert.equal(card.getAttribute("role"), "alert", `${what}: role=alert`);
+            ok(
+              (card.textContent ?? "").includes(words(lang, "aiaic.sell.price.failed")),
+              `${what}: aiaic.sell.price.failed's words`,
+            );
+            const again = [...card.querySelectorAll("button")].find(
+              (b) => (b.textContent ?? "").trim() === words(lang, "aiaic.retry"),
+            );
+            ok(again, `${what}: Try again, in her words`);
+            noEl(p.q('[data-testid="sell-price-none"]'), `${what}: never "none held"`);
+            noFigureOnPrice(p, what);
+            const reads = priceReads().length;
+            await tap(again, "Try again");
+            assert.equal(priceReads().length, reads + 1, `${what}: Try again reads once more`);
+            ok(p.q('[data-testid="sell-price-failed"]'), `${what}: failed again, said again`);
+            noEl(p.q('[data-testid="sell-price-none"]'), `${what}: and still never "none held"`);
+          }
+        } finally {
+          priceAnswer = null;
+          await p.unmount();
+        }
+      });
+    });
+
+  /**
+   * DERIVED, labelled (R2-4's AP4-04): AIAIC's recorded `practice_price` as AIAIC answers when it holds no mandi price for
+   * the crop in the district: `held` false and its figures removed (its day, its age and its mandis as AIAIC's not-held
+   * reference keeps them, null and empty; how many reported, the lowest, middle, highest and suggested prices, and the
+   * sentences that say them, taken out). No recording holds AIAIC's answer to this read with nothing held.
+   */
+  const PRICE_NOT_HELD = (() => {
+    const answer = { ...(PRICE["answer"] as Record<string, unknown>) };
+    for (const k of [
+      "mandis_reporting",
+      "middle_of_all_per_q",
+      "lowest_per_q",
+      "highest_per_q",
+      "suggested_ask_per_q",
+      "note",
+      "suggestion_is",
+      "trace",
+    ])
+      delete answer[k];
+    return { ...answer, held: false, price_day: null, age_days: null, mandis: [] };
+  })();
+  test('KA12N her sale\'s price step when AIAIC holds no mandi price for her crop in her district (DERIVED from practice_price, held false): in Marathi and English "none held" is said, never the failed card; no range and no figure; the box empty', async () => {
+    await inStart(async () => {
+      priceAnswer = () => ({ ok: true, data: app.referencePriceShown(PRICE_NOT_HELD) });
+      const p = await toPrice(40);
+      try {
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          const what = `none held, ${lang}`;
+          const none = await waitFor(
+            () => p.q('[data-testid="sell-price-none"]'),
+            `${what}: "none held"`,
+          );
+          assert.equal(
+            (none.textContent ?? "").trim(),
+            words(lang, "aiaic.sell.price.none"),
+            `${what}: aiaic.sell.price.none's words`,
+          );
+          noEl(p.q('[data-testid="sell-price-failed"]'), `${what}: never the failed card`);
+          noEl(
+            p.step("price")?.querySelector('[role="alert"]'),
+            `${what}: nothing said as an alert`,
+          );
+          noFigureOnPrice(p, what);
+        }
+      } finally {
+        priceAnswer = null;
+        await p.unmount();
       }
     });
   });
