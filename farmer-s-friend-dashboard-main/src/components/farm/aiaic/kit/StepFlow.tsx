@@ -473,7 +473,9 @@ export type KitBox = {
   name: string;
   label: string;
   hint?: string;
-  /** What the box holds when it opens: what was typed before (kept by the page while the box was closed), or an answer. */
+  /** What the box holds when it opens: what was typed before (kept by the page while the box was closed), or an answer.
+   *  Until the person types in it, the box holds the value its page gives it now: a value given later (an answer that
+   *  lands after the box opened) is taken. Once the person types, what was typed stays, whatever is given later. */
   value?: string;
   /** `value` is an answer given before (AIAIC's own, or one already checked), not the person's typing: its words are
    *  not read again. Typing kept by the page is never `given`: it is read like any typing. */
@@ -607,6 +609,26 @@ export function BoxStep({
     Object.fromEntries(boxes.map((b) => [b.name, b.value ?? ""])),
   );
   const [errs, setErrs] = useState<Record<string, string>>({});
+  // A VALUE GIVEN LATER (R2-4's VAP404-1): a box the person has not typed in holds the value its page gives it NOW, so an
+  // answer that lands after the box opened fills it (the sale's price read on Try again, or slowly, or for a crop changed
+  // at the check step), and an error said beside that box goes with what it was said of. A box the person typed in keeps
+  // what was typed, whatever its page gives later. Taken as the page draws (React's "adjusting state when a prop
+  // changes"), so no screen shows the box holding one thing and its page another. A value taken so is not the person's
+  // typing, yet the crisis reader reads it like typing when it holds words: `given` marks only what the box opened with
+  // (it reads more, never less).
+  const [typedIn, setTypedIn] = useState<Readonly<Record<string, true>>>({});
+  const [givenNow, setGivenNow] = useState<Readonly<Record<string, string>>>(() =>
+    Object.fromEntries(boxes.map((b) => [b.name, b.value ?? ""])),
+  );
+  const later = boxes.filter(
+    (b) => !typedIn[b.name] && (b.value ?? "") !== (givenNow[b.name] ?? ""),
+  );
+  if (later.length) {
+    const taken = Object.fromEntries(later.map((b) => [b.name, b.value ?? ""]));
+    setGivenNow((g) => ({ ...g, ...taken }));
+    setVals((v) => ({ ...v, ...taken }));
+    setErrs((e) => Object.fromEntries(Object.entries(e).filter(([name]) => !(name in taken))));
+  }
   const [checking, setChecking] = useState(false);
   const els = useRef<Record<string, HTMLInputElement | null>>({});
   const focusBox = (name: string) => els.current[name]?.focus();
@@ -725,6 +747,8 @@ export function BoxStep({
               onChange={(e) => {
                 const v = e.target.value;
                 setVals((x) => ({ ...x, [b.name]: v }));
+                // the person typed in this box: nothing given later takes the typed words out of it
+                setTypedIn((x) => (x[b.name] ? x : { ...x, [b.name]: true }));
                 onType?.(b.name, v);
               }}
               onKeyDown={onKey(i)}

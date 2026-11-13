@@ -297,6 +297,9 @@ function suite(app: App, window: Window & typeof globalThis) {
   /** Her sale's answer held until a case lets it land (R2-4's AP4-06: a press on its way); null, it lands at once. The
    *  sale is kept in `sales` when it is sent, before this. */
   let saleHeld: Promise<void> | null = null;
+  /** Her price read's answer held until a case lets it land (R2-4's VAP404-1: a slow read, or a crop changed at the check
+   *  step, answered with the price step open); null, it lands at once. What it answers is taken when it is asked. */
+  let priceHeld: Promise<void> | null = null;
   const answers = {
     getMyTrade: () => ({
       ok: true,
@@ -379,6 +382,7 @@ function suite(app: App, window: Window & typeof globalThis) {
           asked.push({ read: name, sent });
           const result = answers[name as keyof typeof answers](sent);
           if (name === "sellProduce" && saleHeld) await saleHeld;
+          if (name === "getSalePrice" && priceHeld) await priceHeld;
           return { ...ctx, result };
         }
         seen.unanswered.push(String(name ?? "a server function this suite does not know"));
@@ -916,6 +920,234 @@ function suite(app: App, window: Window & typeof globalThis) {
             `${what}: nothing said as an alert`,
           );
           noFigureOnPrice(p, what);
+        }
+      } finally {
+        priceAnswer = null;
+        await p.unmount();
+      }
+    });
+  });
+
+  // ================================================================== KA12L (R2-4's VAP404-1 and VAP404-2)
+  // AIAIC'S PRICE ANSWER LANDS AFTER HER PRICE BOX HAS APPEARED: on a Try again that answers, on a slow first read, and on
+  // R2-3's D6 (the crop changed at the check step). Her box takes AIAIC's suggestion as it lands unless she has typed,
+  // and the page says what the box holds: "Filled in from the middle of this district's mandi prices" only while the box
+  // holds that filled value, the total and her marker at what the box holds, never at the suggestion beside it.
+  const SUGGESTED = String(
+    Math.round(Number((PRICE["answer"] as Record<string, unknown>)["suggested_ask_per_q"])),
+  );
+  /**
+   * Her price step agrees with her box, in her language: the box holds `box`; the hint is said only when `filled`, and
+   * then the box is described by it; the total is the quantity times what the box holds ("—" while it holds no price);
+   * her marker is drawn at what the box holds on the range's own scale (PriceBar's: 10% beyond the lowest and the
+   * highest, her price among them), and is not drawn while the box holds no price or no range is drawn.
+   */
+  const agreesWithBox = (
+    p: Page,
+    lang: Lang,
+    quintals: number,
+    box: string,
+    filled: boolean,
+    what: string,
+  ) => {
+    const input = p.box("sell-price-typed");
+    ok(input, `${what}: the price box`);
+    assert.equal(input.value, box, `${what}: the box holds ${JSON.stringify(box)}`);
+    const hint = p.step("price")?.querySelector('[id$="-hint"]') ?? null;
+    if (filled) {
+      ok(hint, `${what}: "filled in from the middle", while the box holds AIAIC's middle`);
+      assert.equal(
+        (hint.textContent ?? "").trim(),
+        words(lang, "aiaic.sell.price.hint"),
+        `${what}: the hint, in her words`,
+      );
+      ok(
+        (input.getAttribute("aria-describedby") ?? "").split(" ").includes(hint.id),
+        `${what}: the box is described by the hint`,
+      );
+    } else
+      noEl(
+        hint,
+        `${what}: no "filled in from the middle" while the box holds ${JSON.stringify(box)}`,
+      );
+    const n = /^\d+$/.test(box) ? Number(box) : null;
+    const total = p.q('[data-testid="sell-total"]')?.textContent ?? "";
+    if (n === null) ok(total.includes("—"), `${what}: no total while the box holds no price`);
+    else
+      ok(
+        total.includes(app.rupees(Math.round(quintals * n * 100) / 100)),
+        `${what}: the total is ${quintals} quintals at what the box holds, not ${JSON.stringify(total)}`,
+      );
+    const yours = p.q('[data-testid="sell-price-yours"]') as HTMLElement | null;
+    if (n === null || !p.q('[data-testid="sell-price-range"]')) {
+      noEl(yours, `${what}: no marker of hers`);
+      return;
+    }
+    ok(yours, `${what}: her marker`);
+    const answer = PRICE["answer"] as Record<string, number>;
+    const lo = Math.min(Number(answer["lowest_per_q"]), n) * 0.9;
+    const hi = Math.max(Number(answer["highest_per_q"]), n) * 1.1;
+    const at = ((n - lo) / Math.max(hi - lo, 1)) * 100;
+    ok(
+      Math.abs(Number.parseFloat(yours.style.left) - at) < 1e-6,
+      `${what}: her marker at what the box holds (${at.toFixed(4)}%), not at ${yours.style.left}`,
+    );
+  };
+  /** The failed card's Try again, in her words. */
+  const tryAgainOn = (p: Page, lang: Lang) =>
+    [...(p.q('[data-testid="sell-price-failed"]')?.querySelectorAll("button") ?? [])].find(
+      (b) => (b.textContent ?? "").trim() === words(lang, "aiaic.retry"),
+    );
+
+  test("KA12L1 her sale's price read fails, then answers on Try again (R2-4's VAP404-1 and VAP404-2): AIAIC's range is drawn, the failed card goes and none held is never said; her box takes AIAIC's middle and the error said of it while it was empty goes; the hint, the total and her marker agree with the box, in Marathi and English; Use this price takes it", async () => {
+    await inStart(async () => {
+      priceAnswer = () => unavailable();
+      const p = await toPrice(40);
+      try {
+        await waitFor(() => p.q('[data-testid="sell-price-failed"]'), "the failed card");
+        agreesWithBox(p, "mr", 40, "", false, "the read failed, mr");
+        await tap(p.q('[data-testid="sell-price-use"]'), "Use this price, with the box empty");
+        ok(p.q('[data-testid="sell-price-error"]'), "the empty box: said beside it");
+        const reads = priceReads().length;
+        priceAnswer = null; // AIAIC's recording answers the next read
+        await tap(tryAgainOn(p, "mr"), "Try again");
+        assert.equal(priceReads().length, reads + 1, "Try again reads once more");
+        await waitFor(
+          () => p.q('[data-testid="sell-price-range"]'),
+          "AIAIC's range, after Try again",
+        );
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          const what = `answered on Try again, ${lang}`;
+          noEl(p.q('[data-testid="sell-price-failed"]'), `${what}: the failed card is gone`);
+          noEl(p.q('[data-testid="sell-price-none"]'), `${what}: never "none held"`);
+          agreesWithBox(p, lang, 40, SUGGESTED, true, what);
+          noEl(
+            p.q('[data-testid="sell-price-error"]'),
+            `${what}: the error said of the empty box is gone`,
+          );
+        }
+        await p.setLang("mr");
+        await tap(p.q('[data-testid="sell-price-use"]'), "Use this price");
+        await openSettled(p, "check");
+        assert.equal(
+          (press(p)?.textContent ?? "").trim(),
+          saleSentence("mr", 40, ONION_MR, Number(SUGGESTED)),
+          "Use this price takes the box's price: her one button says the sale at AIAIC's middle",
+        );
+      } finally {
+        priceAnswer = null;
+        await p.unmount();
+      }
+    });
+  });
+
+  test("KA12L2 her sale's price read lands only after the price step is open (a slow first read; R2-4's VAP404-1): reading is said and no box is drawn; as it lands her box takes AIAIC's middle, and the hint, the total and her marker agree with the box, in Marathi and English", async () => {
+    await inStart(async () => {
+      let letItLand: () => void = () => undefined;
+      priceHeld = new Promise<void>((landed) => {
+        letItLand = landed;
+      });
+      const p = await toCrop();
+      try {
+        await tap(p.q('[data-testid="sell-crop-onion"]'), "onion");
+        await openSettled(p, "quantity");
+        await tap(p.q('[data-testid="sell-qty-40"]'), "40 quintals");
+        await openSettled(p, "price");
+        ok(p.q('[data-testid="sell-price-reading"]'), "the read on its way: said");
+        noEl(p.box("sell-price-typed"), "no box while it is read");
+        await act(async () => {
+          letItLand();
+        });
+        priceHeld = null;
+        await waitFor(
+          () => p.q('[data-testid="sell-price-range"]'),
+          "AIAIC's range, once the read lands",
+        );
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          agreesWithBox(p, lang, 40, SUGGESTED, true, `a slow read landed, ${lang}`);
+        }
+      } finally {
+        letItLand();
+        priceHeld = null;
+        await p.unmount();
+      }
+    });
+  });
+
+  /**
+   * DERIVED, labelled (R2-4's VAP404-1, for R2-3's D6): AIAIC's recorded `practice_price` (onion in Nashik) as AIAIC's
+   * answer for the crop the page asks, its figures unchanged and its `crop` named as asked. No recording holds another
+   * crop's mandi prices in Nashik.
+   */
+  const priceForCropAsked = (sent: Record<string, unknown>) => ({
+    ok: true,
+    data: app.referencePriceShown({
+      ...(PRICE["answer"] as Record<string, unknown>),
+      crop: sent["crop"],
+    }),
+  });
+  test("KA12L3 R2-3's D6 (R2-4's VAP404-1): the crop changed at the check step under a price she typed, the new crop's read answering after the price step opened again: the price says check again; her box takes AIAIC's middle for the new crop (DERIVED from practice_price), and the hint, the total and her marker agree with the box, in Marathi and English", async () => {
+    await inStart(async () => {
+      const p = await toCheck(40, "3000");
+      let letItLand: () => void = () => undefined;
+      try {
+        priceAnswer = priceForCropAsked;
+        priceHeld = new Promise<void>((landed) => {
+          letItLand = landed;
+        });
+        await tap(p.q('[data-testid="sell-step-crop-change"]'), "Change on the crop");
+        await openSettled(p, "crop");
+        const crops = [...(p.q('[data-testid="sell-crops"]')?.querySelectorAll("button") ?? [])];
+        const other = crops.find((b) => b.getAttribute("data-testid") !== "sell-crop-onion");
+        ok(other, "another crop of Nashik's");
+        const otherCrop = (other.getAttribute("data-testid") ?? "").replace("sell-crop-", "");
+        await tap(other, "another crop");
+        await openSettled(p, "price");
+        ok(p.q('[data-testid="sell-step-price-again"]'), "the price says check again");
+        ok(p.q('[data-testid="sell-price-reading"]'), "the new crop's read on its way: said");
+        await act(async () => {
+          letItLand();
+        });
+        priceHeld = null;
+        await waitFor(
+          () => p.q('[data-testid="sell-price-range"]'),
+          "AIAIC's range for the new crop",
+        );
+        assert.equal(priceReads().at(-1)?.["crop"], otherCrop, "the read asked for the new crop");
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          agreesWithBox(p, lang, 40, SUGGESTED, true, `D6, ${lang}`);
+        }
+      } finally {
+        letItLand();
+        priceHeld = null;
+        priceAnswer = null;
+        await p.unmount();
+      }
+    });
+  });
+
+  test("KA12L4 her own figure is never overwritten (R2-4's VAP404-1): the read fails, she types her price, then Try again answers: AIAIC's range is drawn and the failed card goes, her box keeps her figure, no hint says it was filled in, and the total and her marker are at her figure, in Marathi and English", async () => {
+    await inStart(async () => {
+      priceAnswer = () => unavailable();
+      const p = await toPrice(40);
+      try {
+        await waitFor(() => p.q('[data-testid="sell-price-failed"]'), "the failed card");
+        await type(p.box("sell-price-typed") as HTMLInputElement, "4100");
+        agreesWithBox(p, "mr", 40, "4100", false, "her figure typed, the read failed, mr");
+        priceAnswer = null; // AIAIC's recording answers the next read
+        await tap(tryAgainOn(p, "mr"), "Try again");
+        await waitFor(
+          () => p.q('[data-testid="sell-price-range"]'),
+          "AIAIC's range, after Try again",
+        );
+        for (const lang of ["mr", "en"] as const) {
+          if (lang === "en") await p.setLang("en");
+          const what = `her figure, then AIAIC's answer, ${lang}`;
+          noEl(p.q('[data-testid="sell-price-failed"]'), `${what}: the failed card is gone`);
+          agreesWithBox(p, lang, 40, "4100", false, what);
         }
       } finally {
         priceAnswer = null;

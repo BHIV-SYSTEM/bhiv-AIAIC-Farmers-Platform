@@ -983,6 +983,104 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
   });
 
+  // ================================================================== KA2L (R2-4's VAP404-1)
+  // A VALUE GIVEN LATER: a box the person has not typed in holds the value its page gives it now (an answer that lands
+  // after the box opened, as her sale's price does on Try again), and an error said beside it goes; a box she typed in
+  // keeps what she typed, whatever is given later. Two boxes of one fact, drawn alone from the kit's BoxStep; digits only,
+  // so its crisis reader is never asked (a stand-in that keeps what it is asked, and is asked nothing).
+  test("KA2L a box takes a value given later until the person types in it: an untouched box takes it and the error said of it goes; a box she typed in keeps her figure; Continue gives what the boxes hold", async () => {
+    await inStart(async () => {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      const root = app.createRoot(container);
+      const lateReads: string[] = [];
+      const lateDone: Record<string, string>[] = [];
+      const draw = (a: string, b: string) =>
+        h(app.I18nProvider, {
+          initialLang: "en",
+          children: h(kit.BoxStep, {
+            testid: "late",
+            read: async (w: string) => {
+              lateReads.push(w);
+              return false;
+            },
+            onDone: (v: Readonly<Record<string, string>>) => {
+              lateDone.push({ ...v });
+            },
+            boxes: [
+              {
+                name: "a",
+                label: "Price",
+                value: a,
+                given: true,
+                inputMode: "decimal" as const,
+                check: (text: string) =>
+                  /^\d+$/.test(text.trim()) ? null : "aiaic.sell.price.range",
+                testid: "late-a",
+              },
+              {
+                name: "b",
+                label: "Quantity",
+                value: b,
+                given: true,
+                inputMode: "decimal" as const,
+                testid: "late-b",
+              },
+            ],
+          }),
+        });
+      await act(async () => {
+        root.render(draw("", ""));
+      });
+      try {
+        const box = (name: string) =>
+          container.querySelector(`[data-testid="late-${name}"]`) as HTMLInputElement;
+        await tap(
+          container.querySelector('[data-testid="late-continue"]'),
+          "Continue, the first box empty",
+        );
+        ok(
+          container.querySelector('[data-testid="late-a-error"]'),
+          "the empty box: said beside it",
+        );
+        await type(box("b"), "12");
+        await act(async () => {
+          root.render(draw("4350", "99"));
+        });
+        await settle();
+        assert.equal(
+          box("a").value,
+          "4350",
+          "the box she has not typed in takes the value given later",
+        );
+        noEl(
+          container.querySelector('[data-testid="late-a-error"]'),
+          "the error said of it while it was empty goes",
+        );
+        assert.equal(box("b").value, "12", "the box she typed in keeps her figure");
+        await act(async () => {
+          root.render(draw("4400", ""));
+        });
+        await settle();
+        assert.equal(box("a").value, "4400", "still untouched, it holds the value given now");
+        assert.equal(box("b").value, "12", "her figure stays, whatever is given");
+        await clear(box("a"));
+        await type(box("a"), "4500");
+        await act(async () => {
+          root.render(draw("4600", ""));
+        });
+        await settle();
+        assert.equal(box("a").value, "4500", "once she typed in it, it keeps her figure");
+        await tap(container.querySelector('[data-testid="late-continue"]'), "Continue");
+        assert.deepEqual(lateDone, [{ a: "4500", b: "12" }], "Continue gives what the boxes hold");
+        assert.deepEqual(lateReads, [], "digits only: nothing read for a crisis");
+      } finally {
+        await act(async () => root.unmount());
+        container.remove();
+      }
+    });
+  });
+
   // ======================================================================================== KA3
   test("KA3 K3: three answers, Change on the first, then on: the later ones are kept; a change that no longer fits marks the later step check again and opens it; the address holds the step's name and never a quantity or typed words; the back button goes back one step", async () => {
     await inStart(async () => {

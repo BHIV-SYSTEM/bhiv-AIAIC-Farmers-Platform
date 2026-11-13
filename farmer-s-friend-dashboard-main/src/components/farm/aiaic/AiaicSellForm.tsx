@@ -136,6 +136,12 @@ function priceOf(text: string): number | null {
   const n = plainNumber(text);
   return n !== null && n > 0 && n <= 1_000_000 ? n : null;
 }
+/** What her price box is filled with from AIAIC's suggestion (the middle of her district's mandi prices), in whole
+ *  rupees; "" when AIAIC suggests none. */
+function suggestedText(ref: ReferencePrice | null): string {
+  const s = ref?.suggested_ask_per_q;
+  return typeof s === "number" ? String(Math.round(s)) : "";
+}
 
 /** The farmer's sale, listed in AIAIC, one decision a screen. The page reads their records only when opened (nothing on
  * it moves): never again by itself under the form (R5P-09). */
@@ -252,11 +258,13 @@ function SellForm({
     staleTime: 10 * 60_000,
   });
   const ref: ReferencePrice | null = reference.data?.ok ? reference.data.data : null;
-  // Her price starts from the middle of her district's mandi prices (AIAIC's suggestion); she changes it freely.
+  // Her price starts from the middle of her district's mandi prices (AIAIC's suggestion); she changes it freely. Until she
+  // types, the box takes the suggestion whenever it lands, even after the box appeared (R2-4's VAP404-1: on Try again,
+  // a slow read, a crop changed at the check step); once she types, nothing given later overwrites her figure.
+  // `priceText` is what her box holds: what she typed, or this suggestion while she has typed nothing.
   useEffect(() => {
     if (priceTouched) return;
-    const s = ref?.suggested_ask_per_q;
-    setPriceText(typeof s === "number" ? String(Math.round(s)) : "");
+    setPriceText(suggestedText(ref));
   }, [ref, priceTouched]);
 
   // the page is still reading what fills its first steps: no step opens yet, and the address decides nothing. Only when
@@ -1056,6 +1064,11 @@ function QuantityBody({
  * her price marked among them), then her box, filled from their middle (AIAIC's suggestion), and the sale's total. While
  * AIAIC's prices are read the step says so; a read that failed says that, with Try again (never as "none held"); none
  * held, it says that; either way the box starts empty.
+ *
+ * THE PAGE SAYS WHAT HER BOX HOLDS (R2-4's VAP404-1): `typed` is what the box holds (the kit's box takes a value given
+ * later until she types, and her typing comes back through `onType`). Her marker and the total are drawn at it, never at
+ * the suggestion beside it, and "Filled in from the middle of this district's mandi prices" is said only while the box
+ * holds that filled suggestion: not once she has typed, and not over a box AIAIC filled nothing into.
  */
 function PriceBody({
   reading,
@@ -1094,6 +1107,7 @@ function PriceBody({
       </p>
     );
   const yours = priceOf(typed);
+  const filled = Boolean(ref_?.held) && given && typed !== "" && typed === suggestedText(ref_);
   return (
     <>
       {ref_?.held ? (
@@ -1125,7 +1139,7 @@ function PriceBody({
           {
             name: "price",
             label: t("aiaic.sell.price"),
-            ...(ref_?.held ? { hint: t("aiaic.sell.price.hint") } : {}),
+            ...(filled ? { hint: t("aiaic.sell.price.hint") } : {}),
             value: typed,
             given,
             inputMode: "decimal",
