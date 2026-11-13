@@ -1,21 +1,22 @@
 {
  "what": "Real answers of AIAIC's real routes, made by AIAIC's own recorders in-process (FastAPI's TestClient) on a *_test database made fresh for the run, every payment provider stood in for on the recording machine (no request left it), copied byte for byte under Annapoorna's names; one derived file, which says so. Replayed by tests/aiaic_trade_integration_suite.ts; never edited by hand; never shown to a farmer.",
  "by": "reports/handover_tools/rerecord_annapoorna_fixtures.py (AIAIC's repository)",
- "command": "python -X utf8 reports/handover_tools/rerecord_annapoorna_fixtures.py --aiaic <AIAIC's repository> --commit b4ebc7679eb857cf4062b2fcf854b0d04a920437 --app <Annapoorna's farmer-s-friend-dashboard-main folder> --scratch <a scratch folder> --python <a python with AIAIC's engine requirements> --database aiaic_annrec_r22_test",
+ "command": "python -X utf8 reports/handover_tools/rerecord_annapoorna_fixtures.py --aiaic <AIAIC's repository> --commit 2a183d172b7aede8c14fa8429b49ba6a9ebf215f --app <Annapoorna's farmer-s-friend-dashboard-main folder> --scratch <a scratch folder> --python <a python with AIAIC's engine requirements> --database aiaic_annrec_r24_test",
  "tree": {
-  "commit": "b4ebc7679eb857cf4062b2fcf854b0d04a920437",
-  "committed": "2026-11-12T20:08:24+04:00",
-  "subject": "The trade lane's Round 2 payloads have their version 1.0 schemas, held to the routes' own answers, and the role recorder records lots available, a request made the offer, the participants' notices, the monitoring, the payout, her view and the buyer notice (Round 2, R2-2 lane E part E-d; T11, DESIGN 3.5)",
+  "commit": "2a183d172b7aede8c14fa8429b49ba6a9ebf215f",
+  "committed": "2026-11-13T16:24:09+04:00",
+  "subject": "Annapoorna's re-recorder now runs AIAIC's role recorder too and copies her three sharing answers (role_sharing_mine, role_sharing_given, role_sharing_ended: GET and POST /farmer/trade/sharing) into her fixtures under the same names, named in her manifest, so her sharing suite (R2-3's A1 to A3) reads them from her own fixtures by the manifest's sha256 and no longer from a folder named by hand (Round 2, R2-4, the main session).",
   "taken_by": "git archive",
   "engine_changed_since": false
  },
- "recorded_at": "2026-11-12T16:29:51+00:00",
- "database": "aiaic_annrec_r22_test (dropped and made again for the run, migrated, the committed price slice loaded)",
+ "recorded_at": "2026-11-13T12:27:24+00:00",
+ "database": "aiaic_annrec_r24_test (dropped and made again for the run, migrated, the committed price slice loaded)",
  "recorders": {
-  "reports/handover_tools/record_trip_and_payout_answers.py": "exit 0 in 26 s; last line: kept recorded_trade trip_x_close_by_person 200",
-  "reports/handover_tools/record_buyer_portal_answers.py": "exit 0 in 27 s; last line: 97 recordings kept: buyer_approved_linked_record, buyer_approved_new_record, buyer_buyers_after_erase, buyer_buyers_before_link, buyer_buyers_page, buyer_catalog_mh_en, buyer_catalog_mh_hi, buyer_cata",
-  "reports/handover_tools/record_connected_trade_answers.py": "exit 0 in 13 s; last line: recorded buyers_looking",
-  "reports/handover_tools/record_trade_answers.py": "exit 0 in 36 s; last line: PUBLISHED: 288 files placed in <the copy>\\aiaic-frontend\\src\\test\\recorded_trade; 0 no longer recorded removed"
+  "reports/handover_tools/record_trip_and_payout_answers.py": "exit 0 in 31 s; last line: kept recorded_trade trip_x_close_by_person 200",
+  "reports/handover_tools/record_buyer_portal_answers.py": "exit 0 in 34 s; last line: 101 recordings kept: buyer_approved_linked_record, buyer_approved_new_record, buyer_buyers_after_erase, buyer_buyers_before_link, buyer_buyers_page, buyer_catalog_mh_en, buyer_catalog_mh_hi, buyer_cat",
+  "reports/handover_tools/record_connected_trade_answers.py": "exit 0 in 17 s; last line: recorded buyers_looking",
+  "reports/handover_tools/record_trade_answers.py": "exit 0 in 32 s; last line: PUBLISHED: 288 files placed in <the copy>\\aiaic-frontend\\src\\test\\recorded_trade; 0 no longer recorded removed",
+  "reports/handover_tools/record_role_portal_answers.py": "exit 0 in 27 s; last line: files after {'recorded_board': 19, 'recorded_trade': 496} (18 board samples and the manifest, 54 role files)"
  },
  "not_made_here": "The storage samples (recording_manifest.sample.json), the advice, places, catalog, transport and safety recordings have recorders of their own, named in each file's _recorded.by.",
  "files": {
@@ -24,8 +25,8 @@
    "by": "reports/handover_tools/record_buyer_portal_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:28:57+00:00",
-   "sha256": "46ccd9589db42a05e8edd1a835086dfd3fc23408972d2dba4eb626433d401466",
+   "at": "2026-11-13T12:26:03+00:00",
+   "sha256": "f6c101f2398cae595da91e9dcecfe71905fa3de971d89d0454e881ef84624acc",
    "bytes": 70262
   },
   "buyer_farmer_notices_more_time.json": {
@@ -33,8 +34,8 @@
    "by": "reports/handover_tools/record_buyer_portal_answers.py",
    "route": "GET /notifications",
    "status": 200,
-   "at": "2026-11-12T16:28:57+00:00",
-   "sha256": "cf28058e025b2046b5611aa97fe8890b375c0bcfed4d604943ade28e1142ecf1",
+   "at": "2026-11-13T12:26:03+00:00",
+   "sha256": "3b5bca472b25c4e6ef97d4207fa1e02f39f15dcd0dbf6f2327053d9f4fd2bd33",
    "bytes": 6630
   },
   "collect_mine_approval_pending.json": {
@@ -42,8 +43,8 @@
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:28:29+00:00",
-   "sha256": "903fe54755d10952083c217cc343f4e9e1b52a5c223ed9e268ad4694362df986",
+   "at": "2026-11-13T12:25:29+00:00",
+   "sha256": "be34ac9d0043486cf37c8b8feefba4fa9acb5b84441270f7cc33ae72597cc8ec",
    "bytes": 68810
   },
   "collect_mine_paid.json": {
@@ -51,8 +52,8 @@
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:28:25+00:00",
-   "sha256": "71f9a69f2d87f7dc3115ea3e12d365ec902863ad5568ba34a4cf625d18b95b75",
+   "at": "2026-11-13T12:25:25+00:00",
+   "sha256": "1b5ff635983e0633aa7fbc79d72840ed1b882cbb9f683206c8b35d592a84ac6b",
    "bytes": 41418
   },
   "collect_mine_processed.json": {
@@ -60,8 +61,8 @@
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:28:26+00:00",
-   "sha256": "ffe1b211a707af86db83bae5c78cbef40abb9ecee8712ce7efe98e39a0c5aebf",
+   "at": "2026-11-13T12:25:26+00:00",
+   "sha256": "96c4d71a243aa810fa1ba886aa9c7454b39d81d4b462af40e131bfd44c404ee2",
    "bytes": 42470
   },
   "collect_mine_processing.json": {
@@ -69,8 +70,8 @@
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:28:26+00:00",
-   "sha256": "d971966f7295dcefc830d25f09dff53cc19a84bdca14c44a342131dc0308bbce",
+   "at": "2026-11-13T12:25:26+00:00",
+   "sha256": "ce27ac9efd3bcbdb83cfd8ea0b509f9bbbd338ffe5d50a417939935c954a7057",
    "bytes": 42469
   },
   "collect_mine_queued.json": {
@@ -78,8 +79,8 @@
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:28:26+00:00",
-   "sha256": "a1034d0627e2f06d6a272ee5c160d169a83a7b425514752931111a71b542fd0e",
+   "at": "2026-11-13T12:25:25+00:00",
+   "sha256": "c16e84de36a0f41d8702ef7f8ef0be88c967ac2faa6d5face26f21a2a6cb95bc",
    "bytes": 42954
   },
   "collect_mine_stale.json": {
@@ -87,8 +88,8 @@
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:28:28+00:00",
-   "sha256": "6afe2c1ad3bfa6fdd4c9181af6f717b2672c46769fd84c737e8d7aee15ff4079",
+   "at": "2026-11-13T12:25:28+00:00",
+   "sha256": "2544727ab622cfe598640fe6e94503548a5ceec485188b9990164b061261e409",
    "bytes": 58618
   },
   "connected_farmer_mine_journey.json": {
@@ -96,8 +97,8 @@
    "by": "reports/handover_tools/record_connected_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:12+00:00",
-   "sha256": "e8c35e282fb49ea69d6ae4ba97046287a066b1d6431c7c95557a47980750d210",
+   "at": "2026-11-13T12:26:22+00:00",
+   "sha256": "32d2bb4a706be55548ce52fc9ff2f45d92e52051f483ea9f6f1234912f583700",
    "bytes": 40411
   },
   "connected_farmer_mine_pool_full.json": {
@@ -105,8 +106,8 @@
    "by": "reports/handover_tools/record_connected_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:11+00:00",
-   "sha256": "0415f552996db9bdc22676eb314bd3c4a9344c2a53538581060758c0b70a3aca",
+   "at": "2026-11-13T12:26:21+00:00",
+   "sha256": "cab1b7baa5e20a27149c679ca848f49162fea631e46f34f3399776796bcc116b",
    "bytes": 34517
   },
   "connected_farmer_mine_pool_offer.json": {
@@ -114,17 +115,17 @@
    "by": "reports/handover_tools/record_connected_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:10+00:00",
-   "sha256": "0f618a8d6dde214043269f11edbdc6a3649c9139ee5aa0b10800d83d14617e37",
+   "at": "2026-11-13T12:26:21+00:00",
+   "sha256": "f4c3010536642a1b61a46f28119c97845cfe07eb44a79fea286eb1c6a63c4ef5",
    "bytes": 34355
   },
   "farmer_app_accept_refused_lot_sold.json": {
    "from": "aiaic-frontend/src/test/recorded_trade/farmer_app_accept_refused_lot_sold.json",
    "by": "reports/handover_tools/record_trade_answers.py",
-   "route": "POST /farmer/trade/offers/ofr_0e93e0706c647b099352/accept",
+   "route": "POST /farmer/trade/offers/ofr_2ab3520203f0e82aca35/accept",
    "status": 409,
-   "at": "2026-11-12T16:29:33+00:00",
-   "sha256": "34a985ef129ad11fc72425864ab3904ece263403ddcd2f5febc296446deffe1e",
+   "at": "2026-11-13T12:26:44+00:00",
+   "sha256": "16e10485f56c9fcb5881fafa35928a2af44210be5f91331b26e79c77704d8a17",
    "bytes": 1003
   },
   "farmer_app_mine_after_pickup.json": {
@@ -132,8 +133,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:32+00:00",
-   "sha256": "09f1e8612f62d851f536fda0c4ca8394877bbcd2921329fcf7f9fe4f958e164a",
+   "at": "2026-11-13T12:26:42+00:00",
+   "sha256": "d83a4b22b372326f04b892b6348b8e80937ce54c6cf19260887563a4803e8255",
    "bytes": 45015
   },
   "farmer_app_mine_offer_expired.json": {
@@ -141,8 +142,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:32+00:00",
-   "sha256": "2effb17a5e688ced2bd5fd73f8a0bcae5206a449ae0a96d23f07cc37363324e6",
+   "at": "2026-11-13T12:26:43+00:00",
+   "sha256": "796772a5ac485e5b0f21eee08cef08c4de8a3557b825771923b5d0130b648174",
    "bytes": 56457
   },
   "farmer_app_mine_refund_owed.json": {
@@ -150,8 +151,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:35+00:00",
-   "sha256": "31fdf311988ba2b01f84878951756926ea881bca1d9cdd196f407b5e7dc5a9d5",
+   "at": "2026-11-13T12:26:45+00:00",
+   "sha256": "3a32ee0d87c24adccad8b52c57675922385daf0f0e80f98835e0785d6d68855a",
    "bytes": 93654
   },
   "farmer_app_mine_with_offer.json": {
@@ -159,8 +160,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:31+00:00",
-   "sha256": "58dfaeb2a3f3315c9906ea0c5b23185af550a23a6552ec38415bcd5f4f7fc81b",
+   "at": "2026-11-13T12:26:42+00:00",
+   "sha256": "af52e9cf574e13d26f62c15dc5663a04fc8ab2f38185c778d4563ad2531b25c1",
    "bytes": 40191
   },
   "farmer_app_not_a_farmer.json": {
@@ -168,8 +169,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 403,
-   "at": "2026-11-12T16:29:31+00:00",
-   "sha256": "d965fe8d8ed02aab3c57e002a1d0d958317413bcfd2f00a949aad909370d3a69",
+   "at": "2026-11-13T12:26:41+00:00",
+   "sha256": "346ca3459fef514e3379f3530ec13fde185fa79283c3be21dadbe5b1bfa25766",
    "bytes": 922
   },
   "farmer_app_price_far_refused.json": {
@@ -177,8 +178,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "POST /farmer/trade/listings",
    "status": 422,
-   "at": "2026-11-12T16:29:33+00:00",
-   "sha256": "1b29b2aff165e1fb297e9cfb66d3e47355fa18f47414eca2de4859c53b9be49b",
+   "at": "2026-11-13T12:26:43+00:00",
+   "sha256": "5d6b172e9a12ecf30be007b88c0e1751aeb3ee727fc2149a1b95cc064165b301",
    "bytes": 1696
   },
   "farmer_app_refund_mine_held.json": {
@@ -186,8 +187,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:35+00:00",
-   "sha256": "73f7f0610c4e280ef6547aeab778c66e31418e8cefc48fac1d051a0a59e7d903",
+   "at": "2026-11-13T12:26:45+00:00",
+   "sha256": "b417dc1c54a0a896144889503f43ef69c3ff4746b850cdbdd48d6a680bfc870e",
    "bytes": 93673
   },
   "farmer_app_refund_payout_account.json": {
@@ -195,8 +196,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "POST /farmer/trade/payout-account",
    "status": 200,
-   "at": "2026-11-12T16:29:34+00:00",
-   "sha256": "3d9b2776a20b5b2c5215b21f5dd58de74b294b67e9543b28dc7602b9cb58b68a",
+   "at": "2026-11-13T12:26:44+00:00",
+   "sha256": "95a153519b5a0e60c4586c4a6f03057019c72917cf5dfeac3bb5ac5255668a9f",
    "bytes": 2750
   },
   "farmer_app_session_expired.json": {
@@ -204,8 +205,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 401,
-   "at": "2026-11-12T16:29:31+00:00",
-   "sha256": "b362670030b949f432cbb5f101175368f9825725cf5ad5d4ef1a61d6f2389bcc",
+   "at": "2026-11-13T12:26:41+00:00",
+   "sha256": "50ef3d44aea12f55f402975af984d796607aa88be74b0d1cf168d2ef7484ae78",
    "bytes": 859
   },
   "notices_money_processed.json": {
@@ -213,26 +214,26 @@
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /notifications",
    "status": 200,
-   "at": "2026-11-12T16:28:26+00:00",
-   "sha256": "f6424500d64e668b421418088fad8180508eafeff9da2be86601ed11185695dd",
+   "at": "2026-11-13T12:25:26+00:00",
+   "sha256": "db9b9521b1294e09c27be14252fd8404dffb28abf30afaee304cb01aac669ebb",
    "bytes": 5114
   },
   "offer_compare_buyer_collects.json": {
    "from": "aiaic-frontend/src/test/recorded_trade/trip_offer_compare_buyer_collects.json",
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
-   "route": "GET /trade/offers/ofr_4aa36c2176232787059f/compare",
+   "route": "GET /trade/offers/ofr_fe2a9ebc3d169fc63086/compare",
    "status": 200,
-   "at": "2026-11-12T16:28:25+00:00",
-   "sha256": "ac52f2661cf031e2fb6d67926f8c2667a8dbc1b32b9309fa45dc3d00dcce4302",
+   "at": "2026-11-13T12:25:25+00:00",
+   "sha256": "8b53481173a2a43a7f1d162a55d7678c968b932da507278a36590574f4508755",
    "bytes": 9648
   },
   "offer_compare_depends_on_sharing.json": {
    "from": "aiaic-frontend/src/test/recorded_trade/trip_offer_compare_depends_on_sharing.json",
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
-   "route": "GET /trade/offers/ofr_d9edc9029c85be995e71/compare",
+   "route": "GET /trade/offers/ofr_78db8a5480de3b461601/compare",
    "status": 200,
-   "at": "2026-11-12T16:28:28+00:00",
-   "sha256": "b9589bfd4079236b685217599eddbc28725a959d3ba7cb8beb3ec7c0859b6f33",
+   "at": "2026-11-13T12:25:28+00:00",
+   "sha256": "e8a272b3d46dfa88c0a83cd02f4c931a2b3ddb595bb550fa903712dd25a5c113",
    "bytes": 9813
   },
   "payout_mine_account_checking.json": {
@@ -240,8 +241,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:40+00:00",
-   "sha256": "0f4717c2d342a76f0081aac6760c346b1e8c88af84e17bc3ab989d2e76359deb",
+   "at": "2026-11-13T12:26:49+00:00",
+   "sha256": "d63824a1b0ca724b23259a0e98073c6c72efc993252d92e7c74ba854de9c6793",
    "bytes": 54233
   },
   "payout_mine_account_made.json": {
@@ -249,8 +250,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "POST /farmer/trade/payout-account",
    "status": 200,
-   "at": "2026-11-12T16:29:39+00:00",
-   "sha256": "cfb5ebdfc5c924b3a77912c84b686c481befd80e12c74478764341ba34ce4797",
+   "at": "2026-11-13T12:26:48+00:00",
+   "sha256": "5c99f9b2bf0123d72aa55247e0491ae1a8cc0a32ffa5512dfceb025c7e62c3d1",
    "bytes": 2719
   },
   "payout_mine_account_ready.json": {
@@ -258,8 +259,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:40+00:00",
-   "sha256": "2912f445fd52ac460a33e1492c1bc9d1d2502d57c7bfed5a4e3f9e695574f5ee",
+   "at": "2026-11-13T12:26:49+00:00",
+   "sha256": "95423f44f63874a4a61d8ce46ea13e4d63b6f5546fdf31e9a0e12508cc299c0a",
    "bytes": 54080
   },
   "payout_mine_dlite_direct.json": {
@@ -267,8 +268,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:47+00:00",
-   "sha256": "01511f759c6f6a6a72a909353424f14e1ebd726c347c7532ba2eb1712f5c2508",
+   "at": "2026-11-13T12:26:54+00:00",
+   "sha256": "5077b430bf858a8631a2b946f6f822c6657d383a14008dbbdff4e52e7debb7fb",
    "bytes": 80487
   },
   "payout_mine_offered.json": {
@@ -276,8 +277,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:39+00:00",
-   "sha256": "b8c8ebbac8ef0800f3b3811be17d2fd70af6dec32badb1b5539810a6015134d5",
+   "at": "2026-11-13T12:26:48+00:00",
+   "sha256": "fb001a93c6bb6fe1055f8978c815e54107e1a2aada82cb37129cada27de52dfa",
    "bytes": 53052
   },
   "payout_mine_refused_no_press.json": {
@@ -285,8 +286,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "POST /farmer/trade/payout-account",
    "status": 422,
-   "at": "2026-11-12T16:29:39+00:00",
-   "sha256": "61fe0614923b9aa6ca31fa7cac19657a465b94a756cd1056f0eb97f0a58a4139",
+   "at": "2026-11-13T12:26:48+00:00",
+   "sha256": "724ff8845f5c1fd6633632ba0ad428e24e34e773fd38f9a0e1e77f1f5a562a63",
    "bytes": 1469
   },
   "payout_mine_sending.json": {
@@ -294,8 +295,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:40+00:00",
-   "sha256": "4d429ffc22d339c172684ad67b8c71d706a36acf4e18aa783d4af0240c788f28",
+   "at": "2026-11-13T12:26:49+00:00",
+   "sha256": "650f138ae46eb41d43b40f35521e2264002574c9abf6e6c240fe149ccbb1a0fe",
    "bytes": 54853
   },
   "payout_mine_sent.json": {
@@ -303,8 +304,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:41+00:00",
-   "sha256": "a08bb03ae13aa797cb9b30f0f8935e6c2f6c4d0b85b708987f8bbb0e74213c8c",
+   "at": "2026-11-13T12:26:49+00:00",
+   "sha256": "395f15f7eda0c0d7d925deec60dfb24ad3dfab245313354debb048b4a6e37809",
    "bytes": 54842
   },
   "payout_mine_settled.json": {
@@ -312,8 +313,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:41+00:00",
-   "sha256": "e32c1e680c3d3c83aff1db18a4972173117c96fbe9983ce9b8877a52716d2082",
+   "at": "2026-11-13T12:26:49+00:00",
+   "sha256": "25e6bff33f8f8f344debd1c002ff553486f05a0c08745634a3af11e0c51e5eaf",
    "bytes": 54953
   },
   "payout_mine_will_send.json": {
@@ -321,17 +322,17 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:40+00:00",
-   "sha256": "f5044f3fe2f72050205a33cfa16e85aa42cef9fc8c853ab82b9688e243d085d1",
+   "at": "2026-11-13T12:26:49+00:00",
+   "sha256": "8570f2ba974bb992e6f26c5e1bf4f298bd91debff85225b5e8eb856cd56b97fd",
    "bytes": 54875
   },
   "practice_accepted.json": {
    "from": "aiaic-frontend/src/test/recorded_trade/practice_accepted.json",
    "by": "reports/handover_tools/record_trade_answers.py",
-   "route": "POST /farmer/trade/offers/ofr_2675912d86cd73a48679/accept",
+   "route": "POST /farmer/trade/offers/ofr_a6ebdccd8e1d182f0e97/accept",
    "status": 201,
-   "at": "2026-11-12T16:29:37+00:00",
-   "sha256": "a45e53780d58d39306ab3c42381fb1dc0dccd1cecf866556360a37a3baa5fa4c",
+   "at": "2026-11-13T12:26:47+00:00",
+   "sha256": "2e8160ca6b79b049c776e46828e82b0e1db5d45e43dfe1eae010172452faee87",
    "bytes": 2895
   },
   "practice_listed.json": {
@@ -339,8 +340,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "POST /farmer/trade/listings",
    "status": 201,
-   "at": "2026-11-12T16:29:37+00:00",
-   "sha256": "68331b76b16d1871d1e26cd687c2d70ce1e5c2bcea20d14349919e880f4be2f5",
+   "at": "2026-11-13T12:26:47+00:00",
+   "sha256": "8bf99f1476ea124d5f08992a14bfcbb3b53f2cd571a764e9af79fea8aafc1acd",
    "bytes": 4241
   },
   "practice_mine_empty.json": {
@@ -348,8 +349,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:37+00:00",
-   "sha256": "63c9da59125cf6a23ee2a83640fada037270832f306372ac09410da60123940b",
+   "at": "2026-11-13T12:26:46+00:00",
+   "sha256": "65e754bdc8e4d2e30fec7eb08fbc6f0ccd9154d4d1f121ccc8624df900f934da",
    "bytes": 35063
   },
   "practice_mine_link_made.json": {
@@ -357,8 +358,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:38+00:00",
-   "sha256": "3a2dbfeded1c3507bb6e20079cb098c2dd86591ae789aa89a430eacafc73710f",
+   "at": "2026-11-13T12:26:48+00:00",
+   "sha256": "8442be534b8dbdfb1ef21c640b743a111bf29bc504d69ff4700e58ed790146e8",
    "bytes": 44143
   },
   "practice_mine_paid.json": {
@@ -366,8 +367,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:38+00:00",
-   "sha256": "c197ea79d956f3a37aec369c433319b8545d4704131fcac17c158295c8bf6dc2",
+   "at": "2026-11-13T12:26:48+00:00",
+   "sha256": "fae73b93ea81891beafabbc7d82c9b6c9e0b97789451f629f3c2dd275d6bba93",
    "bytes": 44127
   },
   "practice_mine_with_offer.json": {
@@ -375,8 +376,8 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade",
    "status": 200,
-   "at": "2026-11-12T16:29:37+00:00",
-   "sha256": "e1b56210aab2d494ba359202d59ddc26633cb2bbd4beb69b173159862a248c3c",
+   "at": "2026-11-13T12:26:47+00:00",
+   "sha256": "c9a66bc417749e5342d20f084bf867c21c4919cc1637b5ceb09eecb0aa3a0837",
    "bytes": 40349
   },
   "practice_price.json": {
@@ -384,17 +385,44 @@
    "by": "reports/handover_tools/record_trade_answers.py",
    "route": "GET /farmer/trade/price",
    "status": 200,
-   "at": "2026-11-12T16:29:37+00:00",
-   "sha256": "3a1e18339ac49285bbce66f966b41b46fa4bc9c378ac03e69a9a16e95f9b85ed",
+   "at": "2026-11-13T12:26:47+00:00",
+   "sha256": "5ee8bdb2e31ba1316b78a81cd490d0f5b153e519c54c5280eaaae6fccc4d0e71",
    "bytes": 7658
+  },
+  "role_sharing_ended.json": {
+   "from": "aiaic-frontend/src/test/recorded_trade/role_sharing_ended.json",
+   "by": "reports/handover_tools/record_role_portal_answers.py",
+   "route": "POST /farmer/trade/sharing",
+   "status": 200,
+   "at": "2026-11-13T12:26:57+00:00",
+   "sha256": "15f6d2e54d3b52739a26c58b0fe3f2ef669aaf3d4b8c83f09eb4f69b12a6ec26",
+   "bytes": 1132
+  },
+  "role_sharing_given.json": {
+   "from": "aiaic-frontend/src/test/recorded_trade/role_sharing_given.json",
+   "by": "reports/handover_tools/record_role_portal_answers.py",
+   "route": "POST /farmer/trade/sharing",
+   "status": 201,
+   "at": "2026-11-13T12:26:57+00:00",
+   "sha256": "ad549161fea26ff79b048bd73067f06b85cd85fb946457fe16bcdc74bdd0b54a",
+   "bytes": 1238
+  },
+  "role_sharing_mine.json": {
+   "from": "aiaic-frontend/src/test/recorded_trade/role_sharing_mine.json",
+   "by": "reports/handover_tools/record_role_portal_answers.py",
+   "route": "GET /farmer/trade/sharing",
+   "status": 200,
+   "at": "2026-11-13T12:26:57+00:00",
+   "sha256": "e6fa8812d3db9fdb6c5fbf4b877e890f07a5140eb2f9ef264ab1c69184e15875",
+   "bytes": 7277
   },
   "transport_estimate_niphad_lasalgaon_1q.json": {
    "from": "aiaic-frontend/src/test/recorded_transport/trip_estimate_niphad_lasalgaon_1q.json",
    "by": "reports/handover_tools/record_trip_and_payout_answers.py",
    "route": "GET /transport/estimate",
    "status": 200,
-   "at": "2026-11-12T16:28:17+00:00",
-   "sha256": "173bdba59fc3516374de7d925e68a136794db9d0b5796551bd64c4ab52728497",
+   "at": "2026-11-13T12:25:13+00:00",
+   "sha256": "9e9c4157f9e30f00ade61e105422b2f1b42b496928cbe7c1ad6655df6df3b298",
    "bytes": 11120
   },
   "derived_mine_report_without_amount.json": {
@@ -402,7 +430,7 @@
    "by": "reports/handover_tools/rerecord_annapoorna_fixtures.py (AIAIC's repository)",
    "route": "GET /farmer/trade",
    "status": 200,
-   "sha256": "6af7a55366bfd4d9c235b414c0302ca1312ccc3a7ce194f0abcf5f685de2c074",
+   "sha256": "554b56e6d48d3c472d47d09e0656006784e4b8956f4354cfd676a1b77d8c9b95",
    "bytes": 81775
   }
  }

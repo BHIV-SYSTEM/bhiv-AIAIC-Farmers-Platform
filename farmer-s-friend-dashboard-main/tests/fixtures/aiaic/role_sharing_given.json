@@ -1,0 +1,40 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_role_portal_answers.py",
+    "route": "POST /farmer/trade/sharing",
+    "at": "2026-11-13T12:26:57+00:00",
+    "status": 201,
+    "request": {
+      "params": {},
+      "body": {
+        "field": "name",
+        "share": true,
+        "notice_version": "shn-4deef92f00dd",
+        "shown_in": "mr"
+      }
+    },
+    "asked_as": "app_farmer",
+    "world_tag": "28b38584",
+    "today": "2026-11-13",
+    "price_clock": "2026-09-29",
+    "masked": [
+      "request_id",
+      "since"
+    ],
+    "note": "A real answer of the real route, in-process, on a *_test database, in a workspace of its own (brd-<tag>): practice and rehearsal records (no farmer sees them), the price clock at the committed price slice's day, no road key. Replayed by the portal's and the website's tests, never edited by hand."
+  },
+  "answer": {
+    "field": "name",
+    "shared": true,
+    "since": "2026-11-13T12:27:16.588623+00:00",
+    "notice_version": "shn-4deef92f00dd",
+    "trace": {
+      "request_id": "8095bec7815747709e5e89b3a729c903",
+      "decision_ids": [],
+      "price_day": "not held",
+      "price_from": "not held",
+      "datasets": "not held",
+      "build": "unknown"
+    }
+  }
+}
