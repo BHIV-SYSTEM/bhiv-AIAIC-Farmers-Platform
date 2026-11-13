@@ -877,10 +877,18 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
 
   /**
-   * DERIVED, labelled (R2-4's AP4-04): AIAIC's recorded `practice_price` as AIAIC answers when it holds no mandi price for
-   * the crop in the district: `held` false and its figures removed (its day, its age and its mandis as AIAIC's not-held
-   * reference keeps them, null and empty; how many reported, the lowest, middle, highest and suggested prices, and the
-   * sentences that say them, taken out). No recording holds AIAIC's answer to this read with nothing held.
+   * DERIVED, labelled (R2-4's AP4-04; its label made whole by VAP404-5): AIAIC's recorded `practice_price` in AIAIC's own
+   * not-held shape, as its farmer price route answers when no mandi of the district reported the crop (AIAIC at
+   * c2c9389f, engine/service/farmer_trade_routes.py `price`: `_named_mandis(_with_suggestion(_reference_price(...)))`;
+   * engine/service/trade_routes.py `_reference_price`'s not-held return, :466-472, and `_with_suggestion`, :1368-1373).
+   *   - Removed: how many reported, the middle, the lowest and the highest (`mandis_reporting`, `middle_of_all_per_q`,
+   *     `lowest_per_q`, `highest_per_q`), the sentences that say them (`note`, `suggestion_is`), and `trace`, the
+   *     recorded read's own request id and lineage, which no other read shares (not a price field).
+   *   - Set as AIAIC sets them: `held` false, `price_day` and `age_days` null, `mandis` [], `suggested_ask_per_q` null
+   *     (`_with_suggestion` with no mandi price), and `reason`, AIAIC's own sentence for a district whose mandis reported
+   *     the crop on no day searched (the second of its three forms), filled with the recording's district and crop.
+   * The page draws none of `reason`; her server keeps it (`referencePriceShown`). No recording holds AIAIC's answer to
+   * this read with nothing held.
    */
   const PRICE_NOT_HELD = (() => {
     const answer = { ...(PRICE["answer"] as Record<string, unknown>) };
@@ -889,15 +897,36 @@ function suite(app: App, window: Window & typeof globalThis) {
       "middle_of_all_per_q",
       "lowest_per_q",
       "highest_per_q",
-      "suggested_ask_per_q",
       "note",
       "suggestion_is",
       "trace",
     ])
       delete answer[k];
-    return { ...answer, held: false, price_day: null, age_days: null, mandis: [] };
+    return {
+      ...answer,
+      held: false,
+      price_day: null,
+      age_days: null,
+      mandis: [],
+      suggested_ask_per_q: null,
+      reason: `No mandi in ${String(answer["district"])} reported ${String(answer["crop"])} in the days searched.`,
+    };
   })();
   test('KA12N her sale\'s price step when AIAIC holds no mandi price for her crop in her district (DERIVED from practice_price, held false): in Marathi and English "none held" is said, never the failed card; no range and no figure; the box empty', async () => {
+    // the variant as her server hands it to her page: AIAIC's not-held keys, and none of its figures (VAP404-5)
+    const shown = app.referencePriceShown(PRICE_NOT_HELD) as unknown as Record<string, unknown>;
+    assert.equal(shown["held"], false, "the variant: held false");
+    assert.equal(
+      shown["suggested_ask_per_q"],
+      null,
+      "the variant: no suggestion, as AIAIC says it",
+    );
+    ok(
+      typeof shown["reason"] === "string" && shown["reason"] !== "",
+      "the variant: AIAIC's not-held reason, kept by her server",
+    );
+    for (const k of ["mandis_reporting", "middle_of_all_per_q", "lowest_per_q", "highest_per_q"])
+      ok(!(k in shown), `the variant: no ${k}`);
     await inStart(async () => {
       priceAnswer = () => ({ ok: true, data: app.referencePriceShown(PRICE_NOT_HELD) });
       const p = await toPrice(40);
