@@ -15,14 +15,13 @@
  * press (`shareMyName`, after its own validator) by AIAIC's RECORDED answers to that press, through this server's own
  * reading (`refusalOf` for a refusal).
  *
- * AIAIC'S RECORDINGS (never written by hand): her sharing as AIAIC's role recorder answered it at AIAIC's b4ebc76
+ * AIAIC'S RECORDINGS (never written by hand): her sharing as AIAIC's role recorder answered it
  * (`reports/handover_tools/record_role_portal_answers.py`): `role_sharing_mine` (GET 200: a practice farmer, her name offered
  * and not given, her phone and village `field_not_held`), `role_sharing_given` (POST 201: her yes, shown in Marathi) and
- * `role_sharing_ended` (POST 200: her stop). HER FIXTURES DO NOT HOLD THEM YET (the re-recorder of R2-2 copied no sharing
- * answer): the main session copies them into tests/fixtures/aiaic under these names. Until then a run names AIAIC's
- * recorded_trade folder of that commit in `AIAIC_TEST_RECORDED_TRADE`, and each file read from there is held to the sha256
- * of its LF text at b4ebc76 (`PINNED`); a file in her fixtures is held to the trade manifest's sha256. With neither the
- * suite fails, naming the file: never a silent skip.
+ * `role_sharing_ended` (POST 200: her stop). Her fixtures hold them under these names, copied by AIAIC's re-recorder
+ * (`reports/handover_tools/rerecord_annapoorna_fixtures.py`, which runs the role recorder since AIAIC 2a183d1, 13 Nov
+ * 2026), each held to the sha256 her trade manifest names. A file missing from her fixtures, or named by no manifest,
+ * fails the suite, naming the file: never a silent skip, and never a folder named by hand.
  *
  * DERIVED, IN MEMORY, AND SAID IN EACH TEST: the positions of AIAIC's settings no recording holds (the owner's direction of
  * 12 Nov: every default changeable, the app working in every position): her yes as AIAIC's next read says it after its 201
@@ -100,12 +99,12 @@ process.on("unhandledRejection", (e) => {
 
 // ------------------------------------------------------------------------- AIAIC's recordings, held to their bytes
 
-/** The sha256 of each recording's LF text at AIAIC's b4ebc76 (`aiaic-frontend/src/test/recorded_trade/<name>.json`). */
-const PINNED: Record<string, string> = {
-  role_sharing_mine: "e5b69fe183232e793c66fd8ede19fb0d2a09aeba70ed20d583b2d29827b0a636",
-  role_sharing_given: "ef9ca70584133081b0903580f267c6b5a7e767e453d62dac71cc372d5a1db54f",
-  role_sharing_ended: "68bc7eaf603625b233548cf3958211619597d5d0354312cb43a454c33688e51c",
-};
+/** AIAIC's three sharing recordings this suite reads (each from her fixtures, `recording` below). */
+const SHARING_RECORDINGS = [
+  "role_sharing_mine",
+  "role_sharing_given",
+  "role_sharing_ended",
+] as const;
 /** Where each recording was read from, said in the run's first test. */
 const readFrom: Record<string, string> = {};
 const lfSha = (file: string) =>
@@ -114,29 +113,18 @@ const lfSha = (file: string) =>
     .digest("hex");
 function recording(name: string): Record<string, unknown> {
   const hers = path.join(FIXTURES, `${name}.json`);
-  if (fs.existsSync(hers)) {
-    const manifest = JSON.parse(
-      fs.readFileSync(path.join(FIXTURES, "trade_recording_manifest.json"), "utf-8"),
-    ) as { files: Record<string, { sha256?: string }> };
-    const held = manifest.files[`${name}.json`]?.sha256;
-    ok(
-      held,
-      `${name}.json is in her fixtures but named by no manifest: copy it by the re-recorder`,
-    );
-    assert.equal(lfSha(hers), held, `${name}.json is not the file the trade manifest names`);
-    readFrom[name] = "her fixtures (the trade manifest's sha256)";
-    return JSON.parse(fs.readFileSync(hers, "utf-8")) as Record<string, unknown>;
-  }
-  const dir = process.env["AIAIC_TEST_RECORDED_TRADE"];
   ok(
-    dir,
-    `${name}.json: not in her fixtures yet (the main session copies AIAIC's recorded_trade/${name}.json there by the re-recorder); until then name AIAIC's recorded_trade folder of b4ebc76 in AIAIC_TEST_RECORDED_TRADE`,
+    fs.existsSync(hers),
+    `${name}.json is not in her fixtures: make them again by AIAIC's re-recorder (reports/handover_tools/rerecord_annapoorna_fixtures.py), which copies it from AIAIC's role recorder`,
   );
-  const file = path.join(dir, `${name}.json`);
-  ok(fs.existsSync(file), `${file}: not there`);
-  assert.equal(lfSha(file), PINNED[name], `${file} is not AIAIC's recording at b4ebc76`);
-  readFrom[name] = `AIAIC's recorded_trade at b4ebc76 (${dir}), its pinned sha256`;
-  return JSON.parse(fs.readFileSync(file, "utf-8")) as Record<string, unknown>;
+  const manifest = JSON.parse(
+    fs.readFileSync(path.join(FIXTURES, "trade_recording_manifest.json"), "utf-8"),
+  ) as { files: Record<string, { sha256?: string }> };
+  const held = manifest.files[`${name}.json`]?.sha256;
+  ok(held, `${name}.json is in her fixtures but named by no manifest: copy it by the re-recorder`);
+  assert.equal(lfSha(hers), held, `${name}.json is not the file the trade manifest names`);
+  readFrom[name] = "her fixtures (the trade manifest's sha256)";
+  return JSON.parse(fs.readFileSync(hers, "utf-8")) as Record<string, unknown>;
 }
 
 // ------------------------------------------------------------------------------------------------ the runner
@@ -529,7 +517,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     const raw = MINE["answer"] as Raw;
     assert.equal(nameOf(raw).offered, true, "the recording: her name offered");
     assert.equal(nameOf(raw).shared, false, "the recording: not given");
-    for (const name of Object.keys(PINNED)) ok(readFrom[name], `${name} read: ${readFrom[name]}`);
+    for (const name of SHARING_RECORDINGS) ok(readFrom[name], `${name} read: ${readFrom[name]}`);
     const p = await mount("en", mineRaw());
     try {
       assert.equal(p.choice(), "ask", "asked");
