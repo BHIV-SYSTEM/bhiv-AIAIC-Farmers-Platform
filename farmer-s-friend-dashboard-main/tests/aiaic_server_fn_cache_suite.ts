@@ -4,6 +4,8 @@
  *
  * - A server function's answer (her sale, her money, her sharing) goes out with `Cache-Control: no-store`, whatever it
  *   said before, error answers too, with its status, words and other headers unchanged.
+ * - Her cookies go out one by one (two Set-Cookie headers, a comma in one's Expires); an answer with no body goes with
+ *   none, and a streamed answer stays a stream (R2-4's VFX2-2).
  * - Pages and the app's own files keep their headers: a phone still keeps the app's files.
  * - A path that only looks like the base is not one.
  * - The base is TanStack Start's own: `vite.config.ts` sets no server-function base and no router basepath.
@@ -80,6 +82,74 @@ async function main(): Promise<void> {
     const after = withNoStoreForServerFns(`${SERVER_FN_BASE}x`, answer('{"ok":false}', 500, {}));
     equal(after.headers.get("cache-control"), "no-store", "cache-control");
     equal(after.status, 500, "status");
+  });
+
+  // HER COOKIES GO THROUGH THE RULE WHOLE (R2-4's VFX2-2): her identity module sets her session, her device id and its
+  // note on a server function's answer (aiaic-identity.server.ts, through h3's setCookie), so two Set-Cookie headers can
+  // ride on one answer. Each must go out as its own header: a cookie's Expires holds a comma, so two joined into one
+  // header are not two cookies again. The values are stand-ins, no one's.
+  await test("her two cookies go out one by one after the rule: two Set-Cookie headers, one with a comma in its Expires, each whole", async () => {
+    const cookies = [
+      "aiaic_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax",
+      "aiaic_note=signed_out; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax",
+    ];
+    const headers = new Headers({ "content-type": "application/json", "x-tss-serialized": "true" });
+    for (const cookie of cookies) headers.append("set-cookie", cookie);
+    const after = withNoStoreForServerFns(
+      `${SERVER_FN_BASE}abc123`,
+      new Response('{"ok":true}', { status: 200, headers }),
+    );
+    equal(
+      JSON.stringify(after.headers.getSetCookie()),
+      JSON.stringify(cookies),
+      "her cookies, one header each, as they were set",
+    );
+    equal(after.headers.get("cache-control"), "no-store", "cache-control");
+    equal(after.headers.get("x-tss-serialized"), "true", "Start's own header");
+    equal(await after.text(), '{"ok":true}', "the words");
+  });
+
+  await test("a server function's answer with no body (204) goes out with none, its status kept, kept by no one", () => {
+    const after = withNoStoreForServerFns(`${SERVER_FN_BASE}x`, new Response(null, { status: 204 }));
+    equal(after.status, 204, "status");
+    equal(after.body, null, "no body");
+    equal(after.headers.get("cache-control"), "no-store", "cache-control");
+  });
+
+  await test("a server function's streamed answer stays a stream: its first part is handed on before its second is written", async () => {
+    const source: { push: ReadableStreamDefaultController<Uint8Array> | null } = { push: null };
+    const stream = new ReadableStream<Uint8Array>({
+      start: (controller) => {
+        source.push = controller;
+      },
+    });
+    const after = withNoStoreForServerFns(
+      `${SERVER_FN_BASE}x`,
+      new Response(stream, { status: 200, headers: { "content-type": "application/x-tss-framed" } }),
+    );
+    equal(after.headers.get("cache-control"), "no-store", "cache-control");
+    const reader = after.body?.getReader();
+    const push = source.push;
+    if (!reader || !push) throw new Error("the answer holds no stream");
+    const bytes = new TextEncoder();
+    const text = new TextDecoder();
+    push.enqueue(bytes.encode("part 1"));
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const first = await Promise.race([
+      reader.read(),
+      new Promise<"held">((done) => {
+        timer = setTimeout(() => done("held"), 2000);
+      }),
+    ]);
+    clearTimeout(timer);
+    if (first === "held")
+      throw new Error("the first part was held back until the stream ends: the answer is no stream");
+    equal(text.decode(first.value), "part 1", "the first part, as it was written");
+    push.enqueue(bytes.encode("part 2"));
+    push.close();
+    const second = await reader.read();
+    equal(text.decode(second.value), "part 2", "the second part");
+    equal((await reader.read()).done, true, "then the end");
   });
 
   await test("pages keep their own headers", () => {
