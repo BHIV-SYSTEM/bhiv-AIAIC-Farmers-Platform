@@ -10,9 +10,31 @@
  */
 export const SERVER_FN_BASE = "/_serverFn/";
 
-/** True for a request to one of her server functions. */
+/**
+ * The path as TanStack Start reads it before it routes the request (router-core's `decodePath`, which `getNormalizedURL`
+ * runs in `createStartHandler`): its escapes decoded with `decodeURI`, so `/%5FserverFn/<id>` is served as a server
+ * function too (R2-4's VFX2-3). A path holding a malformed escape is read as Start reads it then: each escape that decodes
+ * on its own is decoded and the malformed ones are kept (Start takes the function's id from the first part after the
+ * base, so `/%5FserverFn/<id>/%` still names that function). It never throws: every request's path passes through here.
+ */
+function asStartReadsIt(pathname: string): string {
+  try {
+    return decodeURI(pathname);
+  } catch {
+    return pathname.replace(/%[0-9A-F]{2}/gi, (escape) => {
+      try {
+        return decodeURI(escape);
+      } catch {
+        return escape;
+      }
+    });
+  }
+}
+
+/** True for a request to one of her server functions: its path as it came, or as TanStack Start reads it, begins with
+ *  the base. */
 export function isServerFnPath(pathname: string, base: string = SERVER_FN_BASE): boolean {
-  return pathname.startsWith(base);
+  return pathname.startsWith(base) || asStartReadsIt(pathname).startsWith(base);
 }
 
 /** The answer as it was, but for a server function's: that one with `Cache-Control: no-store` in place of its own. */

@@ -8,6 +8,8 @@
  *   none, and a streamed answer stays a stream (R2-4's VFX2-2).
  * - Pages and the app's own files keep their headers: a phone still keeps the app's files.
  * - A path that only looks like the base is not one.
+ * - The path is read as TanStack Start reads it (decoded), so `/%5FserverFn/<id>` gets no-store too; on a sweep of paths
+ *   the rule says a server function exactly when Start's own `getNormalizedURL` routes one (R2-4's VFX2-3).
  * - The base is TanStack Start's own: `vite.config.ts` sets no server-function base and no router basepath.
  * - `src/server.ts` passes every answer of its handler through the rule.
  *
@@ -16,6 +18,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+// TanStack Start's own reading of a request's URL (createStartHandler routes by it), from router-core's public export
+import { getNormalizedURL } from "@tanstack/router-core/ssr/server";
 
 import {
   SERVER_FN_BASE,
@@ -110,7 +115,10 @@ async function main(): Promise<void> {
   });
 
   await test("a server function's answer with no body (204) goes out with none, its status kept, kept by no one", () => {
-    const after = withNoStoreForServerFns(`${SERVER_FN_BASE}x`, new Response(null, { status: 204 }));
+    const after = withNoStoreForServerFns(
+      `${SERVER_FN_BASE}x`,
+      new Response(null, { status: 204 }),
+    );
     equal(after.status, 204, "status");
     equal(after.body, null, "no body");
     equal(after.headers.get("cache-control"), "no-store", "cache-control");
@@ -125,7 +133,10 @@ async function main(): Promise<void> {
     });
     const after = withNoStoreForServerFns(
       `${SERVER_FN_BASE}x`,
-      new Response(stream, { status: 200, headers: { "content-type": "application/x-tss-framed" } }),
+      new Response(stream, {
+        status: 200,
+        headers: { "content-type": "application/x-tss-framed" },
+      }),
     );
     equal(after.headers.get("cache-control"), "no-store", "cache-control");
     const reader = after.body?.getReader();
@@ -143,7 +154,9 @@ async function main(): Promise<void> {
     ]);
     clearTimeout(timer);
     if (first === "held")
-      throw new Error("the first part was held back until the stream ends: the answer is no stream");
+      throw new Error(
+        "the first part was held back until the stream ends: the answer is no stream",
+      );
     equal(text.decode(first.value), "part 1", "the first part, as it was written");
     push.enqueue(bytes.encode("part 2"));
     push.close();
@@ -176,10 +189,86 @@ async function main(): Promise<void> {
   });
 
   await test("a path that only looks like the base is not one", () => {
-    for (const p of ["/_serverFnX/abc", "/x/_serverFn/abc", "/_serverfn/abc", "/_serverFn"]) {
+    for (const p of [
+      "/_serverFnX/abc",
+      "/x/_serverFn/abc",
+      "/_serverfn/abc",
+      "/_serverFn",
+      // the same, escaped (R2-4's VFX2-3): read as TanStack Start reads them, still not the base
+      "/%5FserverFnX/abc",
+      "/x/%5FserverFn/abc",
+      "/%5Fserverfn/abc",
+      "/%5FserverFn",
+      "/%255FserverFn/abc", // an escaped percent sign: decoded once, never into the base
+      "/%5FserverFn%2Fabc", // an escaped slash: Start keeps it escaped, and the base ends in a slash of its own
+      "/%5FserverFn%/abc", // a malformed escape inside the base
+      "/%5C_serverFn/abc", // an escaped backslash: Start keeps it escaped
+      "//_serverFn/abc", // a doubled slash: Start answers it with a redirect, never as a server function
+    ]) {
       equal(isServerFnPath(p), false, p);
     }
     equal(isServerFnPath(`${SERVER_FN_BASE}abc`), true, "the base itself");
+  });
+
+  // THE PATH AS TANSTACK START READS IT (R2-4's VFX2-3): Start decodes a request's path before it routes it
+  // (`getNormalizedURL`), so an escaped base is served as a server function, and its answer is kept by no one either.
+  await test("a server function's path as TanStack Start reads it gets no-store too: the base escaped, in capitals or not, a letter of it escaped, and a malformed escape after the function's id", () => {
+    for (const p of [
+      "/%5FserverFn/abc123",
+      "/%5fserverFn/abc123",
+      "/%5F%73erverFn/abc123",
+      "/_serverFn/abc123/%",
+      "/%5FserverFn/abc123/%",
+      "/%5FserverFn/abc123/%E0%A4",
+    ]) {
+      equal(isServerFnPath(p), true, p);
+      const before = answer("{}", 200, { "cache-control": "public, max-age=600" });
+      equal(
+        withNoStoreForServerFns(p, before).headers.get("cache-control"),
+        "no-store",
+        `${p}: cache-control`,
+      );
+    }
+  });
+
+  await test("a malformed escape in a page's path never throws: the page keeps its own answer", () => {
+    for (const page of ["/sell/%", "/listing/%E0%A4", "/%ZZ"]) {
+      const before = answer("<html></html>", 200, { "cache-control": "private, max-age=0" });
+      equal(withNoStoreForServerFns(page, before), before, `${page}: the same answer`);
+    }
+  });
+
+  await test("the rule says a server function exactly when TanStack Start serves one: each path of a sweep, read as her server reads it and as Start's own getNormalizedURL reads it", () => {
+    const paths: string[] = [];
+    for (const head of ["/", "//", "/x/"])
+      for (const under of ["_", "%5F", "%5f", "%255F", "%5C_", ""])
+        for (const s of ["s", "%73", "S"])
+          for (const rest of ["erverFn", "erverfn", "erverFnX"])
+            for (const slash of ["/", "%2F", "", "%/"])
+              for (const tail of ["abc123", "abc123/%", "abc123/%E0%A4", "%ZZ", ""])
+                paths.push(`${head}${under}${s}${rest}${slash}${tail}`);
+    let served = 0;
+    const wrong: string[] = [];
+    for (const p of paths) {
+      const requestUrl = new Request(`http://localhost${p}`).url;
+      // createStartHandler: a doubled slash is answered with a redirect; else a path under the base is a server function
+      const start = getNormalizedURL(requestUrl);
+      const startServes =
+        !start.handledProtocolRelativeURL && start.url.pathname.startsWith(SERVER_FN_BASE);
+      if (startServes) served += 1;
+      const ours = isServerFnPath(new URL(requestUrl).pathname);
+      if (ours !== startServes) wrong.push(`${p}: the rule ${ours}, Start ${startServes}`);
+    }
+    equal(
+      wrong.slice(0, 5).join("; "),
+      "",
+      `paths the rule reads otherwise than Start (${wrong.length} of ${paths.length})`,
+    );
+    equal(
+      served > 0 && served < paths.length,
+      true,
+      `the sweep holds both kinds (${served} of ${paths.length} served as server functions)`,
+    );
   });
 
   await test("the base is TanStack Start's own: the Vite config sets no server-function base or basepath", () => {
