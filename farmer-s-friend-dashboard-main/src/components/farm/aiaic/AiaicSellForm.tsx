@@ -355,6 +355,17 @@ function SellForm({
   // before React draws "Sending...", sends nothing (as the sharing card's press does); it goes with `sending`, on every way
   // out of the press, a throw included (R2-4's VAP404-4: a `finally`, so no answer, however malformed, leaves it stuck)
   const onItsWay = useRef(false);
+  // SHE MAY HAVE LEFT BEFORE THE ANSWER LANDS (R2-4's VFX2-6): the answer is still kept (the press key's holder, her
+  // records read again), but the flow's moves of the address (its end; a refused field's step) are made only while her
+  // form is on the screen. The flow's `navigate` is the router's: after she left, it would act on the page she is on by
+  // then, and drop that page's own `?step=` (the storage page's).
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const send = async (confirmed: boolean) => {
     if (!district || !crop || qty === null || price === null) return;
     if (onItsWay.current) return;
@@ -387,7 +398,7 @@ function SellForm({
         setListed(r.data.listing_id);
         setAskBack(null);
         setPressKey(newPressKey());
-        flow.end();
+        if (mounted.current) flow.end();
       } else if (r.problem.code === "price_far_from_market" && !confirmed) {
         // AIAIC kept nothing and no key: the SAME press goes again once she says her price is right.
         const range = r.problem.facts?.["range"];
@@ -400,7 +411,7 @@ function SellForm({
         else setRetry(!confirmed);
         // a refusal that names a field opens that field's step again, with AIAIC's words in it (C.3)
         const step = stepOfRefusal(r.problem);
-        if (step) void flow.change(step);
+        if (step && mounted.current) void flow.change(step);
       }
     } finally {
       setSending(false);

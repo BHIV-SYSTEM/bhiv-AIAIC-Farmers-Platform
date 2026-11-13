@@ -196,6 +196,8 @@ async function loadApp() {
   const { runWithStartContext } = await import("@tanstack/start-storage-context");
   const { DICTS, I18nProvider, useI18n } = await import("../src/lib/i18n");
   const { Route: SaleRoute } = await import("../src/routes/listing.new");
+  // her storage page, which keeps its own step in the address (KA9L: her sale's answer lands after she went there)
+  const { Route: StorageRoute } = await import("../src/routes/storage");
   const { scanFirst } = await import("../src/lib/aiaic-account.functions");
   const { getMyTrade, getSalePrice, getTripTalukas, giveMyDestination, sellProduce } =
     await import("../src/lib/aiaic-trade.functions");
@@ -216,6 +218,7 @@ async function loadApp() {
     I18nProvider,
     useI18n,
     SaleRoute,
+    StorageRoute,
     scanFirst,
     getMyTrade,
     getSalePrice,
@@ -526,9 +529,15 @@ function suite(app: App, window: Window & typeof globalThis) {
       path: "/listing/new",
       getParentRoute: () => root,
     } as never);
+    // her storage page beside it: she may go there while her sale is on its way (KA9L)
+    const storage = app.StorageRoute.update({
+      id: "/storage",
+      path: "/storage",
+      getParentRoute: () => root,
+    } as never);
     const entries = [address];
     const router = R.createRouter({
-      routeTree: root.addChildren([page as never]),
+      routeTree: root.addChildren([page as never, storage as never]),
       history: R.createMemoryHistory({ initialEntries: entries }),
     });
     const container = document.createElement("div");
@@ -1881,6 +1890,60 @@ function suite(app: App, window: Window & typeof globalThis) {
         noEl(c.q('[data-testid="sell-flow"]'), "nothing of the sale beside the card");
       } finally {
         await c.unmount();
+      }
+    });
+  });
+
+  // HER SALE'S ANSWER CAN LAND AFTER SHE HAS LEFT ITS PAGE (R2-4's VFX2-6): its flow's moves of the address are made only
+  // while her form is on the screen. The flow's navigate is the router's, so after she left, the flow's end would drop
+  // the step of the page she is on by then: her storage page, whose steps live in its address too.
+  test("KA9L her sale's answer lands after she has left for her storage page and opened a step there: the storage page's step stays in its address and stays open, she stays on that page, and her sale was sent once", async () => {
+    await inStart(async () => {
+      const p = await toCheck(40);
+      let letItLand: () => void = () => undefined;
+      try {
+        assert.equal(p.search()["step"], "check", "her sale's step in its address");
+        saleHeld = new Promise<void>((landed) => {
+          letItLand = landed;
+        });
+        sales.length = 0;
+        await tap(press(p), "her sale's button");
+        assert.equal(sales.length, 1, "her sale is on its way");
+        // she leaves while it is on its way (a link of her app's menu), for her storage page, in her language
+        await act(async () => {
+          await p.router.navigate({
+            to: "/storage",
+            search: { state: "mh", region: "nashik" },
+          } as never);
+        });
+        await settle(300);
+        noEl(p.q('[data-testid="sell-flow"]'), "her sale's page is gone");
+        const stateAt = (n: number) =>
+          p.q(`[data-testid="store-step-${n}"]`)?.getAttribute("data-state") ?? null;
+        await waitFor(() => stateAt(2) === "open", "the storage page's crop step, open");
+        const onion = [
+          ...(p.q('[data-testid="store-crops"]')?.querySelectorAll("button") ?? []),
+        ].find((b) => (b.textContent ?? "").includes(ONION_MR));
+        await tap(onion, "onion, on her storage page");
+        await waitFor(() => stateAt(3) === "open", "the storage page's quantity step, open");
+        assert.equal(p.search()["step"], "quantity", "the storage page's step in its address");
+        await act(async () => {
+          letItLand();
+        });
+        saleHeld = null;
+        await settle(300);
+        assert.equal(sales.length, 1, "her sale was sent once");
+        assert.equal(p.router.state.location.pathname, "/storage", "she stays on her storage page");
+        assert.equal(
+          p.search()["step"],
+          "quantity",
+          "the storage page's step is still in its address once her sale's answer has landed",
+        );
+        assert.equal(stateAt(3), "open", "and that step is still open");
+      } finally {
+        letItLand();
+        saleHeld = null;
+        await p.unmount();
       }
     });
   });
