@@ -295,6 +295,27 @@ async function main(): Promise<void> {
     );
   });
 
+  // THE ANSWER REACHES THE RULE UNREAD (R2-4's VFX2-4): the rule hands the answer's body on as it is, and a body already
+  // read makes it throw, so server.ts's catch would send the error page in place of her answer. Nothing reads the
+  // handler's answer today but through a clone; server.ts says so at the wrapper, and this holds both.
+  await test("src/server.ts says at the wrapper that the handler's answer must reach it with its body unread, and reads that answer only through a clone", () => {
+    const server = fs.readFileSync(path.join(APP, "src", "server.ts"), "utf-8");
+    equal(
+      server.includes("The handler's answer must reach the wrapper with its body unread"),
+      true,
+      "server.ts says, at the wrapper, that the answer's body stays unread",
+    );
+    equal(
+      server.includes("await response.clone().text()"),
+      true,
+      "server.ts reads the answer's words through a clone",
+    );
+    const read = /response\.(?:text|json|arrayBuffer|blob|formData|bytes)\(|response\.body\b/.exec(
+      server,
+    );
+    equal(read?.[0] ?? null, null, "server.ts reads the handler's answer itself, not a clone");
+  });
+
   const junit = process.env["AIAIC_TEST_JUNIT"];
   if (junit) {
     const xml = (s: string) =>
