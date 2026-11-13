@@ -1357,6 +1357,67 @@ function suite(app: App, window: Window & typeof globalThis) {
       }
     });
   });
+  // R2-4's VAP404-3 (VERIFY's VP6): the check step gives its press back when the press's promise is REJECTED too, as its
+  // comment says ("until that promise settles"). No caller rejects today (her sale's press settles either way, and the
+  // kit flow above turns a rejection into an answer), so the check step is drawn alone here, its press a stand-in whose
+  // promise this case rejects.
+  test("KA5D3 C.8 on the kit's check step: a press whose promise is rejected takes a press again once it settles: two taps in the same moment make one press; after the rejection a tap is taken; nothing ends in an unhandled rejection", async () => {
+    await inStart(async () => {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      const root = app.createRoot(container);
+      const sent: number[] = [];
+      const refusals: ((e: unknown) => void)[] = [];
+      const onPress = () => {
+        sent.push(Date.now());
+        return new Promise<void>((_answered, refused) => {
+          refusals.push(refused);
+        });
+      };
+      await act(async () => {
+        root.render(
+          h(app.I18nProvider, {
+            initialLang: "en",
+            children: h(kit.CheckStep, {
+              testid: "rejected",
+              parts: [],
+              action: "Send ₹4,350 to UPI ••••",
+              onPress,
+            }),
+          }),
+        );
+      });
+      try {
+        const button = container.querySelector(
+          '[data-testid="rejected-press"]',
+        ) as HTMLButtonElement | null;
+        ok(button, "the check step's one button");
+        await land(button);
+        await act(async () => {
+          button.click();
+          button.click();
+        });
+        await settle();
+        assert.equal(sent.length, 1, "two taps in the same moment: one press");
+        await tap(button, "a tap while the press is on its way");
+        assert.equal(sent.length, 1, "a tap while it is on its way sends nothing");
+        await act(async () => {
+          for (const refused of refusals.splice(0))
+            refused(new Error("the press's request was refused"));
+        });
+        await settle();
+        await tap(button, "a press after the rejection");
+        assert.equal(sent.length, 2, "after a rejected press, a press is taken again");
+        await act(async () => {
+          for (const refused of refusals.splice(0)) refused(new Error("refused again"));
+        });
+        await settle();
+      } finally {
+        await act(async () => root.unmount());
+        container.remove();
+      }
+    });
+  });
 
   // ======================================================================================== KA6
   test("KA6 K6: a crisis typed in the storage box gets the helplines first, on its Continue, on Skip and on a chip, and the flow does not move", async () => {
