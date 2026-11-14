@@ -174,6 +174,7 @@ import { useMandiTrip } from "../src/lib/aiaic-trip";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
 import { getPlacesDistricts } from "../src/lib/places.functions";
 import { PAGE_UPDATED, commissionSentence } from "../src/lib/business";
+import { parsePolicy, type Inline } from "../src/lib/policy-text";
 import { pricingOf, rupeeRange, type TripWays } from "../src/lib/aiaic-trade";
 
 import {
@@ -7107,37 +7108,57 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
     return (end < 0 ? text.slice(from) : text.slice(from, end)).replace(/\.$/, "");
   };
   const listAfter = (text: string, lead: string): string[] => partsOf(bodyAfter(text, lead));
-  // FOUR LISTS since AIAIC's R2-4 lane FIX-5 (its skeptics' AE4-03-V7): the third, what an officer reads of a consent
+  // FOUR LISTS since AIAIC's R2-4 lane FIX-5 (its skeptics' AE4-03-V7): the third, what an officer reads of a farmer's
+  // consent ("of a farmer's consent" since its lane FIX-6, AE4-03-V15)
   const RULE = [
     "Of money, an officer reads only the trade's own prices and amounts: ",
     "and only while its switch is on: ",
-    "Of a consent, an officer reads only ",
+    "Of a farmer's consent, an officer reads only ",
     "An officer never sees ",
   ];
   const PAGE = [
     "Of money, they see only the trade's own prices and amounts: ",
     "and only while AIAIC's team allows it (by default it does): ",
-    "Of a consent, they see only ",
+    "Of a farmer's consent, they see only ",
     "They never see ",
   ];
   const page = fs
     .readFileSync(path.join(APP, "src", "content", "policies", "privacy.md"), "utf-8")
     .replace(/\r\n/g, "\n");
   const lines = page.split("\n");
-  const officers = lines.find((l) => l.startsWith("- **What officers see of your sales:**"));
-  assert.ok(officers, "her page names the officers");
+  assert.equal(
+    lines.filter((l) => l.startsWith("- **What officers see of your sales:**")).length,
+    1,
+    "her page names the officers, on one line",
+  );
+  // HER OFFICERS' ITEM AS HER PAGE DRAWS IT (AIAIC's R2-4 lane FIX-6, its skeptics' AE4-03-V13: the pin held only the
+  // item's first physical line, while her own `parsePolicy` joins an indented next line into the item): the one list
+  // item that opens with the officers' lead, its words read through her parser (a bold part as its words)
+  const wordsOf = (inline: Inline[]): string =>
+    inline.map((n) => (n.kind === "text" ? n.text : wordsOf(n.children))).join("");
+  const drawn = parsePolicy(page)
+    .flatMap((b) => (b.kind === "ul" ? b.items.map(wordsOf) : []))
+    .filter((item) => item.startsWith("What officers see of your sales:"));
+  assert.equal(drawn.length, 1, "one officers' item, as her page draws it");
+  const officers = drawn[0];
   const [prices, states, consent, never] = RULE.map((lead) => listAfter(rule.description, lead));
   const [pagePrices, pageStates, pageConsent, pageNever] = PAGE.map((lead) =>
     listAfter(officers, lead),
   );
   assert.ok(prices.length >= 4 && states.length >= 6 && never.length >= 4, "the rule's four lists");
-  // what an officer reads of a consent (every officer reads each farmer's consent state on the Farm stage's records)
+  // what an officer reads of a farmer's consent (every officer reads each farmer's consent state on the Farm stage's
+  // records, its moments, and who recorded it: she herself in her app, or AIAIC's team; AIAIC's lane FIX-6, its
+  // skeptics' AE4-03-V12), and never the words AIAIC's team recorded of how a consent was taken (for a farmer of her
+  // app, who recorded it is her consent's basis in substance, so the never list names no basis)
   assert.deepEqual(consent, [
-    "whether a farmer's consent stands",
+    "whether it stands",
     "when it was recorded or she withdrew it",
+    "whether she gave it herself in her app or AIAIC's team recorded it",
   ]);
   assert.ok(
-    never.includes("a consent's record (its basis and its words)") && !never.includes("a consent"),
+    never.includes("the words AIAIC's team recorded of how a consent was taken") &&
+      !never.includes("a consent") &&
+      !never.some((p) => p.includes("basis")),
   );
   // EACH LIST EQUALS THE RULE'S, AS A SET: nothing the rule names left out, nothing it does not name added
   assert.deepEqual(new Set(pagePrices), new Set(prices), "what they see of money");
@@ -7152,13 +7173,13 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
   const SENTENCES = [
     "Of money, an officer reads only the trade's own prices and amounts: ",
     "Of a payment, an officer reads only its states, never an amount, and only while its switch is on: ",
-    "Of a consent, an officer reads only ",
+    "Of a farmer's consent, an officer reads only ",
     "An officer never sees ",
   ];
   const HER_SENTENCES = [
     "Of money, they see only the trade's own prices and amounts: ",
     "Of a payment, they see only its states, never an amount, and only while AIAIC's team allows it (by default it does): ",
-    "Of a consent, they see only ",
+    "Of a farmer's consent, they see only ",
     "They never see ",
   ];
   const bodies = SENTENCES.map((lead) => bodyAfter(rule.description, lead));
@@ -7168,14 +7189,14 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
     "the rule, whole",
   );
   const HER_OPENING =
-    "- **What officers see of your sales:** your sales are kept in AIAIC's farmers' workspace, where the officers of " +
+    "What officers see of your sales: your sales are kept in AIAIC's farmers' workspace, where the officers of " +
     "an organisation working with AIAIC (on its operations portal) are told of an offer you accept and may record your " +
     "order's steps (never its delivery), as AIAIC's team allows by AIAIC's own settings. They see your lots' and " +
     "orders' crop, quantity and district and your farmer record's id, never your name, your phone number or your account.";
   assert.equal(
     officers,
     [HER_OPENING, ...HER_SENTENCES.map((lead, i) => `${lead}${bodies[i]}.`)].join(" "),
-    "her officers' line, whole",
+    "her officers' item, whole, as her page draws it",
   );
   // of her: never her name (an officer never reads the name of a farmer who sells in her own app), her phone or account
   assert.ok(
