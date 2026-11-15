@@ -112,7 +112,35 @@ export type AiaicStep = {
   detail?: Record<string, string | number | boolean> | null | undefined;
   /** What a process lost (sorting, drying), as recorded: quintals and the share of what went in. */
   loss?: { q: number; pct: number } | null | undefined;
+  /** How the step is known, AIAIC's code (`evidence_kind`, Round 2): `buyer_confirmed` is the buyer's own "It arrived";
+   * null when AIAIC sent none or a code not in its list (`EVIDENCE_KINDS`). */
+  evidence_kind?: string | null | undefined;
 };
+
+/** HOW A STEP IS KNOWN, AIAIC's closed list (its `trade.store.EVIDENCE_KINDS`, Round 2): a code not in it is none. */
+export const EVIDENCE_KINDS = [
+  "provider_reference",
+  "document_reference",
+  "operator_observed",
+  "partner_observed",
+  "buyer_confirmed",
+  "simulated",
+] as const;
+export function evidenceKindOf(v: unknown): string | null {
+  return typeof v === "string" && (EVIDENCE_KINDS as readonly string[]).includes(v) ? v : null;
+}
+/**
+ * "THE BUYER SAID IT ARRIVED" (Round 2, R2-3; DESIGN 4.4): the delivery recorded by the buyer's own word "received" (AIAIC's
+ * `buyer_confirmed`, a real order's; a practice order's says `simulated`, never this), on her sale's journey and in her
+ * step notice alike: only a delivery done, only on AIAIC's own code.
+ */
+export function buyerSaidItArrived(
+  stage: string | null | undefined,
+  status: string | null | undefined,
+  evidence: string | null | undefined,
+): boolean {
+  return stage === "delivered" && status === "done" && evidence === "buyer_confirmed";
+}
 
 export type AiaicPayment = {
   state: string;
@@ -622,12 +650,48 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
  * never hers, ONLY where AIAIC says so for the order (`payment.not_onward`, the server's own sentence), and only once a
  * link was made. Never worked out here: a collect order's money reaches her through AIAIC's own send (the re-check of 28
  * Oct 2026, MONEY-06), which no rule of this app could tell from the link.
+ *
+ * NO LINK YET, SAID AS AIAIC SAYS IT NOW (the walk of 13 Nov 2026, WF-05: right after she accepted, her page told her to
+ * agree the payment with the buyer before she hands over, while AIAIC was making the buyer's link by itself). AIAIC says
+ * per order whether a link can still come, in `money.why_not_report` (its `payout_store.her_report_refusal`):
+ * `payment_route_is_razorpay` with no link made is a link BEING MADE now (a live link is a made one); `link_still_possible`,
+ * AIAIC can still make it, by itself or by its team. Only where AIAIC says no link can be made, the payment being between
+ * her and the buyer (`noLinkByAiaic`), is she told to agree it with the buyer before she hands over. Whatever else AIAIC
+ * says (a real order on a server that takes no word of a payment outside AIAIC, `direct_payment_not_approved`; a code this
+ * app does not know; no money block; a sale called off) is said as the payment's own state ("No payment yet"): never a
+ * promise of a link, never "agree it by hand".
  */
 export function paymentLine(order: AiaicOrder): { key: string; state: string; notOnward: boolean } {
   const notOnward = order.payment.link_made && Boolean(order.payment.not_onward);
-  if (!order.payment.link_made)
-    return { key: "aiaic.pay.no_link", state: order.payment.state, notOnward };
-  return { key: `aiaic.pay.state.${order.payment.state}`, state: order.payment.state, notOnward };
+  if (order.payment.link_made)
+    return { key: `aiaic.pay.state.${order.payment.state}`, state: order.payment.state, notOnward };
+  return { key: noLinkKey(order), state: order.payment.state, notOnward };
+}
+
+/**
+ * AIAIC SAYS NO LINK CAN BE MADE FOR THIS ORDER, its payment being between her and the buyer (WF-05): AIAIC's
+ * `not_handed_over_yet` (no link possible, her produce not handed over yet), her own word of a payment outside AIAIC taken
+ * (`can_report`: only where no link can be made), or the payment recorded as made outside AIAIC (`route: direct`).
+ */
+export function noLinkByAiaic(order: AiaicOrder): boolean {
+  const m = order.money;
+  return Boolean(
+    m &&
+    (m.route === "direct" ||
+      m.can_report === true ||
+      m.why_not_report?.code === "not_handed_over_yet"),
+  );
+}
+
+/** Her payment line while no link is made (`paymentLine`), from AIAIC's own facts of the order. */
+function noLinkKey(order: AiaicOrder): string {
+  if (order.order_state !== "cancelled") {
+    const code = order.money?.why_not_report?.code ?? null;
+    if (code === "payment_route_is_razorpay") return "aiaic.pay.link_being_made";
+    if (code === "link_still_possible") return "aiaic.pay.link_by_aiaic";
+    if (noLinkByAiaic(order)) return "aiaic.pay.no_link";
+  }
+  return `aiaic.pay.state.${order.payment.state}`;
 }
 
 // --------------------------------------------------------------------------------------- her money, in words
@@ -1652,13 +1716,68 @@ export function moneyMoving(got: AiaicResult<MineForScreen> | undefined): boolea
  */
 export type MinePace = "money" | "live" | "opened";
 
-/** Milliseconds until the page reads the farmer's sale again by itself (`MinePace`), or `false` for never. */
+/**
+ * HER OWN ACCEPT, READ AGAIN SOON (the walk of 13 Nov 2026, WF-05): AIAIC sends her accept's answer FIRST and makes the
+ * buyer's payment link AFTER it (its `farmer_trade_routes.accept` runs the link once the answer is sent), so the read her
+ * press makes at once can come before the link, and the order page read her sale again only 15 s later. For
+ * `AFTER_ACCEPT_MS` after her own accept in this app (this phone's own clock, never compared with AIAIC's), the order page
+ * reads her sale every `AFTER_ACCEPT_EVERY_MS` while that order waits for a link AIAIC may yet make (`linkMayCome`).
+ */
+export const AFTER_ACCEPT_MS = 60_000;
+export const AFTER_ACCEPT_EVERY_MS = 3_000;
+/** Her accepts in this app: order id -> this phone's time of AIAIC's answer (only ids and times; nothing of hers). */
+const acceptedHere = new Map<string, number>();
+
+/** Her accept of an offer, answered by AIAIC with its order (the offer page's press): kept with this phone's time. */
+export function noteAccepted(orderId: string, at: number = Date.now()): void {
+  acceptedHere.set(orderId, at);
+}
+
+/** The orders she accepted in this app within `AFTER_ACCEPT_MS` of `now`; older ones (or a clock set back) forgotten. */
+export function acceptedRecently(now: number = Date.now()): ReadonlyMap<string, number> {
+  for (const [id, at] of acceptedHere)
+    if (at > now || now - at > AFTER_ACCEPT_MS) acceptedHere.delete(id);
+  return new Map(acceptedHere);
+}
+
+/**
+ * Whether AIAIC may yet make this order's link (WF-05): no link made, her sale not called off, no group sale's order (its
+ * link waits for the group's answers, the owner's D-239), and AIAIC has not said none can be made (`noLinkByAiaic`).
+ */
+export function linkMayCome(order: AiaicOrder): boolean {
+  if (order.payment.link_made || order.order_state === "cancelled") return false;
+  if (order.pool_id || order.pool) return false;
+  return !noLinkByAiaic(order);
+}
+
+/** An order she accepted here within `AFTER_ACCEPT_MS` of `now` that, in AIAIC's answer, still waits for its link. */
+export function linkAwaited(
+  got: AiaicResult<MineForScreen> | undefined,
+  accepted: ReadonlyMap<string, number>,
+  now: number,
+): boolean {
+  if (!got || !got.ok || accepted.size === 0) return false;
+  return got.data.mine.orders.some((o) => {
+    const at = accepted.get(o.order_id);
+    return at !== undefined && at <= now && now - at <= AFTER_ACCEPT_MS && linkMayCome(o);
+  });
+}
+
+/**
+ * Milliseconds until the page reads the farmer's sale again by itself (`MinePace`), or `false` for never: on the order
+ * page every 5 s while AIAIC's send of her money moves, every `AFTER_ACCEPT_EVERY_MS` for a minute after her own accept
+ * while its link may yet come (`linkAwaited`), else every 15 s; `accepted` and `now` are the phone's (given in tests).
+ */
 export function mineReadEvery(
   pace: MinePace,
   got: AiaicResult<MineForScreen> | undefined,
+  accepted: ReadonlyMap<string, number> = acceptedRecently(),
+  now: number = Date.now(),
 ): number | false {
   if (pace === "opened") return false;
-  return pace === "money" && moneyMoving(got) ? 5_000 : 15_000;
+  if (pace !== "money") return 15_000;
+  if (moneyMoving(got)) return 5_000;
+  return linkAwaited(got, accepted, now) ? AFTER_ACCEPT_EVERY_MS : 15_000;
 }
 
 /** What a sale page shows from its read of the farmer's records (`mineShown`). */
@@ -1710,7 +1829,72 @@ export type FromAiaic = {
   } | null;
   /** Her steps as AIAIC says them (a hand-recorded transfer is "sent", never "reached"). */
   steps?: { buyer_paid: boolean; sent: boolean; reached: boolean } | null;
+  /** What AIAIC holds for her now (Round 2, R2-2's `from_aiaic.holds`): null until the buyer has paid in full, on a sale
+   * called off, and once her money left AIAIC; absent from an AIAIC not yet updated. */
+  holds?: Holds | null;
 };
+
+/** WHY AIAIC STILL HOLDS HER MONEY, AIAIC's closed codes (`from_aiaic.holds.waits_for`, its `farmer_payout.WAITS_FOR`): the
+ * pickup to be recorded, her UPI ID or bank account, AIAIC's team's press, a problem reported after the pickup, AIAIC's
+ * team to send again, the payments provider preparing it, an answer not known. A code this app does not hold is read as
+ * `not_known` (fail closed, as AIAIC itself does). */
+export const WAITS_FOR = [
+  "pickup",
+  "your_details",
+  "aiaic_team",
+  "problem",
+  "aiaic_team_again",
+  "provider",
+  "not_known",
+] as const;
+export type WaitsFor = (typeof WAITS_FOR)[number];
+/** What AIAIC holds for her: HER OWN amount (G-20: never the buyer's total), since when, and why it waits. */
+export type Holds = { amount_inr: number | null; since: string | null; waits_for: WaitsFor };
+
+/** AIAIC's `holds` block, field by field (an unknown `waits_for` is `not_known`); null when it is not one. */
+export function holdsOf(raw: unknown): Holds | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const code = typeof r["waits_for"] === "string" ? r["waits_for"] : "";
+  return {
+    amount_inr:
+      typeof r["amount_inr"] === "number" && Number.isFinite(r["amount_inr"])
+        ? r["amount_inr"]
+        : null,
+    since: typeof r["since"] === "string" ? r["since"] : null,
+    waits_for: (WAITS_FOR as readonly string[]).includes(code) ? (code as WaitsFor) : "not_known",
+  };
+}
+
+/**
+ * WHAT AIAIC HOLDS FOR HER NOW, ONLY AS AIAIC SAYS IT (Round 2, R2-3; DESIGN 2h, A5): its `holds` block, never worked out
+ * here from her steps (why it waits needs AIAIC's facts: the pickup, her details, a dispute). On a sale called off, none,
+ * whatever a block says (G-28: its payment goes back to the buyer).
+ */
+export function holdsShown(money: FromAiaic | null | undefined, calledOff: boolean): Holds | null {
+  if (calledOff || !money) return null;
+  return money.holds ?? null;
+}
+
+/**
+ * HER MONEY'S FOUR STEPS (DESIGN 2h): the buyer pays (done when paid) -> AIAIC holds your money (done while AIAIC holds
+ * it, or once it left AIAIC) -> AIAIC sends your money (done only once it left AIAIC) -> it reaches your bank (done only
+ * on AIAIC's `reached`, the payments provider's own word). An AIAIC that does not say its steps ticks only that the buyer
+ * paid.
+ */
+export function moneySteps(
+  money: FromAiaic,
+  calledOff: boolean,
+): { key: "buyer_paid" | "holds" | "sending" | "reached"; done: boolean }[] {
+  const said = money.steps ?? { buyer_paid: money.buyer_paid, sent: false, reached: false };
+  const held = holdsShown(money, calledOff) !== null;
+  return [
+    { key: "buyer_paid", done: said.buyer_paid },
+    { key: "holds", done: held || said.sent || said.reached },
+    { key: "sending", done: said.sent },
+    { key: "reached", done: said.reached },
+  ];
+}
 /** The notice she is shown before she gives her UPI ID or bank account (`x_notice`): its version and its paragraphs. */
 export type XNotice = { version: string; en: string[]; mr: string[]; hi: string[] };
 /** Where her money goes, as a masked hint (`x_destination`). */
@@ -2290,4 +2474,96 @@ export function sendingLine(t: Words, order: AiaicOrder): string | null {
   if (!sending) return null;
   const key = `aiaic.money.status.${sendingSaid(sending)}`;
   return t(key) === key ? null : t(key, { rs: rupees(sending.amount_inr) });
+}
+
+// --------------------------------------------------------------- what buyers see of her, and her one choice (Round 2)
+
+/** WHAT BUYERS READ OF HER NOW, AIAIC's codes (`buyers_see_now`, its `trade.sharing.SEES_NOW`): the terms of her offers
+ * and orders, her district (or her state while AIAIC's district switch is off), and while her lots are listed to buyers
+ * their crop, quantity left, least sale and days, with the taluka, grade and asking price only while their switches are
+ * on. Her name is never in it: that is her own choice. */
+export const SEES_NOW = [
+  "offer_and_order_terms",
+  "district",
+  "state",
+  "lot_crop",
+  "lot_quantity_left",
+  "lot_min_lot",
+  "lot_days",
+  "lot_taluka",
+  "lot_grade",
+  "lot_asking_price",
+] as const;
+/** Why AIAIC does not offer her a field now, its codes (`trade.sharing.WHY_NOT`); her app words each one. */
+export const SHARE_WHY_NOT = [
+  "field_not_held",
+  "no_name_held",
+  "name_holds_a_number",
+  "switched_off",
+  "not_open_yet",
+  "grievance_contact_not_set",
+] as const;
+/** One personal field as AIAIC says it to her (route 4): offered or why not, what a buyer would read (`held_as`, hers
+ * only), whether her yes stands under the current notice, since when, and the notice version she said yes to. */
+export type ShareField = {
+  field: string;
+  offered: boolean;
+  why_not: string | null;
+  held_as: string | null;
+  shared: boolean;
+  since: string | null;
+  version_given: string | null;
+};
+/** HER SHARING, AS AIAIC ANSWERS IT (GET /farmer/trade/sharing, contract 17n), kept small. */
+export type MySharing = {
+  practice: boolean;
+  /** the owner has opened names for real farmers (`AIAIC_SHARING_REAL_APPROVED`); before it a practice farmer's buyers
+   * read a practice name, never her own */
+  real_names_open: boolean;
+  /** the notice in en, mr and hi with its version; null when AIAIC sent none (no yes can be given then) */
+  notice: XNotice | null;
+  fields: ShareField[];
+  buyers_see_now: string[];
+};
+/** AIAIC's answer to her press (route 5): her yes kept (`shared: true`, since, the version) or ended (`ended_at`). */
+export type ShareAnswer = {
+  shared: boolean;
+  since: string | null;
+  ended_at: string | null;
+  notice_version: string | null;
+  unchanged: boolean;
+};
+
+/**
+ * HER NAME'S CHOICE NOW, FROM AIAIC'S ANSWER ALONE (Round 2, R2-3; DESIGN 2d, A1): `on` while her yes stands under the
+ * current notice and AIAIC offers it; `on_held` while her yes stands but AIAIC does not show it now (its team switched
+ * names off, or another reason it gives: she can still stop); `ask` while it is offered and her yes does not stand
+ * (`again`: she said yes to an older notice, so she is asked again); `held` while AIAIC does not offer it, with its
+ * reason's code; `unknown` when the answer names no name field. Never worked out from a switch's default here.
+ */
+export type NameChoice =
+  | { kind: "on"; since: string | null; shownAs: string | null }
+  | { kind: "on_held"; why: string; since: string | null }
+  | { kind: "ask"; again: boolean; shownAs: string | null }
+  | { kind: "held"; why: string }
+  | { kind: "unknown" };
+export function nameChoice(s: MySharing): NameChoice {
+  const f = s.fields.find((x) => x.field === "name");
+  if (!f) return { kind: "unknown" };
+  const why = f.why_not ?? "not_offered";
+  if (f.shared)
+    return f.offered
+      ? { kind: "on", since: f.since, shownAs: f.held_as }
+      : { kind: "on_held", why, since: f.since };
+  if (!f.offered) return { kind: "held", why };
+  if (!s.notice) return { kind: "held", why: "no_notice" };
+  return {
+    kind: "ask",
+    again: f.version_given !== null && f.version_given !== s.notice.version,
+    shownAs: f.held_as,
+  };
+}
+/** The fields AIAIC holds none of for buyers (`field_not_held`): said plainly, never offered. */
+export function fieldsNotHeld(s: MySharing): string[] {
+  return s.fields.filter((f) => !f.offered && f.why_not === "field_not_held").map((f) => f.field);
 }

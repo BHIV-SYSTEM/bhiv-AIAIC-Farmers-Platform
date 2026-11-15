@@ -1164,13 +1164,19 @@ const BOXES: Record<string, [count: number, how: "heard" | "demo" | "secret", wh
   "components/farm/aiaic/AiaicPayments.tsx": [
     [5, "heard", "the payout details: an AIAIC route, by `press`"],
   ],
-  "components/farm/aiaic/AiaicSellForm.tsx": [
-    [2, "heard", "useNumberBoxHeard: anything but a plain number is read"],
-  ],
   "components/farm/aiaic/FromAiaicCard.tsx": [
     [4, "heard", "the payout destination: an AIAIC route, by `press`"],
   ],
-  "components/farm/aiaic/storage/StorageSteps.tsx": [[1, "heard", "onWords: the page's scan"]],
+  // R2-3 lane A (12 Nov 2026): the storage page's Other box moved into the step kit's BoxStep, its one box drawn for every
+  // flow; each flow gives its boxes the page's crisis reader (`read`; the storage page's is onWords: its scan). Part A-b:
+  // the sale's two boxes (Other's quintals and the price, AiaicSellForm.tsx's useNumberBoxHeard until then) moved there too
+  "components/farm/aiaic/kit/StepFlow.tsx": [
+    [
+      1,
+      "heard",
+      "BoxStep: the page's crisis reader (the storage page's: onWords; the sale's: its scan, readForCrisis)",
+    ],
+  ],
   "components/farm/BankDetailsCard.tsx": [
     [3, "heard", "AIAIC's payout route, by `press`"],
     [1, "secret", "the account number typed again"],
@@ -2198,6 +2204,9 @@ test("S42 nothing new carries a gendered word, and every control of the page is 
     "src/components/farm/aiaic/storage/WastagePanel.tsx",
     "src/components/farm/aiaic/storage/ColdStoresPanel.tsx",
     "src/components/farm/aiaic/storage/storage-chart.ts",
+    // the step kit the steps are drawn with (R2-3 lane A, 12 Nov 2026)
+    "src/components/farm/aiaic/kit/StepFlow.tsx",
+    "src/components/farm/aiaic/kit/useStepFlow.ts",
     "tests/aiaic_storage_suite.ts",
   ];
   for (const f of files) {

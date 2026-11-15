@@ -585,6 +585,22 @@ export const AIAIC_EN: Dict = {
   "aiaic.sell.far.change": "No, change my price",
   "aiaic.sell.see_offers": "See offers",
   "aiaic.sell.another": "List another lot",
+  "aiaic.sell.step.list": "The steps of your sale",
+  "aiaic.sell.step.where": "Where is your produce?",
+  "aiaic.sell.step.crop": "Which crop?",
+  "aiaic.sell.step.quantity": "How much will you sell?",
+  "aiaic.sell.step.grade": "Its grade, if you know it",
+  "aiaic.sell.step.price": "Your price, a quintal",
+  "aiaic.sell.step.check": "Check and list",
+  "aiaic.sell.list_named": "List {qty} of {crop} at {price} a quintal",
+  "aiaic.sell.price.use": "Use this price",
+  "aiaic.sell.price.hint":
+    "Filled in from the middle of this district's mandi prices. You can change it.",
+  "aiaic.sell.price.range": "Give your price as a number above 0, up to ₹10,00,000 a quintal.",
+  "aiaic.sell.price.source_no_n": "{source} · {day}",
+  "aiaic.sell.price.failed":
+    "The district's mandi prices could not be read: enter your own price, or try again.",
+  "aiaic.sell.far.held": "Answer the question about your price above first.",
 
   "aiaic.lots.title": "What I am selling",
   "aiaic.lots.empty": "Nothing listed yet.",
@@ -700,6 +716,11 @@ export const AIAIC_EN: Dict = {
   "aiaic.pay.title": "Payment",
   "aiaic.pay.no_link":
     "No payment link yet: agree the payment with the buyer before you hand over.",
+  // WF-05 (the walk of 13 Nov 2026): no link yet, as AIAIC says it now: being made, or AIAIC's to make
+  "aiaic.pay.link_being_made":
+    "AIAIC is making the buyer's payment link now. This page shows it in a moment.",
+  "aiaic.pay.link_by_aiaic":
+    "No payment link yet: AIAIC makes it for the buyer, and this page shows it once it is made.",
   "aiaic.pay.state.not_connected": "No payment yet",
   "aiaic.pay.state.link_created": "Link sent to the buyer: not paid yet",
   "aiaic.pay.state.partially_paid": "The buyer paid part",
@@ -871,6 +892,31 @@ export const AIAIC_EN: Dict = {
   "aiaic.store.qty.skip": "Skip: use an example",
   "aiaic.store.qty.example": "{q}, an example",
   "aiaic.store.qty.example_plain": "An example quantity",
+  // THE STEP KIT'S OWN WORDS (R2-3 lane A, 12 Nov 2026; DESIGN_UPDATE C.11): `kit/StepFlow.tsx`. The hidden ones
+  // too (Error:, done, now, not yet). Marathi and Hindi: drafts for a native reader, as the website's kit words are.
+  "aiaic.kit.g13": "Each choice opens the next step. You can change any answer.",
+  "aiaic.kit.restarted":
+    "The earlier answers were not kept here, so this starts at the first step that needs one.",
+  "aiaic.kit.step_of": "Step {n} of {total}:",
+  "aiaic.kit.n_of": "{n} of {total}",
+  "aiaic.kit.state.open": "now",
+  "aiaic.kit.state.done": "done",
+  "aiaic.kit.state.todo": "not yet",
+  "aiaic.kit.state.again": "check again",
+  "aiaic.kit.change": "Change",
+  "aiaic.kit.change_named": "Change: {step}",
+  "aiaic.kit.check_again": "An answer before this one changed: check this step again.",
+  "aiaic.kit.continue": "Continue",
+  "aiaic.kit.choose": "Choose…",
+  "aiaic.kit.choose_one": "Choose one from the list to go on.",
+  "aiaic.kit.error_prefix": "Error:",
+  "aiaic.kit.sending": "Sending…",
+  "aiaic.kit.try_again_named": "Try again: {action}",
+  "aiaic.kit.done_on": "Done: recorded on {day}",
+  "aiaic.kit.done": "Done",
+  "aiaic.kit.next_title": "What happens next:",
+  "aiaic.kit.title.fixed": "{question} ({n} of {total}) - {flow} - {app}",
+  "aiaic.kit.title.open": "{question} - {flow} - {app}",
   "aiaic.store.tone.good": "Good sign",
   "aiaic.store.tone.warn": "Take care",
   "aiaic.store.plan_loading": "Reading the answer…",
@@ -1095,6 +1141,83 @@ export const AIAIC_EN: Dict = {
   "aiaic.notice.cancelled": "your sale of {qty} was called off.",
   "aiaic.notice.cancelled_no_qty": "your sale was called off.",
   "aiaic.notice.lot_open_again": "Your lot takes offers again.",
+  "aiaic.share.title": "What buyers see about you",
+  "aiaic.share.name_on": "Your name: shown to buyers",
+  "aiaic.share.name_off": "Your name: not shown to buyers",
+  "aiaic.share.never_phone": "AIAIC never shows buyers your phone number.",
+  "aiaic.share.sees.toggle": "What buyers see now ({n})",
+  "aiaic.share.sees.offer_and_order_terms":
+    "The buyer of each offer and order to you: its crop, quantity, grade, price and handover",
+  "aiaic.share.sees.district": "Your district",
+  "aiaic.share.sees.state": "Your state (not your district)",
+  "aiaic.share.sees.lot_crop": "Your lots' crop",
+  "aiaic.share.sees.lot_quantity_left": "How much of each lot is left",
+  "aiaic.share.sees.lot_min_lot": "The least each lot sells",
+  "aiaic.share.sees.lot_days": "The days each lot is ready",
+  "aiaic.share.sees.lot_taluka": "Your lots' taluka",
+  "aiaic.share.sees.lot_grade": "The grade you gave each lot",
+  "aiaic.share.sees.lot_asking_price": "Your asking price for each lot",
+  "aiaic.share.sees.other": "One more fact that this app cannot name yet",
+  "aiaic.share.not_held.phone":
+    "Your phone number: AIAIC holds none for buyers, so it is never shown.",
+  "aiaic.share.not_held.village": "Your village: AIAIC holds none, so it is never shown.",
+  "aiaic.share.q": "Show your name to buyers?",
+  "aiaic.share.again":
+    "AIAIC changed these words after you said yes. Your name is not shown until you say yes again.",
+  "aiaic.share.changed_now":
+    "AIAIC changed these words just now. Read them, then choose again. Nothing was changed.",
+  "aiaic.share.see": "Buyers see",
+  "aiaic.share.would_see": "Buyers would see",
+  "aiaic.share.practice_name": "A practice name, never your own",
+  "aiaic.share.farmer_of_district": "“A farmer of” your district",
+  "aiaic.share.farmer_of_state": "“A farmer of” your state",
+  "aiaic.share.yes": "Show my name to buyers",
+  "aiaic.share.no": "No, keep it hidden",
+  "aiaic.share.no_done": "Your name stays hidden. Nothing was sent.",
+  "aiaic.share.stop": "Stop showing my name",
+  "aiaic.share.on_since": "Shown since {day}.",
+  "aiaic.share.done_on": "Buyers who look at your lots now see your name.",
+  "aiaic.share.done_off":
+    "Buyers no longer see your name. A buyer who saw it before may remember it.",
+  "aiaic.share.on_held": "You said yes, but buyers do not see your name now:",
+  "aiaic.share.why.field_not_held":
+    "AIAIC holds no such fact of yours, so it is never shown to buyers.",
+  "aiaic.share.why.no_name_held": "Your AIAIC account holds no name, so there is no name to show.",
+  "aiaic.share.why.name_holds_a_number":
+    "Your account's name holds a number, so AIAIC never shows it to buyers.",
+  "aiaic.share.why.switched_off": "AIAIC's team has switched farmers' names off for buyers.",
+  "aiaic.share.why.not_open_yet":
+    "Showing a farmer's name to buyers is not open yet: AIAIC opens it once its words have been read by a lawyer and by native readers of Marathi and Hindi.",
+  "aiaic.share.why.grievance_contact_not_set":
+    "AIAIC has not yet named whom you can ask about this choice: it opens once it has.",
+  "aiaic.share.why.no_notice":
+    "AIAIC sent no words to read for this choice, so it cannot be given now.",
+  "aiaic.share.why.other": "AIAIC does not offer this choice now.",
+  "aiaic.share.reading": "Reading what buyers see...",
+  "aiaic.share.sign_in": "Sign in to see what buyers see about you, and to choose.",
+  "aiaic.notice.buyer_paid":
+    "the buyer has paid in full. AIAIC has received {rs} for you. It is not in your account yet.",
+  "aiaic.notice.buyer_paid_no_rs":
+    "the buyer has paid in full. AIAIC has received your money. It is not in your account yet.",
+  "aiaic.notice.buyer_said_arrived": "the buyer said it arrived.",
+  "aiaic.journey.buyer_said_arrived": "The buyer said it arrived",
+  "aiaic.money.step.holds": "AIAIC holds your money",
+  "aiaic.money.holds.line":
+    "The buyer has paid. AIAIC has received {rs} for you and holds it. It is not in your account yet.",
+  "aiaic.money.holds.line_no_rs":
+    "The buyer has paid. AIAIC has received your money and holds it. It is not in your account yet.",
+  "aiaic.money.holds.since": "With AIAIC since {day}.",
+  "aiaic.money.holds.waits_for.pickup": "AIAIC's team sends it once the pickup is recorded.",
+  "aiaic.money.holds.waits_for.your_details":
+    "Give your UPI ID or bank account below; AIAIC's team sends it then.",
+  "aiaic.money.holds.waits_for.aiaic_team": "AIAIC's team will send it to you.",
+  "aiaic.money.holds.waits_for.problem":
+    "A problem was reported about the delivery. AIAIC's team is looking; your money stays with AIAIC until it is settled.",
+  "aiaic.money.holds.waits_for.aiaic_team_again":
+    "The last send did not reach you. AIAIC's team will send it again.",
+  "aiaic.money.holds.waits_for.provider": "AIAIC's payments provider is getting it ready to send.",
+  "aiaic.money.holds.waits_for.not_known":
+    "AIAIC's team is checking; your money stays with AIAIC until then.",
 };
 
 export const AIAIC_MR: Dict = {
@@ -1665,6 +1788,23 @@ export const AIAIC_MR: Dict = {
   "aiaic.sell.far.change": "नाही, माझी किंमत बदला",
   "aiaic.sell.see_offers": "ऑफर पाहा",
   "aiaic.sell.another": "आणखी माल नोंदवा",
+  "aiaic.sell.step.list": "तुमच्या विक्रीच्या पायऱ्या",
+  "aiaic.sell.step.where": "तुमचा माल कुठे आहे?",
+  "aiaic.sell.step.crop": "कोणते पीक?",
+  "aiaic.sell.step.quantity": "किती विकणार?",
+  "aiaic.sell.step.grade": "त्याचा दर्जा, माहीत असल्यास",
+  "aiaic.sell.step.price": "तुमची किंमत, प्रति क्विंटल",
+  "aiaic.sell.step.check": "तपासा आणि नोंदवा",
+  "aiaic.sell.list_named": "{crop}, {qty}, क्विंटलला {price}: विक्रीसाठी नोंद करा",
+  "aiaic.sell.price.use": "ही किंमत वापरा",
+  "aiaic.sell.price.hint":
+    "या जिल्ह्याच्या मंडी भावांच्या मधल्या भावावरून भरले आहे. तुम्ही ते बदलू शकता.",
+  "aiaic.sell.price.range":
+    "तुमची किंमत 0 पेक्षा जास्त आणि क्विंटलला ₹10,00,000 पर्यंत, आकड्यात द्या.",
+  "aiaic.sell.price.source_no_n": "{source} · {day}",
+  "aiaic.sell.price.failed":
+    "जिल्ह्याचे मंडी भाव वाचता आले नाहीत: तुमची किंमत लिहा, किंवा पुन्हा प्रयत्न करा.",
+  "aiaic.sell.far.held": "आधी वरच्या, तुमच्या किमतीच्या प्रश्नाचे उत्तर द्या.",
 
   "aiaic.lots.title": "मी काय विकत आहे",
   "aiaic.lots.empty": "अजून काहीही नोंदवलेले नाही.",
@@ -1780,6 +1920,10 @@ export const AIAIC_MR: Dict = {
   "aiaic.pay.title": "पेमेंट",
   "aiaic.pay.no_link":
     "अजून पेमेंट लिंक नाही: माल देण्यापूर्वी खरेदीदारासोबत पैसे कसे द्यायचे ते ठरवा.",
+  "aiaic.pay.link_being_made":
+    "AIAIC आत्ता खरेदीदारासाठी पेमेंट लिंक तयार करत आहे. हे पान ती थोड्याच वेळात दाखवेल.",
+  "aiaic.pay.link_by_aiaic":
+    "अजून पेमेंट लिंक नाही: AIAIC ती खरेदीदारासाठी तयार करते, आणि ती तयार झाली की हे पान ती दाखवेल.",
   "aiaic.pay.state.not_connected": "अजून पेमेंट नाही",
   "aiaic.pay.state.link_created": "खरेदीदाराला लिंक पाठवली: अजून भरलेले नाही",
   "aiaic.pay.state.partially_paid": "खरेदीदाराने काही भाग भरला",
@@ -1951,6 +2095,31 @@ export const AIAIC_MR: Dict = {
   "aiaic.store.qty.skip": "वगळा: उदाहरण वापरा",
   "aiaic.store.qty.example": "{q}, उदाहरण",
   "aiaic.store.qty.example_plain": "उदाहरणाचे प्रमाण",
+  // THE STEP KIT'S OWN WORDS (R2-3 lane A): DRAFTS for a native reader, the hidden ones (Error:, done, now, not yet)
+  // included; the same words as the website's kit (aiaic-frontend/src/i18n/kit.js), with the storage page's colon.
+  "aiaic.kit.g13": "प्रत्येक निवड पुढची पायरी उघडते. तुम्ही कोणतेही उत्तर बदलू शकता.",
+  "aiaic.kit.restarted":
+    "आधीची उत्तरे येथे ठेवलेली नव्हती, म्हणून उत्तर हवे असलेल्या पहिल्या पायरीपासून सुरुवात होते.",
+  "aiaic.kit.step_of": "{total} पैकी पायरी {n}:",
+  "aiaic.kit.n_of": "{total} पैकी {n}",
+  "aiaic.kit.state.open": "आता",
+  "aiaic.kit.state.done": "झाले",
+  "aiaic.kit.state.todo": "अजून नाही",
+  "aiaic.kit.state.again": "पुन्हा तपासा",
+  "aiaic.kit.change": "बदला",
+  "aiaic.kit.change_named": "बदला: {step}",
+  "aiaic.kit.check_again": "याआधीचे एक उत्तर बदलले आहे: ही पायरी पुन्हा तपासा.",
+  "aiaic.kit.continue": "पुढे चला",
+  "aiaic.kit.choose": "निवडा…",
+  "aiaic.kit.choose_one": "पुढे जाण्यासाठी यादीतून एक निवडा.",
+  "aiaic.kit.error_prefix": "चूक:",
+  "aiaic.kit.sending": "पाठवत आहे…",
+  "aiaic.kit.try_again_named": "पुन्हा प्रयत्न करा: {action}",
+  "aiaic.kit.done_on": "झाले: {day} रोजी नोंदवले",
+  "aiaic.kit.done": "झाले",
+  "aiaic.kit.next_title": "पुढे काय होते:",
+  "aiaic.kit.title.fixed": "{question} ({total} पैकी {n}) - {flow} - {app}",
+  "aiaic.kit.title.open": "{question} - {flow} - {app}",
   "aiaic.store.tone.good": "चांगले चिन्ह",
   "aiaic.store.tone.warn": "काळजी घ्या",
   "aiaic.store.plan_loading": "उत्तर वाचत आहोत…",
@@ -2178,6 +2347,84 @@ export const AIAIC_MR: Dict = {
   "aiaic.notice.cancelled": "तुमची {qty} ची विक्री रद्द झाली.",
   "aiaic.notice.cancelled_no_qty": "तुमची विक्री रद्द झाली.",
   "aiaic.notice.lot_open_again": "तुमचा लॉट पुन्हा ऑफर घेतो.",
+  "aiaic.share.title": "खरेदीदारांना तुमच्याबद्दल काय दिसते",
+  "aiaic.share.name_on": "तुमचे नाव: खरेदीदारांना दिसते",
+  "aiaic.share.name_off": "तुमचे नाव: खरेदीदारांना दिसत नाही",
+  "aiaic.share.never_phone": "AIAIC खरेदीदारांना तुमचा फोन नंबर कधीही दाखवत नाही.",
+  "aiaic.share.sees.toggle": "खरेदीदारांना आता काय दिसते ({n})",
+  "aiaic.share.sees.offer_and_order_terms":
+    "तुम्हाला आलेल्या प्रत्येक ऑफर व ऑर्डरच्या खरेदीदाराला: त्याचे पीक, प्रमाण, दर्जा, किंमत आणि माल देण्याची पद्धत",
+  "aiaic.share.sees.district": "तुमचा जिल्हा",
+  "aiaic.share.sees.state": "तुमचे राज्य (तुमचा जिल्हा नाही)",
+  "aiaic.share.sees.lot_crop": "तुमच्या लॉटचे पीक",
+  "aiaic.share.sees.lot_quantity_left": "प्रत्येक लॉटमध्ये किती माल उरला आहे",
+  "aiaic.share.sees.lot_min_lot": "प्रत्येक लॉटची कमीत कमी विक्री",
+  "aiaic.share.sees.lot_days": "प्रत्येक लॉट तयार असण्याचे दिवस",
+  "aiaic.share.sees.lot_taluka": "तुमच्या लॉटचा तालुका",
+  "aiaic.share.sees.lot_grade": "तुम्ही प्रत्येक लॉटला दिलेला दर्जा",
+  "aiaic.share.sees.lot_asking_price": "प्रत्येक लॉटसाठी तुम्ही मागितलेली किंमत",
+  "aiaic.share.sees.other": "आणखी एक माहिती, जिचे नाव हे ॲप अजून सांगू शकत नाही",
+  "aiaic.share.not_held.phone":
+    "तुमचा फोन नंबर: AIAIC कडे खरेदीदारांसाठी तो नाही, म्हणून तो कधीही दाखवला जात नाही.",
+  "aiaic.share.not_held.village": "तुमचे गाव: AIAIC कडे ते नाही, म्हणून ते कधीही दाखवले जात नाही.",
+  "aiaic.share.q": "खरेदीदारांना तुमचे नाव दाखवायचे?",
+  "aiaic.share.again":
+    "तुम्ही होय म्हटल्यानंतर AIAIC ने हे शब्द बदलले. तुम्ही पुन्हा होय म्हणेपर्यंत तुमचे नाव दाखवले जात नाही.",
+  "aiaic.share.changed_now":
+    "AIAIC ने हे शब्द आत्ताच बदलले. ते वाचा, मग पुन्हा निवडा. काहीही बदलले नाही.",
+  "aiaic.share.see": "खरेदीदारांना दिसते",
+  "aiaic.share.would_see": "खरेदीदारांना दिसेल",
+  "aiaic.share.practice_name": "सरावाचे नाव, तुमचे स्वतःचे कधीच नाही",
+  "aiaic.share.farmer_of_district": "“तुमच्या जिल्ह्यातील एक शेतकरी”",
+  "aiaic.share.farmer_of_state": "“तुमच्या राज्यातील एक शेतकरी”",
+  "aiaic.share.yes": "माझे नाव खरेदीदारांना दाखवा",
+  "aiaic.share.no": "नको, नाव लपवलेलेच ठेवा",
+  "aiaic.share.no_done": "तुमचे नाव लपवलेलेच राहते. काहीही पाठवले नाही.",
+  "aiaic.share.stop": "माझे नाव दाखवणे थांबवा",
+  "aiaic.share.on_since": "{day} पासून दाखवले जाते.",
+  "aiaic.share.done_on": "तुमचे लॉट पाहणाऱ्या खरेदीदारांना आता तुमचे नाव दिसते.",
+  "aiaic.share.done_off":
+    "खरेदीदारांना आता तुमचे नाव दिसत नाही. आधी ज्या खरेदीदाराने ते पाहिले, त्याच्या ते लक्षात राहू शकते.",
+  "aiaic.share.on_held": "तुम्ही होय म्हटले, पण खरेदीदारांना आता तुमचे नाव दिसत नाही:",
+  "aiaic.share.why.field_not_held":
+    "AIAIC कडे तुमची अशी माहिती नाही, म्हणून ती खरेदीदारांना कधीही दाखवली जात नाही.",
+  "aiaic.share.why.no_name_held": "तुमच्या AIAIC खात्यात नाव नाही, म्हणून दाखवण्यासाठी नाव नाही.",
+  "aiaic.share.why.name_holds_a_number":
+    "तुमच्या खात्याच्या नावात एक नंबर आहे, म्हणून AIAIC ते खरेदीदारांना कधीही दाखवत नाही.",
+  "aiaic.share.why.switched_off": "AIAIC च्या टीमने खरेदीदारांसाठी शेतकऱ्यांची नावे बंद केली आहेत.",
+  "aiaic.share.why.not_open_yet":
+    "शेतकऱ्याचे नाव खरेदीदारांना दाखवणे अजून सुरू झालेले नाही: वकील आणि मराठी व हिंदीचे मूळ वाचक यांनी हे शब्द वाचल्यावर AIAIC ते सुरू करते.",
+  "aiaic.share.why.grievance_contact_not_set":
+    "या निवडीबद्दल तुम्ही कोणाला विचारू शकता हे AIAIC ने अजून सांगितलेले नाही: ते सांगितल्यावर हे सुरू होते.",
+  "aiaic.share.why.no_notice":
+    "या निवडीसाठी वाचायचे शब्द AIAIC ने पाठवले नाहीत, म्हणून ती आता देता येत नाही.",
+  "aiaic.share.why.other": "AIAIC आता ही निवड देत नाही.",
+  "aiaic.share.reading": "खरेदीदारांना काय दिसते ते वाचत आहे...",
+  "aiaic.share.sign_in":
+    "खरेदीदारांना तुमच्याबद्दल काय दिसते ते पाहण्यासाठी आणि निवडण्यासाठी साइन इन करा.",
+  "aiaic.notice.buyer_paid":
+    "खरेदीदाराने पूर्ण पैसे भरले. AIAIC कडे तुमच्यासाठी {rs} आले आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.notice.buyer_paid_no_rs":
+    "खरेदीदाराने पूर्ण पैसे भरले. AIAIC कडे तुमचे पैसे आले आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.notice.buyer_said_arrived": "खरेदीदाराने माल पोहोचल्याचे सांगितले.",
+  "aiaic.journey.buyer_said_arrived": "खरेदीदाराने माल पोहोचल्याचे सांगितले",
+  "aiaic.money.step.holds": "तुमचे पैसे AIAIC कडे आहेत",
+  "aiaic.money.holds.line":
+    "खरेदीदाराने पैसे भरले. AIAIC कडे तुमच्यासाठी {rs} आले आहेत आणि ते AIAIC कडेच आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.money.holds.line_no_rs":
+    "खरेदीदाराने पैसे भरले. AIAIC कडे तुमचे पैसे आले आहेत आणि ते AIAIC कडेच आहेत. ते अजून तुमच्या खात्यात नाहीत.",
+  "aiaic.money.holds.since": "{day} पासून AIAIC कडे.",
+  "aiaic.money.holds.waits_for.pickup": "माल उचलल्याची नोंद झाल्यावर AIAIC ची टीम ते पाठवते.",
+  "aiaic.money.holds.waits_for.your_details":
+    "खाली तुमचा UPI आयडी किंवा बँक खाते द्या; मग AIAIC ची टीम ते पाठवते.",
+  "aiaic.money.holds.waits_for.aiaic_team": "AIAIC ची टीम ते तुम्हाला पाठवेल.",
+  "aiaic.money.holds.waits_for.problem":
+    "माल पोहोचवण्याबद्दल अडचण कळवली गेली आहे. AIAIC ची टीम पाहत आहे; ती सुटेपर्यंत तुमचे पैसे AIAIC कडेच राहतात.",
+  "aiaic.money.holds.waits_for.aiaic_team_again":
+    "मागील वेळी पाठवलेले पैसे तुमच्यापर्यंत पोहोचले नाहीत. AIAIC ची टीम ते पुन्हा पाठवेल.",
+  "aiaic.money.holds.waits_for.provider": "AIAIC चा पेमेंट पुरवठादार ते पाठवण्याची तयारी करत आहे.",
+  "aiaic.money.holds.waits_for.not_known":
+    "AIAIC ची टीम तपासत आहे; तोपर्यंत तुमचे पैसे AIAIC कडेच राहतात.",
 };
 
 export const AIAIC_HI: Dict = {
@@ -2738,6 +2985,22 @@ export const AIAIC_HI: Dict = {
   "aiaic.sell.far.change": "नहीं, मेरी कीमत बदलें",
   "aiaic.sell.see_offers": "ऑफ़र देखें",
   "aiaic.sell.another": "और माल दर्ज करें",
+  "aiaic.sell.step.list": "आपकी बिक्री के चरण",
+  "aiaic.sell.step.where": "आपकी उपज कहाँ है?",
+  "aiaic.sell.step.crop": "कौन सी फ़सल?",
+  "aiaic.sell.step.quantity": "कितना बेचेंगे?",
+  "aiaic.sell.step.grade": "इसका दर्जा, अगर आप जानते हैं",
+  "aiaic.sell.step.price": "आपकी कीमत, प्रति क्विंटल",
+  "aiaic.sell.step.check": "जाँचें और दर्ज करें",
+  "aiaic.sell.list_named": "{crop}, {qty}, {price} प्रति क्विंटल: बिक्री के लिए दर्ज करें",
+  "aiaic.sell.price.use": "यह कीमत रखें",
+  "aiaic.sell.price.hint":
+    "इस ज़िले के मंडी भावों के बीच के भाव से भरा गया है। आप इसे बदल सकते हैं।",
+  "aiaic.sell.price.range": "अपनी कीमत 0 से ज़्यादा और ₹10,00,000 प्रति क्विंटल तक, अंकों में दें।",
+  "aiaic.sell.price.source_no_n": "{source} · {day}",
+  "aiaic.sell.price.failed":
+    "ज़िले के मंडी भाव पढ़े नहीं जा सके: अपनी कीमत लिखें, या फिर से कोशिश करें।",
+  "aiaic.sell.far.held": "पहले ऊपर, अपनी कीमत वाले सवाल का जवाब दें।",
 
   "aiaic.lots.title": "बिक्री के लिए मेरी उपज",
   "aiaic.lots.empty": "अभी कुछ भी दर्ज नहीं।",
@@ -2852,6 +3115,10 @@ export const AIAIC_HI: Dict = {
 
   "aiaic.pay.title": "भुगतान",
   "aiaic.pay.no_link": "अभी भुगतान लिंक नहीं: माल सौंपने से पहले खरीदार के साथ भुगतान तय करें।",
+  "aiaic.pay.link_being_made":
+    "AIAIC अभी खरीदार के लिए भुगतान लिंक बना रहा है। यह पेज उसे थोड़ी देर में दिखाएगा।",
+  "aiaic.pay.link_by_aiaic":
+    "अभी भुगतान लिंक नहीं: AIAIC इसे खरीदार के लिए बनाता है, और बनते ही यह पेज इसे दिखाएगा।",
   "aiaic.pay.state.not_connected": "अभी भुगतान नहीं",
   "aiaic.pay.state.link_created": "खरीदार को लिंक भेजा: अभी भुगतान नहीं हुआ",
   "aiaic.pay.state.partially_paid": "खरीदार ने कुछ भाग भरा",
@@ -3022,6 +3289,31 @@ export const AIAIC_HI: Dict = {
   "aiaic.store.qty.skip": "छोड़ें: उदाहरण इस्तेमाल करें",
   "aiaic.store.qty.example": "{q}, उदाहरण",
   "aiaic.store.qty.example_plain": "उदाहरण की मात्रा",
+  // THE STEP KIT'S OWN WORDS (R2-3 lane A): DRAFTS for a native reader, the hidden ones (Error:, done, now, not yet)
+  // included; the same words as the website's kit (aiaic-frontend/src/i18n/kit.js), with the storage page's colon.
+  "aiaic.kit.g13": "हर चुनाव अगला चरण खोलता है। आप कोई भी उत्तर बदल सकते हैं।",
+  "aiaic.kit.restarted":
+    "पहले के उत्तर यहाँ नहीं रखे गए थे, इसलिए यह उस पहले चरण से शुरू होता है जिसे उत्तर चाहिए।",
+  "aiaic.kit.step_of": "{total} में से चरण {n}:",
+  "aiaic.kit.n_of": "{total} में से {n}",
+  "aiaic.kit.state.open": "अभी",
+  "aiaic.kit.state.done": "हो गया",
+  "aiaic.kit.state.todo": "अभी नहीं",
+  "aiaic.kit.state.again": "फिर से जाँचें",
+  "aiaic.kit.change": "बदलें",
+  "aiaic.kit.change_named": "बदलें: {step}",
+  "aiaic.kit.check_again": "इससे पहले का एक उत्तर बदला है: यह चरण फिर से जाँचें।",
+  "aiaic.kit.continue": "आगे बढ़ें",
+  "aiaic.kit.choose": "चुनें…",
+  "aiaic.kit.choose_one": "आगे बढ़ने के लिए सूची से एक चुनें।",
+  "aiaic.kit.error_prefix": "त्रुटि:",
+  "aiaic.kit.sending": "भेज रहे हैं…",
+  "aiaic.kit.try_again_named": "फिर से कोशिश करें: {action}",
+  "aiaic.kit.done_on": "हो गया: {day} को दर्ज किया गया",
+  "aiaic.kit.done": "हो गया",
+  "aiaic.kit.next_title": "आगे क्या होता है:",
+  "aiaic.kit.title.fixed": "{question} ({total} में से {n}) - {flow} - {app}",
+  "aiaic.kit.title.open": "{question} - {flow} - {app}",
   "aiaic.store.tone.good": "अच्छा संकेत",
   "aiaic.store.tone.warn": "सावधान रहें",
   "aiaic.store.plan_loading": "उत्तर पढ़ा जा रहा है…",
@@ -3244,4 +3536,84 @@ export const AIAIC_HI: Dict = {
   "aiaic.notice.cancelled": "आपकी {qty} की बिक्री रद्द हुई।",
   "aiaic.notice.cancelled_no_qty": "आपकी बिक्री रद्द हुई।",
   "aiaic.notice.lot_open_again": "आपका लॉट फिर से ऑफ़र लेता है।",
+  "aiaic.share.title": "खरीदारों को आपके बारे में क्या दिखता है",
+  "aiaic.share.name_on": "आपका नाम: खरीदारों को दिखता है",
+  "aiaic.share.name_off": "आपका नाम: खरीदारों को नहीं दिखता",
+  "aiaic.share.never_phone": "AIAIC खरीदारों को आपका फ़ोन नंबर कभी नहीं दिखाता।",
+  "aiaic.share.sees.toggle": "खरीदारों को अभी क्या दिखता है ({n})",
+  "aiaic.share.sees.offer_and_order_terms":
+    "आपको मिले हर ऑफ़र और ऑर्डर के खरीदार को: उसकी फ़सल, मात्रा, दर्जा, कीमत और माल सौंपने का तरीका",
+  "aiaic.share.sees.district": "आपका ज़िला",
+  "aiaic.share.sees.state": "आपका राज्य (आपका ज़िला नहीं)",
+  "aiaic.share.sees.lot_crop": "आपके लॉट की फ़सल",
+  "aiaic.share.sees.lot_quantity_left": "हर लॉट में कितना माल बचा है",
+  "aiaic.share.sees.lot_min_lot": "हर लॉट की कम से कम बिक्री",
+  "aiaic.share.sees.lot_days": "हर लॉट के तैयार होने के दिन",
+  "aiaic.share.sees.lot_taluka": "आपके लॉट की तहसील",
+  "aiaic.share.sees.lot_grade": "आपने हर लॉट को दिया दर्जा",
+  "aiaic.share.sees.lot_asking_price": "हर लॉट के लिए आपकी माँगी कीमत",
+  "aiaic.share.sees.other": "एक और जानकारी, जिसका नाम यह ऐप अभी नहीं बता सकता",
+  "aiaic.share.not_held.phone":
+    "आपका फ़ोन नंबर: AIAIC के पास खरीदारों के लिए वह नहीं है, इसलिए वह कभी नहीं दिखाया जाता।",
+  "aiaic.share.not_held.village":
+    "आपका गाँव: AIAIC के पास वह नहीं है, इसलिए वह कभी नहीं दिखाया जाता।",
+  "aiaic.share.q": "खरीदारों को अपना नाम दिखाएँ?",
+  "aiaic.share.again":
+    "आपके हाँ कहने के बाद AIAIC ने ये शब्द बदले। आपके फिर से हाँ कहने तक आपका नाम नहीं दिखाया जाता।",
+  "aiaic.share.changed_now":
+    "AIAIC ने ये शब्द अभी बदले। इन्हें पढ़ें, फिर से चुनें। कुछ भी नहीं बदला।",
+  "aiaic.share.see": "खरीदारों को दिखता है",
+  "aiaic.share.would_see": "खरीदारों को दिखेगा",
+  "aiaic.share.practice_name": "अभ्यास का नाम, आपका अपना कभी नहीं",
+  "aiaic.share.farmer_of_district": "“आपके ज़िले का एक किसान”",
+  "aiaic.share.farmer_of_state": "“आपके राज्य का एक किसान”",
+  "aiaic.share.yes": "मेरा नाम खरीदारों को दिखाएँ",
+  "aiaic.share.no": "नहीं, नाम छिपा ही रहने दें",
+  "aiaic.share.no_done": "आपका नाम छिपा ही रहता है। कुछ भी नहीं भेजा गया।",
+  "aiaic.share.stop": "मेरा नाम दिखाना बंद करें",
+  "aiaic.share.on_since": "{day} से दिखाया जाता है।",
+  "aiaic.share.done_on": "आपके लॉट देखने वाले खरीदारों को अब आपका नाम दिखता है।",
+  "aiaic.share.done_off":
+    "खरीदारों को अब आपका नाम नहीं दिखता। जिस खरीदार ने उसे पहले देखा, उसे वह याद रह सकता है।",
+  "aiaic.share.on_held": "आपने हाँ कहा, पर खरीदारों को अभी आपका नाम नहीं दिखता:",
+  "aiaic.share.why.field_not_held":
+    "AIAIC के पास आपकी ऐसी जानकारी नहीं है, इसलिए वह खरीदारों को कभी नहीं दिखाई जाती।",
+  "aiaic.share.why.no_name_held":
+    "आपके AIAIC खाते में कोई नाम नहीं है, इसलिए दिखाने के लिए कोई नाम नहीं है।",
+  "aiaic.share.why.name_holds_a_number":
+    "आपके खाते के नाम में एक नंबर है, इसलिए AIAIC उसे खरीदारों को कभी नहीं दिखाता।",
+  "aiaic.share.why.switched_off": "AIAIC की टीम ने खरीदारों के लिए किसानों के नाम बंद किए हैं।",
+  "aiaic.share.why.not_open_yet":
+    "किसान का नाम खरीदारों को दिखाना अभी शुरू नहीं हुआ है: वकील और मराठी व हिंदी के मूल पाठकों के ये शब्द पढ़ लेने पर AIAIC इसे शुरू करता है।",
+  "aiaic.share.why.grievance_contact_not_set":
+    "इस चुनाव के बारे में आप किससे पूछ सकते हैं, यह AIAIC ने अभी नहीं बताया है: बताने पर यह शुरू होता है।",
+  "aiaic.share.why.no_notice":
+    "इस चुनाव के लिए पढ़ने के शब्द AIAIC ने नहीं भेजे, इसलिए यह अभी नहीं दी जा सकती।",
+  "aiaic.share.why.other": "AIAIC अभी यह चुनाव नहीं देता।",
+  "aiaic.share.reading": "खरीदारों को क्या दिखता है, यह पढ़ रहे हैं...",
+  "aiaic.share.sign_in":
+    "खरीदारों को आपके बारे में क्या दिखता है यह देखने और चुनने के लिए साइन इन करें।",
+  "aiaic.notice.buyer_paid":
+    "खरीदार ने पूरा पैसा भर दिया। AIAIC को आपके लिए {rs} मिल गए हैं। वे अभी आपके खाते में नहीं हैं।",
+  "aiaic.notice.buyer_paid_no_rs":
+    "खरीदार ने पूरा पैसा भर दिया। AIAIC को आपका पैसा मिल गया है। वह अभी आपके खाते में नहीं है।",
+  "aiaic.notice.buyer_said_arrived": "खरीदार ने बताया कि माल पहुँच गया।",
+  "aiaic.journey.buyer_said_arrived": "खरीदार ने बताया कि माल पहुँच गया",
+  "aiaic.money.step.holds": "आपका पैसा AIAIC के पास है",
+  "aiaic.money.holds.line":
+    "खरीदार ने पैसे भर दिए। AIAIC को आपके लिए {rs} मिल गए हैं और वे AIAIC के पास हैं। वे अभी आपके खाते में नहीं हैं।",
+  "aiaic.money.holds.line_no_rs":
+    "खरीदार ने पैसे भर दिए। AIAIC को आपका पैसा मिल गया है और वह AIAIC के पास है। वह अभी आपके खाते में नहीं है।",
+  "aiaic.money.holds.since": "{day} से AIAIC के पास।",
+  "aiaic.money.holds.waits_for.pickup": "माल उठाए जाने की नोंद होने पर AIAIC की टीम इसे भेजती है।",
+  "aiaic.money.holds.waits_for.your_details":
+    "नीचे अपनी UPI आईडी या बैंक खाता दें; फिर AIAIC की टीम इसे भेजती है।",
+  "aiaic.money.holds.waits_for.aiaic_team": "AIAIC की टीम इसे आपको भेजेगी।",
+  "aiaic.money.holds.waits_for.problem":
+    "माल पहुँचाने के बारे में एक दिक्कत बताई गई है। AIAIC की टीम देख रही है; उसके सुलझने तक आपका पैसा AIAIC के पास ही रहता है।",
+  "aiaic.money.holds.waits_for.aiaic_team_again":
+    "पिछली बार भेजा गया पैसा आप तक नहीं पहुँचा। AIAIC की टीम इसे फिर से भेजेगी।",
+  "aiaic.money.holds.waits_for.provider": "AIAIC का भुगतान प्रदाता इसे भेजने की तैयारी कर रहा है।",
+  "aiaic.money.holds.waits_for.not_known":
+    "AIAIC की टीम जाँच रही है; तब तक आपका पैसा AIAIC के पास ही रहता है।",
 };

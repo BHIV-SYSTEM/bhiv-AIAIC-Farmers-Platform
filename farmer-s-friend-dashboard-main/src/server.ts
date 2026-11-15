@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { withNoStoreForServerFns } from "./lib/server-fn-cache";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -139,7 +140,14 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      // Her records are kept by no browser or proxy: a server function's answer goes out with no-store (AP4-05).
+      // The handler's answer must reach the wrapper with its body unread: the wrapper hands that body on as it is, and a
+      // body already read (or locked) makes it throw, so the catch below would send the error page in place of her answer.
+      // normalizeCatastrophicSsrResponse reads only a clone of it (R2-4's VFX2-4).
+      return withNoStoreForServerFns(
+        url.pathname,
+        await normalizeCatastrophicSsrResponse(response),
+      );
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

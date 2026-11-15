@@ -1,8 +1,8 @@
 {
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
-    "route": "POST /farmer/trade/offers/ofr_f411d8048f264b61a4f5/accept",
-    "at": "2026-11-06T10:33:55+00:00",
+    "route": "POST /farmer/trade/offers/ofr_a6ebdccd8e1d182f0e97/accept",
+    "at": "2026-11-13T12:26:47+00:00",
     "status": 201,
     "replay": "false",
     "signed_in": true,
@@ -14,14 +14,14 @@
     "provider": "razorpay (named in-process)"
   },
   "answer": {
-    "order_id": "ord_6164a52d59e3611d50ea",
-    "transaction_id": "txn_0ec4ba3470fc2849f0a3",
+    "order_id": "ord_76a0e13d06aa51f560cb",
+    "transaction_id": "txn_4168029cced02182a57f",
     "tenant_id": "rec-farmer",
-    "offer_id": "ofr_f411d8048f264b61a4f5",
-    "listing_id": "lst_4108b0f8522c3b5afa9e",
-    "lot_id": "lot_6acb2e46c76325e7b0f3",
-    "farmer_id": "frm_64959269259eea3a0964",
-    "buyer_id": "byr_56b92aead44e89aa8a6e",
+    "offer_id": "ofr_a6ebdccd8e1d182f0e97",
+    "listing_id": "lst_6da366ecfdd12d08699a",
+    "lot_id": "lot_a5c8cc75683ff1c36d8f",
+    "farmer_id": "frm_d91436482c22d5693502",
+    "buyer_id": "byr_be0b4684f4b72cc0f284",
     "crop": "onion",
     "variety": null,
     "grade": null,
@@ -41,19 +41,19 @@
     "payment_route": "none",
     "payout_timing": null,
     "synthetic": true,
-    "trace_id": "a00a716c9f6f4d8c82b6cf480f08a242",
-    "created_at": "2026-11-06T10:33:55.591647+00:00",
-    "updated_at": "2026-11-06T10:33:55.591647+00:00",
+    "trace_id": "502f892afbe74313acc34de97af6f819",
+    "created_at": "2026-11-13T12:26:47.807493+00:00",
+    "updated_at": "2026-11-13T12:26:47.807493+00:00",
     "pool_id": null,
     "offers_closed": [],
     "command": {
-      "command_id": "cmd_a83dd1f3f6d712c6a4e5",
+      "command_id": "cmd_bb418ce96ad27e897060",
       "delivery_state": "not_sent",
       "blocker": "TANTRA's order gate is not configured on this server (AIAIC_TANTRA_GATE_URL): its address and authentication have not been supplied, and TANTRA's live /initiate answered 400 on 21 Oct 2026 (Ranjit). Nothing is sent; the command is kept.",
-      "command_sha256": "70b4ab2919fca22b0b312615b75498b78e998d8d94aea97d6023134420890300"
+      "command_sha256": "43fade5612acbd894569716309f1527c333ef742448feb11f3837363c86f1268"
     },
     "trace": {
-      "request_id": "a00a716c9f6f4d8c82b6cf480f08a242",
+      "request_id": "502f892afbe74313acc34de97af6f819",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

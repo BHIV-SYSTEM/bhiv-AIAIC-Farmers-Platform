@@ -1,0 +1,105 @@
+{
+  "_recorded": {
+    "by": "reports/handover_tools/record_role_portal_answers.py",
+    "route": "GET /farmer/trade/sharing",
+    "at": "2026-11-13T12:26:57+00:00",
+    "status": 200,
+    "request": {
+      "params": {},
+      "body": {}
+    },
+    "asked_as": "app_farmer",
+    "world_tag": "28b38584",
+    "today": "2026-11-13",
+    "price_clock": "2026-09-29",
+    "masked": [
+      "held_as",
+      "request_id",
+      "tenant_id"
+    ],
+    "note": "A real answer of the real route, in-process, on a *_test database, in a workspace of its own (brd-<tag>): practice and rehearsal records (no farmer sees them), the price clock at the committed price slice's day, no road key. Replayed by the portal's and the website's tests, never edited by hand."
+  },
+  "answer": {
+    "tenant_id": "brd-28b38584",
+    "practice": true,
+    "real_names_open": false,
+    "notice": {
+      "version": "shn-4deef92f00dd",
+      "en": [
+        "Show your name to buyers: your choice",
+        "If you agree, AIAIC shows your name, as your AIAIC account holds it, beside your produce, so that buyers who buy through AIAIC see who grows it.",
+        "Who sees it: every buyer registered with AIAIC who looks at lots in your district, and the buyer of each offer and order made to you, sees your name with them.",
+        "AIAIC never shows buyers your phone number or your account.",
+        "Saying no changes nothing else about your sales: buyers then read \"a farmer of\" your district.",
+        "To stop: press Stop here at any time. From then on buyers no longer see your name; a buyer who saw it before may remember it.",
+        "If you withdraw your consent to sell through AIAIC, or erase your account, this choice ends too.",
+        "Questions or a complaint: AIAIC grievance desk (test), grievance-test@example.invalid."
+      ],
+      "mr": [
+        "खरेदीदारांना तुमचे नाव दाखवा: तुमची निवड",
+        "तुम्ही संमती दिल्यास, AIAIC तुमच्या AIAIC खात्यात असलेले तुमचे नाव तुमच्या मालासोबत दाखवते, जेणेकरून AIAIC मार्फत खरेदी करणाऱ्या खरेदीदारांना तो माल कोण पिकवतो ते कळेल.",
+        "कोण पाहतो: तुमच्या जिल्ह्यातील माल पाहणारा AIAIC कडे नोंदणी केलेला प्रत्येक खरेदीदार, आणि तुम्हाला आलेल्या प्रत्येक ऑफर व ऑर्डरचा खरेदीदार, त्यांच्यासोबत तुमचे नाव पाहतो.",
+        "AIAIC खरेदीदारांना तुमचा फोन नंबर किंवा तुमचे खाते कधीही दाखवत नाही.",
+        "नकार दिल्यास तुमच्या विक्रीत दुसरे काहीही बदलत नाही: खरेदीदारांना मग \"तुमच्या जिल्ह्यातील एक शेतकरी\" असे दिसते.",
+        "थांबवण्यासाठी: इथे कधीही थांबवा दाबा. त्यानंतर खरेदीदारांना तुमचे नाव दिसत नाही; आधी ज्या खरेदीदाराने ते पाहिले, त्याच्या ते लक्षात राहू शकते.",
+        "तुम्ही AIAIC मार्फत विक्री करण्याची तुमची संमती मागे घेतल्यास, किंवा तुमचे खाते पुसून टाकल्यास, ही निवडही संपते.",
+        "प्रश्न किंवा तक्रार: AIAIC grievance desk (test), grievance-test@example.invalid."
+      ],
+      "hi": [
+        "खरीदारों को अपना नाम दिखाएँ: आपकी पसंद",
+        "आपकी सहमति होने पर, AIAIC आपके AIAIC खाते में दर्ज आपका नाम आपकी उपज के साथ दिखाता है, ताकि AIAIC के ज़रिए खरीदने वाले खरीदार जानें कि वह उपज कौन उगाता है।",
+        "कौन देखता है: आपके ज़िले की उपज देखने वाला AIAIC में पंजीकृत हर खरीदार, और आपको मिले हर ऑफ़र और ऑर्डर का खरीदार, उनके साथ आपका नाम देखता है।",
+        "AIAIC खरीदारों को आपका फ़ोन नंबर या आपका खाता कभी नहीं दिखाता।",
+        "मना करने पर आपकी बिक्री में और कुछ नहीं बदलता: तब खरीदारों को \"आपके ज़िले का एक किसान\" दिखता है।",
+        "रोकने के लिए: यहाँ कभी भी रोकें दबाएँ। उसके बाद खरीदारों को आपका नाम नहीं दिखता; जिस खरीदार ने उसे पहले देखा, उसे वह याद रह सकता है।",
+        "अगर आप AIAIC के ज़रिए बेचने की अपनी सहमति वापस लेते हैं, या अपना खाता मिटाते हैं, तो यह पसंद भी ख़त्म हो जाती है।",
+        "प्रश्न या शिकायत: AIAIC grievance desk (test), grievance-test@example.invalid।"
+      ]
+    },
+    "fields": [
+      {
+        "field": "name",
+        "offered": true,
+        "why_not": null,
+        "held_as": "Practice farmer 940",
+        "shared": false,
+        "since": null,
+        "version_given": null
+      },
+      {
+        "field": "phone",
+        "offered": false,
+        "why_not": "field_not_held",
+        "held_as": null,
+        "shared": false,
+        "since": null,
+        "version_given": null
+      },
+      {
+        "field": "village",
+        "offered": false,
+        "why_not": "field_not_held",
+        "held_as": null,
+        "shared": false,
+        "since": null,
+        "version_given": null
+      }
+    ],
+    "buyers_see_now": [
+      "offer_and_order_terms",
+      "district",
+      "lot_crop",
+      "lot_quantity_left",
+      "lot_min_lot",
+      "lot_days"
+    ],
+    "trace": {
+      "request_id": "5458fa77669249cba120fc3c31ce89dc",
+      "decision_ids": [],
+      "price_day": "not held",
+      "price_from": "not held",
+      "datasets": "not held",
+      "build": "unknown"
+    }
+  }
+}

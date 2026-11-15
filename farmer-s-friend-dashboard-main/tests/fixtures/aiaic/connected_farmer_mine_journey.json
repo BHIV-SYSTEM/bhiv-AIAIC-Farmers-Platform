@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_connected_trade_answers.py",
     "route": "GET /farmer/trade",
-    "at": "2026-11-06T10:33:31+00:00",
+    "at": "2026-11-13T12:26:22+00:00",
     "status": 200,
     "signed_in": true,
     "request": {
@@ -20,7 +20,7 @@
     "practice": true,
     "practice_note": "This is a practice account: what it sells is kept as rehearsal data (synthetic, marked so on the operators' dashboard too). No real money moves for it: a payment link for its orders is made only with Cashfree's test keys. Nothing of it counts as a farmer's income.",
     "party": {
-      "party_id": "frm_a5d6546d8b0731974f01",
+      "party_id": "frm_7776f9123caf9aed1d54",
       "kind": "farmer",
       "buyer_type": null,
       "tenant_id": "rec-connected",
@@ -32,16 +32,16 @@
       "consent_withdrawn_at": null,
       "interests": {},
       "synthetic": true,
-      "trace_id": "d108813fad1f48bd86964d2cf83e7fde",
-      "created_at": "2026-11-06T10:33:18.576773+00:00",
+      "trace_id": "f034153a81ed42ed887155032f674e33",
+      "created_at": "2026-11-13T12:26:13.152358+00:00",
       "from_the_app": true
     },
     "listings": [
       {
-        "listing_id": "lst_407f89e5ed74ee87fcaa",
-        "lot_id": "lot_ad2932bc04b703174b01",
+        "listing_id": "lst_465a49afc8acc33af5e4",
+        "lot_id": "lot_1aa13749846ae440acf4",
         "tenant_id": "rec-connected",
-        "farmer_id": "frm_a5d6546d8b0731974f01",
+        "farmer_id": "frm_7776f9123caf9aed1d54",
         "crop": "onion",
         "variety": null,
         "grade": null,
@@ -70,27 +70,27 @@
           "source_name": "Agmarknet"
         },
         "synthetic": true,
-        "trace_id": "d108813fad1f48bd86964d2cf83e7fde",
-        "created_at": "2026-11-06T10:33:18.576773+00:00",
-        "updated_at": "2026-11-06T10:33:29.399867+00:00",
+        "trace_id": "f034153a81ed42ed887155032f674e33",
+        "created_at": "2026-11-13T12:26:13.152358+00:00",
+        "updated_at": "2026-11-13T12:26:21.296102+00:00",
         "offers": [
           {
-            "offer_id": "ofr_36c566ca0de6ec12c383",
+            "offer_id": "ofr_40201f1dda73c7f1b4e2",
             "tenant_id": "rec-connected",
-            "listing_id": "lst_407f89e5ed74ee87fcaa",
-            "buyer_id": "byr_35f9501d1945d9006720",
+            "listing_id": "lst_465a49afc8acc33af5e4",
+            "buyer_id": "byr_63e57c8581b1bf9186d9",
             "price_per_q": 2450.0,
             "quantity_q": 12.0,
-            "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-09; the buyer pays within 3 days of delivery, as it said",
+            "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-16; the buyer pays within 3 days of delivery, as it said",
             "terms_code": "collection_point",
-            "valid_until": "2026-11-09",
+            "valid_until": "2026-11-16",
             "status": "accepted",
             "closed_reason": null,
             "synthetic": true,
-            "trace_id": "3670fadda30f4cd7ac08d2508fddc1bb",
-            "created_at": "2026-11-06T10:33:29.163424+00:00",
-            "updated_at": "2026-11-06T10:33:29.399867+00:00",
-            "pool_id": "pol_063061afb5a631014cbc",
+            "trace_id": "25b7fcdcd256425f97c48f3b6772e765",
+            "created_at": "2026-11-13T12:26:21.187498+00:00",
+            "updated_at": "2026-11-13T12:26:21.296102+00:00",
+            "pool_id": "pol_30dda3d4fbe743611d6e",
             "expired": false,
             "can_accept": false,
             "why_not_accept": {
@@ -115,7 +115,7 @@
               }
             },
             "pool": {
-              "pool_id": "pol_063061afb5a631014cbc",
+              "pool_id": "pol_30dda3d4fbe743611d6e",
               "crop": "onion",
               "target_q": 20.0,
               "joined_q": 12.0,
@@ -125,8 +125,8 @@
               "grade": null,
               "collection_point": "FPO collection centre",
               "district": "Nashik",
-              "collect_on": "2026-11-09",
-              "valid_until": "2026-11-09",
+              "collect_on": "2026-11-16",
+              "valid_until": "2026-11-16",
               "pay_within_days": 3,
               "status": "open",
               "simulated": true
@@ -139,21 +139,21 @@
     ],
     "orders": [
       {
-        "order_id": "ord_b4e0902bd9f37b804eea",
-        "transaction_id": "txn_f13366d77384dca3ecc1",
+        "order_id": "ord_8e5d88d32961bfb9d85f",
+        "transaction_id": "txn_5b9a517fa25d3181dba2",
         "tenant_id": "rec-connected",
-        "offer_id": "ofr_36c566ca0de6ec12c383",
-        "listing_id": "lst_407f89e5ed74ee87fcaa",
-        "lot_id": "lot_ad2932bc04b703174b01",
-        "farmer_id": "frm_a5d6546d8b0731974f01",
-        "buyer_id": "byr_35f9501d1945d9006720",
+        "offer_id": "ofr_40201f1dda73c7f1b4e2",
+        "listing_id": "lst_465a49afc8acc33af5e4",
+        "lot_id": "lot_1aa13749846ae440acf4",
+        "farmer_id": "frm_7776f9123caf9aed1d54",
+        "buyer_id": "byr_63e57c8581b1bf9186d9",
         "crop": "onion",
         "variety": null,
         "grade": null,
         "quantity_q": 12.0,
         "price_per_q": 2450.0,
         "amount_inr": 29400.0,
-        "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-09; the buyer pays within 3 days of delivery, as it said",
+        "delivery_terms": "Collection point: FPO collection centre, Nashik, on 2026-11-16; the buyer pays within 3 days of delivery, as it said",
         "terms_code": "collection_point",
         "order_state": "in_fulfilment",
         "cancel_reason_code": null,
@@ -166,17 +166,23 @@
         "payment_route": "none",
         "payout_timing": null,
         "synthetic": true,
-        "trace_id": "deebc81c4a4a449a9616c32f2428a361",
-        "created_at": "2026-11-06T10:33:29.399867+00:00",
-        "updated_at": "2026-11-06T10:33:29.607689+00:00",
-        "pool_id": "pol_063061afb5a631014cbc",
+        "trace_id": "0ac4b2ae6ffc41b4919ffcac3d9c2f4f",
+        "created_at": "2026-11-13T12:26:21.296102+00:00",
+        "updated_at": "2026-11-13T12:26:21.432001+00:00",
+        "pool_id": "pol_30dda3d4fbe743611d6e",
         "buyer_name": "Rehearsal onion dehydration unit",
         "buyer_type": "processor",
         "buyer_district": "Nashik",
+        "lane": {
+          "code": "being_readied",
+          "since": "2026-11-13T12:26:21.432001+00:00",
+          "waiting_on": "farmer",
+          "synthetic": true
+        },
         "fulfilment": [
           {
-            "event_id": "ful_6a453a687640d0b5e7ca",
-            "order_id": "ord_b4e0902bd9f37b804eea",
+            "event_id": "ful_dcf2b48f4af1bcaefaf4",
+            "order_id": "ord_8e5d88d32961bfb9d85f",
             "stage": "aggregation",
             "status": "done",
             "reference": null,
@@ -186,12 +192,12 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "d6040108495d46588e024f2475516eae",
-            "created_at": "2026-11-06T10:33:29.607689+00:00"
+            "trace_id": "6f210172309f4d71bd42c1baf31c2f78",
+            "created_at": "2026-11-13T12:26:21.432001+00:00"
           },
           {
-            "event_id": "ful_b8a3ba919feb0ac1dae7",
-            "order_id": "ord_b4e0902bd9f37b804eea",
+            "event_id": "ful_8825e810cb3ab4bde0d5",
+            "order_id": "ord_8e5d88d32961bfb9d85f",
             "stage": "quality_grading",
             "status": "done",
             "reference": null,
@@ -202,8 +208,8 @@
             },
             "evidence_kind": "simulated",
             "simulated": true,
-            "trace_id": "d50700873fb24316a886d194366cb03c",
-            "created_at": "2026-11-06T10:33:31.041337+00:00"
+            "trace_id": "708655981a274a478c8c3a61e06dbad4",
+            "created_at": "2026-11-13T12:26:22.467778+00:00"
           }
         ],
         "reconciliation": null,
@@ -271,11 +277,11 @@
           "lots": 1,
           "farmers": 1,
           "quantity_q": 11.8,
-          "recorded_at": "2026-11-06T10:33:29.607689+00:00",
+          "recorded_at": "2026-11-13T12:26:21.432001+00:00",
           "simulated": true
         },
         "pool": {
-          "pool_id": "pol_063061afb5a631014cbc",
+          "pool_id": "pol_30dda3d4fbe743611d6e",
           "crop": "onion",
           "target_q": 20.0,
           "joined_q": 12.0,
@@ -285,8 +291,8 @@
           "grade": null,
           "collection_point": "FPO collection centre",
           "district": "Nashik",
-          "collect_on": "2026-11-09",
-          "valid_until": "2026-11-09",
+          "collect_on": "2026-11-16",
+          "valid_until": "2026-11-16",
           "pay_within_days": 3,
           "status": "open",
           "simulated": true
@@ -306,7 +312,8 @@
             "buyer_paid": false,
             "sent": false,
             "reached": false
-          }
+          },
+          "holds": null
         }
       }
     ],
@@ -422,7 +429,7 @@
     "payout_notice": null,
     "states_note": "Payment, VAJRA, settlement and fee are separate states. The payment moves only on Cashfree's verified word about a payment link made for the order's buyer (each order says whether one was made); VAJRA only on TANTRA's answer. AIAIC collects, then pays, on this server: the buyer pays their whole total, the payment fee with it, through a Cashfree payment link into AIAIC's account, and AIAIC sends the farmer their amount (the link's own figure) to their UPI ID or bank account through Cashfree Payouts on an operator's press, once per order and only after their produce has left them, or AIAIC's team records a bank transfer it made by hand, with its UTR. Each order's from_aiaic says its step: being prepared, not sent yet, while Cashfree holds the transfer (queued or pending); sent once the money has left AIAIC's account (Cashfree sent it to the farmer's bank) or a transfer made by hand is recorded; reached only on Cashfree's word that the farmer's bank credited it. The farmer's mobile number is kept only for an order where they asked an AIAIC person to call them, sealed, and deleted when that sale ends; only the staff the owner names see it, and each look is recorded.",
     "trace": {
-      "request_id": "bffad5e9012f4248876417fa5ab1588b",
+      "request_id": "54382d0d6c6e45a497ee682319eb0218",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

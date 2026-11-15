@@ -24,6 +24,7 @@ import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
 import { BuyersLookingCard } from "./BuyersLookingCard";
 import { GroupPlanCard } from "./GroupPlanCard";
 import { PooledLine } from "./PooledLine";
+import { SharingCard } from "./SharingCard";
 
 /** Her lots in AIAIC: what is left of each, at what price, how many open offers, and a way to stop selling one. */
 export function AiaicListings() {
@@ -58,6 +59,8 @@ export function AiaicListings() {
       {/* buyers looking for produce near her (AIAIC, 27 Oct 2026): "someone is looking for his yield at a rate" */}
       <BuyersLookingCard />
       <WithMine>{(data) => <Lots data={data} />}</WithMine>
+      {/* what buyers see about her, and her one choice (Round 2, R2-3; DESIGN 2d): also on its own page, /sharing */}
+      <SharingCard />
     </div>
   );
 }

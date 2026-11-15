@@ -30,6 +30,8 @@ import {
 } from "./aiaic-identity.server";
 import {
   commissionOf,
+  evidenceKindOf,
+  holdsOf,
   namesOf,
   pricingOf,
   problem,
@@ -52,6 +54,8 @@ import {
   type TalukaRow,
   type OfferCompare,
   type XDestination,
+  type MySharing,
+  type ShareAnswer,
 } from "./aiaic-trade";
 
 export const USERNAME_ENV = "AIAIC_FARMER_USERNAME";
@@ -357,6 +361,9 @@ function stepOf(x: unknown): Record<string, unknown> {
     if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") kept[k] = v;
   }
   out["detail"] = kept;
+  // HOW THE STEP IS KNOWN (Round 2, R2-3): AIAIC's code from its closed list, else none (`buyer_confirmed`: the buyer's
+  // own "It arrived", said to her as such)
+  out["evidence_kind"] = evidenceKindOf(src["evidence_kind"]);
   const loss = src["loss"];
   out["loss"] = loss && typeof loss === "object" ? pick(loss, ["q", "pct"] as const) : null;
   return out;
@@ -582,6 +589,8 @@ export function mineForBrowser(raw: unknown): AiaicMine {
         const s = (fa as Record<string, unknown>)["sending"];
         m["sending"] = s && typeof s === "object" ? pick(s, SENDING_KEYS) : null;
         m["steps"] = stepsOf((fa as Record<string, unknown>)["steps"]);
+        // WHAT AIAIC HOLDS FOR HER NOW (Round 2, R2-2's `holds`): her own amount, since when, why it waits (a closed code)
+        m["holds"] = holdsOf((fa as Record<string, unknown>)["holds"]);
         order["from_aiaic"] = m;
       }
       if (src["money"] && typeof src["money"] === "object") {
@@ -798,7 +807,13 @@ export async function getPrice(q: {
   if (refused) return { ok: false, problem: refused };
   const r = await call<unknown>({ path: "/farmer/trade/price", query: q, as: "trade" });
   if (!r.ok) return r;
-  return { ok: true, data: pick<ReferencePrice>(r.data, REFERENCE_KEYS) };
+  return { ok: true, data: referencePriceShown(r.data) };
+}
+
+/** What of AIAIC's mandi prices for her sale leaves this server (`GET /farmer/trade/price`): its reference keys only.
+ *  Exported so her sale's page test reads AIAIC's recorded answer as this server reads it (R2-3 lane A part A-b). */
+export function referencePriceShown(answer: unknown): ReferencePrice {
+  return pick<ReferencePrice>(answer, REFERENCE_KEYS);
 }
 
 async function write<T>(path: string, key: string, body: unknown): Promise<AiaicResult<T>> {
@@ -1262,6 +1277,86 @@ export async function endDestination(
     data: {
       closure: typeof closure === "string" ? closure : null,
       provider: typeof provider === "string" ? provider : null,
+    },
+  };
+}
+
+// -------------------------------------------------------------- what buyers see of her, and her one choice (Round 2)
+
+/**
+ * HER SHARING AS HER SCREEN READS IT (Round 2, R2-3; AIAIC's routes 4 and 5, contract 17n): field by field, strings and
+ * booleans only (the answer's workspace, its trace and every later field AIAIC may add stay here). `held_as` is what a
+ * buyer would read of her (her own name as her AIAIC account holds it, or a practice name): shown to her only, on her
+ * own card, as her account chip shows her name.
+ */
+export function sharingForBrowser(raw: unknown): MySharing {
+  const r = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const text = (v: unknown) => (typeof v === "string" && v ? v : null);
+  const fields = (Array.isArray(r["fields"]) ? r["fields"] : [])
+    .filter((f): f is Record<string, unknown> => Boolean(f) && typeof f === "object")
+    .filter((f) => typeof f["field"] === "string")
+    .map((f) => ({
+      field: String(f["field"]),
+      offered: f["offered"] === true,
+      why_not: text(f["why_not"]),
+      held_as: text(f["held_as"]),
+      shared: f["shared"] === true,
+      since: text(f["since"]),
+      version_given: text(f["version_given"]),
+    }));
+  return {
+    practice: r["practice"] === true,
+    real_names_open: r["real_names_open"] === true,
+    notice: noticeOf(r["notice"]),
+    fields,
+    buyers_see_now: (Array.isArray(r["buyers_see_now"]) ? r["buyers_see_now"] : []).filter(
+      (c): c is string => typeof c === "string",
+    ),
+  };
+}
+
+/** GET /farmer/trade/sharing with HER OWN token: what buyers see of her, and her one choice (her name). */
+export async function mySharing(): Promise<AiaicResult<MySharing>> {
+  if (!herSession()) return { ok: false, problem: problem("sign_in_to_sell") };
+  const r = await call<unknown>({ path: "/farmer/trade/sharing", as: "trade" });
+  if (!r.ok) return r;
+  return { ok: true, data: sharingForBrowser(r.data) };
+}
+
+/**
+ * HER ONE PRESS (POST /farmer/trade/sharing, her own token, one key a press): her yes for one field with the version of
+ * the notice she was shown and the language it was shown in, or her stop, which asks no version (stopping is as easy as
+ * giving). Only AIAIC's answer says it is on or off.
+ */
+export async function shareMyField(
+  key: string,
+  body: {
+    field: "name";
+    share: boolean;
+    notice_version?: string | undefined;
+    shown_in?: string | undefined;
+  },
+): Promise<AiaicResult<ShareAnswer>> {
+  const refused = await practiceFirst();
+  if (refused) return { ok: false, problem: refused };
+  const r = await call<Record<string, unknown>>({
+    path: "/farmer/trade/sharing",
+    method: "POST",
+    body,
+    key,
+    as: "trade",
+  });
+  if (!r.ok) return r;
+  const a = r.data && typeof r.data === "object" ? r.data : {};
+  const text = (v: unknown) => (typeof v === "string" && v ? v : null);
+  return {
+    ok: true,
+    data: {
+      shared: a["shared"] === true,
+      since: text(a["since"]),
+      ended_at: text(a["ended_at"]),
+      notice_version: text(a["notice_version"]),
+      unchanged: a["unchanged"] === true,
     },
   };
 }

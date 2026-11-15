@@ -13,6 +13,7 @@ import {
   PackageCheck,
   Trash2,
   UserRound,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -170,12 +171,14 @@ const TRADE_ICONS = {
   trade_offer: Handshake,
   trade_order_step: PackageCheck,
   trade_order_cancelled: Ban,
+  // the buyer has paid in full: AIAIC holds her money (Round 2, R2-3; A6)
+  trade_buyer_paid: Wallet,
 } as const;
 
 /**
  * HER NOTICES, said once (push 4b): her registration approved, a reply from AIAIC's team (opening the question), her
  * money, and (30 Oct 2026) HER SALE'S NEWS: an offer on her lot or MORE TIME to answer it, a step on her order, her order
- * called off, each with Open; and, for a guest whose session ended, that she was signed out. Marked read when she presses
+ * called off, (Round 2) her buyer has paid in full and AIAIC holds her money, each with Open; and, for a guest whose session ended, that she was signed out. Marked read when she presses
  * OK or opens it. Read only while AIAIC knows who she is (signed in): a guest has no sale to be told of. New sale news
  * reads her sale again at once, so the page she is on shows what the notice says.
  */

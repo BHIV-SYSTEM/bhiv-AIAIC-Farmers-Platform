@@ -8,6 +8,8 @@ import {
   type AiaicResult,
   type BuyersLooking,
   type MineForScreen,
+  type MySharing,
+  type ShareAnswer,
   type NearbyMandis,
   type ReferencePrice,
   type StoragePlan,
@@ -264,6 +266,40 @@ export const giveMyDestination = createServerFn({ method: "POST" })
     const { giveDestination } = await import("./aiaic-trade.server");
     const { key, ...rest } = data;
     return giveDestination(key, rest);
+  });
+
+/** What buyers see of her, and her one choice, her name (Round 2, R2-3; AIAIC's route 4). */
+export const getMySharing = createServerFn({ method: "GET" }).handler(
+  async (): Promise<AiaicResult<MySharing>> => {
+    const { mySharing } = await import("./aiaic-trade.server");
+    return mySharing();
+  },
+);
+
+/**
+ * Her press to show her name to buyers, or to stop (AIAIC's route 5): her yes goes with the notice's version and the
+ * language it was shown in; her stop with neither. Only her name is offered: AIAIC holds no phone number or village of
+ * hers for buyers.
+ */
+export const shareMyName = createServerFn({ method: "POST" })
+  .validator((d: unknown) =>
+    z
+      .object({
+        key: pressKey,
+        field: z.literal("name"),
+        share: z.boolean(),
+        notice_version: z.string().trim().min(3).max(40).optional(),
+        shown_in: lang.optional(),
+      })
+      .refine((v) => (v.share ? Boolean(v.notice_version && v.shown_in) : !v.notice_version), {
+        message: "a yes says the notice's version and language; a stop says neither",
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }): Promise<AiaicResult<ShareAnswer>> => {
+    const { shareMyField } = await import("./aiaic-trade.server");
+    const { key, ...body } = data;
+    return shareMyField(key, body);
   });
 
 /** She removes her UPI ID or bank account by her own press (audit of 28 Oct 2026, PRIVACY-04). */

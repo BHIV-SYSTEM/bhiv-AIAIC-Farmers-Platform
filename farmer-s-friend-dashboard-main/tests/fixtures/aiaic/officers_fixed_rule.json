@@ -1,0 +1,15 @@
+{
+ "what": "AIAIC's fixed rule of what officers see (officers_see_no_money_phones_or_consents), as AIAIC's GET /trade/settings answers it: its entry of `answer.fixed`, copied word for word from AIAIC's own recording of that route (made by AIAIC's role recorder on a test database), never edited by hand. Read by tests/aiaic_trade_integration_suite.ts (A77), which holds her privacy page's officers' paragraph to its four lists, and checks these words by their sha256. Never shown to a farmer. When AIAIC's rule changes, copy it again from AIAIC's recording, with its commit and sha256.",
+ "recorded_from": {
+  "repository": "AIAIC (BHIV-Engineering-Exchange/bhiv-AIAIC_farmers-Backend)",
+  "commit": "a2f5ff33d1a2c834924d524873ad3dffbe610608",
+  "subject": "The role and board recordings are made again with the role recorder on a test database, because the officers' fixed rule's words changed in this lane (of a f...",
+  "path": "aiaic-frontend/src/test/recorded_trade/role_settings.json",
+  "sha256": "f8b4d87a2af6ffd9f085574364029ee5ca6c25c5db8d6906f90136e1f904901c",
+  "bytes": 38478,
+  "field": "answer.fixed[code=officers_see_no_money_phones_or_consents].description"
+ },
+ "code": "officers_see_no_money_phones_or_consents",
+ "description": "Of money, an officer reads only the trade's own prices and amounts: a lot's asking price, an offer's and an order's price and amount, a reconciliation's amount for the quantity accepted, the mandis' public prices, and whether a buyer's top price reaches a lot's asking price (never that top price). Of a payment, an officer reads only its states, never an amount, and only while its switch is on: whether the buyer has paid, the payment link's state (made, cancelled, or run out unpaid, and the day the buyer asked for a new one), the settlement to the farmer, the fee rule, the payment route and its timing, a refund owed to the buyer, and whether the farmer has been paid (with the days she has waited). Of a farmer's consent, an officer reads only whether it stands, when it was recorded or she withdrew it, and whether she gave it herself in her app or AIAIC's team recorded it. An officer never sees an amount of a payment or payout, a provider's id, a phone number, or the words AIAIC's team recorded of how a consent was taken.",
+ "description_sha256": "d86b7a9bd3cdc6cc353e3690c17978081b92866f74705c21568f3f5ef0582dad"
+}

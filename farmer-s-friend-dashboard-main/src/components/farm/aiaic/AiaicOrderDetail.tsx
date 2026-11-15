@@ -30,6 +30,7 @@ import {
   moneyCard,
   moreTimeGiven,
   newPressKey,
+  noteAccepted,
   orderOfOffer,
   paymentLine,
   quintalWords,
@@ -175,6 +176,9 @@ function OfferDetail({ view, data }: { view: OfferView; data: MineForScreen }) {
     const r = await press(() =>
       answerFn({ data: { key: pressKey, offer_id: o.offer_id, answer: which } }),
     );
+    // HER ACCEPT, READ AGAIN SOON (WF-05): AIAIC makes the buyer's link once this answer is sent, so her sale is read
+    // every few seconds for a minute while that link may yet come (`mineReadEvery`), from the read just below on
+    if (r.ok && which === "accept" && r.data.order_id) noteAccepted(r.data.order_id);
     await queryClient.invalidateQueries({ queryKey: ["aiaic-mine"] });
     if (!r.ok) {
       setProblem(r.problem);
@@ -463,6 +467,7 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
           dest={dest}
           collectThenPay={collectThenPay}
           notice={(data.mine as { x_notice?: XNotice | null }).x_notice}
+          calledOff={order.order_state === "cancelled"}
         />
         <MoneyCard order={order} />
         {listing ? (
@@ -530,6 +535,7 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
         dest={(data.mine as { x_destination?: XDestination | null }).x_destination}
         collectThenPay={(data.mine as { collect_then_pay?: boolean }).collect_then_pay === true}
         notice={(data.mine as { x_notice?: XNotice | null }).x_notice}
+        calledOff={order.order_state === "cancelled"}
       />
       <MoneyCard order={order} />
 
@@ -546,7 +552,8 @@ function SaleDetail({ order, data }: { order: AiaicOrder; data: MineForScreen })
   );
 }
 
-function PaymentCard({ order }: { order: AiaicOrder }) {
+/** The buyer's payment on her sale page: the line said from AIAIC's own facts (`paymentLine`; WF-05). */
+export function PaymentCard({ order }: { order: AiaicOrder }) {
   const { t } = useI18n();
   const line = paymentLine(order);
   return (
