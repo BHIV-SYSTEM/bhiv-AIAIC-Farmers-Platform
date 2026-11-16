@@ -25,6 +25,7 @@ import { Route as SharingRouteImport } from './routes/sharing'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as StorageRouteImport } from './routes/storage'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TodayRouteImport } from './routes/today'
 import { Route as AdviceServiceRouteImport } from './routes/advice.$service'
 import { Route as HelpIndexRouteImport } from './routes/help.index'
 import { Route as HelpQueryIdRouteImport } from './routes/help.$queryId'
@@ -113,6 +114,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TodayRoute = TodayRouteImport.update({
+  id: '/today',
+  path: '/today',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdviceServiceRoute = AdviceServiceRouteImport.update({
   id: '/advice/$service',
   path: '/advice/$service',
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
+  '/today': typeof TodayRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/help/$queryId': typeof HelpQueryIdRoute
   '/listing/$listingId': typeof ListingListingIdRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
+  '/today': typeof TodayRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/help/$queryId': typeof HelpQueryIdRoute
   '/listing/$listingId': typeof ListingListingIdRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/storage': typeof StorageRoute
   '/terms': typeof TermsRoute
+  '/today': typeof TodayRoute
   '/advice/$service': typeof AdviceServiceRoute
   '/help/$queryId': typeof HelpQueryIdRoute
   '/listing/$listingId': typeof ListingListingIdRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/storage'
     | '/terms'
+    | '/today'
     | '/advice/$service'
     | '/help/$queryId'
     | '/listing/$listingId'
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/storage'
     | '/terms'
+    | '/today'
     | '/advice/$service'
     | '/help/$queryId'
     | '/listing/$listingId'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/storage'
     | '/terms'
+    | '/today'
     | '/advice/$service'
     | '/help/$queryId'
     | '/listing/$listingId'
@@ -320,6 +332,7 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   StorageRoute: typeof StorageRoute
   TermsRoute: typeof TermsRoute
+  TodayRoute: typeof TodayRoute
   AdviceServiceRoute: typeof AdviceServiceRoute
   HelpQueryIdRoute: typeof HelpQueryIdRoute
   ListingListingIdRoute: typeof ListingListingIdRoute
@@ -443,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/today': {
+      id: '/today'
+      path: '/today'
+      fullPath: '/today'
+      preLoaderRoute: typeof TodayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/advice/$service': {
       id: '/advice/$service'
       path: '/advice/$service'
@@ -512,6 +532,7 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   StorageRoute: StorageRoute,
   TermsRoute: TermsRoute,
+  TodayRoute: TodayRoute,
   AdviceServiceRoute: AdviceServiceRoute,
   HelpQueryIdRoute: HelpQueryIdRoute,
   ListingListingIdRoute: ListingListingIdRoute,

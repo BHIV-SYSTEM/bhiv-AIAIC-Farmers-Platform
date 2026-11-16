@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ChevronRight, RotateCcw, Warehouse } from "lucide-react";
+import { AlertTriangle, ChevronRight, ListChecks, RotateCcw, Warehouse } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { LanguageSwitcher } from "@/components/farm/LanguageSwitcher";
@@ -59,6 +59,32 @@ function Home() {
       <div className="mt-6 sm:mt-8">
         <LanguageSwitcher />
       </div>
+
+      {/* HER GUIDED HOME (Crowe EOD, 16 Nov 2026): one card to "What would you like to do today?", right after her language;
+          everything else of this page stays as it was */}
+      <Link
+        to="/today"
+        className="mt-6 flex w-full items-center gap-3 rounded-3xl border-2 border-primary bg-card px-4 py-3 shadow-sm transition-colors hover:bg-secondary focus:outline-none focus:ring-4 focus:ring-ring"
+        style={{ minHeight: "max(72px, 4.5rem)" }}
+        data-testid="home-today-link"
+      >
+        <ListChecks aria-hidden className="size-8 shrink-0 text-primary" />
+        <span className="min-w-0 flex-1">
+          <span
+            className="block break-words font-extrabold text-foreground"
+            style={{ fontSize: "max(18px, 1.125rem)" }}
+          >
+            {t("aiaic.today.title")}
+          </span>
+          <span
+            className="block break-words text-foreground"
+            style={{ fontSize: "max(16px, 1rem)" }}
+          >
+            {t("aiaic.today.entry_tip")}
+          </span>
+        </span>
+        <ChevronRight aria-hidden className="size-6 shrink-0 text-primary" />
+      </Link>
 
       {saved ? (
         <Link

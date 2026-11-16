@@ -32,6 +32,7 @@ import {
   commissionOf,
   evidenceKindOf,
   holdsOf,
+  laneOf,
   namesOf,
   pricingOf,
   problem,
@@ -582,6 +583,8 @@ export function mineForBrowser(raw: unknown): AiaicMine {
       order["payment"] = pick(src["payment"], PAYMENT_KEYS);
       order["pooled"] = pooledOf(src["pooled"]);
       order["pool"] = poolOf(src["pool"]);
+      // WHERE IT STANDS AND WHOM IT WAITS ON, AIAIC's own word (Crowe EOD, 16 Nov 2026: her guided home), field by field
+      order["lane"] = laneOf(src["lane"]);
       // WHAT AIAIC SENDS HER, AND WHERE IT IS (28 Oct 2026): AIAIC's own figures, field by field
       const fa = src["from_aiaic"];
       if (fa && typeof fa === "object") {

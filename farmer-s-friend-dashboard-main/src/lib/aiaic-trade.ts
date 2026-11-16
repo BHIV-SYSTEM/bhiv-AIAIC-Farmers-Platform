@@ -336,6 +336,8 @@ export type AiaicOrder = {
   /** The group sale her order is part of (AIAIC section 27); null when not. */
   pool_id?: string | null | undefined;
   pool?: AiaicPool | null | undefined;
+  /** AIAIC's one word for where the order stands, and whom it waits on (`laneOf`); null when AIAIC sent none. */
+  lane?: Lane | null | undefined;
 };
 
 export type PayoutAccountView = {
@@ -1874,6 +1876,58 @@ export function holdsOf(raw: unknown): Holds | null {
 export function holdsShown(money: FromAiaic | null | undefined, calledOff: boolean): Holds | null {
   if (calledOff || !money) return null;
   return money.holds ?? null;
+}
+
+/**
+ * WHERE HER ORDER STANDS, AIAIC'S ONE WORD (its `trade.store.lane_of`, Round 2, DESIGN 2g: "every answer that carries an
+ * order carries its lane, so no page works out a state of its own"), and WHOM IT WAITS ON NOW (its `WAITING_ON`). Read
+ * here for her guided home (Crowe EOD, 16 Nov 2026). The money is never in it: the buyer's payment and her money stay
+ * their own states. Closed lists, AIAIC's own: a code outside them is no lane (fail closed), a `waiting_on` outside them
+ * is none.
+ */
+export const LANE_CODES = [
+  "called_off",
+  "disputed",
+  "reconciled",
+  "delivered",
+  "on_the_way",
+  "being_readied",
+  "agreed",
+] as const;
+export type LaneCode = (typeof LANE_CODES)[number];
+export const WAITING_ON = [
+  "farmer",
+  "buyer",
+  "team",
+  "partner:aggregator",
+  "partner:processor",
+  "partner:warehouse",
+  "partner:transporter",
+] as const;
+export type WaitingOn = (typeof WAITING_ON)[number];
+export type Lane = {
+  code: LaneCode;
+  since: string | null;
+  waiting_on: WaitingOn | null;
+  synthetic: boolean;
+};
+
+/** AIAIC's `lane` block, field by field; null when it is not one or its code is not AIAIC's. */
+export function laneOf(raw: unknown): Lane | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  const code = r["code"];
+  if (typeof code !== "string" || !(LANE_CODES as readonly string[]).includes(code)) return null;
+  const waiting = r["waiting_on"];
+  return {
+    code: code as LaneCode,
+    since: typeof r["since"] === "string" ? r["since"] : null,
+    waiting_on:
+      typeof waiting === "string" && (WAITING_ON as readonly string[]).includes(waiting)
+        ? (waiting as WaitingOn)
+        : null,
+    synthetic: r["synthetic"] === true,
+  };
 }
 
 /**
