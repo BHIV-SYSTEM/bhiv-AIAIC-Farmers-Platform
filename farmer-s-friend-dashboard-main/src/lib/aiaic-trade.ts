@@ -647,6 +647,48 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
   ];
 }
 
+/** AIAIC's sentences of people's word of a payment made outside it (`money.say`), each worded by `aiaic.farmer.money.*`. */
+const WORD_SAYS = [
+  "farmer.money.direct.said_got",
+  "farmer.money.direct.said_got_any",
+  "farmer.money.direct.said_not_yet",
+  "farmer.money.direct.buyer_says",
+  "farmer.money.direct.buyer_says_any",
+];
+/** A step of her sale's bar (`barSteps`): a step's own state, or `told` / `unseen` on a payment made outside AIAIC. */
+export type BarStep = { key: SaleStep["key"]; state: StepState | "told" | "unseen" };
+/**
+ * HER SALE'S BAR (`SaleStepper`): her sale's five steps (`saleSteps`), except ON A PAYMENT MADE OUTSIDE AIAIC (AIAIC's
+ * `money.route` "direct", a payment AIAIC never sees: the night run's A3, TRACE's T1-09 = RC2-ANN-6): there the buyer's
+ * payment and her money have no state of AIAIC's own, so they are drawn as people's word (`told`, where AIAIC holds a
+ * sentence of her word or the buyer's, which her money card says) or as unseen by AIAIC (`unseen`): never a done payment,
+ * and never "to come" beside "You told us you got ...". A step that stopped (a sale called off) stays stopped.
+ */
+export function barSteps(order: AiaicOrder): BarStep[] {
+  const steps = saleSteps(order);
+  if (order.money?.route !== "direct") return steps;
+  const word = WORD_SAYS.includes(order.money?.say?.key ?? "");
+  return steps.map((s) =>
+    (s.key === "paid" || s.key === "money") && s.state !== "stopped"
+      ? { key: s.key, state: word ? "told" : "unseen" }
+      : s,
+  );
+}
+
+/** THE BUYER'S PAYMENT AND THE DELIVERY RUNNING SIDE BY SIDE (the night run's A2, TRACE's INT-D6): her sale's bar shows
+ *  both as "now" where the buyer's payment is under way while her produce is handed over or on its way (AIAIC's payment
+ *  is a state of its own, never a step of its delivery chain); the bar then says so in words, never two "now" unsaid.
+ *  The two steps' keys, the payment's first; null when they do not run together. */
+export function stepsTogether(
+  steps: readonly { key: SaleStep["key"]; state: string }[],
+): [SaleStep["key"], SaleStep["key"]] | null {
+  const paid = steps.find((s) => s.key === "paid");
+  const moving = steps.find(
+    (s) => (s.key === "handover" || s.key === "delivered") && s.state === "now",
+  );
+  return paid?.state === "now" && moving ? ["paid", moving.key] : null;
+}
+
 /**
  * The payment line's key and values: a link that does not carry her share is said to reach AIAIC's payment account,
  * never hers, ONLY where AIAIC says so for the order (`payment.not_onward`, the server's own sentence), and only once a

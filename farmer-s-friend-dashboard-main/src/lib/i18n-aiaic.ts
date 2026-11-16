@@ -716,6 +716,9 @@ export const AIAIC_EN: Dict = {
   "aiaic.step.state.now": "now",
   "aiaic.step.state.todo": "to come",
   "aiaic.step.state.stopped": "stopped",
+  "aiaic.step.state.told": "people's word, not seen by AIAIC",
+  "aiaic.step.state.unseen": "outside AIAIC, not seen by AIAIC",
+  "aiaic.step.together": "At the same time: {a} and {b}.",
 
   "aiaic.pay.title": "Payment",
   "aiaic.pay.no_link":
@@ -889,6 +892,8 @@ export const AIAIC_EN: Dict = {
   "aiaic.today.sale.title": "Sale: {qty} of {crop}",
   "aiaic.today.sale.group": "Part of a group sale: its own steps are on the sale's page.",
   "aiaic.today.progress.now": "Step {n} of {total}: {step}",
+  "aiaic.today.progress.beside":
+    "Step {n} of {total}: {step}. At the same time, step {m}: {also}.",
   "aiaic.today.progress.all_done": "All {total} steps done",
   "aiaic.today.progress.step.agreed": "agreeing the sale",
   "aiaic.today.progress.step.paid": "the buyer's payment",
@@ -2030,6 +2035,9 @@ export const AIAIC_MR: Dict = {
   "aiaic.step.state.now": "आत्ता",
   "aiaic.step.state.todo": "पुढे",
   "aiaic.step.state.stopped": "थांबले",
+  "aiaic.step.state.told": "सांगितलेले, AIAIC ने पाहिलेले नाही",
+  "aiaic.step.state.unseen": "AIAIC बाहेर, AIAIC ने पाहिलेले नाही",
+  "aiaic.step.together": "एकाच वेळी: {a} आणि {b}.",
 
   "aiaic.pay.title": "पेमेंट",
   "aiaic.pay.no_link":
@@ -2203,6 +2211,8 @@ export const AIAIC_MR: Dict = {
   "aiaic.today.sale.group":
     "सामूहिक विक्रीचा भाग: तिच्या स्वतःच्या पायऱ्या विक्रीच्या पानावर आहेत.",
   "aiaic.today.progress.now": "{total} पैकी पायरी {n}: {step}",
+  "aiaic.today.progress.beside":
+    "{total} पैकी पायरी {n}: {step}. त्याच वेळी, पायरी {m}: {also}.",
   "aiaic.today.progress.all_done": "सर्व {total} पायऱ्या पूर्ण",
   "aiaic.today.progress.step.agreed": "विक्री ठरवणे",
   "aiaic.today.progress.step.paid": "खरेदीदाराचे पेमेंट",
@@ -3337,6 +3347,9 @@ export const AIAIC_HI: Dict = {
   "aiaic.step.state.now": "अभी",
   "aiaic.step.state.todo": "आगे",
   "aiaic.step.state.stopped": "रुका",
+  "aiaic.step.state.told": "बताया गया, AIAIC ने नहीं देखा",
+  "aiaic.step.state.unseen": "AIAIC के बाहर, AIAIC ने नहीं देखा",
+  "aiaic.step.together": "एक साथ: {a} और {b}।",
 
   "aiaic.pay.title": "भुगतान",
   "aiaic.pay.no_link": "अभी भुगतान लिंक नहीं: माल सौंपने से पहले खरीदार के साथ भुगतान तय करें।",
@@ -3507,6 +3520,8 @@ export const AIAIC_HI: Dict = {
   "aiaic.today.sale.title": "बिक्री: {crop} {qty}",
   "aiaic.today.sale.group": "समूह बिक्री का हिस्सा: इसके अपने कदम बिक्री के पेज पर हैं।",
   "aiaic.today.progress.now": "{total} में से चरण {n}: {step}",
+  "aiaic.today.progress.beside":
+    "{total} में से चरण {n}: {step}। साथ ही, चरण {m}: {also}।",
   "aiaic.today.progress.all_done": "सभी {total} चरण पूरे",
   "aiaic.today.progress.step.agreed": "बिक्री तय करना",
   "aiaic.today.progress.step.paid": "खरीदार का भुगतान",

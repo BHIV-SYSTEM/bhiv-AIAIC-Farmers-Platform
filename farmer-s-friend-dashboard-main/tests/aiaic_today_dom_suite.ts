@@ -229,6 +229,7 @@ async function loadApp() {
   );
   const { getPlacesDistricts } = await import("../src/lib/places.functions");
   const { recordedTrip } = await import("./aiaic_shared_scan");
+  const { SaleStepper } = await import("../src/components/farm/aiaic/SaleStepper");
   const { getMyTrade } = await import("../src/lib/aiaic-trade.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
   const { problem, laneOf, moneyCard, paymentLine, groupView, groupSaid, groupPaidWords } =
@@ -252,6 +253,7 @@ async function loadApp() {
     signInFarmer,
     getPlacesDistricts,
     recordedTrip,
+    SaleStepper,
     getMyTrade,
     mineForBrowser,
     problem,
@@ -2582,6 +2584,355 @@ function suite(app: App, window: Window & typeof globalThis) {
     }
     window.localStorage.clear();
     window.sessionStorage.clear();
+  });
+
+  // ======================================================================= the night run of 16-17 Nov 2026 (A2)
+  /** Her sale's own bar (`SaleStepper`, drawn on her sale's page and her orders), mounted alone in her language. */
+  const barOf = async (lang: Lang, order: unknown) => {
+    // her language as her phone keeps it (the provider reads it first)
+    window.localStorage.setItem("aiaic.lang", lang);
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = app.createRoot(container);
+    await act(async () => {
+      root.render(
+        h(app.I18nProvider, {
+          initialLang: lang,
+          children: h(app.SaleStepper, { order: order as never }),
+        }),
+      );
+    });
+    await settle(50);
+    const together = container.querySelector('[data-testid="sale-steps-together"]');
+    const out = {
+      label: container.querySelector("ol")?.getAttribute("aria-label") ?? "",
+      together: together?.textContent ?? null,
+      steps: together?.getAttribute("data-steps") ?? null,
+    };
+    await act(async () => root.unmount());
+    container.remove();
+    return out;
+  };
+
+  /** Her sale's card on her page, by AIAIC's order id. */
+  const saleCard = (p: Page, id: string) => {
+    const s = p.items().find((i) => i.getAttribute("data-id") === id);
+    ok(s, `${id} is on her page`);
+    return s;
+  };
+  test("TD21 one current step (the night run's A2; TRACE's T1-07, T2-ANN-03, INT-D6): on a DERIVED copy of AIAIC's recorded sale with the buyer's link sent and not paid, given a pickup done as AIAIC records one (the order on the way, waiting on AIAIC's team, her next step the delivery), her home's progress names the step AIAIC names as hers, the delivery, with the buyer's payment said as running at the same time, never 'Step 2 of 5: the buyer's payment' beside 'Next: the delivery to the buyer.'; the four states stay apart; her sale's bar says in words that the two run at the same time; before the pickup the handover AIAIC names, the payment beside it; a sale whose buyer paid keeps its one step; in Marathi and Hindi", async () => {
+    // DERIVED, in memory: AIAIC's recorded practice sale with the buyer's link sent and not paid
+    // (buyer_farmer_mine_more_time, ord_bd132f59e0bbb326a758), given what AIAIC sets once a pickup is recorded, as its
+    // recorded after-pickup order holds them (farmer_app_mine_after_pickup): the order in fulfilment, a pickup done, its
+    // lane on the way waiting on AIAIC's team, her next step the delivery (engine `trade/store.py` `her_next_step`)
+    const linkOrder = (MANY as Raw).orders.find(
+      (o) => o["order_id"] === "ord_bd132f59e0bbb326a758",
+    ) as Record<string, unknown>;
+    ok(linkOrder, "AIAIC's recorded sale with the buyer's link sent");
+    assert.equal(linkOrder["payment_state"], "link_created", "its link is sent and not paid");
+    const picked = copy(linkOrder);
+    const at = new Date(Date.parse(String(picked["created_at"])) + 10 * 60_000).toISOString();
+    picked["order_state"] = "in_fulfilment";
+    picked["fulfilment"] = [
+      {
+        stage: "pickup",
+        status: "done",
+        simulated: true,
+        evidence_kind: "simulated",
+        created_at: at,
+        detail: { quantity_q: picked["quantity_q"] },
+      },
+    ];
+    picked["lane"] = { code: "on_the_way", since: at, waiting_on: "team", synthetic: true };
+    picked["her_next_step"] = "delivered";
+    const one = (o: Record<string, unknown>) => ({ ...copy(MANY), orders: [copy(o)] });
+    const p = await mount("en", screenOf(one(picked)));
+    try {
+      await ready(p);
+      const sale = saleCard(p, "ord_bd132f59e0bbb326a758");
+      assert.equal(
+        sale.querySelector('[data-testid="today-progress"]')?.textContent,
+        "Step 4 of 5: the delivery to the buyer. At the same time, step 2: the buyer's payment.",
+        "the step AIAIC names as hers, with the payment beside it",
+      );
+      assert.equal(
+        sale.querySelector('[data-testid="today-next"]')?.textContent,
+        "Next: the delivery to the buyer.",
+        "and 'Next' names the same step",
+      );
+      ok(
+        !(sale.textContent ?? "").includes("Step 2 of 5: the buyer's payment"),
+        "never the payment alone as her step beside a Next naming the delivery",
+      );
+      // the four states stay apart
+      for (const id of [
+        "today-state-order",
+        "today-state-payment",
+        "today-state-delivery",
+        "today-state-money",
+      ])
+        ok(sale.querySelector(`[data-testid="${id}"]`), `${id}: its own state`);
+      assert.equal(
+        statusOf(sale, "today-state-payment").text,
+        EN.linkSent,
+        "the buyer's payment: its link sent, not paid",
+      );
+    } finally {
+      await p.unmount();
+    }
+    const read = app.mineForBrowser(copy(one(picked))).orders[0];
+    const bar = await barOf("en", read);
+    assert.equal(
+      bar.together,
+      "At the same time: the buyer's payment and the delivery to the buyer.",
+      "her sale's bar says the two 'now' run at the same time",
+    );
+    assert.equal(bar.steps, "paid delivered");
+    // before the pickup (AIAIC's recording as it is): the handover AIAIC names, the payment beside it
+    const before = await mount("en", screenOf(one(linkOrder)));
+    try {
+      await ready(before);
+      const sale = saleCard(before, "ord_bd132f59e0bbb326a758");
+      assert.equal(
+        sale.querySelector('[data-testid="today-progress"]')?.textContent,
+        "Step 3 of 5: handing over your produce. At the same time, step 2: the buyer's payment.",
+        "before the pickup: the handover AIAIC names, the payment beside it",
+      );
+      assert.equal(
+        sale.querySelector('[data-testid="today-next"]')?.textContent,
+        "Next: the buyer collects it from your farm.",
+      );
+    } finally {
+      await before.unmount();
+    }
+    assert.equal(
+      (await barOf("en", app.mineForBrowser(copy(one(linkOrder))).orders[0])).together,
+      "At the same time: the buyer's payment and handing over your produce.",
+    );
+    // a sale whose buyer paid: one step, as before (AIAIC's recording)
+    const paidOrder = (PAID as Raw).orders.find((o) => o["from_aiaic"]) as Record<string, unknown>;
+    const paid = await mount("en", screenOf({ ...copy(PAID), orders: [copy(paidOrder)] }));
+    try {
+      await ready(paid);
+      const sale = saleCard(paid, String(paidOrder["order_id"]));
+      assert.equal(
+        sale.querySelector('[data-testid="today-progress"]')?.textContent,
+        "Step 3 of 5: handing over your produce",
+        "the buyer paid: the handover alone",
+      );
+    } finally {
+      await paid.unmount();
+    }
+    assert.equal(
+      (await barOf("en", app.mineForBrowser(copy(PAID)).orders.find((o) => o.from_aiaic))).together,
+      null,
+      "the buyer paid: nothing runs beside the handover",
+    );
+    // Marathi and Hindi
+    for (const lang of ["mr", "hi"] as const) {
+      const m = await mount(lang, screenOf(one(picked), lang));
+      try {
+        await ready(m);
+        const line =
+          saleCard(m, "ord_bd132f59e0bbb326a758").querySelector('[data-testid="today-progress"]')
+            ?.textContent ?? "";
+        assert.equal(
+          line,
+          fill(lang, "aiaic.today.progress.beside", {
+            n: 4,
+            total: 5,
+            step: words(lang, "aiaic.today.progress.step.delivered"),
+            m: 2,
+            also: words(lang, "aiaic.today.progress.step.paid"),
+          }),
+          `${lang}: in her language`,
+        );
+        ok(!/[A-Za-z]{2,}/.test(line), `${lang}: no English word`);
+      } finally {
+        await m.unmount();
+      }
+      const lb = await barOf(lang, read);
+      assert.equal(
+        lb.together,
+        fill(lang, "aiaic.step.together", {
+          a: words(lang, "aiaic.today.progress.step.paid"),
+          b: words(lang, "aiaic.today.progress.step.delivered"),
+        }),
+        `${lang}: the bar's words in her language`,
+      );
+      ok(!/[A-Za-z]{2,}/.test(lb.together ?? ""), `${lang}: no English word on the bar`);
+    }
+  });
+
+  // ======================================================================= the night run of 16-17 Nov 2026 (A3)
+  test("TD22 money said against people's word (the night run's A3; TRACE's T1-09 = RC2-ANN-6 and ANN-8e-2): on a payment made outside AIAIC (AIAIC's recording payout_mine_dlite_direct: her word that she got the money), her sale's bar draws the buyer's payment and her money as people's word, never done and never 'to come'; with nobody's word held (DERIVED: AIAIC's sentence removed) as not seen by AIAIC; where AIAIC asks her word once her produce is handed over (DERIVED from AIAIC's recorded after-pickup order: money.can_report true, nothing in its way), her home asks it word for word as her sale's money card does, never 'The buyer has not paid'; in Marathi and Hindi", async () => {
+    const pageSays = (lang: Lang, order: unknown) =>
+      app.moneyCard(
+        (k: string, v?: Record<string, string | number>) => fill(lang, k, v ?? {}),
+        order as never,
+      )?.line ?? null;
+    const directOrder = (DIRECT as Raw).orders.find(
+      (o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c",
+    ) as Record<string, unknown>;
+    ok(directOrder, "AIAIC's recorded sale paid outside it");
+    assert.equal((directOrder["money"] as Record<string, unknown>)["route"], "direct");
+    const readOne = (raw: Record<string, unknown>, o: Record<string, unknown>) =>
+      app.mineForBrowser(copy({ ...copy(raw), orders: [copy(o)] })).orders[0];
+    const bar = await barOf("en", readOne(DIRECT, directOrder));
+    ok(
+      bar.label.includes("Buyer paid: people's word, not seen by AIAIC") &&
+        bar.label.includes("Money to you: people's word, not seen by AIAIC"),
+      `the buyer's payment and her money as people's word (the bar said "${bar.label}")`,
+    );
+    for (const never of ["Buyer paid: done", "Buyer paid: to come", "Money to you: to come", "Money to you: done"])
+      ok(!bar.label.includes(never), `never "${never}" on a payment AIAIC did not see`);
+    // DERIVED: nobody's word held (AIAIC's sentence removed)
+    const nobody = copy(directOrder);
+    (nobody["money"] as Record<string, unknown>)["say"] = null;
+    const unseen = await barOf("en", readOne(DIRECT, nobody));
+    ok(
+      unseen.label.includes("Buyer paid: outside AIAIC, not seen by AIAIC") &&
+        unseen.label.includes("Money to you: outside AIAIC, not seen by AIAIC"),
+      `nobody's word: not seen by AIAIC (the bar said "${unseen.label}")`,
+    );
+    // a sale whose buyer's link AIAIC sees keeps its own states (AIAIC's recording)
+    const linkOrder = (DIRECT as Raw).orders.find(
+      (o) => o["order_id"] === "ord_d6cae7be9dbe4dd4ac7c",
+    ) as Record<string, unknown>;
+    ok(
+      (await barOf("en", readOne(DIRECT, linkOrder))).label.includes("Buyer paid: now"),
+      "a payment AIAIC can see: its own state",
+    );
+    // DERIVED from AIAIC's recorded after-pickup order: AIAIC takes her word now (money.can_report true, nothing in its
+    // way: engine `payout_store.her_report_refusal` gives None once no link can be made and her produce is handed over)
+    const AFTER = recording("farmer_app_mine_after_pickup");
+    const asked = copy((AFTER as Raw).orders[0]) as Record<string, unknown>;
+    const money = asked["money"] as Record<string, unknown>;
+    money["can_report"] = true;
+    money["why_not_report"] = null;
+    const askedMine = { ...copy(AFTER), orders: [asked] };
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const m = await mount(lang, screenOf(askedMine, lang));
+      try {
+        await ready(m);
+        const card = saleCard(m, String(asked["order_id"]));
+        const said = statusOf(card, "today-state-money");
+        const card2 = pageSays(lang, readOne(AFTER, asked));
+        ok(card2, `${lang}: her sale's money card asks her`);
+        assert.equal(said.text, card2, `${lang}: her home asks it as her sale's money card does`);
+        if (lang === "en") {
+          assert.equal(said.text, EN.ask, "AIAIC's question, word for word");
+          ok(!said.text.includes(EN.notPaid), "never 'The buyer has not paid'");
+          assert.deepEqual(said.codes, ["told"], "said as people's word to give, never as not paid");
+        } // (AIAIC's own sentence; "UPI" is the payment system's own name, as in its existing words)
+        else ok(!/[A-Za-z]{2,}/.test(said.text.replace(/AIAIC|UPI/g, "")), `${lang}: no English word`);
+      } finally {
+        await m.unmount();
+      }
+    }
+    // the bar's new words: in Marathi and Hindi, no English word but AIAIC's name
+    for (const lang of ["mr", "hi"] as const)
+      for (const k of ["aiaic.step.state.told", "aiaic.step.state.unseen"])
+        ok(!/[A-Za-z]{2,}/.test(words(lang, k).replace(/AIAIC/g, "")), `${lang} ${k}: no English word`);
+  });
+
+  // ======================================================================= the night run of 16-17 Nov 2026 (A4)
+  test("TD23 two claims of the money rule, each held (the night run's A4; TRACE's T1-10 = RC2-ANN-3 and RC2-ANN-4): a sale paid outside AIAIC whose quantities were checked (DERIVED from AIAIC's recording payout_mine_dlite_direct: its delivery and reconciliation recorded done, AIAIC's lane reconciled) is never finished on people's word: her money is her word, never confirmed, and the sale stays among her sales under way, before her lots; and on AIAIC's recorded sends (her money reached her bank, sent, held for the pickup), each DERIVED with people's word held beside it (AIAIC's recorded sentence and report of her word that she got the money), AIAIC's own state wins: reached, sent, held, never her word in its place", async () => {
+    const T = app.today;
+    // RC2-ANN-3: reconciled, paid outside AIAIC
+    const direct = copy(
+      (DIRECT as Raw).orders.find((o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c"),
+    ) as Record<string, unknown>;
+    ok(direct, "AIAIC's recorded sale paid outside it");
+    const at = (m: number) =>
+      new Date(Date.parse(String(direct["created_at"])) + m * 60_000).toISOString();
+    const step = (stage: string, m: number, detail: Record<string, unknown> = {}) => ({
+      stage,
+      status: "done",
+      simulated: true,
+      evidence_kind: "simulated",
+      created_at: at(m),
+      detail,
+    });
+    direct["order_state"] = "delivered";
+    direct["fulfilment"] = [
+      step("pickup", 10),
+      step("delivered", 20),
+      step("reconciliation", 30, {
+        delivered_q: direct["quantity_q"],
+        accepted_q: direct["quantity_q"],
+        rejected_q: 0,
+      }),
+    ];
+    direct["lane"] = { code: "reconciled", since: at(30), waiting_on: null, synthetic: true };
+    direct["her_next_step"] = null;
+    const lot = copy((OFFER as Raw).listings[0]) as Record<string, unknown>;
+    lot["offers"] = [];
+    lot["created_at"] = at(40);
+    const mine = { ...copy(DIRECT), orders: [direct], listings: [lot] };
+    const read = app.mineForBrowser(copy(mine));
+    const now = T.saleNow(read.orders[0] as never);
+    assert.equal(now.lane, "reconciled", "AIAIC's lane: quantities checked");
+    assert.equal(now.money.state, "told", "her money: her word");
+    assert.equal(now.money.confirmed, false, "never confirmed on a word");
+    assert.equal(now.closed, false, "never finished on people's word");
+    const items = T.todayItems(read as never);
+    assert.deepEqual(
+      items.map((x) => x.kind),
+      ["sale", "lot"],
+      "kept among her sales under way, before her lots",
+    );
+    const p = await mount("en", screenOf(mine));
+    try {
+      await ready(p);
+      const first = p.items()[0] as Element;
+      assert.equal(first.getAttribute("data-id"), String(direct["order_id"]), "first on her page");
+      assert.equal(
+        first.querySelector('[data-testid="today-lane-word"]')?.textContent,
+        EN.reconciled,
+      );
+      assert.deepEqual(statusOf(first, "today-state-money").codes, ["told"]);
+      assert.equal(
+        first.querySelector('[data-testid="today-money-to-her"]')?.getAttribute("data-confirmed") ??
+          "no",
+        "no",
+        "nothing confirmed",
+      );
+    } finally {
+      await p.unmount();
+    }
+    // RC2-ANN-4: AIAIC's own state wins over people's word held beside it
+    const word = copy((DIRECT as Raw).orders.find((o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c")) as Record<
+      string,
+      unknown
+    >;
+    const wordMoney = word["money"] as Record<string, unknown>;
+    for (const [raw, name, state] of [
+      [REACHED, "collect_mine_processed", "reached"],
+      [SENDING, "collect_mine_processing", "sent"],
+      [PAID, "collect_mine_paid", "held"],
+    ] as const) {
+      const order = copy((raw as Raw).orders.find((o) => o["from_aiaic"])) as Record<string, unknown>;
+      const m = order["money"] as Record<string, unknown>;
+      m["say"] = copy(wordMoney["say"]);
+      m["reports"] = copy(wordMoney["reports"]);
+      const one = { ...copy(raw), orders: [order] };
+      const s = T.saleNow(app.mineForBrowser(copy(one)).orders[0] as never);
+      assert.equal(s.money.state, state, `${name} with her word beside it: AIAIC's own state, ${state}`);
+      assert.equal(s.money.told, null, `${name}: her word is not said in its place`);
+      const page = await mount("en", screenOf(one));
+      try {
+        await ready(page);
+        const sale = page.items()[0] as Element;
+        assert.deepEqual(statusOf(sale, "today-state-money").codes, [state], `${name}: on her page`);
+        ok(
+          !statusOf(sale, "today-state-money").text.includes("You told us"),
+          `${name}: her word never in place of AIAIC's state`,
+        );
+      } finally {
+        await page.unmount();
+      }
+    }
   });
 
   return learn;

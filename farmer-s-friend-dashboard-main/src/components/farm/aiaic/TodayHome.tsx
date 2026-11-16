@@ -362,14 +362,23 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
           style={BODY}
           data-testid="today-progress"
           data-step={item.progress.key}
+          data-beside={item.progress.beside?.key ?? ""}
         >
           {item.progress.allDone
             ? t("aiaic.today.progress.all_done", { total: item.progress.of })
-            : t("aiaic.today.progress.now", {
-                n: item.progress.n,
-                total: item.progress.of,
-                step: t(`aiaic.today.progress.step.${item.progress.key}`),
-              })}
+            : item.progress.beside
+              ? t("aiaic.today.progress.beside", {
+                  n: item.progress.n,
+                  total: item.progress.of,
+                  step: t(`aiaic.today.progress.step.${item.progress.key}`),
+                  m: item.progress.beside.n,
+                  also: t(`aiaic.today.progress.step.${item.progress.beside.key}`),
+                })
+              : t("aiaic.today.progress.now", {
+                  n: item.progress.n,
+                  total: item.progress.of,
+                  step: t(`aiaic.today.progress.step.${item.progress.key}`),
+                })}
         </p>
       ) : null}
 

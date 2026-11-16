@@ -48,6 +48,7 @@
  * she says "Not now" and once her lot is listed.
  */
 import {
+  asksHerWord,
   evidenceKindOf,
   groupView,
   holdsShown,
@@ -145,7 +146,14 @@ export type MoneyNow = {
 /** Where her sale is on the five steps her sale's own page draws (`saleSteps`): "step n of m", the step in progress
  *  (never said as reached: "Step 2 of 5: the buyer's payment"), or every step done. Only on a sale she sells alone whose
  *  payment AIAIC can see (`progressOf`). */
-export type Progress = { n: number; of: number; key: SaleStep["key"]; allDone: boolean };
+export type Progress = {
+  n: number;
+  of: number;
+  key: SaleStep["key"];
+  allDone: boolean;
+  /** the buyer's payment, not done, running beside the step AIAIC names as hers (the night run's A2): said with it */
+  beside?: { n: number; key: SaleStep["key"] } | null;
+};
 /** The buyer's payment as her page says it (`paymentNow`): a key of her app's words and the values it fills in (said as
  *  the group sale's page says its steps, `groupSaid`), and the payment's own state (its status code). */
 export type PaymentNow = { key: string; values: Record<string, string | number>; state: string };
@@ -244,7 +252,12 @@ export function paidOutside(order: AiaicOrder): boolean {
 export function toldOf(order: AiaicOrder): ToldSay | null {
   const say = order.money?.say ?? null;
   if (say && (TOLD_SAYS as readonly string[]).includes(say.key)) return say;
-  return paidOutside(order) ? { key: "farmer.money.direct.ask", values: {} } : null;
+  // where AIAIC asks her word (`money.can_report`, once her produce is handed over or on a payment made outside it:
+  // `asksHerWord`, the rule her sale's money card asks by), her home asks it too, never "The buyer has not paid"
+  // (the night run's A3, ANN-8e-2)
+  return paidOutside(order) || asksHerWord(order)
+    ? { key: "farmer.money.direct.ask", values: {} }
+    : null;
 }
 
 /** Her money on one sale, only as AIAIC says it (see the file's head). People's word of a payment made outside AIAIC
@@ -311,8 +324,27 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
   };
 }
 
-/** "Step n of 5" on her sale's five steps (`saleSteps`): the first step not done is the one she is at (all done: the
- *  last); none on a sale whose steps stopped (called off, or the buyer's link expired or cancelled). NONE ON A GROUP SALE:
+/** Her sale's five steps' step that AIAIC's `her_next_step` names (AIAIC's delivery chain, never the money: engine
+ *  `trade/store.py`): a handover, in the terms agreed, is the handover step; the delivery, the delivery step; anything
+ *  else (the quantities checked, none) names none of the five. */
+function stepOfNext(next: NextStep | null): SaleStep["key"] | null {
+  if (next === "delivered") return "delivered";
+  if (
+    next === "buyer_collects" ||
+    next === "farmer_delivers" ||
+    next === "collection_point" ||
+    next === "as_written"
+  )
+    return "handover";
+  return null;
+}
+
+/** "Step n of 5" on her sale's five steps (`saleSteps`): THE STEP AIAIC NAMES AS HERS (its `her_next_step`, the "Next"
+ *  beside it on her card) when it is one of the five and not done, so the line and "Next" never point two ways (the
+ *  night run's A2, TRACE's T1-07 and T2-ANN-03: "Step 2 of 5: the buyer's payment" beside "Next: the delivery to the
+ *  buyer."); and where the buyer's payment, not done, runs beside it (AIAIC's payment is a state of its own, never a step
+ *  of its delivery chain), the payment is said with it as running at the same time (`beside`). Where AIAIC names none,
+ *  the first step not done is the one she is at (all done: the last). None on a sale whose steps stopped (called off, or the buyer's link expired or cancelled). NONE ON A GROUP SALE:
  *  its own five steps are on its page (`groupView`), and these would say another step there, the stale handover among
  *  them (RC-ANN-1). NONE ON A SALE WHOSE PAYMENT AIAIC RECORDED AS MADE OUTSIDE IT: its buyer's payment and her money are
  *  then never done on AIAIC's word, so the line could only say one of them is still to come (RC-ANN-3). */
@@ -320,10 +352,18 @@ export function progressOf(order: AiaicOrder): Progress | null {
   if (order.pool || order.pool_id || paidOutside(order)) return null;
   const steps = saleSteps(order);
   if (steps.some((s) => s.state === "stopped")) return null;
-  const at = steps.findIndex((s) => s.state !== "done");
+  const named = stepOfNext(nextStepOf(order));
+  const ni = named ? steps.findIndex((s) => s.key === named && s.state !== "done") : -1;
+  const at = ni >= 0 ? ni : steps.findIndex((s) => s.state !== "done");
   const i = at < 0 ? steps.length - 1 : at;
   const step = steps[i];
-  return step ? { n: i + 1, of: steps.length, key: step.key, allDone: at < 0 } : null;
+  if (!step) return null;
+  const pay = steps.findIndex((s) => s.key === "paid");
+  const beside =
+    ni >= 0 && pay >= 0 && pay < i && steps[pay]?.state !== "done"
+      ? { n: pay + 1, key: "paid" as const }
+      : null;
+  return { n: i + 1, of: steps.length, key: step.key, allDone: at < 0, beside };
 }
 
 /**
