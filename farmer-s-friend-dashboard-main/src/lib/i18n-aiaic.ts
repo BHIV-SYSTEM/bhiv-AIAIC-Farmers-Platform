@@ -892,8 +892,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.today.sale.title": "Sale: {qty} of {crop}",
   "aiaic.today.sale.group": "Part of a group sale: its own steps are on the sale's page.",
   "aiaic.today.progress.now": "Step {n} of {total}: {step}",
-  "aiaic.today.progress.beside":
-    "Step {n} of {total}: {step}. At the same time, step {m}: {also}.",
+  "aiaic.today.progress.beside": "Step {n} of {total}: {step}. At the same time, step {m}: {also}.",
   "aiaic.today.progress.all_done": "All {total} steps done",
   "aiaic.today.progress.step.agreed": "agreeing the sale",
   "aiaic.today.progress.step.paid": "the buyer's payment",
@@ -974,6 +973,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.today.resume.sell": "You started a sale here.",
   "aiaic.today.resume.go": "Continue",
   "aiaic.today.resume.drop": "Not now",
+  "aiaic.today.sale.ref": "Sale of {day}, reference",
   "aiaic.today.resume.kept": "Kept on this phone: {answers}.",
   "aiaic.store.open": "See the full storage answer",
   "aiaic.store.step.list": "The steps of this page",
@@ -2211,8 +2211,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.today.sale.group":
     "सामूहिक विक्रीचा भाग: तिच्या स्वतःच्या पायऱ्या विक्रीच्या पानावर आहेत.",
   "aiaic.today.progress.now": "{total} पैकी पायरी {n}: {step}",
-  "aiaic.today.progress.beside":
-    "{total} पैकी पायरी {n}: {step}. त्याच वेळी, पायरी {m}: {also}.",
+  "aiaic.today.progress.beside": "{total} पैकी पायरी {n}: {step}. त्याच वेळी, पायरी {m}: {also}.",
   "aiaic.today.progress.all_done": "सर्व {total} पायऱ्या पूर्ण",
   "aiaic.today.progress.step.agreed": "विक्री ठरवणे",
   "aiaic.today.progress.step.paid": "खरेदीदाराचे पेमेंट",
@@ -2293,6 +2292,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.today.resume.sell": "तुम्ही इथे विक्री सुरू केली होती.",
   "aiaic.today.resume.go": "पुढे चालू ठेवा",
   "aiaic.today.resume.drop": "आत्ता नको",
+  "aiaic.today.sale.ref": "{day} ची विक्री, संदर्भ",
   "aiaic.today.resume.kept": "या फोनवर ठेवले: {answers}.",
   "aiaic.store.open": "साठवणुकीचे पूर्ण उत्तर पाहा",
   "aiaic.store.step.list": "या पानाच्या पायऱ्या",
@@ -3520,8 +3520,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.today.sale.title": "बिक्री: {crop} {qty}",
   "aiaic.today.sale.group": "समूह बिक्री का हिस्सा: इसके अपने कदम बिक्री के पेज पर हैं।",
   "aiaic.today.progress.now": "{total} में से चरण {n}: {step}",
-  "aiaic.today.progress.beside":
-    "{total} में से चरण {n}: {step}। साथ ही, चरण {m}: {also}।",
+  "aiaic.today.progress.beside": "{total} में से चरण {n}: {step}। साथ ही, चरण {m}: {also}।",
   "aiaic.today.progress.all_done": "सभी {total} चरण पूरे",
   "aiaic.today.progress.step.agreed": "बिक्री तय करना",
   "aiaic.today.progress.step.paid": "खरीदार का भुगतान",
@@ -3602,6 +3601,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.today.resume.sell": "आपने यहाँ बिक्री शुरू की थी।",
   "aiaic.today.resume.go": "आगे बढ़ें",
   "aiaic.today.resume.drop": "अभी नहीं",
+  "aiaic.today.sale.ref": "{day} की बिक्री, संदर्भ",
   "aiaic.today.resume.kept": "इस फ़ोन पर रखा गया: {answers}।",
   "aiaic.store.open": "भंडारण का पूरा उत्तर देखें",
   "aiaic.store.step.list": "इस पेज के चरण",

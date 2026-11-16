@@ -353,6 +353,19 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
       <p className="mt-1 break-words text-foreground" style={BODY} data-name="">
         {buyerLine(t, data.districtNames, o.buyer_type, o.buyer_district, o.buyer_name)}
       </p>
+      {/* EACH SALE TOLD APART (the night run's A5, TRACE's T1-08): two sales of one crop to one buyer read alike, so each
+          says its own day (the day AIAIC recorded the order, India's day) and a short reference, the end of AIAIC's own
+          order id, marked as a code (never a word to read) */}
+      <p className="mt-1 break-words text-foreground" style={BODY} data-testid="today-sale-ref">
+        {t("aiaic.today.sale.ref", { day: dayOf(o.created_at) })}{" "}
+        <code
+          className="rounded-md bg-muted px-1.5 font-mono font-bold text-foreground"
+          data-name=""
+          data-testid="today-sale-code"
+        >
+          {saleRef(o.order_id)}
+        </code>
+      </p>
       {/* "step n of 5" on the five steps her sale's own page draws (the brief's progress rule), said as the step in
           progress, never as a milestone reached: "Step 2 of 5: the buyer's payment", never "... Buyer paid". None on a
           group sale (its own steps are on its page: RC-ANN-1) nor on a sale paid outside AIAIC (RC-ANN-3): `progressOf` */}
@@ -614,6 +627,14 @@ function TaskInner({
 }
 
 /** Her saved farm as the advice page's address (the state goes with the place, F35), as the landing builds it. */
+/** A sale's short reference: the last six letters and digits of AIAIC's own order id (A5). */
+function saleRef(orderId: string): string {
+  return orderId
+    .replace(/[^A-Za-z0-9]/g, "")
+    .slice(-6)
+    .toUpperCase();
+}
+
 /** What her phone kept of a sale she started (A1), in her sale's own words: how much, the grade she gave, her price.
  *  Nothing is said of what she did not give. */
 function keptWords(

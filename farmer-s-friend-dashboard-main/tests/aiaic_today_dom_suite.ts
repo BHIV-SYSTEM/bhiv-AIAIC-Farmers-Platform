@@ -2935,6 +2935,49 @@ function suite(app: App, window: Window & typeof globalThis) {
     }
   });
 
+  // ======================================================================= the night run of 16-17 Nov 2026 (A5)
+  test("TD24 two sales of one crop to one buyer are told apart (the night run's A5; TRACE's T1-08): AIAIC's recorded sales of onion to the same buyer (buyer_farmer_mine_more_time) each say their own day and a short reference, the end of AIAIC's order id marked as a code; no two cards read alike; in English, Marathi and Hindi, the code the same in each", async () => {
+    const orders = (MANY as Raw).orders as Record<string, unknown>[];
+    const key = (o: Record<string, unknown>) => `${String(o["crop"])}|${String(o["buyer_name"])}|${String(o["quantity_q"])}`;
+    const twins = orders.filter((o) => orders.filter((x) => key(x) === key(o)).length > 1);
+    ok(twins.length >= 2, "AIAIC's recording holds sales of one crop to one buyer, the same quantity");
+    const codes: Record<string, string> = {};
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const p = await mount(lang, screenOf(MANY, lang));
+      try {
+        await ready(p);
+        const cards = twins.map((o) => saleCard(p, String(o["order_id"])));
+        const texts = cards.map((c) => (c.textContent ?? "").replace(/\s+/g, " "));
+        assert.equal(new Set(texts).size, texts.length, `${lang}: no two cards read alike`);
+        twins.forEach((o, i) => {
+          const card = cards[i] as Element;
+          const id = String(o["order_id"]);
+          const code = card.querySelector('[data-testid="today-sale-code"]');
+          ok(code && code.tagName === "CODE", `${lang} ${id}: the reference is marked as a code`);
+          const want = id.replace(/[^A-Za-z0-9]/g, "").slice(-6).toUpperCase();
+          assert.equal(code.textContent, want, `${lang} ${id}: the end of AIAIC's own order id`);
+          if (codes[id]) assert.equal(code.textContent, codes[id], `${id}: the same code in each language`);
+          codes[id] = code.textContent ?? "";
+          const line = card.querySelector('[data-testid="today-sale-ref"]')?.textContent ?? "";
+          assert.equal(
+            line,
+            `${fill(lang, "aiaic.today.sale.ref", { day: istDay(String(o["created_at"])) })} ${want}`,
+            `${lang} ${id}: its own day, as India's day of AIAIC's record`,
+          );
+          if (lang !== "en")
+            ok(!/[A-Za-z]{2,}/.test(line.replace(want, "")), `${lang}: no English word but the code`);
+        });
+      } finally {
+        await p.unmount();
+      }
+    }
+    assert.equal(
+      words("en", "aiaic.today.sale.ref").replace("{day}", "2026-11-13"),
+      "Sale of 2026-11-13, reference",
+      "the English words, pinned",
+    );
+  });
+
   return learn;
 }
 
