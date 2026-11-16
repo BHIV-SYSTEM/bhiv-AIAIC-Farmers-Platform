@@ -2022,9 +2022,14 @@ function suite(app: App, window: Window & typeof globalThis) {
           ok(!held.includes(v), `${v}: kept nowhere`);
         // beside her sale: her answers only, each as the form takes it (A1)
         const draftRaw = window.localStorage.getItem(SELL_KEY) ?? "";
-        const draft = (JSON.parse(draftRaw || "null") as { answers?: Record<string, unknown> } | null)
-          ?.answers;
-        assert.equal(draft?.["quantity"], 37.5, "her quantity, given as her answer, is kept as a number");
+        const draft = (
+          JSON.parse(draftRaw || "null") as { answers?: Record<string, unknown> } | null
+        )?.answers;
+        assert.equal(
+          draft?.["quantity"],
+          37.5,
+          "her quantity, given as her answer, is kept as a number",
+        );
         assert.equal(draft?.["price"], null, "a price box holding words is no answer: not kept");
         for (const v of ["37 bags", "bags", "3931", "rupees"])
           ok(!draftRaw.includes(v), `${v}: not in what her phone keeps of her sale`);
@@ -2074,7 +2079,10 @@ function suite(app: App, window: Window & typeof globalThis) {
           back.step("quantity")?.textContent?.includes(app.quintalWords(tOf("mr"), 40)),
           "how much, said",
         );
-        noEl(back.q('[data-testid="sell-flow-restarted"]'), "never 'the earlier answers were not kept'");
+        noEl(
+          back.q('[data-testid="sell-flow-restarted"]'),
+          "never 'the earlier answers were not kept'",
+        );
         assert.equal(
           back.q('[data-testid="sell-kept"]')?.textContent,
           words("mr", "aiaic.sell.kept"),
@@ -2101,7 +2109,11 @@ function suite(app: App, window: Window & typeof globalThis) {
         // listed: what was kept is forgotten
         await tap(press(again), "her sale's button");
         await waitFor(() => again.q('[data-testid="sell-done"]'), "her lot listed");
-        assert.equal(window.localStorage.getItem(SELL_KEY), null, "listed: what was kept is forgotten");
+        assert.equal(
+          window.localStorage.getItem(SELL_KEY),
+          null,
+          "listed: what was kept is forgotten",
+        );
         noEl(again.q('[data-testid="sell-kept"]'), "and no longer said");
       } finally {
         await again.unmount();

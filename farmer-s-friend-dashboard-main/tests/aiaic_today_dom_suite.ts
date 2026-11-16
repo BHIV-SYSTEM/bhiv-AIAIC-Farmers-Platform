@@ -224,9 +224,8 @@ async function loadApp() {
   // her first use (the night run of 16-17 Nov 2026): the registration and the sign-in, mounted beside her home
   const { Route: RegisterRoute } = await import("../src/routes/register");
   const { Route: SignInRoute } = await import("../src/routes/signin");
-  const { whoAmI, registerFarmer, signInFarmer } = await import(
-    "../src/lib/aiaic-account.functions"
-  );
+  const { whoAmI, registerFarmer, signInFarmer } =
+    await import("../src/lib/aiaic-account.functions");
   const { getPlacesDistricts } = await import("../src/lib/places.functions");
   const { recordedTrip } = await import("./aiaic_shared_scan");
   const { SaleStepper } = await import("../src/components/farm/aiaic/SaleStepper");
@@ -420,9 +419,15 @@ function suite(app: App, window: Window & typeof globalThis) {
               error: "AIAIC did not answer",
             },
           };
-        if ((name === "registerFarmer" || name === "signInFarmer") && world[name === "registerFarmer" ? "register" : "signIn"]) {
+        if (
+          (name === "registerFarmer" || name === "signInFarmer") &&
+          world[name === "registerFarmer" ? "register" : "signIn"]
+        ) {
           world.sent.push(name);
-          return { ...ctx, result: (world[name === "registerFarmer" ? "register" : "signIn"] as () => unknown)() };
+          return {
+            ...ctx,
+            result: (world[name === "registerFarmer" ? "register" : "signIn"] as () => unknown)(),
+          };
         }
         unanswered.push(String(name ?? "a server function this suite does not know"));
         throw new Error("a server function this suite does not answer");
@@ -2403,7 +2408,9 @@ function suite(app: App, window: Window & typeof globalThis) {
     window.localStorage.clear();
     T.keepSellStart("onion", "Nashik", "", now - 5_000);
     const listed = copy(OFFER) as Raw;
-    (listed.listings[0] as Record<string, unknown>)["created_at"] = iso(now - 25 * 3_600_000 + 25_000);
+    (listed.listings[0] as Record<string, unknown>)["created_at"] = iso(
+      now - 25 * 3_600_000 + 25_000,
+    );
     const ahead = await mount("en", screenOf(listed), { keep: true });
     try {
       await ready(ahead);
@@ -2480,7 +2487,10 @@ function suite(app: App, window: Window & typeof globalThis) {
         district: "Nashik",
         at: iso(now - 60_000),
         seen: "",
-        answers: { ...KEPT_ANSWERS({ quantity: -4, price: 99_000_000, step: "nonsense" }), name: "Sita" },
+        answers: {
+          ...KEPT_ANSWERS({ quantity: -4, price: 99_000_000, step: "nonsense" }),
+          name: "Sita",
+        },
       }),
     );
     const read = T.readSellStart(now);
@@ -2507,24 +2517,38 @@ function suite(app: App, window: Window & typeof globalThis) {
     const stores = () =>
       [window.localStorage, window.sessionStorage]
         .flatMap((s) =>
-          Array.from({ length: s.length }, (_, i) => `${s.key(i) ?? ""}=${s.getItem(s.key(i) ?? "") ?? ""}`),
+          Array.from(
+            { length: s.length },
+            (_, i) => `${s.key(i) ?? ""}=${s.getItem(s.key(i) ?? "") ?? ""}`,
+          ),
         )
         .join("\n");
     window.localStorage.clear();
     window.sessionStorage.clear();
     // her saved farm's place, as AIAIC's district list keys it (the page keeps a district only when the list holds it)
     window.localStorage.setItem("aiaic.farm", JSON.stringify({ region: "nashik", state: "mh" }));
-    const first = await mount("en", screenOf(EMPTY), { at: "/register", keep: true, signedIn: false });
+    const first = await mount("en", screenOf(EMPTY), {
+      at: "/register",
+      keep: true,
+      signedIn: false,
+    });
     try {
       await waitFor(() => first.q('[data-testid="register-username"]'), "the registration");
       ok(!first.q('[data-testid="register-kept"]'), "nothing kept yet: nothing said");
-      await typeInto(first.q('[data-testid="register-username"]'), "practice-kept-1", "her username");
+      await typeInto(
+        first.q('[data-testid="register-username"]'),
+        "practice-kept-1",
+        "her username",
+      );
       await typeInto(first.q('[data-testid="register-password"]'), SECRET, "her password");
       await typeInto(first.q('[data-testid="register-password-again"]'), SECRET, "its repeat");
       await typeInto(first.q('[data-testid="register-name"]'), "Practice Kept", "her name");
       await press(first.q('[data-testid="register-agree"]'), "her tick");
       await settle(100);
-      const draft = JSON.parse(window.sessionStorage.getItem(DRAFT) ?? "null") as Record<string, unknown> | null;
+      const draft = JSON.parse(window.sessionStorage.getItem(DRAFT) ?? "null") as Record<
+        string,
+        unknown
+      > | null;
       ok(draft, "her boxes are kept in this tab's own storage");
       assert.deepEqual(
         draft,
@@ -2538,9 +2562,16 @@ function suite(app: App, window: Window & typeof globalThis) {
       await first.unmount();
     }
     // a reload: the page opens again in the same tab
-    const again = await mount("en", screenOf(EMPTY), { at: "/register", keep: true, signedIn: false });
+    const again = await mount("en", screenOf(EMPTY), {
+      at: "/register",
+      keep: true,
+      signedIn: false,
+    });
     try {
-      const user = await waitFor(() => again.q('[data-testid="register-username"]'), "the registration");
+      const user = await waitFor(
+        () => again.q('[data-testid="register-username"]'),
+        "the registration",
+      );
       await settle(100);
       assert.equal((user as HTMLInputElement).value, "practice-kept-1", "her username is back");
       assert.equal(
@@ -2548,13 +2579,21 @@ function suite(app: App, window: Window & typeof globalThis) {
         "Practice Kept",
         "her name is back",
       );
-      assert.equal((again.q('[data-testid="register-password"]') as HTMLInputElement).value, "", "her password is not");
+      assert.equal(
+        (again.q('[data-testid="register-password"]') as HTMLInputElement).value,
+        "",
+        "her password is not",
+      );
       assert.equal(
         (again.q('[data-testid="register-password-again"]') as HTMLInputElement).value,
         "",
         "nor its repeat",
       );
-      assert.equal((again.q('[data-testid="register-agree"]') as HTMLInputElement).checked, false, "nor her tick");
+      assert.equal(
+        (again.q('[data-testid="register-agree"]') as HTMLInputElement).checked,
+        false,
+        "nor her tick",
+      );
       assert.equal(
         again.q('[data-testid="register-kept"]')?.textContent,
         "What you typed here is kept until you close this page. Your password is never kept: type it again.",
@@ -2724,7 +2763,12 @@ function suite(app: App, window: Window & typeof globalThis) {
       await paid.unmount();
     }
     assert.equal(
-      (await barOf("en", app.mineForBrowser(copy(PAID)).orders.find((o) => o.from_aiaic))).together,
+      (
+        await barOf(
+          "en",
+          app.mineForBrowser(copy(PAID)).orders.find((o) => o.from_aiaic),
+        )
+      ).together,
       null,
       "the buyer paid: nothing runs beside the handover",
     );
@@ -2784,7 +2828,12 @@ function suite(app: App, window: Window & typeof globalThis) {
         bar.label.includes("Money to you: people's word, not seen by AIAIC"),
       `the buyer's payment and her money as people's word (the bar said "${bar.label}")`,
     );
-    for (const never of ["Buyer paid: done", "Buyer paid: to come", "Money to you: to come", "Money to you: done"])
+    for (const never of [
+      "Buyer paid: done",
+      "Buyer paid: to come",
+      "Money to you: to come",
+      "Money to you: done",
+    ])
       ok(!bar.label.includes(never), `never "${never}" on a payment AIAIC did not see`);
     // DERIVED: nobody's word held (AIAIC's sentence removed)
     const nobody = copy(directOrder);
@@ -2823,9 +2872,14 @@ function suite(app: App, window: Window & typeof globalThis) {
         if (lang === "en") {
           assert.equal(said.text, EN.ask, "AIAIC's question, word for word");
           ok(!said.text.includes(EN.notPaid), "never 'The buyer has not paid'");
-          assert.deepEqual(said.codes, ["told"], "said as people's word to give, never as not paid");
+          assert.deepEqual(
+            said.codes,
+            ["told"],
+            "said as people's word to give, never as not paid",
+          );
         } // (AIAIC's own sentence; "UPI" is the payment system's own name, as in its existing words)
-        else ok(!/[A-Za-z]{2,}/.test(said.text.replace(/AIAIC|UPI/g, "")), `${lang}: no English word`);
+        else
+          ok(!/[A-Za-z]{2,}/.test(said.text.replace(/AIAIC|UPI/g, "")), `${lang}: no English word`);
       } finally {
         await m.unmount();
       }
@@ -2833,7 +2887,10 @@ function suite(app: App, window: Window & typeof globalThis) {
     // the bar's new words: in Marathi and Hindi, no English word but AIAIC's name
     for (const lang of ["mr", "hi"] as const)
       for (const k of ["aiaic.step.state.told", "aiaic.step.state.unseen"])
-        ok(!/[A-Za-z]{2,}/.test(words(lang, k).replace(/AIAIC/g, "")), `${lang} ${k}: no English word`);
+        ok(
+          !/[A-Za-z]{2,}/.test(words(lang, k).replace(/AIAIC/g, "")),
+          `${lang} ${k}: no English word`,
+        );
   });
 
   // ======================================================================= the night run of 16-17 Nov 2026 (A4)
@@ -2902,29 +2959,39 @@ function suite(app: App, window: Window & typeof globalThis) {
       await p.unmount();
     }
     // RC2-ANN-4: AIAIC's own state wins over people's word held beside it
-    const word = copy((DIRECT as Raw).orders.find((o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c")) as Record<
-      string,
-      unknown
-    >;
+    const word = copy(
+      (DIRECT as Raw).orders.find((o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c"),
+    ) as Record<string, unknown>;
     const wordMoney = word["money"] as Record<string, unknown>;
     for (const [raw, name, state] of [
       [REACHED, "collect_mine_processed", "reached"],
       [SENDING, "collect_mine_processing", "sent"],
       [PAID, "collect_mine_paid", "held"],
     ] as const) {
-      const order = copy((raw as Raw).orders.find((o) => o["from_aiaic"])) as Record<string, unknown>;
+      const order = copy((raw as Raw).orders.find((o) => o["from_aiaic"])) as Record<
+        string,
+        unknown
+      >;
       const m = order["money"] as Record<string, unknown>;
       m["say"] = copy(wordMoney["say"]);
       m["reports"] = copy(wordMoney["reports"]);
       const one = { ...copy(raw), orders: [order] };
       const s = T.saleNow(app.mineForBrowser(copy(one)).orders[0] as never);
-      assert.equal(s.money.state, state, `${name} with her word beside it: AIAIC's own state, ${state}`);
+      assert.equal(
+        s.money.state,
+        state,
+        `${name} with her word beside it: AIAIC's own state, ${state}`,
+      );
       assert.equal(s.money.told, null, `${name}: her word is not said in its place`);
       const page = await mount("en", screenOf(one));
       try {
         await ready(page);
         const sale = page.items()[0] as Element;
-        assert.deepEqual(statusOf(sale, "today-state-money").codes, [state], `${name}: on her page`);
+        assert.deepEqual(
+          statusOf(sale, "today-state-money").codes,
+          [state],
+          `${name}: on her page`,
+        );
         ok(
           !statusOf(sale, "today-state-money").text.includes("You told us"),
           `${name}: her word never in place of AIAIC's state`,
@@ -2938,9 +3005,13 @@ function suite(app: App, window: Window & typeof globalThis) {
   // ======================================================================= the night run of 16-17 Nov 2026 (A5)
   test("TD24 two sales of one crop to one buyer are told apart (the night run's A5; TRACE's T1-08): AIAIC's recorded sales of onion to the same buyer (buyer_farmer_mine_more_time) each say their own day and a short reference, the end of AIAIC's order id marked as a code; no two cards read alike; in English, Marathi and Hindi, the code the same in each", async () => {
     const orders = (MANY as Raw).orders as Record<string, unknown>[];
-    const key = (o: Record<string, unknown>) => `${String(o["crop"])}|${String(o["buyer_name"])}|${String(o["quantity_q"])}`;
+    const key = (o: Record<string, unknown>) =>
+      `${String(o["crop"])}|${String(o["buyer_name"])}|${String(o["quantity_q"])}`;
     const twins = orders.filter((o) => orders.filter((x) => key(x) === key(o)).length > 1);
-    ok(twins.length >= 2, "AIAIC's recording holds sales of one crop to one buyer, the same quantity");
+    ok(
+      twins.length >= 2,
+      "AIAIC's recording holds sales of one crop to one buyer, the same quantity",
+    );
     const codes: Record<string, string> = {};
     for (const lang of ["en", "mr", "hi"] as const) {
       const p = await mount(lang, screenOf(MANY, lang));
@@ -2954,9 +3025,13 @@ function suite(app: App, window: Window & typeof globalThis) {
           const id = String(o["order_id"]);
           const code = card.querySelector('[data-testid="today-sale-code"]');
           ok(code && code.tagName === "CODE", `${lang} ${id}: the reference is marked as a code`);
-          const want = id.replace(/[^A-Za-z0-9]/g, "").slice(-6).toUpperCase();
+          const want = id
+            .replace(/[^A-Za-z0-9]/g, "")
+            .slice(-6)
+            .toUpperCase();
           assert.equal(code.textContent, want, `${lang} ${id}: the end of AIAIC's own order id`);
-          if (codes[id]) assert.equal(code.textContent, codes[id], `${id}: the same code in each language`);
+          if (codes[id])
+            assert.equal(code.textContent, codes[id], `${id}: the same code in each language`);
           codes[id] = code.textContent ?? "";
           const line = card.querySelector('[data-testid="today-sale-ref"]')?.textContent ?? "";
           assert.equal(
@@ -2965,7 +3040,10 @@ function suite(app: App, window: Window & typeof globalThis) {
             `${lang} ${id}: its own day, as India's day of AIAIC's record`,
           );
           if (lang !== "en")
-            ok(!/[A-Za-z]{2,}/.test(line.replace(want, "")), `${lang}: no English word but the code`);
+            ok(
+              !/[A-Za-z]{2,}/.test(line.replace(want, "")),
+              `${lang}: no English word but the code`,
+            );
         });
       } finally {
         await p.unmount();
@@ -2983,12 +3061,17 @@ function suite(app: App, window: Window & typeof globalThis) {
     const css = fs.readFileSync(path.join(here, "..", "src", "styles.css"), "utf-8");
     const html = css.match(/\bhtml\s*\{[^}]*\}/);
     ok(html, "the style sheet sets the root's font");
-    const size = html[0].match(/font-size:\s*clamp\(\s*([\d.]+)px\s*,\s*([\d.]+)vw\s*,\s*([\d.]+)px\s*\)/);
+    const size = html[0].match(
+      /font-size:\s*clamp\(\s*([\d.]+)px\s*,\s*([\d.]+)vw\s*,\s*([\d.]+)px\s*\)/,
+    );
     ok(size, `the root's font is a clamp of px, vw, px (it says ${html[0].replace(/\s+/g, " ")})`);
     const [floor, vw, top] = [Number(size[1]), Number(size[2]), Number(size[3])];
     ok(floor >= 16, `never under 16 px: the floor is ${floor} px`);
     for (const width of [320, 360, 412])
-      ok(Math.min(Math.max(floor, (vw * width) / 100), top) >= 16, `at ${width} px the root is at least 16 px`);
+      ok(
+        Math.min(Math.max(floor, (vw * width) / 100), top) >= 16,
+        `at ${width} px the root is at least 16 px`,
+      );
     // NOT HERE: the bottom menu's five words stay at 11 px. Raised to 16 px they broke inside words at 320 and 360 px
     // ("Advisor|y", "Paymen|ts"; Marathi cut at two lines): a menu layout or shorter words is a design decision, recorded
     // as open in the night run's REGRESSION_EVIDENCE, never forced here.
