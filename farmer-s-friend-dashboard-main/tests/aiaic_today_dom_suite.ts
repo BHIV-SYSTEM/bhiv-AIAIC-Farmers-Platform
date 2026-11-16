@@ -221,7 +221,14 @@ async function loadApp() {
   const { DICTS, I18nProvider } = await import("../src/lib/i18n");
   const { Route: TodayRoute } = await import("../src/routes/today");
   const { Route: IndexRoute } = await import("../src/routes/index");
-  const { whoAmI } = await import("../src/lib/aiaic-account.functions");
+  // her first use (the night run of 16-17 Nov 2026): the registration and the sign-in, mounted beside her home
+  const { Route: RegisterRoute } = await import("../src/routes/register");
+  const { Route: SignInRoute } = await import("../src/routes/signin");
+  const { whoAmI, registerFarmer, signInFarmer } = await import(
+    "../src/lib/aiaic-account.functions"
+  );
+  const { getPlacesDistricts } = await import("../src/lib/places.functions");
+  const { recordedTrip } = await import("./aiaic_shared_scan");
   const { getMyTrade } = await import("../src/lib/aiaic-trade.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
   const { problem, laneOf, moneyCard, paymentLine, groupView, groupSaid, groupPaidWords } =
@@ -238,7 +245,13 @@ async function loadApp() {
     I18nProvider,
     TodayRoute,
     IndexRoute,
+    RegisterRoute,
+    SignInRoute,
     whoAmI,
+    registerFarmer,
+    signInFarmer,
+    getPlacesDistricts,
+    recordedTrip,
     getMyTrade,
     mineForBrowser,
     problem,
@@ -359,9 +372,19 @@ function suite(app: App, window: Window & typeof globalThis) {
     signedIn: true,
     trade: null as unknown,
     calls: 0,
+    // her registration and her sign-in, answered as a case sets them (each sent is kept, without its password)
+    register: null as null | (() => unknown),
+    signIn: null as null | (() => unknown),
+    sent: [] as string[],
   };
   const handlers = new Map<unknown, string>();
-  const named = { whoAmI: app.whoAmI, getMyTrade: app.getMyTrade };
+  const named = {
+    whoAmI: app.whoAmI,
+    getMyTrade: app.getMyTrade,
+    getPlacesDistricts: app.getPlacesDistricts,
+    registerFarmer: app.registerFarmer,
+    signInFarmer: app.signInFarmer,
+  };
   const unanswered: string[] = [];
   unansweredCalls = () => unanswered.splice(0);
   const rpc = {
@@ -383,6 +406,21 @@ function suite(app: App, window: Window & typeof globalThis) {
           world.calls += 1;
           if (world.trade === LOST) throw new TypeError("the phone lost its network");
           return { ...ctx, result: world.trade };
+        }
+        // AIAIC's recorded districts (Maharashtra in English; Madhya Pradesh in en, mr, hi), as the kit suites answer them;
+        // a list no recording holds is answered as AIAIC not answering, as the page's own failed read
+        if (name === "getPlacesDistricts")
+          return {
+            ...ctx,
+            result: app.recordedTrip("districts", ctx["data"] as Record<string, unknown>, {}) ?? {
+              ok: false,
+              districts: [],
+              error: "AIAIC did not answer",
+            },
+          };
+        if ((name === "registerFarmer" || name === "signInFarmer") && world[name === "registerFarmer" ? "register" : "signIn"]) {
+          world.sent.push(name);
+          return { ...ctx, result: (world[name === "registerFarmer" ? "register" : "signIn"] as () => unknown)() };
         }
         unanswered.push(String(name ?? "a server function this suite does not know"));
         throw new Error("a server function this suite does not answer");
@@ -476,8 +514,23 @@ function suite(app: App, window: Window & typeof globalThis) {
       path: "/",
       getParentRoute: () => root,
     } as never);
+    const registerRoute = app.RegisterRoute.update({
+      id: "/register",
+      path: "/register",
+      getParentRoute: () => root,
+    } as never);
+    const signInRoute = app.SignInRoute.update({
+      id: "/signin",
+      path: "/signin",
+      getParentRoute: () => root,
+    } as never);
     const router = R.createRouter({
-      routeTree: root.addChildren([todayRoute as never, indexRoute as never]),
+      routeTree: root.addChildren([
+        todayRoute as never,
+        indexRoute as never,
+        registerRoute as never,
+        signInRoute as never,
+      ]),
       history: R.createMemoryHistory({ initialEntries: [at] }),
     });
     const container = document.createElement("div");
@@ -2312,6 +2365,223 @@ function suite(app: App, window: Window & typeof globalThis) {
         await m.unmount();
       }
     }
+  });
+
+  // ======================================================================= the night run of 16-17 Nov 2026 (A1)
+  /** Her finger types into a box: the box's own value setter, then the input event React listens to. */
+  const typeInto = async (el: Element | null | undefined, text: string, what: string) => {
+    ok(el, `there is ${what} to type in`);
+    const box = el as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+    ok(setter, "the box's own value setter");
+    await act(async () => {
+      setter.call(box, text);
+      box.dispatchEvent(new window.Event("input", { bubbles: true }));
+    });
+    await settle(50);
+  };
+  const KEPT_ANSWERS = (over: Record<string, unknown> = {}) => ({
+    state: "mh",
+    district: "Nashik",
+    taluka: null,
+    crop: "onion",
+    quantity: 10,
+    grade: "none",
+    price: 1800,
+    step: "check",
+    ...over,
+  });
+
+  test("TD19 a sale she started and left, read back through her page (RC-ANN-2; the night run's A1): with the phone's clock a day ahead of AIAIC's, a lot AIAIC holds since her press ends it on AIAIC's own clock, never offered back; and the answers her sale's form kept are said on the card, word for word (how much and her price), with Continue opening the step she was at; answers out of the form's bounds, or another field, are never said or kept", async () => {
+    const T = app.today;
+    const now = Date.now();
+    const iso = (ms: number) => new Date(ms).toISOString();
+    // DERIVED: AIAIC held none of her lots at her press (seen ""); she listed then, on AIAIC's clock, which runs 25 hours
+    // behind the phone's: the lot's time is a day before the phone's mark, so the phone's clock alone would not find it
+    window.localStorage.clear();
+    T.keepSellStart("onion", "Nashik", "", now - 5_000);
+    const listed = copy(OFFER) as Raw;
+    (listed.listings[0] as Record<string, unknown>)["created_at"] = iso(now - 25 * 3_600_000 + 25_000);
+    const ahead = await mount("en", screenOf(listed), { keep: true });
+    try {
+      await ready(ahead);
+      await settle(200);
+      ok(
+        !ahead.q('[data-testid="today-resume"]'),
+        "the phone's clock a day ahead: the lot AIAIC holds since her press ends it, read on AIAIC's clock",
+      );
+      assert.equal(window.localStorage.getItem(T.SELL_STARTED_KEY), null, "and forgotten");
+    } finally {
+      await ahead.unmount();
+    }
+    // her sale's form kept her answers (as `keepSellAnswers` writes them); AIAIC holds no lot of hers
+    window.localStorage.clear();
+    T.keepSellStart("onion", "Nashik", "", now - 60_000);
+    T.keepSellAnswers(KEPT_ANSWERS() as never, "", now - 30_000);
+    const kept = JSON.parse(window.localStorage.getItem(T.SELL_STARTED_KEY) ?? "null") as Record<
+      string,
+      unknown
+    >;
+    assert.deepEqual(
+      Object.keys(kept).sort(),
+      ["answers", "at", "crop", "district", "seen"],
+      "her start, and her answers beside it",
+    );
+    assert.deepEqual(
+      Object.keys(kept["answers"] as object).sort(),
+      ["crop", "district", "grade", "price", "quantity", "state", "step", "taluka"],
+      "her answers: her choices only",
+    );
+    assert.equal(kept["at"], iso(now - 60_000), "her start's own time is kept");
+    const back = await mount("en", screenOf(EMPTY), { keep: true });
+    try {
+      await ready(back);
+      await waitFor(() => back.q('[data-testid="today-resume"]'), "her sale offered back");
+      assert.equal(
+        back.q('[data-testid="today-resume-kept"]')?.textContent,
+        "Kept on this phone: 10 quintals, ₹1,800 a quintal.",
+        "what was kept is said, word for word",
+      );
+      assert.equal(
+        hrefOf(back.q('[data-testid="today-resume-go"]')),
+        "/listing/new?crop=onion&region=Nashik&step=check",
+        "Continue opens the step she was at; her answers are given back by the sale's form",
+      );
+    } finally {
+      await back.unmount();
+    }
+    for (const lang of ["mr", "hi"] as const) {
+      const m = await mount(lang, screenOf(EMPTY, lang), { keep: true });
+      try {
+        await ready(m);
+        const line = await waitFor(() => m.q('[data-testid="today-resume-kept"]'), `${lang}: kept`);
+        assert.equal(
+          line.textContent,
+          fill(lang, "aiaic.today.resume.kept", {
+            answers: [
+              fill(lang, "aiaic.sell.quintals", { n: 10 }),
+              fill(lang, "aiaic.lots.price", { price: "₹1,800" }),
+            ].join(", "),
+          }),
+          `${lang}: in her language`,
+        );
+        ok(!/[A-Za-z]{2,}/.test(line.textContent ?? ""), `${lang}: no English word`);
+      } finally {
+        await m.unmount();
+      }
+    }
+    // kept answers out of the form's bounds, or another field: never said, never read back
+    window.localStorage.setItem(
+      T.SELL_STARTED_KEY,
+      JSON.stringify({
+        crop: "onion",
+        district: "Nashik",
+        at: iso(now - 60_000),
+        seen: "",
+        answers: { ...KEPT_ANSWERS({ quantity: -4, price: 99_000_000, step: "nonsense" }), name: "Sita" },
+      }),
+    );
+    const read = T.readSellStart(now);
+    assert.deepEqual(
+      read?.answers,
+      KEPT_ANSWERS({ quantity: null, price: null, step: null }),
+      "read back field by field: out of bounds is not given, another field is dropped",
+    );
+    const odd = await mount("en", screenOf(EMPTY), { keep: true });
+    try {
+      await ready(odd);
+      await waitFor(() => odd.q('[data-testid="today-resume"]'), "her sale offered back");
+      ok(!odd.q('[data-testid="today-resume-kept"]'), "nothing she did not give is said");
+      ok(!odd.text().includes("Sita"), "another field is never said");
+    } finally {
+      await odd.unmount();
+    }
+    window.localStorage.clear();
+  });
+
+  test("TD20 her registration's boxes are kept while the tab is open (the night run's A1, T2-ANN-01): her username, her name, her state and her district in this tab's own storage, said on the page after a reload, the boxes filled again; her password, its repeat and her tick are never kept anywhere; once AIAIC has her registration, what was kept is forgotten", async () => {
+    const DRAFT = "aiaic.register.draft";
+    const SECRET = "Practice-Pass-7731";
+    const stores = () =>
+      [window.localStorage, window.sessionStorage]
+        .flatMap((s) =>
+          Array.from({ length: s.length }, (_, i) => `${s.key(i) ?? ""}=${s.getItem(s.key(i) ?? "") ?? ""}`),
+        )
+        .join("\n");
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    // her saved farm's place, as AIAIC's district list keys it (the page keeps a district only when the list holds it)
+    window.localStorage.setItem("aiaic.farm", JSON.stringify({ region: "nashik", state: "mh" }));
+    const first = await mount("en", screenOf(EMPTY), { at: "/register", keep: true, signedIn: false });
+    try {
+      await waitFor(() => first.q('[data-testid="register-username"]'), "the registration");
+      ok(!first.q('[data-testid="register-kept"]'), "nothing kept yet: nothing said");
+      await typeInto(first.q('[data-testid="register-username"]'), "practice-kept-1", "her username");
+      await typeInto(first.q('[data-testid="register-password"]'), SECRET, "her password");
+      await typeInto(first.q('[data-testid="register-password-again"]'), SECRET, "its repeat");
+      await typeInto(first.q('[data-testid="register-name"]'), "Practice Kept", "her name");
+      await press(first.q('[data-testid="register-agree"]'), "her tick");
+      await settle(100);
+      const draft = JSON.parse(window.sessionStorage.getItem(DRAFT) ?? "null") as Record<string, unknown> | null;
+      ok(draft, "her boxes are kept in this tab's own storage");
+      assert.deepEqual(
+        draft,
+        { username: "practice-kept-1", name: "Practice Kept", state: "mh", district: "nashik" },
+        "her username, her name, her state and district: nothing else",
+      );
+      ok(!stores().includes(SECRET), "her password is kept nowhere");
+      ok(!/password|agree/i.test(stores()), "nor its name, nor her tick");
+      ok(!window.localStorage.getItem(DRAFT), "never on the phone beyond this tab");
+    } finally {
+      await first.unmount();
+    }
+    // a reload: the page opens again in the same tab
+    const again = await mount("en", screenOf(EMPTY), { at: "/register", keep: true, signedIn: false });
+    try {
+      const user = await waitFor(() => again.q('[data-testid="register-username"]'), "the registration");
+      await settle(100);
+      assert.equal((user as HTMLInputElement).value, "practice-kept-1", "her username is back");
+      assert.equal(
+        (again.q('[data-testid="register-name"]') as HTMLInputElement).value,
+        "Practice Kept",
+        "her name is back",
+      );
+      assert.equal((again.q('[data-testid="register-password"]') as HTMLInputElement).value, "", "her password is not");
+      assert.equal(
+        (again.q('[data-testid="register-password-again"]') as HTMLInputElement).value,
+        "",
+        "nor its repeat",
+      );
+      assert.equal((again.q('[data-testid="register-agree"]') as HTMLInputElement).checked, false, "nor her tick");
+      assert.equal(
+        again.q('[data-testid="register-kept"]')?.textContent,
+        "What you typed here is kept until you close this page. Your password is never kept: type it again.",
+        "what was kept is said, and that her password was not",
+      );
+      // AIAIC has her registration: what was kept is forgotten
+      world.register = () => ({ ok: true });
+      await typeInto(again.q('[data-testid="register-password"]'), SECRET, "her password");
+      await typeInto(again.q('[data-testid="register-password-again"]'), SECRET, "its repeat");
+      await press(again.q('[data-testid="register-agree"]'), "her tick");
+      await press(again.q('[data-testid="register-submit"]'), "Register");
+      await waitFor(() => again.q('[data-testid="register-done"]'), "her registration sent");
+      assert.deepEqual(world.sent, ["registerFarmer"], "sent once");
+      assert.equal(window.sessionStorage.getItem(DRAFT), null, "what was kept is forgotten");
+    } finally {
+      world.register = null;
+      world.sent.length = 0;
+      await again.unmount();
+    }
+    for (const lang of ["mr", "hi"] as const) {
+      ok(
+        !/[A-Za-z]{2,}/.test(words(lang, "aiaic.account.kept")) &&
+          !/[A-Za-z]{2,}/.test(words(lang, "aiaic.sell.kept")) &&
+          !/[A-Za-z]{2,}/.test(words(lang, "aiaic.today.resume.kept").replace("{answers}", "")),
+        `${lang}: the kept words have no English word`,
+      );
+    }
+    window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
   return learn;

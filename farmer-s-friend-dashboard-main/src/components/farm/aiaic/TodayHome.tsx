@@ -48,6 +48,7 @@ import {
   type MoneyState,
   type OfferNow,
   type SaleNow,
+  type SellAnswers,
   type SellStarted,
   type TodayItem,
 } from "@/lib/aiaic-today";
@@ -604,6 +605,19 @@ function TaskInner({
 }
 
 /** Her saved farm as the advice page's address (the state goes with the place, F35), as the landing builds it. */
+/** What her phone kept of a sale she started (A1), in her sale's own words: how much, the grade she gave, her price.
+ *  Nothing is said of what she did not give. */
+function keptWords(
+  t: (k: string, v?: Record<string, string | number>) => string,
+  a: SellAnswers,
+): string {
+  const parts: string[] = [];
+  if (a.quantity !== null) parts.push(quintalWords(t, a.quantity));
+  if (a.grade && a.grade !== "none") parts.push(t(`grade.GRADE_${a.grade}`));
+  if (a.price !== null) parts.push(t("aiaic.lots.price", { price: rupees(a.price) }));
+  return parts.join(", ");
+}
+
 function adviceSearch(saved: SavedFarm) {
   return {
     ...(saved.region ? { region: saved.region } : {}),
@@ -725,12 +739,24 @@ export function TodayHome() {
                     : t("aiaic.today.resume.sell")}
                 </span>
               </p>
+              {resume.answers && keptWords(t, resume.answers) ? (
+                <p
+                  className="mt-2 break-words text-foreground"
+                  style={BODY}
+                  data-testid="today-resume-kept"
+                >
+                  {t("aiaic.today.resume.kept", { answers: keptWords(t, resume.answers) })}
+                </p>
+              ) : null}
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Link
                   to="/listing/new"
                   search={{
                     ...(resume.crop ? { crop: resume.crop } : {}),
                     ...(resume.district ? { region: resume.district } : {}),
+                    // her answers are given back by the sale's form itself; the step she was at opens if every step
+                    // before it is answered, else the first one still to answer (the step kit's rule)
+                    ...(resume.answers?.step ? { step: resume.answers.step } : {}),
                   }}
                   data-testid="today-resume-go"
                   className={PRIMARY}

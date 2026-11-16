@@ -357,6 +357,8 @@ export const AIAIC_EN: Dict = {
   "aiaic.account.have_account": "Already registered?",
   "aiaic.account.as_guest": "Go on as a guest",
   "aiaic.account.busy": "Please wait…",
+  "aiaic.account.kept":
+    "What you typed here is kept until you close this page. Your password is never kept: type it again.",
   "aiaic.account.registered_title": "Registration sent",
   "aiaic.account.registered":
     "Your registration is waiting for AIAIC's team to approve it. You can sign in once it is approved.",
@@ -579,6 +581,8 @@ export const AIAIC_EN: Dict = {
   "aiaic.sell.submit": "List it for sale",
   "aiaic.sell.saving": "Listing…",
   "aiaic.sell.done": "Listed. Buyers' offers will show under Orders.",
+  "aiaic.sell.kept":
+    "Your answers from before were kept on this phone. Check each one: Change opens it again.",
   "aiaic.sell.far.ask":
     "{price} a quintal is far from what mandis reported on {day}: {low} to {high}. Is your price right?",
   "aiaic.sell.far.yes": "Yes, list it at {price}",
@@ -965,6 +969,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.today.resume.sell": "You started a sale here.",
   "aiaic.today.resume.go": "Continue",
   "aiaic.today.resume.drop": "Not now",
+  "aiaic.today.resume.kept": "Kept on this phone: {answers}.",
   "aiaic.store.open": "See the full storage answer",
   "aiaic.store.step.list": "The steps of this page",
   "aiaic.store.step.of": "Step {n} of {total}:",
@@ -1668,6 +1673,8 @@ export const AIAIC_MR: Dict = {
   "aiaic.account.have_account": "आधीच नोंदणी केली आहे?",
   "aiaic.account.as_guest": "पाहुणे म्हणून पुढे जा",
   "aiaic.account.busy": "कृपया थांबा…",
+  "aiaic.account.kept":
+    "तुम्ही इथे लिहिलेले हे पान बंद करेपर्यंत ठेवले जाते. तुमचा पासवर्ड कधीच ठेवला जात नाही: तो पुन्हा लिहा.",
   "aiaic.account.registered_title": "नोंदणी पाठवली",
   "aiaic.account.registered":
     "तुमची नोंदणी AIAIC च्या टीमच्या मंजुरीची वाट पाहत आहे. मंजुरी मिळाल्यावर तुम्ही साइन इन करू शकता.",
@@ -1887,6 +1894,8 @@ export const AIAIC_MR: Dict = {
   "aiaic.sell.submit": "विक्रीसाठी नोंद करा",
   "aiaic.sell.saving": "नोंद करत आहे…",
   "aiaic.sell.done": "नोंद झाली. खरेदीदारांच्या ऑफर ऑर्डरमध्ये दिसतील.",
+  "aiaic.sell.kept":
+    "तुमची आधीची उत्तरे या फोनवर ठेवली आहेत. प्रत्येक उत्तर तपासा: बदला दाबले की ते पुन्हा उघडते.",
   "aiaic.sell.far.ask":
     "क्विंटलला {price} ही किंमत {day} रोजी मंडींनी दिलेल्या भावांपासून खूप दूर आहे: {low} ते {high}. तुमची किंमत बरोबर आहे का?",
   "aiaic.sell.far.yes": "हो, {price} ने नोंद करा",
@@ -2274,6 +2283,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.today.resume.sell": "तुम्ही इथे विक्री सुरू केली होती.",
   "aiaic.today.resume.go": "पुढे चालू ठेवा",
   "aiaic.today.resume.drop": "आत्ता नको",
+  "aiaic.today.resume.kept": "या फोनवर ठेवले: {answers}.",
   "aiaic.store.open": "साठवणुकीचे पूर्ण उत्तर पाहा",
   "aiaic.store.step.list": "या पानाच्या पायऱ्या",
   "aiaic.store.step.of": "{total} पैकी पायरी {n}:",
@@ -2973,6 +2983,8 @@ export const AIAIC_HI: Dict = {
   "aiaic.account.have_account": "पहले से पंजीकरण किया है?",
   "aiaic.account.as_guest": "अतिथि के रूप में आगे बढ़ें",
   "aiaic.account.busy": "कृपया रुकें…",
+  "aiaic.account.kept":
+    "आपने यहाँ जो लिखा, वह यह पेज बंद करने तक रखा जाता है। आपका पासवर्ड कभी नहीं रखा जाता: उसे फिर से लिखें।",
   "aiaic.account.registered_title": "पंजीकरण भेजा गया",
   "aiaic.account.registered":
     "आपका पंजीकरण AIAIC की टीम की मंज़ूरी की प्रतीक्षा में है। मंज़ूरी मिलने पर आप साइन इन कर सकते हैं।",
@@ -3190,6 +3202,8 @@ export const AIAIC_HI: Dict = {
   "aiaic.sell.submit": "बिक्री के लिए दर्ज करें",
   "aiaic.sell.saving": "दर्ज कर रहे हैं…",
   "aiaic.sell.done": "दर्ज हो गया। खरीदारों के ऑफ़र ऑर्डर में दिखेंगे।",
+  "aiaic.sell.kept":
+    "आपके पहले के उत्तर इस फ़ोन पर रखे गए हैं। हर उत्तर जाँचें: बदलें दबाने पर वह फिर से खुलता है।",
   "aiaic.sell.far.ask":
     "{price} प्रति क्विंटल की कीमत {day} को मंडियों के बताए भावों से बहुत दूर है: {low} से {high}। क्या आपकी कीमत सही है?",
   "aiaic.sell.far.yes": "हाँ, {price} पर दर्ज करें",
@@ -3573,6 +3587,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.today.resume.sell": "आपने यहाँ बिक्री शुरू की थी।",
   "aiaic.today.resume.go": "आगे बढ़ें",
   "aiaic.today.resume.drop": "अभी नहीं",
+  "aiaic.today.resume.kept": "इस फ़ोन पर रखा गया: {answers}।",
   "aiaic.store.open": "भंडारण का पूरा उत्तर देखें",
   "aiaic.store.step.list": "इस पेज के चरण",
   "aiaic.store.step.of": "{total} में से चरण {n}:",

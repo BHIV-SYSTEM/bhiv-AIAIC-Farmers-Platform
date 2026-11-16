@@ -39,10 +39,13 @@
  * `trade/store.py`) AND her money reached her bank on the payment company's word. A reconciled sale whose money has not
  * reached her stays among the sales under way (SK-ANN-1).
  *
- * A SALE SHE STARTED HERE AND LEFT (`SELL_STARTED_KEY`): only the crop and district she came with, the time she started and
- * her newest lot's time AS AIAIC SAID IT then (`seen`), never a price, a quantity or a typed word; offered back until AIAIC
- * holds a lot of ANY crop listed after that (read on AIAIC's own clock: SK-ANN-11), for at most `SELL_STARTED_DAYS` days,
- * and forgotten when she says "Not now".
+ * A SALE SHE STARTED HERE AND LEFT (`SELL_STARTED_KEY`): the crop and district she came with, the time she started and
+ * her newest lot's time AS AIAIC SAID IT then (`seen`); and, once her sale's own form has her answers, those answers
+ * (`answers`, the night run's A1: her state, district, taluka, crop, quantity, grade, her own price and the open step, each
+ * one checked as the form checks it): her NON-PERSONAL CHOICES ONLY, never a name, a phone number, a password or a word she
+ * typed that is not her answer. Offered back, and her answers given back to her sale's form, until AIAIC holds a lot of
+ * ANY crop listed after that (read on AIAIC's own clock: SK-ANN-11), for at most `SELL_STARTED_DAYS` days; forgotten when
+ * she says "Not now" and once her lot is listed.
  */
 import {
   evidenceKindOf,
@@ -441,9 +444,48 @@ export type SellStarted = {
   district: string | null;
   at: string;
   seen: string | null;
+  /** Her answers in her sale's own form (absent until the form has one). */
+  answers?: SellAnswers | null;
+};
+/** The steps of her sale's form, by the names its address uses (`AiaicSellForm`'s `SELL_STEPS`). */
+export const SELL_STEP_NAMES = ["where", "crop", "quantity", "grade", "price", "check"] as const;
+/** Her answers in her sale's form, as kept on her phone: her choices only, each as the form takes it (null: not given). */
+export type SellAnswers = {
+  state: "mh" | "mp" | null;
+  district: string | null;
+  taluka: string | null;
+  crop: string | null;
+  /** quintals, above 0 and at most 100,000 (the form's own bounds) */
+  quantity: number | null;
+  grade: "none" | "A" | "B" | "C" | null;
+  /** her own price, rupees a quintal, above 0 and at most 10,00,000 (the form's own bounds) */
+  price: number | null;
+  /** the step that was open */
+  step: (typeof SELL_STEP_NAMES)[number] | null;
 };
 /** A crop or a district as her kept farm names it: letters, digits, spaces and ( ) _ - only, at most 60. */
 const NAME_RE = /^[\p{L}\p{M}0-9][\p{L}\p{M}0-9 ()_-]{0,59}$/u;
+const GRADES = ["none", "A", "B", "C"] as const;
+const within = (x: unknown, top: number): number | null =>
+  typeof x === "number" && Number.isFinite(x) && x > 0 && x <= top ? x : null;
+/** Her kept answers, read back field by field: anything else, or anything out of the form's bounds, is not given. */
+export function answersOf(x: unknown): SellAnswers | null {
+  if (!x || typeof x !== "object" || Array.isArray(x)) return null;
+  const r = x as Record<string, unknown>;
+  const name = (v: unknown) => (typeof v === "string" && NAME_RE.test(v) ? v : null);
+  const step = r["step"];
+  const grade = r["grade"];
+  return {
+    state: r["state"] === "mh" || r["state"] === "mp" ? r["state"] : null,
+    district: name(r["district"]),
+    taluka: name(r["taluka"]),
+    crop: name(r["crop"]),
+    quantity: within(r["quantity"], 100_000),
+    grade: GRADES.includes(grade as never) ? (grade as SellAnswers["grade"]) : null,
+    price: within(r["price"], 1_000_000),
+    step: SELL_STEP_NAMES.includes(step as never) ? (step as SellAnswers["step"]) : null,
+  };
+}
 
 function storage(): Storage | null {
   try {
@@ -493,6 +535,31 @@ export function keepSellStart(
   }
 }
 
+/** Keeps her answers in her sale's form beside her start (A1): the start's own time and mark when one is kept, else a new
+ *  start now, with her newest lot as AIAIC said it on the form's page (`seen`). Her crop and district, once given, are the
+ *  ones her home names. Only `answersOf`'s fields are written: nothing else she typed. */
+export function keepSellAnswers(
+  answers: SellAnswers,
+  seen: string | null = null,
+  now: number = Date.now(),
+): void {
+  const before = readSellStart(now);
+  const clean = answersOf(answers);
+  if (!clean) return;
+  const kept: SellStarted = {
+    crop: clean.crop ?? before?.crop ?? null,
+    district: clean.district ?? before?.district ?? null,
+    at: before?.at ?? new Date(now).toISOString(),
+    seen: before && before.seen !== null ? before.seen : seenOf(seen),
+    answers: clean,
+  };
+  try {
+    storage()?.setItem(SELL_STARTED_KEY, JSON.stringify(kept));
+  } catch {
+    /* a phone that keeps nothing offers nothing back */
+  }
+}
+
 export function forgetSellStart(): void {
   try {
     storage()?.removeItem(SELL_STARTED_KEY);
@@ -524,11 +591,13 @@ export function readSellStart(now: number = Date.now()): SellStarted | null {
     return null;
   }
   const name = (x: unknown) => (typeof x === "string" && NAME_RE.test(x) ? x : null);
+  const answers = answersOf(r["answers"]);
   return {
     crop: name(r["crop"]),
     district: name(r["district"]),
     at: new Date(at).toISOString(),
     seen: seenOf(r["seen"]),
+    ...(answers ? { answers } : {}),
   };
 }
 

@@ -33,11 +33,65 @@ export const Route = createFileRoute("/register")({
   component: RegisterPage,
 });
 
+/** Where this page keeps what she typed while the page is open (A1): this tab's own storage only, so it survives a reload
+ *  and goes when she closes the tab. */
+const REGISTER_DRAFT_KEY = "aiaic.register.draft";
+type RegisterDraft = { username: string; name: string; state: "mh" | "mp"; district: string };
+/** What was kept, read back field by field (each as long as its box allows): never a password, never her tick. */
+function readRegisterDraft(): RegisterDraft | null {
+  try {
+    const raw =
+      typeof window === "undefined" ? null : window.sessionStorage.getItem(REGISTER_DRAFT_KEY);
+    if (!raw) return null;
+    const r = JSON.parse(raw) as Record<string, unknown>;
+    const text = (x: unknown, max: number) => (typeof x === "string" ? x.slice(0, max) : "");
+    const d: RegisterDraft = {
+      username: text(r["username"], 64),
+      name: text(r["name"], 80),
+      state: r["state"] === "mp" ? "mp" : "mh",
+      district: text(r["district"], 80),
+    };
+    return d.username || d.name ? d : null;
+  } catch {
+    return null;
+  }
+}
+function keepRegisterDraft(d: RegisterDraft): void {
+  try {
+    // her place alone is the app's (her saved farm), not her typing: kept only beside a box she typed in
+    if (!d.username && !d.name) window.sessionStorage.removeItem(REGISTER_DRAFT_KEY);
+    else
+      window.sessionStorage.setItem(
+        REGISTER_DRAFT_KEY,
+        JSON.stringify({
+          username: d.username,
+          name: d.name,
+          state: d.state,
+          district: d.district,
+        }),
+      );
+  } catch {
+    /* a phone that keeps nothing: the boxes keep it while the page is open */
+  }
+}
+function forgetRegisterDraft(): void {
+  try {
+    window.sessionStorage.removeItem(REGISTER_DRAFT_KEY);
+  } catch {
+    /* nothing kept */
+  }
+}
+
 /**
  * REGISTER (push 4b, 25 Oct 2026; the owner: "keep it right now with simple farmer usernames and passwords"): her
  * username, her password twice, her name if she wants, her state and district (the app's own district list; her saved
  * farm's place first), and her agreement to the notice of what registering keeps. Her account then waits for AIAIC's
  * team; she is told in the app when it is approved.
+ *
+ * WHAT SHE TYPED IS KEPT WHILE THIS TAB IS OPEN (the night run's A1, TRACE's T2-ANN-01): her username, her name, her state
+ * and her district, in this tab's own storage (a reload keeps them; closing the tab ends them), read back after the page
+ * is on screen and said on the page. NEVER her password, its repeat or her tick: those she gives again. Forgotten once
+ * her registration is sent and AIAIC has it.
  */
 function RegisterPage() {
   const { t, lang } = useI18n();
@@ -53,6 +107,23 @@ function RegisterPage() {
   const [show, setShow] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [local, setLocal] = useState<string | null>(null);
+  // what she typed before a reload, read once the page is on screen (the server's first page and the browser's match)
+  const [draftRead, setDraftRead] = useState(false);
+  const [keptBack, setKeptBack] = useState(false);
+  useEffect(() => {
+    const d = readRegisterDraft();
+    if (d) {
+      setUsername(d.username);
+      setName(d.name);
+      setState(d.state);
+      setDistrict(d.district);
+      setKeptBack(true);
+    }
+    setDraftRead(true);
+  }, []);
+  useEffect(() => {
+    if (draftRead) keepRegisterDraft({ username, name, state, district });
+  }, [draftRead, username, name, state, district]);
   const scan = useScanBeforeRefusing();
   const districts = useQuery({
     queryKey: ["places-districts", state, activeLang],
@@ -91,6 +162,10 @@ function RegisterPage() {
   // a call that never came back (no network, a server error) is said as that (R-14)
   const r =
     go.data ?? (go.isError ? ({ ok: false, code: "aiaic_unavailable" } as const) : undefined);
+  // her registration is with AIAIC: what this tab kept of it is forgotten
+  useEffect(() => {
+    if (r?.ok) forgetRegisterDraft();
+  }, [r?.ok]);
   if ((r && !r.ok && r.code === "crisis") || scan.inCrisis) {
     return (
       <div className="mx-auto w-full max-w-md space-y-4 px-4 pb-24 pt-6">
@@ -146,6 +221,15 @@ function RegisterPage() {
           {t("aiaic.account.intro_register")}
         </p>
       </header>
+      {keptBack ? (
+        <p
+          role="status"
+          className="rounded-2xl border-2 border-primary bg-card p-3 text-base font-bold text-foreground"
+          data-testid="register-kept"
+        >
+          {t("aiaic.account.kept")}
+        </p>
+      ) : null}
       <form
         className="space-y-4"
         onSubmit={(e) => {
