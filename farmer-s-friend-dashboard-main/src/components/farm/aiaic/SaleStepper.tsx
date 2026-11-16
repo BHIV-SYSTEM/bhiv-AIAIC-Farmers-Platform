@@ -25,13 +25,16 @@ const ICONS: Record<SaleStep["key"], typeof Check> = {
 /**
  * One sale's five steps at a glance: agreed -> buyer paid -> handed over -> delivered -> money to her. Each step is
  * AIAIC's own state (`saleSteps`), drawn as a dot on one line: filled when done, ringed when it is the step now, grey
- * when it is to come, crossed when it stopped.
+ * when it is to come, crossed when it stopped. On a payment made outside AIAIC (`barSteps`), its two money steps are
+ * people's word or not seen by AIAIC, and SAID IN WORDS ON THE SCREEN under the bar, each with its icon (a status is an
+ * icon, a word and a colour: never only in the list's label, the night audit's AUD-ANN-F3).
  */
 export function SaleStepper({ order, compact = false }: { order: AiaicOrder; compact?: boolean }) {
   const { t } = useI18n();
   // a payment made outside AIAIC: its two money steps as people's word, or unseen by AIAIC (`barSteps`, A3)
   const steps = barSteps(order);
   const together = stepsTogether(steps);
+  const worded = steps.filter((s) => s.state === "told" || s.state === "unseen");
   return (
     <>
       <ol
@@ -100,6 +103,27 @@ export function SaleStepper({ order, compact = false }: { order: AiaicOrder; com
             b: t(`aiaic.today.progress.step.${together[1]}`),
           })}
         </p>
+      ) : null}
+      {worded.length ? (
+        <ul className="mt-2 space-y-1" data-testid="sale-steps-word">
+          {worded.map((s) => {
+            const Icon = s.state === "told" ? MessageCircle : EyeOff;
+            return (
+              <li
+                key={s.key}
+                data-step={s.key}
+                data-state={s.state}
+                className="flex items-start gap-2 text-base text-foreground"
+              >
+                <Icon className="mt-1 size-4 shrink-0" aria-hidden />
+                <span className="min-w-0 break-words">
+                  <span className="font-bold">{t(`aiaic.step.${s.key}`)}:</span>{" "}
+                  {t(`aiaic.step.state.${s.state}`)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       ) : null}
     </>
   );

@@ -224,8 +224,10 @@ async function loadApp() {
   // her first use (the night run of 16-17 Nov 2026): the registration and the sign-in, mounted beside her home
   const { Route: RegisterRoute } = await import("../src/routes/register");
   const { Route: SignInRoute } = await import("../src/routes/signin");
-  const { whoAmI, registerFarmer, signInFarmer } =
+  const { whoAmI, registerFarmer, signInFarmer, signOutFarmer, eraseMyAccount } =
     await import("../src/lib/aiaic-account.functions");
+  // her account chip (the night audit's AUD-ANN-F1: her sign-out and her account's erasure forget the sale she kept)
+  const { AccountChip } = await import("../src/components/farm/AccountChip");
   const { getPlacesDistricts } = await import("../src/lib/places.functions");
   const { recordedTrip } = await import("./aiaic_shared_scan");
   const { SaleStepper } = await import("../src/components/farm/aiaic/SaleStepper");
@@ -250,6 +252,9 @@ async function loadApp() {
     whoAmI,
     registerFarmer,
     signInFarmer,
+    signOutFarmer,
+    eraseMyAccount,
+    AccountChip,
     getPlacesDistricts,
     recordedTrip,
     SaleStepper,
@@ -371,6 +376,8 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   const world = {
     signedIn: true,
+    // the username AIAIC holds for the account signed in (`whoAmI`): two accounts on one phone (AUD-ANN-F1)
+    username: "practice-farmer",
     trade: null as unknown,
     calls: 0,
     // her registration and her sign-in, answered as a case sets them (each sent is kept, without its password)
@@ -378,6 +385,8 @@ function suite(app: App, window: Window & typeof globalThis) {
     signIn: null as null | (() => unknown),
     sent: [] as string[],
   };
+  /** The mark of the suite's own account (`accountMark` of the username `whoAmI` answers): a sale is kept with it. */
+  const HER = app.today.accountMark("practice-farmer") as string;
   const handlers = new Map<unknown, string>();
   const named = {
     whoAmI: app.whoAmI,
@@ -385,6 +394,8 @@ function suite(app: App, window: Window & typeof globalThis) {
     getPlacesDistricts: app.getPlacesDistricts,
     registerFarmer: app.registerFarmer,
     signInFarmer: app.signInFarmer,
+    signOutFarmer: app.signOutFarmer,
+    eraseMyAccount: app.eraseMyAccount,
   };
   const unanswered: string[] = [];
   unansweredCalls = () => unanswered.splice(0);
@@ -397,7 +408,7 @@ function suite(app: App, window: Window & typeof globalThis) {
             ...ctx,
             result: {
               signedIn: world.signedIn,
-              username: world.signedIn ? "practice-farmer" : null,
+              username: world.signedIn ? world.username : null,
               displayName: null,
               signedOutNote: false,
               erasedNote: false,
@@ -419,6 +430,12 @@ function suite(app: App, window: Window & typeof globalThis) {
               error: "AIAIC did not answer",
             },
           };
+        // her sign-out and her account's erasure, as AIAIC answers them: she is no longer signed in (AUD-ANN-F1)
+        if (name === "signOutFarmer" || name === "eraseMyAccount") {
+          world.sent.push(name);
+          world.signedIn = false;
+          return { ...ctx, result: { ok: true } };
+        }
         if (
           (name === "registerFarmer" || name === "signInFarmer") &&
           world[name === "registerFarmer" ? "register" : "signIn"]
@@ -492,9 +509,22 @@ function suite(app: App, window: Window & typeof globalThis) {
   const mount = async (
     lang: Lang,
     trade: unknown,
-    { signedIn = true, at = "/today", keep = false } = {},
+    {
+      signedIn = true,
+      at = "/today",
+      keep = false,
+      user = "practice-farmer",
+      chip = false,
+    }: {
+      signedIn?: boolean;
+      at?: string;
+      keep?: boolean;
+      user?: string;
+      chip?: boolean;
+    } = {},
   ) => {
     world.signedIn = signedIn;
+    world.username = user;
     world.trade = trade;
     world.calls = 0;
     if (!keep) {
@@ -508,7 +538,13 @@ function suite(app: App, window: Window & typeof globalThis) {
       component: () =>
         h(app.QueryClientProvider, {
           client: qc,
-          children: h(app.I18nProvider, { initialLang: lang, children: h(R.Outlet) }),
+          children: h(app.I18nProvider, {
+            initialLang: lang,
+            // her account chip above the page, as her top bar draws it, where a case asks for it
+            children: chip
+              ? [h(app.AccountChip, { key: "chip" }), h(R.Outlet, { key: "page" })]
+              : h(R.Outlet),
+          }),
         }),
     });
     const todayRoute = app.TodayRoute.update({
@@ -1348,9 +1384,10 @@ function suite(app: App, window: Window & typeof globalThis) {
       ok(kept, "her start is kept");
       assert.deepEqual(
         Object.keys(kept).sort(),
-        ["at", "crop", "district", "seen"],
-        "only the crop, the district, when, and her newest lot as AIAIC said it",
+        ["at", "crop", "district", "seen", "who"],
+        "only the crop, the district, when, her newest lot as AIAIC said it, and her account's mark (AUD-ANN-F1)",
       );
+      assert.equal(kept["who"], HER, "kept for the account signed in, by its mark");
       assert.deepEqual([kept["crop"], kept["district"]], ["onion", "Nashik"]);
       assert.equal(
         kept["seen"],
@@ -1388,7 +1425,7 @@ function suite(app: App, window: Window & typeof globalThis) {
       await back.unmount();
     }
     // DERIVED: she started again, then listed: AIAIC's recorded lot, its `created_at` moved after her start
-    app.today.keepSellStart("onion", "Nashik", null, Date.now() - 60_000);
+    app.today.keepSellStart(HER, "onion", "Nashik", null, Date.now() - 60_000);
     const listed = copy(OFFER) as Raw;
     (listed.listings[0] as Record<string, unknown>)["created_at"] = new Date().toISOString();
     const after = await mount("en", screenOf(listed), { keep: true });
@@ -1864,7 +1901,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     );
     // on her page: AIAIC held none of her lots at her press; the phone stamped it a minute after AIAIC's clock says she listed
     window.localStorage.clear();
-    T.keepSellStart("onion", "Nashik", "", now - 5_000);
+    T.keepSellStart(HER, "onion", "Nashik", "", now - 5_000);
     const listed = copy(OFFER) as Raw;
     (listed.listings[0] as Record<string, unknown>)["created_at"] = iso(now - 65_000);
     const p = await mount("en", screenOf(listed), { keep: true });
@@ -2406,7 +2443,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     // DERIVED: AIAIC held none of her lots at her press (seen ""); she listed then, on AIAIC's clock, which runs 25 hours
     // behind the phone's: the lot's time is a day before the phone's mark, so the phone's clock alone would not find it
     window.localStorage.clear();
-    T.keepSellStart("onion", "Nashik", "", now - 5_000);
+    T.keepSellStart(HER, "onion", "Nashik", "", now - 5_000);
     const listed = copy(OFFER) as Raw;
     (listed.listings[0] as Record<string, unknown>)["created_at"] = iso(
       now - 25 * 3_600_000 + 25_000,
@@ -2425,16 +2462,16 @@ function suite(app: App, window: Window & typeof globalThis) {
     }
     // her sale's form kept her answers (as `keepSellAnswers` writes them); AIAIC holds no lot of hers
     window.localStorage.clear();
-    T.keepSellStart("onion", "Nashik", "", now - 60_000);
-    T.keepSellAnswers(KEPT_ANSWERS() as never, "", now - 30_000);
+    T.keepSellStart(HER, "onion", "Nashik", "", now - 60_000);
+    T.keepSellAnswers(HER, KEPT_ANSWERS() as never, "", now - 30_000);
     const kept = JSON.parse(window.localStorage.getItem(T.SELL_STARTED_KEY) ?? "null") as Record<
       string,
       unknown
     >;
     assert.deepEqual(
       Object.keys(kept).sort(),
-      ["answers", "at", "crop", "district", "seen"],
-      "her start, and her answers beside it",
+      ["answers", "at", "crop", "district", "seen", "who"],
+      "her start, and her answers beside it, for her account (AUD-ANN-F1)",
     );
     assert.deepEqual(
       Object.keys(kept["answers"] as object).sort(),
@@ -2483,6 +2520,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     window.localStorage.setItem(
       T.SELL_STARTED_KEY,
       JSON.stringify({
+        who: HER,
         crop: "onion",
         district: "Nashik",
         at: iso(now - 60_000),
@@ -2493,7 +2531,7 @@ function suite(app: App, window: Window & typeof globalThis) {
         },
       }),
     );
-    const read = T.readSellStart(now);
+    const read = T.readSellStart(HER, now);
     assert.deepEqual(
       read?.answers,
       KEPT_ANSWERS({ quantity: null, price: null, step: null }),
@@ -2643,10 +2681,14 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
     await settle(50);
     const together = container.querySelector('[data-testid="sale-steps-together"]');
+    const worded = [...container.querySelectorAll('[data-testid="sale-steps-word"] li')];
     const out = {
       label: container.querySelector("ol")?.getAttribute("aria-label") ?? "",
       together: together?.textContent ?? null,
       steps: together?.getAttribute("data-steps") ?? null,
+      // the steps said in words on the screen under the bar (AUD-ANN-F3), each as she reads it
+      worded: worded.map((li) => (li.textContent ?? "").replace(/\s+/g, " ").trim()),
+      wordedSize: worded.map((li) => li.className.split(/\s+/).includes("text-base")),
     };
     await act(async () => root.unmount());
     container.remove();
@@ -3075,6 +3117,292 @@ function suite(app: App, window: Window & typeof globalThis) {
     // NOT HERE: the bottom menu's five words stay at 11 px. Raised to 16 px they broke inside words at 320 and 360 px
     // ("Advisor|y", "Paymen|ts"; Marathi cut at two lines): a menu layout or shorter words is a design decision, recorded
     // as open in the night run's REGRESSION_EVIDENCE, never forced here.
+  });
+
+  // ================================================================ the night fix of 17 Nov 2026 (AUD-ANN-F2)
+  test("TD26 the buyer's payment is said beside her step only while it is under way (the night audit's AUD-ANN-F2): on AIAIC's recorded sales with no payment link made (ord_821b47489ac57f6a8118 in buyer_farmer_mine_more_time, and the picked-up ord_5b4cd43a8d8a378a0e43 in farmer_app_mine_after_pickup) her home's progress names her step alone, never 'At the same time, step 2: the buyer's payment', as her sale's bar draws no two steps at once and her payment line names no link; a link sent and not paid keeps the payment beside her step (TD21); in Marathi and Hindi", async () => {
+    const AFTER = recording("farmer_app_mine_after_pickup");
+    for (const [raw, id, en] of [
+      [MANY, "ord_821b47489ac57f6a8118", "Step 3 of 5: handing over your produce"],
+      [AFTER, "ord_5b4cd43a8d8a378a0e43", "Step 4 of 5: the delivery to the buyer"],
+    ] as const) {
+      const order = (raw as Raw).orders.find((o) => o["order_id"] === id) as Record<
+        string,
+        unknown
+      >;
+      ok(order, `AIAIC's recorded ${id}`);
+      const one = { ...copy(raw), orders: [copy(order)] };
+      const read = app.mineForBrowser(copy(one)).orders[0];
+      ok(read, `${id}: read by her server`);
+      assert.equal(read.payment.link_made, false, `${id}: no payment link made`);
+      // her sale's bar: the payment to come, nothing running beside her step
+      const bar = await barOf("en", read);
+      assert.equal(bar.together, null, `${id}: her sale's bar draws no payment running beside`);
+      ok(bar.label.includes("Buyer paid: to come"), `${id}: the bar's payment is to come`);
+      const progress = app.today.progressOf(read as never);
+      ok(progress, `${id}: her progress is said`);
+      assert.equal(progress.beside ?? null, null, `${id}: no payment beside her step`);
+      for (const lang of ["en", "mr", "hi"] as const) {
+        const p = await mount(lang, screenOf(one, lang));
+        try {
+          await ready(p);
+          const sale = saleCard(p, id);
+          const line = sale.querySelector('[data-testid="today-progress"]');
+          ok(line, `${lang} ${id}: her progress line`);
+          assert.equal(line.getAttribute("data-beside"), "", `${lang} ${id}: nothing beside`);
+          assert.equal(
+            line.textContent,
+            fill(lang, "aiaic.today.progress.now", {
+              n: progress.n,
+              total: 5,
+              step: words(lang, `aiaic.today.progress.step.${progress.key}`),
+            }),
+            `${lang} ${id}: her step alone`,
+          );
+          if (lang === "en") {
+            assert.equal(line.textContent, en, `${id}: the English line, pinned`);
+            ok(
+              !(sale.textContent ?? "").includes("At the same time"),
+              `${id}: never 'At the same time' on her card`,
+            );
+            assert.notEqual(
+              statusOf(sale, "today-state-payment").text,
+              EN.linkSent,
+              `${id}: her payment line names no link`,
+            );
+          }
+        } finally {
+          await p.unmount();
+        }
+      }
+    }
+  });
+
+  // ================================================================ the night fix of 17 Nov 2026 (AUD-ANN-F3)
+  test("TD27 her sale's bar on a payment made outside AIAIC says its two money steps in words on the screen, and never says people's word that it was paid when her last word is that the money has not come (the night audit's AUD-ANN-F3): on AIAIC's recording payout_mine_dlite_direct (ord_67978c9f5bfb73cfb86c, her word that she got the money) the buyer's payment and her money are people's word, said under the bar; on its copy DERIVED with her later word that the money has not come (AIAIC keeps the route direct and says the last word: one report not_received after the recorded one, say farmer.money.direct.said_not_yet), both are not seen by AIAIC, never people's word, beside her money card's 'You told us the money has not come'; a payment AIAIC sees adds no such line; in Marathi and Hindi", async () => {
+    const directOrder = (DIRECT as Raw).orders.find(
+      (o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c",
+    ) as Record<string, unknown>;
+    ok(directOrder, "AIAIC's recorded sale paid outside it");
+    const readOne = (o: Record<string, unknown>) =>
+      app.mineForBrowser(copy({ ...copy(DIRECT), orders: [copy(o)] })).orders[0];
+    // her word that she got the money (AIAIC's recording): people's word, said on the screen
+    const got = await barOf("en", readOne(directOrder));
+    assert.deepEqual(
+      got.worded,
+      [
+        "Buyer paid: people's word, not seen by AIAIC",
+        "Money to you: people's word, not seen by AIAIC",
+      ],
+      "people's word of the payment, in words under the bar",
+    );
+    assert.deepEqual(got.wordedSize, [true, true], "said at her body text's size (16 px and up)");
+    // DERIVED: her later word, the money has not come (engine `payout_store.money_for_her`: `say` is the last word; a
+    // "not yet" changes no route, `claim_report`)
+    const notYet = copy(directOrder);
+    const m = notYet["money"] as Record<string, unknown>;
+    const reports = (m["reports"] as Record<string, unknown>[]) ?? [];
+    const last = reports[reports.length - 1];
+    ok(last, "AIAIC's recorded report of her word");
+    const at = new Date(Date.parse(String(last["created_at"])) + 60 * 60_000).toISOString();
+    m["say"] = {
+      key: "farmer.money.direct.said_not_yet",
+      values: { amount: null, day: at, ref: null },
+    };
+    m["reports"] = [
+      ...reports,
+      {
+        report_id: "prp_derived_not_yet",
+        said_by: "farmer_in_app",
+        what: "not_received",
+        amount_inr: null,
+        reference: null,
+        simulated: true,
+        created_at: at,
+      },
+    ];
+    const read = readOne(notYet);
+    assert.equal(read?.money?.route, "direct", "AIAIC keeps the route direct after a not-yet word");
+    const bar = await barOf("en", read);
+    assert.deepEqual(
+      bar.worded,
+      [
+        "Buyer paid: outside AIAIC, not seen by AIAIC",
+        "Money to you: outside AIAIC, not seen by AIAIC",
+      ],
+      "her word that it has not come: not seen by AIAIC, said on the screen",
+    );
+    ok(
+      !bar.label.includes("people's word") && !bar.worded.join(" ").includes("people's word"),
+      `never people's word that it was paid (the bar said "${bar.label}")`,
+    );
+    for (const never of ["Buyer paid: done", "Money to you: done", "Money to you: to come"])
+      ok(!bar.label.includes(never), `never "${never}"`);
+    assert.equal(
+      app.moneyCard(
+        (k: string, v?: Record<string, string | number>) => fill("en", k, v ?? {}),
+        read as never,
+      )?.line,
+      EN.saidNotYet,
+      "beside her money card's own words",
+    );
+    // a payment AIAIC sees: no such line (AIAIC's recording)
+    const linkOrder = (DIRECT as Raw).orders.find(
+      (o) => o["order_id"] === "ord_d6cae7be9dbe4dd4ac7c",
+    ) as Record<string, unknown>;
+    assert.deepEqual((await barOf("en", readOne(linkOrder))).worded, [], "a payment AIAIC sees");
+    for (const lang of ["mr", "hi"] as const) {
+      const said = (state: string) =>
+        ["paid", "money"].map(
+          (k) => `${words(lang, `aiaic.step.${k}`)}: ${words(lang, `aiaic.step.state.${state}`)}`,
+        );
+      const lb = await barOf(lang, read);
+      assert.deepEqual(lb.worded, said("unseen"), `${lang}: not seen by AIAIC, in her language`);
+      const lg = await barOf(lang, readOne(directOrder));
+      assert.deepEqual(lg.worded, said("told"), `${lang}: people's word, in her language`);
+      for (const w of [...lb.worded, ...lg.worded])
+        ok(
+          !/[A-Za-z]{2,}/.test(w.replace(/AIAIC/g, "")),
+          `${lang}: no English word but AIAIC's name`,
+        );
+    }
+  });
+
+  // ================================================================ the night fix of 17 Nov 2026 (AUD-ANN-F1)
+  test("TD28 a sale kept on a shared phone is her account's alone (the night audit's AUD-ANN-F1): kept by one account (A, with her answers), her home signed in as another (B) offers nothing, says none of A's answers and forgets it; A is offered her own; a guest is offered nothing and nothing is kept for one; a sale kept with no account's mark is offered to nobody; her username is never kept on the phone; a sign-in by another account forgets it, hers keeps it; her sign-out and her account's erasure forget it", async () => {
+    const T = app.today;
+    const now = Date.now();
+    const A = "practice-farmer-a";
+    const B = "practice-farmer-b";
+    const markA = T.accountMark(A) as string;
+    const markB = T.accountMark(B) as string;
+    ok(markA && markB && markA !== markB, "two accounts, two marks");
+    ok(!`${markA}${markB}`.includes("practice"), "a mark is never the username");
+    const keepA = () => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+      T.keepSellStart(markA, "onion", "Nashik", "", now - 60_000);
+      T.keepSellAnswers(markA, KEPT_ANSWERS() as never, "", now - 30_000);
+      const raw = window.localStorage.getItem(T.SELL_STARTED_KEY) ?? "";
+      ok(raw, "A's sale is kept");
+      ok(!raw.includes(A), "her username is never kept on the phone");
+    };
+    const kept = () => window.localStorage.getItem(T.SELL_STARTED_KEY);
+    // B signs in on the same phone: nothing of A's
+    keepA();
+    const b = await mount("en", screenOf(EMPTY), { keep: true, user: B });
+    try {
+      await ready(b);
+      await settle(200);
+      ok(!b.q('[data-testid="today-resume"]'), "B is offered nothing of A's");
+      ok(!b.text().includes("You started selling"), "never 'You started selling' to B");
+      ok(!b.text().includes("Kept on this phone"), "none of A's answers said to B");
+      assert.equal(kept(), null, "and A's kept sale is forgotten");
+    } finally {
+      await b.unmount();
+    }
+    // A, signed in: her own
+    keepA();
+    const a = await mount("en", screenOf(EMPTY), { keep: true, user: A });
+    try {
+      await ready(a);
+      await waitFor(() => a.q('[data-testid="today-resume"]'), "A's own sale offered back to A");
+      assert.equal(
+        a.q('[data-testid="today-resume-kept"]')?.textContent,
+        "Kept on this phone: 10 quintals, ₹1,800 a quintal.",
+        "her own answers, to her",
+      );
+    } finally {
+      await a.unmount();
+    }
+    // a guest on the same phone: nothing offered, and A's stays for A
+    const g = await mount("en", screenOf(EMPTY), { keep: true, signedIn: false });
+    try {
+      await ready(g);
+      await settle(100);
+      ok(!g.q('[data-testid="today-resume"]'), "a guest is offered nothing");
+      ok(kept(), "and A's stays for A");
+    } finally {
+      await g.unmount();
+    }
+    assert.equal(T.readSellStart(null, now), null, "nobody signed in: nothing read");
+    ok(kept(), "and nothing forgotten");
+    // nothing is kept for nobody
+    window.localStorage.clear();
+    T.keepSellStart(null, "onion", "Nashik", "", now);
+    T.keepSellAnswers(null, KEPT_ANSWERS() as never, "", now);
+    assert.equal(kept(), null, "nothing kept for a guest");
+    // a sale kept with no account's mark (as the app kept it before this fix): nobody's, forgotten
+    window.localStorage.setItem(
+      T.SELL_STARTED_KEY,
+      JSON.stringify({
+        crop: "onion",
+        district: "Nashik",
+        at: new Date(now - 60_000).toISOString(),
+        seen: "",
+        answers: KEPT_ANSWERS(),
+      }),
+    );
+    assert.equal(T.readSellStart(markA, now), null, "no mark: offered to nobody");
+    assert.equal(kept(), null, "and forgotten");
+    // a sign-in on the sign-in page: another account's forgets A's kept sale before anything is read for it; A's keeps it
+    const SIGN_IN_TEST = "Practice-Pass-4417";
+    for (const [who, stays] of [
+      [B, false],
+      [A, true],
+    ] as const) {
+      keepA();
+      const s = await mount("en", screenOf(EMPTY), { keep: true, signedIn: false, at: "/signin" });
+      try {
+        await waitFor(() => s.q('[data-testid="signin-username"]'), "the sign-in page");
+        world.signIn = () => {
+          world.signedIn = true;
+          world.username = who;
+          return { ok: true };
+        };
+        await typeInto(s.q('[data-testid="signin-username"]'), who, "her username");
+        await typeInto(s.q('[data-testid="signin-password"]'), SIGN_IN_TEST, "her password");
+        await press(s.q('[data-testid="signin-submit"]'), "Sign in");
+        await waitFor(() => world.sent.includes("signInFarmer") || null, "her sign-in sent");
+        await settle(200);
+        if (stays) ok(kept(), "A signing in again keeps her own");
+        else assert.equal(kept(), null, "another account signed in: A's kept sale is forgotten");
+      } finally {
+        world.signIn = null;
+        world.sent.length = 0;
+        await s.unmount();
+      }
+    }
+    // her sign-out, and her account's erasure, through her account chip: forgotten
+    for (const how of ["out", "erase"] as const) {
+      keepA();
+      const c = await mount("en", screenOf(EMPTY), { keep: true, user: A, chip: true });
+      try {
+        await ready(c);
+        await waitFor(() => c.q('[data-testid="today-resume"]'), "A's own sale offered back");
+        await press(c.q('[data-testid="account-chip"]'), "her account");
+        if (how === "out") await press(c.q('[data-testid="account-sign-out"]'), "Sign out");
+        else {
+          await press(c.q('[data-testid="account-erase"]'), "Erase my account");
+          await press(c.q('[data-testid="account-erase-yes"]'), "Yes, erase");
+        }
+        await waitFor(
+          () => world.sent.includes(how === "out" ? "signOutFarmer" : "eraseMyAccount") || null,
+          `her ${how === "out" ? "sign-out" : "erasure"} sent`,
+        );
+        await settle(200);
+        assert.equal(
+          kept(),
+          null,
+          how === "out" ? "signed out: forgotten" : "her account erased: forgotten",
+        );
+      } finally {
+        world.sent.length = 0;
+        await c.unmount();
+      }
+    }
+    window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
   return learn;

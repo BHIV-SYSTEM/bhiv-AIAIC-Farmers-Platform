@@ -15,6 +15,7 @@ import {
 
 import { useRaiseCrisis, usePress } from "@/lib/aiaic-crisis";
 import { plainNumber } from "@/lib/aiaic-heard";
+import { useMe } from "@/lib/aiaic-me";
 import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import { cropsOffered } from "@/lib/aiaic-storage";
 import {
@@ -33,6 +34,7 @@ import {
 } from "@/lib/aiaic-trade";
 import { getSalePrice, getTripTalukas, sellProduce } from "@/lib/aiaic-trade.functions";
 import {
+  accountMark,
   forgetSellStart,
   keepSellAnswers,
   newestLotAt,
@@ -49,7 +51,7 @@ import {
 } from "@/lib/places.functions";
 import { cn } from "@/lib/utils";
 
-import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
+import { Loading, ModeChip, ProblemCard, WithMine } from "./AiaicBits";
 import {
   BoxStep,
   CheckStep,
@@ -152,10 +154,11 @@ function suggestedText(ref: ReferencePrice | null): string {
 }
 
 /** HER ANSWERS FROM BEFORE (the night run's A1, TRACE's T2-ANN-01 and INT-D2): what her phone keeps of a sale she started
- *  and left (`aiaic-today`'s keeper: her choices only, checked field by field), given back while AIAIC holds no lot she
- *  listed since (read on AIAIC's own clock, `sellStillOpen`); a start AIAIC's records have overtaken is forgotten here. */
-function keptAtOpening(mine: MineForScreen["mine"]): SellAnswers | null {
-  const start = readSellStart();
+ *  and left (`aiaic-today`'s keeper: her choices only, checked field by field), given back to HER ACCOUNT ONLY (`who`, its
+ *  mark: another account's is never given back, and is forgotten, the night audit's AUD-ANN-F1) while AIAIC holds no lot
+ *  she listed since (read on AIAIC's own clock, `sellStillOpen`); a start AIAIC's records have overtaken is forgotten here. */
+function keptAtOpening(mine: MineForScreen["mine"], who: string | null): SellAnswers | null {
+  const start = readSellStart(who);
   if (!start) return null;
   if (!sellStillOpen(start, mine)) {
     forgetSellStart();
@@ -173,20 +176,36 @@ export function AiaicSellForm({
   initialCrop?: string | undefined;
   initialDistrict?: string | undefined;
 }) {
+  // the account signed in (AUD-ANN-F1): her answers are kept for her account and given back to it only; the form opens
+  // once it is known (a new account signed in opens a new form)
+  const me = useMe();
+  const who = me.data?.signedIn ? accountMark(me.data.username) : null;
   return (
     <WithMine pace="opened">
-      {(data) => (
-        <SellForm data={data} initialCrop={initialCrop} initialDistrict={initialDistrict} />
-      )}
+      {(data) =>
+        me.isPending ? (
+          <Loading />
+        ) : (
+          <SellForm
+            key={who ?? ""}
+            who={who}
+            data={data}
+            initialCrop={initialCrop}
+            initialDistrict={initialDistrict}
+          />
+        )
+      }
     </WithMine>
   );
 }
 
 function SellForm({
+  who,
   data,
   initialCrop,
   initialDistrict,
 }: {
+  who: string | null;
   data: MineForScreen;
   initialCrop?: string | undefined;
   initialDistrict?: string | undefined;
@@ -219,7 +238,7 @@ function SellForm({
 
   const place = data.mine.profile_place;
   // her answers from before, read once as the form opens (it is drawn only in the browser, once her records are read)
-  const [kept] = useState<SellAnswers | null>(() => keptAtOpening(data.mine));
+  const [kept] = useState<SellAnswers | null>(() => keptAtOpening(data.mine, who));
   const keptQty = kept?.quantity ?? null;
   const [estate, setEstate] = useState<Estate>(kept?.state ?? estateOf(place.state));
   const [district, setDistrict] = useState(kept?.district ?? "");
@@ -329,8 +348,9 @@ function SellForm({
     if (listed || settling) return;
     const own =
       kept !== null || Boolean(crop) || qty !== null || price !== null || grade !== "none";
-    if (!own && !readSellStart()) return;
+    if (!own && !readSellStart(who)) return;
     keepSellAnswers(
+      who,
       {
         state: estate,
         district: district || null,
@@ -345,7 +365,7 @@ function SellForm({
       newestLotAt(data.mine),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listed, settling, kept, estate, district, taluka, crop, qty, grade, price, flow.open]);
+  }, [who, listed, settling, kept, estate, district, taluka, crop, qty, grade, price, flow.open]);
 
   // THE DISTRICT'S OWN CROPS: the link's crop is taken once, when the list holds it; a crop chosen before the district
   // changed, which the new district's list does not hold, is dropped and its step says "check again" (C.6): never silently

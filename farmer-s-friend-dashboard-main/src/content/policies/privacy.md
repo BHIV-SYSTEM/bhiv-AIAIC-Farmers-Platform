@@ -50,7 +50,7 @@ AIAIC keeps the records of its answers, the notes of storage and transport looks
 
 ## On your device
 
-The app keeps in your browser: your language, your saved farm (state, district, crop, mandi, land size and chosen topics), recent answers, your "Was this useful?" answers and your last plant check result, and the cookies named above. You can remove them by clearing this site's data in your browser. The app uses no advertising or analytics service.
+The app keeps in your browser: your language, your saved farm (state, district, crop, mandi, land size and chosen topics), recent answers, your "Was this useful?" answers and your last plant check result, and the cookies named above. **A sale you started and did not finish:** your answers in the sale's form (your state, district and taluka, the crop, how much, the grade, your own price and the step you were at; never your name, phone number or password), for up to 7 days, with a mark made from your account's username (never the username itself) so that only your account is offered it again; it is forgotten once you list the lot or press "Not now", when you sign out or erase your account, and when another account signs in on this phone. **While you register:** what you typed in its boxes (your username, name, state and district; never your password), only in this browser tab, until you close it or AIAIC has your registration. You can remove them by clearing this site's data in your browser. The app uses no advertising or analytics service.
 
 ## Who we share data with
 

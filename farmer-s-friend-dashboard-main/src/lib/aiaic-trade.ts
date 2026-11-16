@@ -647,11 +647,14 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
   ];
 }
 
-/** AIAIC's sentences of people's word of a payment made outside it (`money.say`), each worded by `aiaic.farmer.money.*`. */
+/** AIAIC's sentences of people's word THAT THE MONEY WAS PAID, on a payment made outside it (`money.say`, each worded by
+ *  `aiaic.farmer.money.*`): her word that she got it, the buyer's that he paid. NEVER her word that it has NOT come
+ *  (`farmer.money.direct.said_not_yet`: AIAIC keeps the route direct after it, `say` being the last word said): the bar
+ *  then says the buyer's payment and her money as not seen by AIAIC, under her money card's "You told us the money has not
+ *  come", never as people's word that it was paid (the night audit's AUD-ANN-F3). */
 const WORD_SAYS = [
   "farmer.money.direct.said_got",
   "farmer.money.direct.said_got_any",
-  "farmer.money.direct.said_not_yet",
   "farmer.money.direct.buyer_says",
   "farmer.money.direct.buyer_says_any",
 ];
@@ -661,8 +664,9 @@ export type BarStep = { key: SaleStep["key"]; state: StepState | "told" | "unsee
  * HER SALE'S BAR (`SaleStepper`): her sale's five steps (`saleSteps`), except ON A PAYMENT MADE OUTSIDE AIAIC (AIAIC's
  * `money.route` "direct", a payment AIAIC never sees: the night run's A3, TRACE's T1-09 = RC2-ANN-6): there the buyer's
  * payment and her money have no state of AIAIC's own, so they are drawn as people's word (`told`, where AIAIC holds a
- * sentence of her word or the buyer's, which her money card says) or as unseen by AIAIC (`unseen`): never a done payment,
- * and never "to come" beside "You told us you got ...". A step that stopped (a sale called off) stays stopped.
+ * sentence of her word that she got it or the buyer's that he paid, which her money card says) or as unseen by AIAIC
+ * (`unseen`: nobody's word, or her word that the money has NOT come, AUD-ANN-F3): never a done payment, and never "to
+ * come" beside "You told us you got ...". A step that stopped (a sale called off) stays stopped.
  */
 export function barSteps(order: AiaicOrder): BarStep[] {
   const steps = saleSteps(order);

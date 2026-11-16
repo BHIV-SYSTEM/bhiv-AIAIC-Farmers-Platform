@@ -43,9 +43,11 @@
  * her newest lot's time AS AIAIC SAID IT then (`seen`); and, once her sale's own form has her answers, those answers
  * (`answers`, the night run's A1: her state, district, taluka, crop, quantity, grade, her own price and the open step, each
  * one checked as the form checks it): her NON-PERSONAL CHOICES ONLY, never a name, a phone number, a password or a word she
- * typed that is not her answer. Offered back, and her answers given back to her sale's form, until AIAIC holds a lot of
- * ANY crop listed after that (read on AIAIC's own clock: SK-ANN-11), for at most `SELL_STARTED_DAYS` days; forgotten when
- * she says "Not now" and once her lot is listed.
+ * typed that is not her answer. KEPT FOR HER ACCOUNT ONLY (`who`, a mark made from the username AIAIC holds, never the
+ * username: `accountMark`, the night audit's AUD-ANN-F1): offered back, and her answers given back to her sale's form, to
+ * that account alone, until AIAIC holds a lot of ANY crop listed after that (read on AIAIC's own clock: SK-ANN-11), for at
+ * most `SELL_STARTED_DAYS` days; forgotten when she says "Not now", once her lot is listed, when she signs out or erases
+ * her account, and when another account signs in on the phone.
  */
 import {
   asksHerWord,
@@ -151,7 +153,8 @@ export type Progress = {
   of: number;
   key: SaleStep["key"];
   allDone: boolean;
-  /** the buyer's payment, not done, running beside the step AIAIC names as hers (the night run's A2): said with it */
+  /** the buyer's payment UNDER WAY (its step "now": a link sent, not paid) beside the step AIAIC names as hers (the night
+   *  run's A2): said with it; never a payment merely to come, with no link made (the night audit's AUD-ANN-F2) */
   beside?: { n: number; key: SaleStep["key"] } | null;
 };
 /** The buyer's payment as her page says it (`paymentNow`): a key of her app's words and the values it fills in (said as
@@ -342,8 +345,9 @@ function stepOfNext(next: NextStep | null): SaleStep["key"] | null {
 /** "Step n of 5" on her sale's five steps (`saleSteps`): THE STEP AIAIC NAMES AS HERS (its `her_next_step`, the "Next"
  *  beside it on her card) when it is one of the five and not done, so the line and "Next" never point two ways (the
  *  night run's A2, TRACE's T1-07 and T2-ANN-03: "Step 2 of 5: the buyer's payment" beside "Next: the delivery to the
- *  buyer."); and where the buyer's payment, not done, runs beside it (AIAIC's payment is a state of its own, never a step
- *  of its delivery chain), the payment is said with it as running at the same time (`beside`). Where AIAIC names none,
+ *  buyer."); and where the buyer's payment is under way beside it (its step "now", a link sent and not paid, as her sale's
+ *  bar says it: AIAIC's payment is a state of its own, never a step of its delivery chain), the payment is said with it as
+ *  running at the same time (`beside`); a payment merely to come (no link made) is never said so (AUD-ANN-F2). Where AIAIC names none,
  *  the first step not done is the one she is at (all done: the last). None on a sale whose steps stopped (called off, or the buyer's link expired or cancelled). NONE ON A GROUP SALE:
  *  its own five steps are on its page (`groupView`), and these would say another step there, the stale handover among
  *  them (RC-ANN-1). NONE ON A SALE WHOSE PAYMENT AIAIC RECORDED AS MADE OUTSIDE IT: its buyer's payment and her money are
@@ -359,8 +363,11 @@ export function progressOf(order: AiaicOrder): Progress | null {
   const step = steps[i];
   if (!step) return null;
   const pay = steps.findIndex((s) => s.key === "paid");
+  // the payment said beside her step ONLY WHILE IT IS UNDER WAY (its step "now": the buyer's link sent and not paid, as
+  // her sale's bar says it, `stepsTogether`); a payment merely to come (no link made: "No payment link yet", "No payment
+  // yet") runs beside nothing (the night audit's AUD-ANN-F2)
   const beside =
-    ni >= 0 && pay >= 0 && pay < i && steps[pay]?.state !== "done"
+    ni >= 0 && pay >= 0 && pay < i && steps[pay]?.state === "now"
       ? { n: pay + 1, key: "paid" as const }
       : null;
   return { n: i + 1, of: steps.length, key: step.key, allDone: at < 0, beside };
@@ -474,12 +481,46 @@ export function todayItems(mine: AiaicMine): TodayItem[] {
 
 export const SELL_STARTED_KEY = "aiaic.today.sell_started";
 export const SELL_STARTED_DAYS = 7;
+
+/**
+ * THE ACCOUNT A KEPT SALE BELONGS TO (the night audit's AUD-ANN-F1: on a phone two people share, a sale kept under one
+ * fixed key was offered to the next person who signed in, her answers with it, and outlived her sign-out and her
+ * account's erasure): a mark made from the username AIAIC holds for the account signed in (`useMe`), a one-way digest of
+ * it, never the username itself (a typed personal field is never kept on the phone past its tab). A sale is kept only
+ * with this mark, and offered back and given back only to the account whose mark it carries (`readSellStart`); null with
+ * nobody signed in, so nothing is kept for a guest and nothing kept is offered to one. A mark for matching, not a secret:
+ * anyone holding the phone holds what it keeps.
+ */
+export function accountMark(username: string | null | undefined): string | null {
+  const u = typeof username === "string" ? username.trim() : "";
+  if (!u) return null;
+  // two 32-bit FNV-1a lanes over the name's UTF-16 units, each mixed at its end (murmur3's fmix32): 64 bits as hex
+  let a = 0x811c9dc5;
+  let b = 0x9747b28c;
+  for (let i = 0; i < u.length; i++) {
+    const c = u.charCodeAt(i);
+    a = Math.imul(a ^ c, 0x01000193);
+    b = Math.imul(b ^ c, 0x5bd1e995);
+  }
+  const mix = (x: number) => {
+    let h = x;
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return (h >>> 0).toString(16).padStart(8, "0");
+  };
+  return `${mix(a)}${mix(b)}`;
+}
 /** Where AIAIC's answer was not on the page at her press, "since" is read on the phone's clock less this much: a phone
  *  whose clock runs ahead would otherwise keep offering a sale she already listed (SK-ANN-11). */
 export const CLOCK_SLACK_MS = 24 * 3_600_000;
 /** `seen`: her newest lot's `created_at` in AIAIC's answer at her press (AIAIC's own clock), "" when AIAIC held none, null
  *  when AIAIC's answer was not on the page. */
 export type SellStarted = {
+  /** the account it belongs to (`accountMark`): offered back and given back to that account only (AUD-ANN-F1) */
+  who: string;
   crop: string | null;
   district: string | null;
   at: string;
@@ -554,15 +595,19 @@ function seenOf(x: unknown): string | null {
   return x === "" || (typeof x === "string" && Number.isFinite(Date.parse(x))) ? x : null;
 }
 
-/** Keeps that she started a sale here: the crop and district she came with (or none), when, and her newest lot then as
- *  AIAIC said it (`seen`, from AIAIC's answer on the page; null when there was none). */
+/** Keeps that she started a sale here, for the account signed in (`who`, its `accountMark`; with none, nothing is kept):
+ *  the crop and district she came with (or none), when, and her newest lot then as AIAIC said it (`seen`, from AIAIC's
+ *  answer on the page; null when there was none). */
 export function keepSellStart(
+  who: string | null,
   crop: string | null | undefined,
   district: string | null | undefined,
   seen: string | null = null,
   now: number = Date.now(),
 ): void {
+  if (!who) return;
   const kept: SellStarted = {
+    who,
     crop: crop && NAME_RE.test(crop) ? crop : null,
     district: district && NAME_RE.test(district) ? district : null,
     at: new Date(now).toISOString(),
@@ -575,18 +620,22 @@ export function keepSellStart(
   }
 }
 
-/** Keeps her answers in her sale's form beside her start (A1): the start's own time and mark when one is kept, else a new
- *  start now, with her newest lot as AIAIC said it on the form's page (`seen`). Her crop and district, once given, are the
- *  ones her home names. Only `answersOf`'s fields are written: nothing else she typed. */
+/** Keeps her answers in her sale's form beside her start (A1), for the account signed in (`who`; with none, nothing is
+ *  kept): the start's own time and mark when one is kept for that account, else a new start now, with her newest lot as
+ *  AIAIC said it on the form's page (`seen`). Her crop and district, once given, are the ones her home names. Only
+ *  `answersOf`'s fields are written: nothing else she typed. */
 export function keepSellAnswers(
+  who: string | null,
   answers: SellAnswers,
   seen: string | null = null,
   now: number = Date.now(),
 ): void {
-  const before = readSellStart(now);
+  if (!who) return;
+  const before = readSellStart(who, now);
   const clean = answersOf(answers);
   if (!clean) return;
   const kept: SellStarted = {
+    who,
     crop: clean.crop ?? before?.crop ?? null,
     district: clean.district ?? before?.district ?? null,
     at: before?.at ?? new Date(now).toISOString(),
@@ -600,6 +649,8 @@ export function keepSellAnswers(
   }
 }
 
+/** Forgets the sale she started here: once her lot is listed, on "Not now", and when she signs out or erases her account
+ *  (AUD-ANN-F1). */
 export function forgetSellStart(): void {
   try {
     storage()?.removeItem(SELL_STARTED_KEY);
@@ -608,8 +659,33 @@ export function forgetSellStart(): void {
   }
 }
 
-/** The sale she started here, while it is at most `SELL_STARTED_DAYS` old; null when none (an older one is forgotten). */
-export function readSellStart(now: number = Date.now()): SellStarted | null {
+/** At a sign-in (AUD-ANN-F1): a sale kept for ANOTHER account, or for none, is forgotten before anything is read for the
+ *  account now signed in (`who`, the mark of the username she signed in with); hers, kept before her session ended, stays
+ *  (a username AIAIC holds otherwise written forgets it: erring this way only loses what was kept). */
+export function forgetOthersSellStart(who: string | null): void {
+  let raw: string | null = null;
+  try {
+    raw = storage()?.getItem(SELL_STARTED_KEY) ?? null;
+  } catch {
+    return;
+  }
+  if (!raw) return;
+  let mark: unknown = null;
+  try {
+    const v: unknown = JSON.parse(raw);
+    mark = v && typeof v === "object" ? (v as Record<string, unknown>)["who"] : null;
+  } catch {
+    /* unreadable: forgotten below */
+  }
+  if (!who || mark !== who) forgetSellStart();
+}
+
+/** The sale she started here, FOR THE ACCOUNT SIGNED IN (`who`, its `accountMark`), while it is at most
+ *  `SELL_STARTED_DAYS` old; null when none. With nobody signed in (or not known yet: `who` null) nothing is read and
+ *  nothing forgotten. A sale kept for ANOTHER account, or for none (kept before the mark), is never offered or given
+ *  back: it is forgotten (AUD-ANN-F1), as an older one is. */
+export function readSellStart(who: string | null, now: number = Date.now()): SellStarted | null {
+  if (!who) return null;
   let raw: string | null = null;
   try {
     raw = storage()?.getItem(SELL_STARTED_KEY) ?? null;
@@ -625,6 +701,10 @@ export function readSellStart(now: number = Date.now()): SellStarted | null {
     return null;
   }
   const r = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
+  if (r["who"] !== who) {
+    forgetSellStart();
+    return null;
+  }
   const at = typeof r["at"] === "string" ? Date.parse(r["at"]) : NaN;
   if (!Number.isFinite(at) || at > now || now - at > SELL_STARTED_DAYS * 86_400_000) {
     forgetSellStart();
@@ -633,6 +713,7 @@ export function readSellStart(now: number = Date.now()): SellStarted | null {
   const name = (x: unknown) => (typeof x === "string" && NAME_RE.test(x) ? x : null);
   const answers = answersOf(r["answers"]);
   return {
+    who,
     crop: name(r["crop"]),
     district: name(r["district"]),
     at: new Date(at).toISOString(),

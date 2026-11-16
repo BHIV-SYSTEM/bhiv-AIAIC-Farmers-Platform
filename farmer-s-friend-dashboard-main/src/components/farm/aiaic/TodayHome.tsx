@@ -35,6 +35,7 @@ import { useRaiseCrisis } from "@/lib/aiaic-crisis";
 import { useMine, useProblemText } from "@/lib/aiaic-hooks";
 import { useMe } from "@/lib/aiaic-me";
 import {
+  accountMark,
   forgetSellStart,
   keepSellStart,
   newestLotAt,
@@ -664,6 +665,8 @@ export function TodayHome() {
   const raise = useRaiseCrisis();
   const me = useMe();
   const signedIn = me.data?.signedIn === true;
+  // the account signed in, as a mark (AUD-ANN-F1): a sale kept on this phone is offered back to that account only
+  const who = signedIn ? accountMark(me.data?.username) : null;
   const mine = useMine(signedIn, "live");
   // the records last shown on this page (R5P-09): a read again that fails keeps them
   const [lastShown, setLastShown] = useState<MineForScreen | null>(null);
@@ -681,8 +684,12 @@ export function TodayHome() {
   useEffect(() => {
     const farm = loadFarm();
     if (farm && (farm.region || farm.crop)) setSaved(farm);
-    setStarted(readSellStart());
   }, []);
+  // a sale she started here, read for the account signed in, and again when another signs in or she signs out: one kept
+  // for another account is never offered, and is forgotten (AUD-ANN-F1)
+  useEffect(() => {
+    setStarted(readSellStart(who));
+  }, [who]);
 
   const shown = mineShown({ data: mine.data, isError: mine.isError }, lastShown);
   const data = shown.show === "records" ? shown.data : null;
@@ -952,6 +959,7 @@ export function TodayHome() {
               data-testid="today-task-sell"
               onClick={() =>
                 keepSellStart(
+                  who,
                   saved?.crop ?? null,
                   saved?.region ?? null,
                   data ? newestLotAt(data.mine) : null,
