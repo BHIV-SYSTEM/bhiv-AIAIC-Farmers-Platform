@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   LogIn,
   Mail,
+  MessageSquareQuote,
   PackageCheck,
   Phone,
   RefreshCw,
@@ -43,6 +44,7 @@ import {
   type DeliveryStep,
   type Fee,
   type LotNow,
+  type MoneyNow,
   type MoneyState,
   type OfferNow,
   type SaleNow,
@@ -54,6 +56,7 @@ import {
   cropName,
   dayOf,
   mineShown,
+  moneySaid,
   quintalWords,
   rupees,
   type AiaicProblem,
@@ -128,9 +131,17 @@ const MONEY: Record<MoneyState, { icon: LucideIcon; tone: Tone }> = {
   sent: { icon: Send, tone: "info" },
   held: { icon: Landmark, tone: "info" },
   buyer_paid: { icon: Banknote, tone: "info" },
+  // people's word of a payment made outside AIAIC: a word said to AIAIC, never drawn as a success (AIAIC did not see it)
+  told: { icon: MessageSquareQuote, tone: "info" },
   not_paid: { icon: Clock, tone: "todo" },
   stopped: { icon: XCircle, tone: "stop" },
 };
+/** Her money's words: where AIAIC holds people's word of a payment made outside it (`told`), AIAIC's own sentence, word for
+ *  word as her sale's own money card says it, never "The buyer has not paid" (RC-ANN-3); else her money state's word. */
+function moneyWords(t: (k: string, v?: Record<string, string | number>) => string, m: MoneyNow) {
+  const said = m.told ? moneySaid(t, "money", m.told) : null;
+  return said ?? t(`aiaic.today.money.${m.state}`);
+}
 function payTone(state: string): { icon: LucideIcon; tone: Tone } {
   if (state === "paid") return { icon: Banknote, tone: "good" };
   if (state === "link_expired" || state === "link_cancelled")
@@ -340,7 +351,8 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
         {buyerLine(t, data.districtNames, o.buyer_type, o.buyer_district, o.buyer_name)}
       </p>
       {/* "step n of 5" on the five steps her sale's own page draws (the brief's progress rule), said as the step in
-          progress, never as a milestone reached: "Step 2 of 5: the buyer's payment", never "... Buyer paid" */}
+          progress, never as a milestone reached: "Step 2 of 5: the buyer's payment", never "... Buyer paid". None on a
+          group sale (its own steps are on its page: RC-ANN-1) nor on a sale paid outside AIAIC (RC-ANN-3): `progressOf` */}
       {item.progress ? (
         <p
           className="mt-1 break-words font-bold text-foreground"
@@ -439,7 +451,7 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
           </dt>
           <dd className="mt-1">
             <Status icon={money.icon} tone={money.tone} code={m.state}>
-              {t(`aiaic.today.money.${m.state}`)}
+              {moneyWords(t, m)}
               {m.state === "held" && m.holds ? (
                 <span className="block font-semibold" data-testid="today-money-why">
                   {t(`aiaic.money.holds.waits_for.${m.holds.waits_for}`)}

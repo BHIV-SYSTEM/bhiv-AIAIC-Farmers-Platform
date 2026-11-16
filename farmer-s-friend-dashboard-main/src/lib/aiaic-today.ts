@@ -9,9 +9,19 @@
  *  - the DELIVERY: each step AIAIC recorded (testing and grading, storage, transport, the delivery), its status, and whether
  *    it is a practice step (`simulated`);
  *  - HER MONEY: AIAIC's own steps for her money (`from_aiaic.steps`, in her bank only on the provider's word); from an AIAIC
- *    that sends none, the money step of the sale's five-step bar (`saleSteps`).
- * Then HER NEXT STEP in the order's own terms (`her_next_step`), WHOM THE SALE WAITS ON (the lane's `waiting_on`), and the
- * sale's progress as "step n of 5" on the five steps her sale's own page draws (`saleSteps`).
+ *    that sends none, the money step of the sale's five-step bar (`saleSteps`). WHERE AIAIC HOLDS PEOPLE'S WORD OF A PAYMENT
+ *    MADE OUTSIDE IT and its own steps say nothing more (its `money.say`: her word that she got it or that it has not come,
+ *    the buyer's that he paid; or the payment recorded as made outside AIAIC, `money.route` direct), her money is said in
+ *    AIAIC's OWN SENTENCE, word for word as her sale's own money card says it ("You told us you got ₹23,880 on 2026-11-13.
+ *    AIAIC did not see this payment itself."), never "The buyer has not paid", and never as confirmed (`told`: the
+ *    re-check's RC-ANN-3).
+ * Then HER NEXT STEP in the order's own terms (`her_next_step`), WHOM THE SALE WAITS ON (the lane's `waiting_on`), and, ON A
+ * SALE SHE SELLS ALONE, its progress as "step n of 5" on the five steps her sale's own page draws (`saleSteps`). A GROUP
+ * SALE says none here: its own five steps are on its page (`groupView`: invited, her answer, the group's decision, the
+ * collection, paid), and the steps of a sale sold alone would say another step and another number (RC-ANN-1). Nor does
+ * a sale whose payment AIAIC recorded as made outside it (`money.route` direct): two of its five steps, the buyer's
+ * payment and her money, are then outside what AIAIC sees, so "step n of 5" could only say one of them is still to come
+ * (RC-ANN-3).
  *
  * The money's parts are said apart: the agreed amount (gross: the order's price times its quantity), AIAIC's commission and
  * the GST on it, EACH ON ITS OWN LINE WITH ITS RATE (from the payment link's own record, only where AIAIC set them), and her
@@ -39,6 +49,7 @@ import {
   type AiaicMine,
   type AiaicOffer,
   type AiaicOrder,
+  type AiaicSay,
   type FromAiaic,
   type Holds,
   type LaneCode,
@@ -84,7 +95,22 @@ export type DeliveryStep = {
   at: string;
 };
 
-export type MoneyState = "reached" | "sent" | "held" | "buyer_paid" | "not_paid" | "stopped";
+export type MoneyState =
+  "reached" | "sent" | "held" | "buyer_paid" | "told" | "not_paid" | "stopped";
+/** AIAIC's sentences of people's word of a payment made outside it (engine `trade/payout_store.py` `money_for_her`, with no
+ *  share of hers at the payment provider: her word that she got it, that it has not come, the buyer's that he paid, or its
+ *  question where nobody said), each worded by her app's `aiaic.farmer.money.direct.*`; an `_any` sentence is the same one
+ *  without a fact AIAIC did not send. A key outside this list is never said here (no raw key on her page). */
+export const TOLD_SAYS = [
+  "farmer.money.direct.said_got",
+  "farmer.money.direct.said_got_any",
+  "farmer.money.direct.said_not_yet",
+  "farmer.money.direct.buyer_says",
+  "farmer.money.direct.buyer_says_any",
+  "farmer.money.direct.ask",
+] as const;
+/** AIAIC's own sentence for her money where the state is `told`. */
+export type ToldSay = NonNullable<AiaicSay>;
 /** One deduction as the payment link's own record holds it: its amount and its rate (null where AIAIC sends no rate). */
 export type Fee = { amount: number; pct: number | null };
 export type MoneyNow = {
@@ -97,15 +123,19 @@ export type MoneyNow = {
   gst: Fee | null;
   /** her amount by AIAIC's figure; null where AIAIC sends none, or none is due */
   toHer: number | null;
-  /** her amount reached her bank, on the payment provider's word */
+  /** her amount reached her bank, on the payment provider's word (never on people's word: `told` is never confirmed) */
   confirmed: boolean;
   /** a sale called off whose money never reached her: nothing is due to her on it (SK-ANN-5) */
   noneDue: boolean;
   /** what AIAIC holds for her and why it waits (its closed reasons), only as AIAIC says it */
   holds: Holds | null;
+  /** state `told`: AIAIC's own sentence of people's word of a payment made outside it, said word for word as her sale's
+   *  own money card says it (`toldOf`, RC-ANN-3); null in every other state */
+  told: ToldSay | null;
 };
 /** Where her sale is on the five steps her sale's own page draws (`saleSteps`): "step n of m", the step in progress
- *  (never said as reached: "Step 2 of 5: the buyer's payment"), or every step done. */
+ *  (never said as reached: "Step 2 of 5: the buyer's payment"), or every step done. Only on a sale she sells alone whose
+ *  payment AIAIC can see (`progressOf`). */
 export type Progress = { n: number; of: number; key: SaleStep["key"]; allDone: boolean };
 
 export type SaleNow = {
@@ -117,7 +147,8 @@ export type SaleNow = {
   laneFromAiaic: boolean;
   /** since when the lane holds its word, as AIAIC records it (its `since`); null when AIAIC sends none */
   since: string | null;
-  /** "step n of 5"; null on a sale whose steps stopped (called off, or the buyer's link expired) */
+  /** "step n of 5"; null on a sale whose steps stopped (called off, or the buyer's link expired), on a group sale (its own
+   *  steps are on its page, RC-ANN-1), and on a sale whose payment AIAIC recorded as made outside it (RC-ANN-3) */
   progress: Progress | null;
   payment: { key: string; state: string };
   delivery: DeliveryStep[];
@@ -184,11 +215,33 @@ export function deliverySteps(order: AiaicOrder): DeliveryStep[] {
   }));
 }
 
-/** Her money on one sale, only as AIAIC says it (see the file's head). */
+/** Whether AIAIC recorded the sale's payment as made outside it (`money.route` direct). AIAIC sets that route only on her
+ *  word, or its team's for her, that she got the money (engine `trade/payout_store.py` `claim_report`). */
+export function paidOutside(order: AiaicOrder): boolean {
+  return order.money?.route === "direct";
+}
+
+/**
+ * PEOPLE'S WORD OF A PAYMENT MADE OUTSIDE AIAIC, AS AIAIC SAYS IT (RC-ANN-3): its own sentence for her money where it is one
+ * of `TOLD_SAYS` (the sentence her sale's own money card says, `moneyCard`); on a sale whose payment AIAIC recorded as made
+ * outside it with no such sentence (an AIAIC that sends none), AIAIC's own sentence for that case, its question "Did the
+ * buyer pay you?" (`money_for_her`: `key or "farmer.money.direct.ask"`), which her sale's own page then asks with her two
+ * answers; else null. Never "The buyer has not paid" on a payment AIAIC did not see.
+ */
+export function toldOf(order: AiaicOrder): ToldSay | null {
+  const say = order.money?.say ?? null;
+  if (say && (TOLD_SAYS as readonly string[]).includes(say.key)) return say;
+  return paidOutside(order) ? { key: "farmer.money.direct.ask", values: {} } : null;
+}
+
+/** Her money on one sale, only as AIAIC says it (see the file's head). People's word of a payment made outside AIAIC
+ *  (`told`) is said only where AIAIC's own facts say nothing more of her money: never before "reached", "stopped",
+ *  "sent", "held" or the provider's "the buyer paid", and always in place of "The buyer has not paid" (RC-ANN-3). */
 export function moneyNow(order: AiaicOrder): MoneyNow {
   const calledOff = order.order_state === "cancelled";
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
   const holds = holdsShown(fa, calledOff);
+  const told = toldOf(order);
   let state: MoneyState;
   let confirmed: boolean;
   if (fa) {
@@ -203,7 +256,9 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
             ? "held"
             : said.buyer_paid
               ? "buyer_paid"
-              : "not_paid";
+              : told
+                ? "told"
+                : "not_paid";
     confirmed = said.reached;
   } else {
     const step = saleSteps(order).find((s) => s.key === "money")?.state ?? "todo";
@@ -214,7 +269,9 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
           ? "stopped"
           : order.payment_state === "paid"
             ? "buyer_paid"
-            : "not_paid";
+            : told
+              ? "told"
+              : "not_paid";
     confirmed = step === "done";
   }
   // A SALE CALLED OFF: nothing is due to her (its payment goes back to the buyer, G-28), whatever the payment link's record
@@ -229,12 +286,17 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
     toHer: noneDue ? null : (fa?.to_her_inr ?? null),
     noneDue,
     holds,
+    told: state === "told" ? told : null,
   };
 }
 
 /** "Step n of 5" on her sale's five steps (`saleSteps`): the first step not done is the one she is at (all done: the
- *  last); none on a sale whose steps stopped (called off, or the buyer's link expired or cancelled). */
+ *  last); none on a sale whose steps stopped (called off, or the buyer's link expired or cancelled). NONE ON A GROUP SALE:
+ *  its own five steps are on its page (`groupView`), and these would say another step there, the stale handover among
+ *  them (RC-ANN-1). NONE ON A SALE WHOSE PAYMENT AIAIC RECORDED AS MADE OUTSIDE IT: its buyer's payment and her money are
+ *  then never done on AIAIC's word, so the line could only say one of them is still to come (RC-ANN-3). */
 export function progressOf(order: AiaicOrder): Progress | null {
+  if (order.pool || order.pool_id || paidOutside(order)) return null;
   const steps = saleSteps(order);
   if (steps.some((s) => s.state === "stopped")) return null;
   const at = steps.findIndex((s) => s.state !== "done");
@@ -252,10 +314,11 @@ export function nextStepOf(order: AiaicOrder): NextStep | null {
 }
 
 /**
- * One sale as her page says it. A GROUP SALE'S ORDER (`pool`) names neither her next step nor whom it waits on here:
- * AIAIC's `her_next_step` still names the handover after her lot was collected (AUD-3), and so does its lane's
- * `waiting_on` (AIAIC's recorded group journey: the collection recorded done, `waiting_on: farmer`); the sale's own page
- * says the step she is at from the group's own steps (`GroupPages`).
+ * One sale as her page says it. A GROUP SALE'S ORDER (`pool`) names neither her next step nor whom it waits on here, nor
+ * a "step n of 5" of a sale sold alone (`progressOf`, RC-ANN-1): AIAIC's `her_next_step` still names the handover after
+ * her lot was collected (AUD-3), and so does its lane's `waiting_on` (AIAIC's recorded group journey: the collection
+ * recorded done, `waiting_on: farmer`); the sale's own page says the step she is at from the group's own steps
+ * (`GroupPages`).
  */
 export function saleNow(order: AiaicOrder): SaleNow {
   const lane = laneNow(order);
