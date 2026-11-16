@@ -55,6 +55,7 @@ import {
   buyerLine,
   cropName,
   dayOf,
+  groupSaid,
   mineShown,
   moneySaid,
   quintalWords,
@@ -137,7 +138,8 @@ const MONEY: Record<MoneyState, { icon: LucideIcon; tone: Tone }> = {
   stopped: { icon: XCircle, tone: "stop" },
 };
 /** Her money's words: where AIAIC holds people's word of a payment made outside it (`told`), AIAIC's own sentence, word for
- *  word as her sale's own money card says it, never "The buyer has not paid" (RC-ANN-3); else her money state's word. */
+ *  word as her sale's own money card says it, never "The buyer has not paid" (RC-ANN-3), nor on a sale called off "No
+ *  money moves on this sale" (RC2-ANN-1); else her money state's word. */
 function moneyWords(t: (k: string, v?: Record<string, string | number>) => string, m: MoneyNow) {
   const said = m.told ? moneySaid(t, "money", m.told) : null;
   return said ?? t(`aiaic.today.money.${m.state}`);
@@ -392,8 +394,10 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
             {t("aiaic.today.state.payment")}
           </dt>
           <dd className="mt-1">
+            {/* as her sale's own page says it; on a group sale while no link is made, the group page's money step,
+                never "before you hand over" (`paymentNow`, RC2-ANN-2): its blanks filled as that page fills them */}
             <Status icon={pay.icon} tone={pay.tone} code={item.payment.state}>
-              {t(item.payment.key)}
+              {groupSaid(t, item.payment)}
             </Status>
           </dd>
         </div>

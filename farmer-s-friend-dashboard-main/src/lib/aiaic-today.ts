@@ -5,7 +5,10 @@
  * `getMyTrade`, the read her Listings, Orders and Payments pages already share): nothing here is worked out that AIAIC
  * does not say. For a sale, FOUR SEPARATE STATES, never one blended word:
  *  - the ORDER: AIAIC's lane (`laneOf`); from an AIAIC that sends none, its own order state;
- *  - the BUYER'S PAYMENT: `paymentLine` (paid only on the payment provider's verified word);
+ *  - the BUYER'S PAYMENT: `paymentLine` (paid only on the payment provider's verified word), as her sale's own page says it;
+ *    on a GROUP SALE while no link is made, what the group sale's own page says at its money step ("The buyer says it pays
+ *    within 3 days of delivery."), never "agree the payment with the buyer before you hand over" (`paymentNow`, the
+ *    re-check's RC2-ANN-2);
  *  - the DELIVERY: each step AIAIC recorded (testing and grading, storage, transport, the delivery), its status, and whether
  *    it is a practice step (`simulated`);
  *  - HER MONEY: AIAIC's own steps for her money (`from_aiaic.steps`, in her bank only on the provider's word); from an AIAIC
@@ -28,6 +31,8 @@
  * amount: AIAIC's figure, an ESTIMATE until AIAIC says it reached her bank. Transport is no part of AIAIC's figures for a
  * sale (its trip cost is an estimate on the sale's own page). ON A SALE CALLED OFF nothing is due to her (its payment goes
  * back to the buyer, G-28): no amount "to you" and no deductions are said, only that none is due (the skeptic's SK-ANN-5).
+ * People's word of a payment made outside AIAIC, held before the call-off, stays said in AIAIC's own sentence beside it, as
+ * her sale's own money card says it, never "No money moves on this sale" (the re-check's RC2-ANN-1).
  *
  * A SALE IS FINISHED only when it was called off, or when its quantities were checked (AIAIC's lane `reconciled`: a
  * reconciliation of the quantities delivered, accepted and rejected, "never a payment or a settlement", engine
@@ -41,6 +46,7 @@
  */
 import {
   evidenceKindOf,
+  groupView,
   holdsShown,
   offerViews,
   paymentLine,
@@ -137,6 +143,9 @@ export type MoneyNow = {
  *  (never said as reached: "Step 2 of 5: the buyer's payment"), or every step done. Only on a sale she sells alone whose
  *  payment AIAIC can see (`progressOf`). */
 export type Progress = { n: number; of: number; key: SaleStep["key"]; allDone: boolean };
+/** The buyer's payment as her page says it (`paymentNow`): a key of her app's words and the values it fills in (said as
+ *  the group sale's page says its steps, `groupSaid`), and the payment's own state (its status code). */
+export type PaymentNow = { key: string; values: Record<string, string | number>; state: string };
 
 export type SaleNow = {
   kind: "sale";
@@ -150,7 +159,8 @@ export type SaleNow = {
   /** "step n of 5"; null on a sale whose steps stopped (called off, or the buyer's link expired), on a group sale (its own
    *  steps are on its page, RC-ANN-1), and on a sale whose payment AIAIC recorded as made outside it (RC-ANN-3) */
   progress: Progress | null;
-  payment: { key: string; state: string };
+  /** the buyer's payment as her sale's own page says it (`paymentNow`) */
+  payment: PaymentNow;
   delivery: DeliveryStep[];
   money: MoneyNow;
   next: NextStep | null;
@@ -235,13 +245,18 @@ export function toldOf(order: AiaicOrder): ToldSay | null {
 }
 
 /** Her money on one sale, only as AIAIC says it (see the file's head). People's word of a payment made outside AIAIC
- *  (`told`) is said only where AIAIC's own facts say nothing more of her money: never before "reached", "stopped",
- *  "sent", "held" or the provider's "the buyer paid", and always in place of "The buyer has not paid" (RC-ANN-3). */
+ *  (`told`) is said only where AIAIC's own facts say nothing more of her money: never before "reached", "sent", "held"
+ *  or the provider's "the buyer paid", and always in place of "The buyer has not paid" (RC-ANN-3). ON A SALE CALLED OFF
+ *  it is said in place of "No money moves on this sale": her sale's own money card says it whatever the order's state
+ *  (`moneyCard`), and AIAIC keeps the word on the call-off (`money_for_her`); nothing is due to her there all the same
+ *  (`noneDue`: no amount to her, no deductions). "No money moves" stays only where nobody's word is held (RC2-ANN-1). */
 export function moneyNow(order: AiaicOrder): MoneyNow {
   const calledOff = order.order_state === "cancelled";
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
   const holds = holdsShown(fa, calledOff);
   const told = toldOf(order);
+  // a sale called off: people's word where AIAIC holds it, else no money moves (RC2-ANN-1)
+  const off: MoneyState = told ? "told" : "stopped";
   let state: MoneyState;
   let confirmed: boolean;
   if (fa) {
@@ -249,7 +264,7 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
     state = said.reached
       ? "reached"
       : calledOff
-        ? "stopped"
+        ? off
         : said.sent
           ? "sent"
           : holds
@@ -266,7 +281,9 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
       step === "done"
         ? "reached"
         : step === "stopped"
-          ? "stopped"
+          ? calledOff
+            ? off
+            : "stopped"
           : order.payment_state === "paid"
             ? "buyer_paid"
             : told
@@ -275,7 +292,8 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
     confirmed = step === "done";
   }
   // A SALE CALLED OFF: nothing is due to her (its payment goes back to the buyer, G-28), whatever the payment link's record
-  // once said: no amount "to you" and no deductions from it (SK-ANN-5)
+  // once said: no amount "to you" and no deductions from it (SK-ANN-5); said beside people's word where AIAIC holds it
+  // (RC2-ANN-1), which is never confirmed
   const noneDue = calledOff && !confirmed;
   return {
     state,
@@ -305,6 +323,31 @@ export function progressOf(order: AiaicOrder): Progress | null {
   return step ? { n: i + 1, of: steps.length, key: step.key, allDone: at < 0 } : null;
 }
 
+/**
+ * THE BUYER'S PAYMENT, AS HER SALE'S OWN PAGE SAYS IT (`paymentLine`, its `PaymentCard`), except ON A GROUP SALE WHILE NO
+ * LINK IS MADE (RC2-ANN-2). There the no-link line, "agree the payment with the buyer before you hand over", is false once
+ * the group's lot is collected (AIAIC's "handed over" counts only a pickup, the road or the delivery: AUD-3), and the group
+ * sale's own page draws no payment card until a link is made (`AiaicOrderDetail`, since 30 Oct 2026). Her page then says
+ * what that page says at its money step while the buyer's payment is awaited (`groupView`'s paid step, with the group's
+ * facts: "The buyer says it pays within 3 days of delivery."); else (no group facts sent, or that step not awaited) the
+ * payment's line with the no-link line said as the payment's own state ("No payment yet"). Never "before you hand over"
+ * on a group sale; every sale she sells alone, and every sale with a link, keeps its page's line.
+ */
+export function paymentNow(order: AiaicOrder): PaymentNow {
+  const line = paymentLine(order);
+  const said: PaymentNow = { key: line.key, values: {}, state: line.state };
+  if (order.payment.link_made || !(order.pool || order.pool_id)) return said;
+  // the group's money step as its page draws it (an order is there, so the offer changes none of that step)
+  const paid = order.pool
+    ? groupView(order.pool, null, order).steps.find((s) => s.key === "paid")
+    : undefined;
+  if (paid?.state === "todo" && paid.say)
+    return { key: paid.say.key, values: paid.say.values, state: line.state };
+  return line.key === NO_LINK ? { ...said, key: `aiaic.pay.state.${order.payment.state}` } : said;
+}
+/** The payment line that tells her to agree the payment with the buyer before she hands over (`paymentLine`, WF-05). */
+const NO_LINK = "aiaic.pay.no_link";
+
 /** Her next step as AIAIC names it, on an order neither called off nor part of a group sale (whose own page says the
  *  step she is at: AIAIC's `her_next_step` still names the handover after a group's lot was collected, AUD-3). */
 export function nextStepOf(order: AiaicOrder): NextStep | null {
@@ -318,7 +361,7 @@ export function nextStepOf(order: AiaicOrder): NextStep | null {
  * a "step n of 5" of a sale sold alone (`progressOf`, RC-ANN-1): AIAIC's `her_next_step` still names the handover after
  * her lot was collected (AUD-3), and so does its lane's `waiting_on` (AIAIC's recorded group journey: the collection
  * recorded done, `waiting_on: farmer`); the sale's own page says the step she is at from the group's own steps
- * (`GroupPages`).
+ * (`GroupPages`). Nor, while no link is made, the no-link payment line's "before you hand over" (`paymentNow`, RC2-ANN-2).
  */
 export function saleNow(order: AiaicOrder): SaleNow {
   const lane = laneNow(order);
@@ -327,7 +370,6 @@ export function saleNow(order: AiaicOrder): SaleNow {
   const closed = lane.code === "called_off" || (lane.code === "reconciled" && money.confirmed);
   const group = Boolean(order.pool || order.pool_id);
   const waitingOn = closed || group ? null : (order.lane?.waiting_on ?? null);
-  const pay = paymentLine(order);
   return {
     kind: "sale",
     id: order.order_id,
@@ -336,7 +378,7 @@ export function saleNow(order: AiaicOrder): SaleNow {
     laneFromAiaic: lane.fromAiaic,
     since: order.lane?.since ?? null,
     progress: progressOf(order),
-    payment: { key: pay.key, state: pay.state },
+    payment: paymentNow(order),
     delivery: deliverySteps(order),
     money,
     next: nextStepOf(order),
