@@ -164,8 +164,9 @@
   }
 
   html {
-    /* Responsive font scale: comfortable and legible on 320px mobile screens, scales gracefully up */
-    font-size: clamp(15px, 4.2vw, 18px);
+    /* Responsive font scale, never under 16 px (the night run's A6, TRACE's T1-11 and T2-ANN-04: the task's 16 px text
+       and 48 px controls; at 360 px the old floor gave 15.1 px text and 45 px controls): 16 px on phones, up to 18 px */
+    font-size: clamp(16px, 4.2vw, 18px);
     -webkit-text-size-adjust: 100%;
   }
 

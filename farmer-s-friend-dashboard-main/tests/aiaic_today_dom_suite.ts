@@ -2978,6 +2978,22 @@ function suite(app: App, window: Window & typeof globalThis) {
     );
   });
 
+  // ======================================================================= the night run of 16-17 Nov 2026 (A6)
+  test("TD25 the root font never under 16 px (the night run's A6; TRACE's T1-11 and T2-ANN-04: at 360 px the old floor, clamp(15px, 4.2vw, 18px), gave 15.1 px text and 45 px controls on every page): the app's own style sheet and menu, read as written (jsdom does no layout; the walk's browser measure at 320, 360 and 1280 px is the runtime proof)", async () => {
+    const css = fs.readFileSync(path.join(here, "..", "src", "styles.css"), "utf-8");
+    const html = css.match(/\bhtml\s*\{[^}]*\}/);
+    ok(html, "the style sheet sets the root's font");
+    const size = html[0].match(/font-size:\s*clamp\(\s*([\d.]+)px\s*,\s*([\d.]+)vw\s*,\s*([\d.]+)px\s*\)/);
+    ok(size, `the root's font is a clamp of px, vw, px (it says ${html[0].replace(/\s+/g, " ")})`);
+    const [floor, vw, top] = [Number(size[1]), Number(size[2]), Number(size[3])];
+    ok(floor >= 16, `never under 16 px: the floor is ${floor} px`);
+    for (const width of [320, 360, 412])
+      ok(Math.min(Math.max(floor, (vw * width) / 100), top) >= 16, `at ${width} px the root is at least 16 px`);
+    // NOT HERE: the bottom menu's five words stay at 11 px. Raised to 16 px they broke inside words at 320 and 360 px
+    // ("Advisor|y", "Paymen|ts"; Marathi cut at two lines): a menu layout or shorter words is a design decision, recorded
+    // as open in the night run's REGRESSION_EVIDENCE, never forced here.
+  });
+
   return learn;
 }
 
