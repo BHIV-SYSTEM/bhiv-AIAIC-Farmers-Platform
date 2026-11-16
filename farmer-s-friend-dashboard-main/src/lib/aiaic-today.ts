@@ -10,16 +10,24 @@
  *    it is a practice step (`simulated`);
  *  - HER MONEY: AIAIC's own steps for her money (`from_aiaic.steps`, in her bank only on the provider's word); from an AIAIC
  *    that sends none, the money step of the sale's five-step bar (`saleSteps`).
- * Then HER NEXT STEP in the order's own terms (`her_next_step`), and WHOM THE SALE WAITS ON (the lane's `waiting_on`).
+ * Then HER NEXT STEP in the order's own terms (`her_next_step`), WHOM THE SALE WAITS ON (the lane's `waiting_on`), and the
+ * sale's progress as "step n of 5" on the five steps her sale's own page draws (`saleSteps`).
  *
  * The money's parts are said apart: the agreed amount (gross: the order's price times its quantity), AIAIC's commission and
- * the GST on it (from the payment link's own record, only where AIAIC set them), and her amount: AIAIC's figure, an
- * ESTIMATE until AIAIC says it reached her bank. Transport is no part of AIAIC's figures for a sale (its trip cost is an
- * estimate on the sale's own page).
+ * the GST on it, EACH ON ITS OWN LINE WITH ITS RATE (from the payment link's own record, only where AIAIC set them), and her
+ * amount: AIAIC's figure, an ESTIMATE until AIAIC says it reached her bank. Transport is no part of AIAIC's figures for a
+ * sale (its trip cost is an estimate on the sale's own page). ON A SALE CALLED OFF nothing is due to her (its payment goes
+ * back to the buyer, G-28): no amount "to you" and no deductions are said, only that none is due (the skeptic's SK-ANN-5).
  *
- * A SALE SHE STARTED HERE AND LEFT (`SELL_STARTED_KEY`): only the crop and district she came with and the time she started,
- * never a price, a quantity or a typed word; offered back until AIAIC holds a lot she listed after that time, for at most
- * `SELL_STARTED_DAYS` days, and forgotten when she says "Not now".
+ * A SALE IS FINISHED only when it was called off, or when its quantities were checked (AIAIC's lane `reconciled`: a
+ * reconciliation of the quantities delivered, accepted and rejected, "never a payment or a settlement", engine
+ * `trade/store.py`) AND her money reached her bank on the payment company's word. A reconciled sale whose money has not
+ * reached her stays among the sales under way (SK-ANN-1).
+ *
+ * A SALE SHE STARTED HERE AND LEFT (`SELL_STARTED_KEY`): only the crop and district she came with, the time she started and
+ * her newest lot's time AS AIAIC SAID IT then (`seen`), never a price, a quantity or a typed word; offered back until AIAIC
+ * holds a lot of ANY crop listed after that (read on AIAIC's own clock: SK-ANN-11), for at most `SELL_STARTED_DAYS` days,
+ * and forgotten when she says "Not now".
  */
 import {
   evidenceKindOf,
@@ -34,6 +42,7 @@ import {
   type FromAiaic,
   type Holds,
   type LaneCode,
+  type SaleStep,
   type WaitingOn,
 } from "./aiaic-trade";
 
@@ -76,19 +85,27 @@ export type DeliveryStep = {
 };
 
 export type MoneyState = "reached" | "sent" | "held" | "buyer_paid" | "not_paid" | "stopped";
+/** One deduction as the payment link's own record holds it: its amount and its rate (null where AIAIC sends no rate). */
+export type Fee = { amount: number; pct: number | null };
 export type MoneyNow = {
   state: MoneyState;
   /** the agreed amount: the order's price times its quantity (gross) */
   gross: number;
-  /** AIAIC's commission and the GST on it, from the payment link's own record; null where AIAIC set none */
-  deductions: number | null;
-  /** her amount by AIAIC's figure; null where AIAIC sends none */
+  /** AIAIC's commission with its rate, from the payment link's own record; null where AIAIC set none, or none is due */
+  commission: Fee | null;
+  /** the GST on that commission with its rate, from the same record; null where AIAIC set none, or none is due */
+  gst: Fee | null;
+  /** her amount by AIAIC's figure; null where AIAIC sends none, or none is due */
   toHer: number | null;
   /** her amount reached her bank, on the payment provider's word */
   confirmed: boolean;
+  /** a sale called off whose money never reached her: nothing is due to her on it (SK-ANN-5) */
+  noneDue: boolean;
   /** what AIAIC holds for her and why it waits (its closed reasons), only as AIAIC says it */
   holds: Holds | null;
 };
+/** Where her sale is on the five steps her sale's own page draws (`saleSteps`): "step n of m", the step she is at. */
+export type Progress = { n: number; of: number; key: SaleStep["key"] };
 
 export type SaleNow = {
   kind: "sale";
@@ -97,6 +114,10 @@ export type SaleNow = {
   lane: LaneCode;
   /** true when the lane is AIAIC's own; false when it was read from AIAIC's order state (an AIAIC that sends no lane) */
   laneFromAiaic: boolean;
+  /** since when the lane holds its word, as AIAIC records it (its `since`); null when AIAIC sends none */
+  since: string | null;
+  /** "step n of 5"; null on a sale whose steps stopped (called off, or the buyer's link expired) */
+  progress: Progress | null;
   payment: { key: string; state: string };
   delivery: DeliveryStep[];
   money: MoneyNow;
@@ -104,7 +125,7 @@ export type SaleNow = {
   waitingOn: WaitingOn | null;
   needsHer: boolean;
   practice: boolean;
-  /** called off or settled: nothing more to do on it */
+  /** FINISHED: called off, or its quantities checked AND her money in her bank (see the file's head); nothing more to come */
   closed: boolean;
   /** part of a group sale: its own steps are on the sale's page (see `saleNow`) */
   group: boolean;
@@ -131,10 +152,10 @@ export type LotNow = {
 };
 export type TodayItem = SaleNow | OfferNow | LotNow;
 
-/** Rupees to the paisa, added in paise so no rupee is mis-rounded. */
-function plus(a: number | null, b: number | null): number | null {
-  if (a === null && b === null) return null;
-  return (Math.round((a ?? 0) * 100) + Math.round((b ?? 0) * 100)) / 100;
+/** One deduction from the payment link's own record, with its rate; null where AIAIC set none. */
+function feeOf(amount: number | null | undefined, pct: number | null | undefined): Fee | null {
+  if (typeof amount !== "number" || !Number.isFinite(amount)) return null;
+  return { amount, pct: typeof pct === "number" && Number.isFinite(pct) ? pct : null };
 }
 
 /** The order's state as AIAIC's lane, else (an AIAIC that sends no lane) its order state's nearest lane word. */
@@ -167,15 +188,11 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
   const calledOff = order.order_state === "cancelled";
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
   const holds = holdsShown(fa, calledOff);
-  const base = {
-    gross: order.amount_inr,
-    deductions: fa ? plus(fa.commission_inr, fa.gst_inr) : null,
-    toHer: fa?.to_her_inr ?? null,
-    holds,
-  };
+  let state: MoneyState;
+  let confirmed: boolean;
   if (fa) {
     const said = fa.steps ?? { buyer_paid: fa.buyer_paid, sent: false, reached: false };
-    const state: MoneyState = said.reached
+    state = said.reached
       ? "reached"
       : calledOff
         ? "stopped"
@@ -186,18 +203,43 @@ export function moneyNow(order: AiaicOrder): MoneyNow {
             : said.buyer_paid
               ? "buyer_paid"
               : "not_paid";
-    return { ...base, state, confirmed: said.reached };
+    confirmed = said.reached;
+  } else {
+    const step = saleSteps(order).find((s) => s.key === "money")?.state ?? "todo";
+    state =
+      step === "done"
+        ? "reached"
+        : step === "stopped"
+          ? "stopped"
+          : order.payment_state === "paid"
+            ? "buyer_paid"
+            : "not_paid";
+    confirmed = step === "done";
   }
-  const step = saleSteps(order).find((s) => s.key === "money")?.state ?? "todo";
-  const state: MoneyState =
-    step === "done"
-      ? "reached"
-      : step === "stopped"
-        ? "stopped"
-        : order.payment_state === "paid"
-          ? "buyer_paid"
-          : "not_paid";
-  return { ...base, state, confirmed: step === "done" };
+  // A SALE CALLED OFF: nothing is due to her (its payment goes back to the buyer, G-28), whatever the payment link's record
+  // once said: no amount "to you" and no deductions from it (SK-ANN-5)
+  const noneDue = calledOff && !confirmed;
+  return {
+    state,
+    confirmed,
+    gross: order.amount_inr,
+    commission: fa && !noneDue ? feeOf(fa.commission_inr, fa.commission_percent) : null,
+    gst: fa && !noneDue ? feeOf(fa.gst_inr, fa.gst_percent) : null,
+    toHer: noneDue ? null : (fa?.to_her_inr ?? null),
+    noneDue,
+    holds,
+  };
+}
+
+/** "Step n of 5" on her sale's five steps (`saleSteps`): the first step not done is the one she is at (all done: the
+ *  last); none on a sale whose steps stopped (called off, or the buyer's link expired or cancelled). */
+export function progressOf(order: AiaicOrder): Progress | null {
+  const steps = saleSteps(order);
+  if (steps.some((s) => s.state === "stopped")) return null;
+  const at = steps.findIndex((s) => s.state !== "done");
+  const i = at < 0 ? steps.length - 1 : at;
+  const step = steps[i];
+  return step ? { n: i + 1, of: steps.length, key: step.key } : null;
 }
 
 /** Her next step as AIAIC names it, on an order neither called off nor part of a group sale (whose own page says the
@@ -216,7 +258,9 @@ export function nextStepOf(order: AiaicOrder): NextStep | null {
  */
 export function saleNow(order: AiaicOrder): SaleNow {
   const lane = laneNow(order);
-  const closed = lane.code === "called_off" || lane.code === "reconciled";
+  const money = moneyNow(order);
+  // FINISHED (see the file's head): a reconciled sale is finished only once her money reached her bank (SK-ANN-1)
+  const closed = lane.code === "called_off" || (lane.code === "reconciled" && money.confirmed);
   const group = Boolean(order.pool || order.pool_id);
   const waitingOn = closed || group ? null : (order.lane?.waiting_on ?? null);
   const pay = paymentLine(order);
@@ -226,9 +270,11 @@ export function saleNow(order: AiaicOrder): SaleNow {
     order,
     lane: lane.code,
     laneFromAiaic: lane.fromAiaic,
+    since: order.lane?.since ?? null,
+    progress: progressOf(order),
     payment: { key: pay.key, state: pay.state },
     delivery: deliverySteps(order),
-    money: moneyNow(order),
+    money,
     next: nextStepOf(order),
     waitingOn,
     needsHer: waitingOn === "farmer",
@@ -241,7 +287,8 @@ export function saleNow(order: AiaicOrder): SaleNow {
 
 /**
  * EVERYTHING OF HERS THAT STANDS NOW, the most pressing first: offers waiting for her answer and sales waiting on her;
- * then her sales under way; then her lots listed with no offer; then sales called off or settled. Newest first within each.
+ * then her sales under way (a reconciled sale whose money has not reached her among them); then her lots listed with no
+ * offer; then sales finished (called off, or quantities checked and her money in her bank). Newest first within each.
  */
 export function todayItems(mine: AiaicMine): TodayItem[] {
   const offers: OfferNow[] = offerViews(mine)
@@ -278,7 +325,17 @@ export function todayItems(mine: AiaicMine): TodayItem[] {
 
 export const SELL_STARTED_KEY = "aiaic.today.sell_started";
 export const SELL_STARTED_DAYS = 7;
-export type SellStarted = { crop: string | null; district: string | null; at: string };
+/** Where AIAIC's answer was not on the page at her press, "since" is read on the phone's clock less this much: a phone
+ *  whose clock runs ahead would otherwise keep offering a sale she already listed (SK-ANN-11). */
+export const CLOCK_SLACK_MS = 24 * 3_600_000;
+/** `seen`: her newest lot's `created_at` in AIAIC's answer at her press (AIAIC's own clock), "" when AIAIC held none, null
+ *  when AIAIC's answer was not on the page. */
+export type SellStarted = {
+  crop: string | null;
+  district: string | null;
+  at: string;
+  seen: string | null;
+};
 /** A crop or a district as her kept farm names it: letters, digits, spaces and ( ) _ - only, at most 60. */
 const NAME_RE = /^[\p{L}\p{M}0-9][\p{L}\p{M}0-9 ()_-]{0,59}$/u;
 
@@ -290,16 +347,38 @@ function storage(): Storage | null {
   }
 }
 
-/** Keeps that she started a sale here: the crop and district she came with (or none), and when. */
+/** Her newest lot's `created_at` as AIAIC said it ("" when AIAIC holds none): the mark a sale started here is read against. */
+export function newestLotAt(mine: AiaicMine): string {
+  let newest = "";
+  let at = -Infinity;
+  for (const l of mine.listings) {
+    const t = Date.parse(l.created_at);
+    if (Number.isFinite(t) && t > at) {
+      at = t;
+      newest = l.created_at;
+    }
+  }
+  return newest;
+}
+
+/** A kept `seen`: AIAIC's time of her newest lot, "" for none, else null (nothing from AIAIC was on the page). */
+function seenOf(x: unknown): string | null {
+  return x === "" || (typeof x === "string" && Number.isFinite(Date.parse(x))) ? x : null;
+}
+
+/** Keeps that she started a sale here: the crop and district she came with (or none), when, and her newest lot then as
+ *  AIAIC said it (`seen`, from AIAIC's answer on the page; null when there was none). */
 export function keepSellStart(
   crop: string | null | undefined,
   district: string | null | undefined,
+  seen: string | null = null,
   now: number = Date.now(),
 ): void {
   const kept: SellStarted = {
     crop: crop && NAME_RE.test(crop) ? crop : null,
     district: district && NAME_RE.test(district) ? district : null,
     at: new Date(now).toISOString(),
+    seen: seenOf(seen),
   };
   try {
     storage()?.setItem(SELL_STARTED_KEY, JSON.stringify(kept));
@@ -339,15 +418,25 @@ export function readSellStart(now: number = Date.now()): SellStarted | null {
     return null;
   }
   const name = (x: unknown) => (typeof x === "string" && NAME_RE.test(x) ? x : null);
-  return { crop: name(r["crop"]), district: name(r["district"]), at: new Date(at).toISOString() };
+  return {
+    crop: name(r["crop"]),
+    district: name(r["district"]),
+    at: new Date(at).toISOString(),
+    seen: seenOf(r["seen"]),
+  };
 }
 
-/** Whether the sale she started is still to be offered back: AIAIC holds no lot she listed since (of that crop, when the
- *  crop is known). */
+/**
+ * Whether the sale she started is still to be offered back: AIAIC holds no lot she listed since, OF ANY CROP (a lot of
+ * another crop listed since ends it too). "Since" is read on AIAIC's own clock where AIAIC's answer was on the page at her
+ * press (`seen`); else on the phone's, less `CLOCK_SLACK_MS` (SK-ANN-11). Erring this way only forgets an offer back; it
+ * never invites her to list the same produce twice.
+ */
 export function sellStillOpen(kept: SellStarted, mine: AiaicMine): boolean {
-  const since = Date.parse(kept.at);
-  const crop = kept.crop?.toLowerCase() ?? null;
-  return !mine.listings.some(
-    (l) => Date.parse(l.created_at) >= since && (crop === null || l.crop.toLowerCase() === crop),
-  );
+  if (kept.seen !== null) {
+    const seen = kept.seen === "" ? -Infinity : Date.parse(kept.seen);
+    return !mine.listings.some((l) => Date.parse(l.created_at) > seen);
+  }
+  const since = Date.parse(kept.at) - CLOCK_SLACK_MS;
+  return !mine.listings.some((l) => Date.parse(l.created_at) >= since);
 }

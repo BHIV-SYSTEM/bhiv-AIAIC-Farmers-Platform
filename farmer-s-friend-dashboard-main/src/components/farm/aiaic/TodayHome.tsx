@@ -16,6 +16,7 @@ import {
   Phone,
   RefreshCw,
   RotateCcw,
+  Scale,
   Send,
   ShoppingBag,
   Sprout,
@@ -35,9 +36,12 @@ import { useMe } from "@/lib/aiaic-me";
 import {
   forgetSellStart,
   keepSellStart,
+  newestLotAt,
   readSellStart,
   sellStillOpen,
   todayItems,
+  type DeliveryStep,
+  type Fee,
   type LotNow,
   type MoneyState,
   type OfferNow,
@@ -49,7 +53,7 @@ import {
   buyerLine,
   cropName,
   dayOf,
-  problem as appProblem,
+  mineShown,
   quintalWords,
   rupees,
   type AiaicProblem,
@@ -69,8 +73,14 @@ import { cn } from "@/lib/utils";
  * page makes no decision of its own and holds no press that changes anything in AIAIC. A person closes the page.
  *
  * THE TASK'S FLOORS, IN CSS PIXELS WHATEVER THE ROOT SIZE: the app's root font is 15.1 px on a 360 px phone
- * (`styles.css`: `clamp(15px, 4.2vw, 18px)`), so `min-h-12` is 45 px there. Every control here is at least 48 px tall
- * and every word at least 16 px (`TARGET`, `BODY`), written as styles, so a test can read them on each element.
+ * (`styles.css`: `clamp(15px, 4.2vw, 18px)`), so `min-h-12` is 45 px there. Every control THIS PAGE draws is at least 48 px
+ * tall and every word at least 16 px (`TARGET`, `BODY`), written as styles, so a test can read them on each element. The
+ * app's shell around it (the top bar, the bottom bar, the footer) is not this page's: it keeps the root's sizes (the
+ * audit's D1, the design owner's).
+ *
+ * A READ AGAIN THAT FAILS KEEPS WHAT SHE SAW (R5P-09, the app's rule for every sale page, `mineShown`): once her records
+ * were shown, a failed read every 15 s or on her return to the page keeps them, with a quiet line and "Try again"; only a
+ * first read that fails shows the problem; AIAIC's crisis answer always takes the page.
  */
 
 /** Every control: at least 48 px, or the root's 3 rem where that is more. */
@@ -109,7 +119,7 @@ const LANE: Record<LaneCode, { icon: LucideIcon; tone: Tone }> = {
   being_readied: { icon: Hourglass, tone: "info" },
   on_the_way: { icon: Truck, tone: "info" },
   delivered: { icon: PackageCheck, tone: "good" },
-  reconciled: { icon: CheckCheck, tone: "good" },
+  reconciled: { icon: Scale, tone: "good" },
   disputed: { icon: AlertTriangle, tone: "warn" },
   called_off: { icon: XCircle, tone: "stop" },
 };
@@ -144,6 +154,7 @@ function Status({
   return (
     <span
       data-status={code}
+      data-tone={tone}
       className={cn(
         "inline-flex items-start gap-1.5 rounded-xl border-2 px-2 py-1 font-bold text-foreground",
         TONE[tone],
@@ -182,6 +193,27 @@ function NeedsYouChip() {
       {t("aiaic.today.needs_you")}
     </span>
   );
+}
+
+/**
+ * How one recorded step is drawn: done, failed, or under way. A PROBLEM REPORTED (`delivery_exception`) is never drawn as
+ * a success: the warning's icon and colour, and no "done" after it (the skeptic's SK-ANN-6).
+ */
+function stepLook(s: DeliveryStep): { icon: LucideIcon; tone: Tone; sayStatus: boolean } {
+  if (s.stage === "delivery_exception")
+    return { icon: AlertTriangle, tone: "warn", sayStatus: s.status !== "done" };
+  if (s.status === "done") return { icon: CheckCheck, tone: "good", sayStatus: true };
+  if (s.status === "failed") return { icon: XCircle, tone: "stop", sayStatus: true };
+  return { icon: Clock, tone: "todo", sayStatus: true };
+}
+
+/** A deduction's line: its name with its rate, as her sale's own money card says it, then its amount. */
+function feeLine(
+  t: (k: string, v?: Record<string, string | number>) => string,
+  key: string,
+  fee: Fee,
+) {
+  return `${t(key, { pct: fee.pct ?? "—" })}: ${rupees(fee.amount)}`;
 }
 
 /** A press's words, then its arrow: an icon and words, never an icon alone. */
@@ -307,6 +339,18 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
       <p className="mt-1 break-words text-foreground" style={BODY} data-name="">
         {buyerLine(t, data.districtNames, o.buyer_type, o.buyer_district, o.buyer_name)}
       </p>
+      {/* "step n of 5" on the five steps her sale's own page draws (the brief's progress rule) */}
+      {item.progress ? (
+        <p
+          className="mt-1 break-words font-bold text-foreground"
+          style={BODY}
+          data-testid="today-progress"
+          data-step={item.progress.key}
+        >
+          {t("aiaic.store.step.of", { n: item.progress.n, total: item.progress.of })}{" "}
+          {t(`aiaic.step.${item.progress.key}`)}
+        </p>
+      ) : null}
 
       {/* FOUR SEPARATE STATES: never one word for the order, the payment, the delivery and her money */}
       <dl className="mt-3 space-y-2.5" data-testid="today-states">
@@ -316,7 +360,12 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
           </dt>
           <dd className="mt-1">
             <Status icon={lane.icon} tone={lane.tone} code={item.lane}>
-              {t(`aiaic.today.lane.${item.lane}`)}
+              <span data-testid="today-lane-word">{t(`aiaic.today.lane.${item.lane}`)}</span>
+              {item.since ? (
+                <span className="block font-semibold" data-testid="today-lane-since">
+                  {t("aiaic.today.lane.since", { day: dayOf(item.since) })}
+                </span>
+              ) : null}
             </Status>
           </dd>
         </div>
@@ -337,25 +386,39 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
           <dd className="mt-1">
             {item.delivery.length ? (
               <ul className="space-y-1.5">
-                {item.delivery.map((s, i) => (
-                  <li key={`${s.stage}-${i}`} data-stage={s.stage} data-step-status={s.status}>
-                    <Status
-                      icon={
-                        s.status === "done" ? CheckCheck : s.status === "failed" ? XCircle : Clock
-                      }
-                      tone={s.status === "done" ? "good" : s.status === "failed" ? "stop" : "todo"}
-                      code={`${s.stage}:${s.status}`}
+                {item.delivery.map((s, i) => {
+                  const look = stepLook(s);
+                  // each step's day and how AIAIC knows it (its `evidence_kind`), as AIAIC recorded them (SK-ANN-4)
+                  const known =
+                    !s.simulated && s.evidence && s.evidence !== "simulated"
+                      ? t(`aiaic.today.known.${s.evidence}`)
+                      : null;
+                  const facts = [dayOf(s.at), known].filter(Boolean).join(" · ");
+                  return (
+                    <li
+                      key={`${s.stage}-${i}`}
+                      data-stage={s.stage}
+                      data-step-status={s.status}
+                      data-evidence={s.evidence ?? ""}
                     >
-                      {t(`aiaic.today.stage.${s.stage}`)}: {t(`aiaic.today.step.${s.status}`)}
-                      {s.simulated ? (
-                        <span data-testid="today-practice-step">
-                          {" "}
-                          ({t("aiaic.today.step.practice")})
-                        </span>
-                      ) : null}
-                    </Status>
-                  </li>
-                ))}
+                      <Status icon={look.icon} tone={look.tone} code={`${s.stage}:${s.status}`}>
+                        {t(`aiaic.today.stage.${s.stage}`)}
+                        {look.sayStatus ? `: ${t(`aiaic.today.step.${s.status}`)}` : null}
+                        {s.simulated ? (
+                          <span data-testid="today-practice-step">
+                            {" "}
+                            ({t("aiaic.today.step.practice")})
+                          </span>
+                        ) : null}
+                        {facts ? (
+                          <span className="block font-semibold" data-testid="today-step-known">
+                            {facts}
+                          </span>
+                        ) : null}
+                      </Status>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <Status icon={Clock} tone="todo" code="none">
@@ -419,12 +482,20 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
           <li data-testid="today-money-gross">
             {t("aiaic.today.money.gross", { amount: rupees(m.gross) })}
           </li>
-          {m.deductions !== null ? (
-            <li data-testid="today-money-deductions">
-              {t("aiaic.today.money.deductions", { amount: rupees(m.deductions) })}
+          {/* AIAIC's commission and the GST on it, each on its own line with its rate (SK-ANN-8) */}
+          {m.commission ? (
+            <li data-testid="today-money-commission">
+              {feeLine(t, "aiaic.money.commission", m.commission)}
             </li>
           ) : null}
+          {m.gst ? (
+            <li data-testid="today-money-gst">{feeLine(t, "aiaic.money.gst", m.gst)}</li>
+          ) : null}
           <li data-testid="today-money-transport">{t("aiaic.today.money.transport")}</li>
+          {/* a sale called off: nothing is due to her, said plainly; no amount "to you" (SK-ANN-5) */}
+          {m.noneDue ? (
+            <li data-testid="today-money-none-due">{t("aiaic.today.money.none_due")}</li>
+          ) : null}
           {m.toHer !== null ? (
             <li data-testid="today-money-to-her" data-confirmed={m.confirmed ? "yes" : "no"}>
               {t(
@@ -464,12 +535,15 @@ function TaskInner({
   icon: Icon,
   title,
   tip,
+  kept = null,
   note = null,
   testid,
 }: {
   icon: LucideIcon;
   title: string;
   tip: string;
+  /** where the card opens what her phone kept (her saved crop and district): said, so she knows what it continues */
+  kept?: string | null;
   note?: string | null;
   testid: string;
 }) {
@@ -483,6 +557,15 @@ function TaskInner({
         <span className="block break-words text-foreground" style={BODY}>
           {tip}
         </span>
+        {kept ? (
+          <span
+            data-testid={`${testid}-kept`}
+            className="mt-1 block break-words font-bold text-foreground"
+            style={BODY}
+          >
+            {kept}
+          </span>
+        ) : null}
         {note ? (
           <span
             data-testid={`${testid}-note`}
@@ -516,6 +599,16 @@ export function TodayHome() {
   const me = useMe();
   const signedIn = me.data?.signedIn === true;
   const mine = useMine(signedIn, "live");
+  // the records last shown on this page (R5P-09): a read again that fails keeps them
+  const [lastShown, setLastShown] = useState<MineForScreen | null>(null);
+  const fresh = mine.data?.ok ? mine.data.data : null;
+  useEffect(() => {
+    if (fresh) setLastShown(fresh);
+  }, [fresh]);
+  // signed out: what she saw is no longer shown or kept
+  useEffect(() => {
+    if (!signedIn) setLastShown(null);
+  }, [signedIn]);
   const [saved, setSaved] = useState<SavedFarm | null>(null);
   const [started, setStarted] = useState<SellStarted | null>(null);
   // what this phone keeps is read once the page is on screen (the server's first page and the browser's must match)
@@ -525,13 +618,10 @@ export function TodayHome() {
     setStarted(readSellStart());
   }, []);
 
-  const data = mine.data?.ok ? mine.data.data : null;
-  const failed: AiaicProblem | null =
-    mine.data && !mine.data.ok
-      ? mine.data.problem
-      : mine.isError
-        ? appProblem("aiaic_unavailable")
-        : null;
+  const shown = mineShown({ data: mine.data, isError: mine.isError }, lastShown);
+  const data = shown.show === "records" ? shown.data : null;
+  const failed: AiaicProblem | null = shown.show === "problem" ? shown.problem : null;
+  const notRefreshed: AiaicProblem | null = shown.show === "records" ? shown.notRefreshed : null;
   // AIAIC's crisis answer takes the whole page (`CrisisFirst`), as on every AIAIC page
   useEffect(() => {
     if (failed?.crisis && raise) raise(failed);
@@ -552,6 +642,7 @@ export function TodayHome() {
   };
   const keptCrop = saved?.crop && data ? cropName(data.cropNames, saved.crop) : null;
   const adviceKept = saved?.region && saved.crop ? adviceSearch(saved) : null;
+  const signInAgain = notRefreshed ? SIGN_IN_AGAIN.has(notRefreshed.code) : false;
 
   return (
     <div className="mx-auto w-full max-w-xl px-3.5 pb-16 pt-5 sm:px-4 sm:pt-6" data-testid="today">
@@ -643,6 +734,44 @@ export function TodayHome() {
             </div>
           ) : null}
 
+          {/* her records stay; one quiet line says they could not be read again just now (R5P-09) */}
+          {notRefreshed ? (
+            <div
+              role="status"
+              data-testid="today-not-refreshed"
+              data-code={notRefreshed.code}
+              className="mt-3 rounded-2xl border-2 border-border bg-muted p-3"
+            >
+              <p className="flex items-start gap-2 font-semibold text-foreground" style={BODY}>
+                <RefreshCw aria-hidden className="mt-0.5 size-5 shrink-0" />
+                <span className="min-w-0 break-words">
+                  {signInAgain ? say(notRefreshed) : t("aiaic.not_refreshed")}
+                </span>
+              </p>
+              {signInAgain ? (
+                <Link
+                  to="/signin"
+                  data-testid="today-not-refreshed-sign-in"
+                  className={cn("mt-2", QUIET)}
+                  style={PRESS_STYLE}
+                >
+                  <LogIn aria-hidden className="size-5 shrink-0" />
+                  {t("aiaic.account.sign_in")}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  data-testid="today-not-refreshed-retry"
+                  onClick={() => void mine.refetch()}
+                  className={cn("mt-2", QUIET)}
+                  style={PRESS_STYLE}
+                >
+                  <RefreshCw aria-hidden className="size-5 shrink-0" />
+                  {t("aiaic.retry")}
+                </button>
+              )}
+            </div>
+          ) : null}
           {failed ? (
             failed.crisis ? null : (
               <div
@@ -743,7 +872,13 @@ export function TodayHome() {
               to="/listing/new"
               search={sellSearch}
               data-testid="today-task-sell"
-              onClick={() => keepSellStart(saved?.crop ?? null, saved?.region ?? null)}
+              onClick={() =>
+                keepSellStart(
+                  saved?.crop ?? null,
+                  saved?.region ?? null,
+                  data ? newestLotAt(data.mine) : null,
+                )
+              }
               className={TASK}
               style={TASK_SIZE}
             >
@@ -782,6 +917,7 @@ export function TodayHome() {
                   icon={TrendingUp}
                   title={t("aiaic.today.card.price")}
                   tip={t("aiaic.today.card.price_tip")}
+                  kept={t("aiaic.today.card.price_kept")}
                   note={t("aiaic.today.card.price_note")}
                   testid="today-task-price"
                 />

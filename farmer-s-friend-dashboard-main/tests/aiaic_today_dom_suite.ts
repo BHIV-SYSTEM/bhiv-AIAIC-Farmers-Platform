@@ -18,10 +18,18 @@
  * has at 11e7c1a).
  *
  * DERIVED, IN MEMORY, AND SAID IN EACH TEST: a failed read (`aiaic_unavailable`, `aiaic_signed_out`: this app's own
- * problem codes), AIAIC's crisis answer as her server reads it (`problem("crisis", ...)` with the helplines of AIAIC's
- * recorded crisis answer), a lot she listed after she started a sale here (a recorded lot, its `created_at` moved), an
- * AIAIC that sends no lane (a recorded order, its `lane` removed), and Hindi crop and district names (no Hindi place list
- * is recorded in her fixtures).
+ * problem codes; a read that throws, the phone's network lost), AIAIC's crisis answer as her server reads it
+ * (`problem("crisis", ...)` with the helplines of AIAIC's recorded crisis answer), a lot she listed after she started a sale
+ * here (a recorded lot, its `created_at` moved), an AIAIC that sends no lane (a recorded order, its `lane` removed), a
+ * sale whose quantities were checked (a recorded collect order given a pickup, a delivery and a reconciliation, and
+ * AIAIC's lane for that), a sale called off after its link was made (a recorded collect order, its state cancelled), a lot
+ * with no offer (a recorded practice lot, its offer removed), and Hindi crop and district names (no Hindi place list is
+ * recorded in her fixtures).
+ *
+ * THE ENGLISH SAFETY WORDS AND THE MONEY FIGURES ARE PINNED LITERALLY (the fix round of 16 Nov 2026, the skeptic's
+ * SK-ANN-2): an estimate said as an estimate, the uncalibrated warning, the guest's practice line, the practice labels,
+ * the Kisan Call Centre's number, and every figure the recorded one (`EN`, `inr`): never read from the dictionary the page
+ * renders, so a changed safety word fails here.
  */
 process.env["AIAIC_BASE_URL"] = "http://127.0.0.1:9";
 // THE ROUTER'S BROWSER HALF IN JSDOM (as the kit suites): under Node, TanStack Router's `isServer` is true unless NODE_ENV is
@@ -211,6 +219,44 @@ function suite(app: App, window: Window & typeof globalThis) {
       (s, [k, v]) => s.replaceAll(`{${k}}`, String(v)),
       words(lang, key),
     );
+  /** A day as India's (UTC+5:30), worked out here apart from the app's own `dayOf`. */
+  const istDay = (iso: string) =>
+    new Date(Date.parse(iso) + 330 * 60_000).toISOString().slice(0, 10);
+  /** Rupees as her pages write them, worked out here apart from the app's own `rupees`. */
+  const inr = (n: number) => {
+    const whole = Number.isInteger(n);
+    return `₹${n.toLocaleString("en-IN", {
+      minimumFractionDigits: whole ? 0 : 2,
+      maximumFractionDigits: whole ? 0 : 2,
+    })}`;
+  };
+  /** THE ENGLISH SAFETY WORDS, PINNED LITERALLY (SK-ANN-2): never read from the dictionary the page renders. */
+  const EN = {
+    estimate: (amount: string) => `To you: ${amount} (an estimate until it reaches your bank)`,
+    reached: (amount: string) => `Reached your bank: ${amount}`,
+    gross: (amount: string) => `Agreed price: ${amount}`,
+    commission: (pct: number, amount: string) => `AIAIC's commission (${pct}%): ${amount}`,
+    gst: (pct: number, amount: string) => `GST on the commission (${pct}%): ${amount}`,
+    transport: "Transport: no part of AIAIC's figures for this sale",
+    noneDue: "Nothing is due to you on this sale: it was called off.",
+    held: "AIAIC holds your money",
+    stopped: "No money moves on this sale",
+    warning:
+      "A demonstration, not checked by farm scientists: a suggestion to discuss, never an instruction.",
+    guest: "Sign in to see your own sales here. As a guest, selling in this app is practice only.",
+    practice: "Practice",
+    practiceTip: "A practice account: no real money, no real produce.",
+    practiceStep: "(practice step)",
+    kcc: "Kisan Call Centre 1800-180-1551",
+    kccTel: "tel:18001801551",
+    reconciled: "Quantities checked",
+    problemStep: "A problem reported",
+    seenByTeam: "seen by AIAIC's team",
+    notRefreshed: "Could not refresh just now: this is what AIAIC said last.",
+    savedFarm: "For your saved crop and district",
+  };
+  /** A read that throws: the phone lost its network (DERIVED). */
+  const LOST = Symbol("the phone lost its network");
 
   // --------------------------------------------------------------- AIAIC's recorded answers, read by her server
   const JOURNEY = recording("connected_farmer_mine_journey");
@@ -268,6 +314,7 @@ function suite(app: App, window: Window & typeof globalThis) {
           };
         if (name === "getMyTrade") {
           world.calls += 1;
+          if (world.trade === LOST) throw new TypeError("the phone lost its network");
           return { ...ctx, result: world.trade };
         }
         unanswered.push(String(name ?? "a server function this suite does not know"));
@@ -388,6 +435,18 @@ function suite(app: App, window: Window & typeof globalThis) {
       all,
       text: () => (container.textContent ?? "").replace(/\s+/g, " "),
       items: () => all('[data-testid="today-item"]'),
+      /** Her records read again, as the page does every 15 s and when she comes back to it. */
+      reread: async () => {
+        await app.runWithStartContext(
+          { startOptions: { functionMiddleware: [rpc] } } as never,
+          async () => {
+            await act(async () => {
+              await qc.refetchQueries({ queryKey: ["aiaic-mine"] });
+            });
+            await settle(200);
+          },
+        );
+      },
       unmount: async () => {
         await act(async () => reactRoot.unmount());
         container.remove();
@@ -427,6 +486,28 @@ function suite(app: App, window: Window & typeof globalThis) {
     };
   };
   const hrefOf = (el: Element | null) => el?.getAttribute("href") ?? null;
+  /** AIAIC's crisis answer as her server reads it, with the helplines of AIAIC's recorded crisis answer (DERIVED). */
+  const crisisProblem = () => {
+    const crisisAnswer = JSON.parse(
+      fs.readFileSync(path.join(FIXTURES, "safety_check_crisis.json"), "utf-8"),
+    ) as {
+      answer: {
+        answer: string;
+        message: string;
+        talk_to_someone: { name: string; phone: string }[];
+      };
+    };
+    return app.problem("crisis", {
+      crisis: {
+        answer: crisisAnswer.answer.answer,
+        message: crisisAnswer.answer.message,
+        helplines: crisisAnswer.answer.talk_to_someone.map((x) => ({
+          name: x.name,
+          phone: x.phone,
+        })),
+      },
+    });
+  };
   const latinIn = (root: Element) => {
     const out: string[] = [];
     const walker = document.createTreeWalker(root, 4 /* NodeFilter.SHOW_TEXT */);
@@ -529,7 +610,17 @@ function suite(app: App, window: Window & typeof globalThis) {
       const delivery = statusOf(sale, "today-state-delivery");
       const money = statusOf(sale, "today-state-money");
       assert.deepEqual(order.codes, ["being_readied"], "the order: AIAIC's lane");
-      assert.equal(order.text, words("en", "aiaic.today.lane.being_readied"));
+      const recordedLane = (JOURNEY as Raw).orders[0]?.["lane"] as Record<string, unknown>;
+      assert.equal(
+        sale.querySelector('[data-testid="today-lane-word"]')?.textContent,
+        "Being readied",
+        "the order's word",
+      );
+      assert.equal(
+        sale.querySelector('[data-testid="today-lane-since"]')?.textContent,
+        `since ${istDay(String(recordedLane["since"]))}`,
+        "since when, as AIAIC records it (SK-ANN-4)",
+      );
       assert.deepEqual(pay.codes, ["not_connected"], "the buyer's payment: its own state");
       assert.deepEqual(
         delivery.codes,
@@ -540,6 +631,12 @@ function suite(app: App, window: Window & typeof globalThis) {
         delivery.text.includes(words("en", "aiaic.today.stage.quality_grading")) &&
           sale.querySelectorAll('[data-testid="today-practice-step"]').length === 2,
         "each recorded step says it is a practice step",
+      );
+      const recordedSteps = (JOURNEY as Raw).orders[0]?.["fulfilment"] as Record<string, unknown>[];
+      assert.deepEqual(
+        [...sale.querySelectorAll('[data-testid="today-step-known"]')].map((e) => e.textContent),
+        recordedSteps.map((x) => istDay(String(x["created_at"]))),
+        "each step's day, as AIAIC recorded it (SK-ANN-4)",
       );
       assert.deepEqual(money.codes, ["not_paid"], "her money: its own state");
       const four = new Set([order.text, pay.text, delivery.text, money.text]);
@@ -582,13 +679,13 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   // ============================================================================================ TD3
 
-  test("TD3 her money's parts said apart on AIAIC's recorded sends: held for the pickup (her amount an estimate), sent but not reached (still an estimate), reached her bank (confirmed, the payment company's word); the agreed price gross, AIAIC's commission and GST apart, transport said as no part of AIAIC's figures", async () => {
-    const cases: [Record<string, unknown>, string, string, "yes" | "no"][] = [
-      [PAID, "collect_mine_paid", "held", "no"],
-      [SENDING, "collect_mine_processing", "sent", "no"],
-      [REACHED, "collect_mine_processed", "reached", "yes"],
+  test("TD3 her money's parts said apart on AIAIC's recorded sends, every figure the recorded one and every safety word pinned: held for the pickup (her amount an estimate), sent but not reached (still an estimate), reached her bank (confirmed, the payment company's word); the agreed price gross, AIAIC's commission and the GST on it each on its own line with its rate, transport said as no part of AIAIC's figures; the sale's step n of 5", async () => {
+    const cases: [Record<string, unknown>, string, string, "yes" | "no", string][] = [
+      [PAID, "collect_mine_paid", "held", "no", "Step 3 of 5: Handed over"],
+      [SENDING, "collect_mine_processing", "sent", "no", "Step 4 of 5: Delivered"],
+      [REACHED, "collect_mine_processed", "reached", "yes", "Step 4 of 5: Delivered"],
     ];
-    for (const [raw, name, state, confirmed] of cases) {
+    for (const [raw, name, state, confirmed, progress] of cases) {
       const order = (raw as Raw).orders.find((o) => o["from_aiaic"]) as Record<string, unknown>;
       const fa = order["from_aiaic"] as Record<string, unknown>;
       const one = { ...copy(raw), orders: [copy(order)] };
@@ -601,14 +698,17 @@ function suite(app: App, window: Window & typeof globalThis) {
           [state],
           `${name}: her money ${state}`,
         );
+        const text = (id: string) => p.q(`[data-testid="${id}"]`)?.textContent ?? null;
         if (state === "held") {
           const holds = fa["holds"] as Record<string, unknown>;
+          ok(statusOf(sale, "today-state-money").text.startsWith(EN.held), `${name}: said as held`);
           assert.equal(
             p.q('[data-testid="today-money-why"]')?.textContent,
             words("en", `aiaic.money.holds.waits_for.${String(holds["waits_for"])}`),
             `${name}: why AIAIC holds it, AIAIC's own reason`,
           );
         }
+        assert.equal(text("today-progress"), progress, `${name}: step n of 5`);
         const toHer = p.q('[data-testid="today-money-to-her"]');
         ok(toHer, `${name}: her amount is said`);
         assert.equal(
@@ -616,39 +716,35 @@ function suite(app: App, window: Window & typeof globalThis) {
           confirmed,
           `${name}: confirmed only once it reached her bank`,
         );
-        const amount = fa["to_her_inr"] as number;
-        const rupee = `₹${amount.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+        const amount = inr(fa["to_her_inr"] as number);
         assert.equal(
           toHer.textContent,
-          fill(
-            "en",
-            confirmed === "yes"
-              ? "aiaic.today.money.to_her_confirmed"
-              : "aiaic.today.money.to_her_estimate",
-            {
-              amount: rupee,
-            },
-          ),
-          `${name}: ${confirmed === "yes" ? "confirmed" : "an estimate until it reaches her bank"}`,
+          confirmed === "yes" ? EN.reached(amount) : EN.estimate(amount),
+          `${name}: ${confirmed === "yes" ? "confirmed" : "an estimate until it reaches her bank"}, AIAIC's own figure`,
+        );
+        assert.equal(
+          text("today-money-gross"),
+          EN.gross(inr(order["amount_inr"] as number)),
+          `${name}: the agreed price, gross (the order's own amount, never her net)`,
+        );
+        assert.equal(
+          text("today-money-commission"),
+          EN.commission(fa["commission_percent"] as number, inr(fa["commission_inr"] as number)),
+          `${name}: AIAIC's commission, its rate and amount as the payment link's record holds them`,
+        );
+        assert.equal(
+          text("today-money-gst"),
+          EN.gst(fa["gst_percent"] as number, inr(fa["gst_inr"] as number)),
+          `${name}: the GST on it, on its own line (SK-ANN-8)`,
+        );
+        assert.equal(
+          text("today-money-transport"),
+          EN.transport,
+          `${name}: transport said, never folded in`,
         );
         ok(
-          (p.q('[data-testid="today-money-gross"]')?.textContent ?? "").startsWith(
-            fill("en", "aiaic.today.money.gross", { amount: "" }).trim(),
-          ),
-          `${name}: the agreed price, gross`,
-        );
-        const fees =
-          (fa["commission_inr"] as number | null) !== null ||
-          (fa["gst_inr"] as number | null) !== null;
-        assert.equal(
-          Boolean(p.q('[data-testid="today-money-deductions"]')),
-          fees,
-          `${name}: the deductions only where AIAIC set them`,
-        );
-        assert.equal(
-          p.q('[data-testid="today-money-transport"]')?.textContent,
-          words("en", "aiaic.today.money.transport"),
-          `${name}: transport said, never folded in`,
+          !p.q('[data-testid="today-money-none-due"]'),
+          `${name}: a sale under way is not said called off`,
         );
         const details = p.q('[data-testid="today-money-more"]') as HTMLDetailsElement | null;
         ok(details && !details.open, `${name}: the money's parts sit behind one control, folded`);
@@ -736,6 +832,36 @@ function suite(app: App, window: Window & typeof globalThis) {
         ["pickup:done", "delivery_exception:done"],
         "its recorded steps, the problem among them",
       );
+      const drawn = (stage: string) =>
+        disputed.querySelector(`[data-stage="${stage}"] [data-status]`) as HTMLElement | null;
+      assert.equal(
+        drawn("pickup")?.getAttribute("data-tone"),
+        "good",
+        "a pickup done: drawn as done",
+      );
+      assert.equal(
+        drawn("delivery_exception")?.getAttribute("data-tone"),
+        "warn",
+        "a problem reported: the warning's colour and icon, never drawn as a success (SK-ANN-6)",
+      );
+      const problemWords = (drawn("delivery_exception")?.textContent ?? "").replace(/\s+/g, " ");
+      ok(
+        problemWords.startsWith(EN.problemStep) && !problemWords.includes(": done"),
+        `a problem reported is never said "done" (${problemWords})`,
+      );
+      const recorded = (REAL as Raw).orders.find(
+        (o) => o["order_id"] === disputed.getAttribute("data-id"),
+      ) as Record<string, unknown>;
+      assert.deepEqual(
+        [...disputed.querySelectorAll('[data-testid="today-step-known"]')].map(
+          (e) => e.textContent,
+        ),
+        (recorded["fulfilment"] as Record<string, unknown>[]).map(
+          (x) => `${istDay(String(x["created_at"]))} · ${EN.seenByTeam}`,
+        ),
+        "each step's day and how AIAIC knows it, as AIAIC recorded them (its operator_observed, SK-ANN-4)",
+      );
+      ok(!off.querySelector('[data-testid="today-progress"]'), "called off: no step n of 5");
       ok(
         !p.q('[data-testid="today-practice-chip"]') && !p.q('[data-testid="today-practice-step"]'),
         "nothing on a real account's page says practice",
@@ -809,26 +935,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     } finally {
       await out.unmount();
     }
-    const crisisAnswer = JSON.parse(
-      fs.readFileSync(path.join(FIXTURES, "safety_check_crisis.json"), "utf-8"),
-    ) as {
-      answer: {
-        answer: string;
-        message: string;
-        talk_to_someone: { name: string; phone: string }[];
-      };
-    };
-    const crisis = app.problem("crisis", {
-      crisis: {
-        answer: crisisAnswer.answer.answer,
-        message: crisisAnswer.answer.message,
-        helplines: crisisAnswer.answer.talk_to_someone.map((x) => ({
-          name: x.name,
-          phone: x.phone,
-        })),
-      },
-    });
-    const c = await mount("en", { ok: false, problem: crisis });
+    const c = await mount("en", { ok: false, problem: crisisProblem() });
     try {
       await ready(c);
       await waitFor(() => c.q("[data-crisis]"), "the crisis card");
@@ -855,6 +962,15 @@ function suite(app: App, window: Window & typeof globalThis) {
     let kept: Record<string, unknown> | null = null;
     try {
       await ready(first);
+      assert.equal(
+        first.q('[data-testid="today-task-price-kept"]')?.textContent,
+        EN.savedFarm,
+        "the price card says it opens her saved crop and district (SK-ANN-10)",
+      );
+      ok(
+        (hrefOf(first.q('[data-testid="today-task-price"]')) ?? "").startsWith("/result?"),
+        "and opens that answer",
+      );
       const sell = first.q('[data-testid="today-task-sell"]');
       assert.equal(
         hrefOf(sell),
@@ -868,10 +984,15 @@ function suite(app: App, window: Window & typeof globalThis) {
       ok(kept, "her start is kept");
       assert.deepEqual(
         Object.keys(kept).sort(),
-        ["at", "crop", "district"],
-        "only the crop, the district and when",
+        ["at", "crop", "district", "seen"],
+        "only the crop, the district, when, and her newest lot as AIAIC said it",
       );
       assert.deepEqual([kept["crop"], kept["district"]], ["onion", "Nashik"]);
+      assert.equal(
+        kept["seen"],
+        "",
+        "AIAIC held no lot of hers at her press: the mark is AIAIC's own answer, never the phone's clock (SK-ANN-11)",
+      );
     } finally {
       await first.unmount();
     }
@@ -903,7 +1024,7 @@ function suite(app: App, window: Window & typeof globalThis) {
       await back.unmount();
     }
     // DERIVED: she started again, then listed: AIAIC's recorded lot, its `created_at` moved after her start
-    app.today.keepSellStart("onion", "Nashik", Date.now() - 60_000);
+    app.today.keepSellStart("onion", "Nashik", null, Date.now() - 60_000);
     const listed = copy(OFFER) as Raw;
     (listed.listings[0] as Record<string, unknown>)["created_at"] = new Date().toISOString();
     const after = await mount("en", screenOf(listed), { keep: true });
@@ -929,7 +1050,8 @@ function suite(app: App, window: Window & typeof globalThis) {
       await ready(p);
       assert.equal(
         p.q('[data-testid="today-guest"] p')?.textContent,
-        words("en", "aiaic.today.guest"),
+        EN.guest,
+        "a guest's selling is practice only, word for word",
       );
       assert.equal(hrefOf(p.q('[data-testid="today-sign-in"]')), "/signin");
       await settle(300);
@@ -1058,9 +1180,12 @@ function suite(app: App, window: Window & typeof globalThis) {
       for (const id of ["today-task-price-note", "today-task-store-note"])
         assert.equal(
           p.q(`[data-testid="${id}"]`)?.textContent,
-          words("en", "aiaic.today.card.price_note"),
-          `${id}: the uncalibrated warning where advice is offered`,
+          EN.warning,
+          `${id}: the uncalibrated warning, word for word, where advice is offered`,
         );
+      const kcc = p.q('[data-testid="today-person-kcc"]');
+      assert.equal(hrefOf(kcc), EN.kccTel, "the Kisan Call Centre's own number is dialled");
+      assert.equal((kcc?.textContent ?? "").trim(), EN.kcc, "and said");
     } finally {
       await p.unmount();
     }
@@ -1080,15 +1205,15 @@ function suite(app: App, window: Window & typeof globalThis) {
       ok(home.q('[role="radiogroup"]'), "the landing's language buttons stay");
       const order = [
         ...home.container.querySelectorAll(
-          '[role="radiogroup"], [data-testid="home-today-link"], a[href="/ask"]',
+          '[role="radiogroup"], a[href="/ask"], [data-testid="home-storage-link"], [data-testid="home-today-link"]',
         ),
       ].map(
         (e) => e.getAttribute("data-testid") ?? e.getAttribute("role") ?? e.getAttribute("href"),
       );
       assert.deepEqual(
         order,
-        ["radiogroup", "home-today-link", "/ask"],
-        "her language first, then the new card, then Get my advice",
+        ["radiogroup", "/ask", "home-storage-link", "home-today-link"],
+        "her language, the landing's own two actions where they were, then the new card (SK-ANN-7: the first screen she knew is unchanged)",
       );
       assert.equal(world.calls, 0, "the landing asks AIAIC for nothing of hers");
     } finally {
@@ -1116,6 +1241,315 @@ function suite(app: App, window: Window & typeof globalThis) {
       ["called_off", true, null],
       "called off by its state alone",
     );
+  });
+
+  // ============================================================================================ TD12
+
+  test("TD12 a sale whose quantities were checked (AIAIC's lane reconciled: never a payment or a settlement) while AIAIC still holds her money: said as 'Quantities checked', never 'Settled', and kept among her sales under way, before her lots; once her money reached her bank it is finished and comes last", async () => {
+    // DERIVED, in memory: AIAIC's recorded collect order (her money held, or reached her bank), given a pickup, a delivery
+    // and a reconciliation recorded done (practice steps), and what AIAIC answers for that (its lane `reconciled`, waiting
+    // on nobody: engine `trade/store.py` `lane_of`; no next step for her: `her_next_step`); AIAIC's team's press is what the
+    // held money waits for after the delivery; and a lot of hers listed with no offer (AIAIC's recorded practice lot, its
+    // offer removed)
+    const reconciledFrom = (raw: Record<string, unknown>) => {
+      const r = copy(raw) as Raw;
+      const order = r.orders.find((o) => o["from_aiaic"]) as Record<string, unknown>;
+      const at = (m: number) =>
+        new Date(Date.parse(String(order["created_at"])) + m * 60_000).toISOString();
+      const step = (stage: string, m: number, detail: Record<string, unknown> = {}) => ({
+        stage,
+        status: "done",
+        simulated: true,
+        evidence_kind: "simulated",
+        created_at: at(m),
+        detail,
+      });
+      order["order_state"] = "delivered";
+      order["fulfilment"] = [
+        step("pickup", 10),
+        step("delivered", 20),
+        step("reconciliation", 30, {
+          delivered_q: order["quantity_q"],
+          accepted_q: order["quantity_q"],
+          rejected_q: 0,
+        }),
+      ];
+      order["lane"] = { code: "reconciled", since: at(30), waiting_on: null, synthetic: true };
+      // nothing comes next on a reconciled order (engine `trade/store.py` `her_next_step`: None once it is reconciled)
+      order["her_next_step"] = null;
+      const fa = order["from_aiaic"] as Record<string, unknown>;
+      if (fa["holds"]) (fa["holds"] as Record<string, unknown>)["waits_for"] = "aiaic_team";
+      const lot = copy((OFFER as Raw).listings[0]) as Record<string, unknown>;
+      lot["offers"] = [];
+      return { ...r, orders: [order], listings: [lot] };
+    };
+    const held = await mount("en", screenOf(reconciledFrom(PAID)));
+    try {
+      await ready(held);
+      assert.deepEqual(
+        held.items().map((i) => i.getAttribute("data-kind")),
+        ["sale", "lot"],
+        "her money not in her bank: the sale stays among those under way, before her lot",
+      );
+      const sale = held.items()[0] as Element;
+      assert.equal(sale.getAttribute("data-lane"), "reconciled");
+      assert.equal(
+        sale.querySelector('[data-testid="today-lane-word"]')?.textContent,
+        EN.reconciled,
+        "the order: its quantities checked",
+      );
+      ok(
+        !/settled/i.test(sale.textContent ?? ""),
+        "never 'Settled' on a sale whose money AIAIC holds",
+      );
+      assert.deepEqual(
+        statusOf(sale, "today-state-money").codes,
+        ["held"],
+        "her money: its own state",
+      );
+      ok(statusOf(sale, "today-state-money").text.startsWith(EN.held), "said as held");
+      const fa = ((PAID as Raw).orders.find((o) => o["from_aiaic"]) as Record<string, unknown>)[
+        "from_aiaic"
+      ] as Record<string, unknown>;
+      assert.equal(
+        sale.querySelector('[data-testid="today-money-to-her"]')?.textContent,
+        EN.estimate(inr(fa["to_her_inr"] as number)),
+        "her amount: still an estimate",
+      );
+    } finally {
+      await held.unmount();
+    }
+    const done = await mount("en", screenOf(reconciledFrom(REACHED)));
+    try {
+      await ready(done);
+      assert.deepEqual(
+        done.items().map((i) => i.getAttribute("data-kind")),
+        ["lot", "sale"],
+        "her money in her bank: the sale is finished and comes last",
+      );
+      const sale = done.items()[1] as Element;
+      assert.equal(
+        sale.querySelector('[data-testid="today-lane-word"]')?.textContent,
+        EN.reconciled,
+      );
+      assert.deepEqual(statusOf(sale, "today-state-money").codes, ["reached"]);
+    } finally {
+      await done.unmount();
+    }
+    const read = (raw: Record<string, unknown>) =>
+      app.today.saleNow(app.mineForBrowser(copy(reconciledFrom(raw))).orders[0] as never);
+    assert.deepEqual(
+      [read(PAID).closed, read(REACHED).closed],
+      [false, true],
+      "finished only once her money reached her bank",
+    );
+  });
+
+  // ============================================================================================ TD13
+
+  test("TD13 a read again that fails keeps what she saw (R5P-09, the app's rule for every sale page): her sale stays with one quiet line and Try again, whether AIAIC refused or the phone lost its network; signed out says Sign in; Try again reads again and the line goes; AIAIC's crisis answer still takes the whole page", async () => {
+    const p = await mount("en", screenOf(JOURNEY));
+    try {
+      await ready(p);
+      const id = String((JOURNEY as Raw).orders[0]?.["order_id"]);
+      const her = () => p.items().find((i) => i.getAttribute("data-id") === id);
+      ok(her(), "her sale is on the page");
+      world.trade = { ok: false, problem: app.problem("aiaic_unavailable") };
+      const before = world.calls;
+      await p.reread();
+      ok(world.calls > before, "her records were read again");
+      ok(her(), "AIAIC refused the read again: her sale stays");
+      ok(!p.q('[data-testid="today-problem"]'), "no problem card in place of her sales");
+      const line = p.q('[data-testid="today-not-refreshed"]');
+      ok(line, "one quiet line says so");
+      ok((line.textContent ?? "").includes(EN.notRefreshed), "in the app's own words");
+      const retry = p.q('[data-testid="today-not-refreshed-retry"]') as HTMLElement | null;
+      ok(retry && retry.style.minHeight === "max(48px, 3rem)", "Try again, at least 48 px");
+      world.trade = LOST;
+      await p.reread();
+      ok(her(), "the phone lost its network: her sale stays");
+      ok(p.q('[data-testid="today-not-refreshed"]'), "with the quiet line");
+      world.trade = screenOf(JOURNEY);
+      await press(p.q('[data-testid="today-not-refreshed-retry"]'), "Try again");
+      await waitFor(
+        () => !p.q('[data-testid="today-not-refreshed"]'),
+        "the line gone once AIAIC answered",
+      );
+      ok(her(), "her sale, read again");
+      world.trade = { ok: false, problem: app.problem("aiaic_signed_out") };
+      await p.reread();
+      ok(her(), "signed out on a read again: what she saw stays");
+      assert.equal(
+        hrefOf(p.q('[data-testid="today-not-refreshed-sign-in"]')),
+        "/signin",
+        "with Sign in",
+      );
+      world.trade = { ok: false, problem: crisisProblem() };
+      await p.reread();
+      await waitFor(() => p.q("[data-crisis]"), "the crisis card");
+      ok(!p.q('[data-testid="today-items"]'), "AIAIC's crisis answer: the crisis card alone");
+    } finally {
+      await p.unmount();
+    }
+  });
+
+  // ============================================================================================ TD14
+
+  test("TD14 a sale called off after AIAIC made the buyer's link: no money moves and nothing is due to her, said plainly; no amount 'to you' and no deductions from it; the agreed price stays a fact of the order; no step n of 5", async () => {
+    // DERIVED, in memory: AIAIC's recorded collect order (from_aiaic: her amount by AIAIC's figure), its state cancelled and
+    // its lane called off (AIAIC still sends from_aiaic for it: engine `trade/farmer_payout.py` `_her_view`)
+    const r = copy(PAID) as Raw;
+    const order = r.orders.find((o) => o["from_aiaic"]) as Record<string, unknown>;
+    order["order_state"] = "cancelled";
+    order["lane"] = {
+      code: "called_off",
+      since: order["created_at"],
+      waiting_on: null,
+      synthetic: true,
+    };
+    const p = await mount("en", screenOf({ ...r, orders: [order] }));
+    try {
+      await ready(p);
+      const sale = p.items().find((i) => i.getAttribute("data-kind") === "sale") as Element;
+      ok(sale, "the sale is on her page");
+      assert.deepEqual(statusOf(sale, "today-state-money").codes, ["stopped"]);
+      ok(statusOf(sale, "today-state-money").text.startsWith(EN.stopped), "no money moves");
+      assert.equal(
+        p.q('[data-testid="today-money-none-due"]')?.textContent,
+        EN.noneDue,
+        "nothing is due to her, said plainly",
+      );
+      ok(!p.q('[data-testid="today-money-to-her"]'), "no amount 'to you' on a sale called off");
+      ok(
+        !p.q('[data-testid="today-money-commission"]') && !p.q('[data-testid="today-money-gst"]'),
+        "no deductions from money she will not get",
+      );
+      ok(!/estimate/i.test(sale.textContent ?? ""), "no estimate of money that will not come");
+      assert.equal(
+        p.q('[data-testid="today-money-gross"]')?.textContent,
+        EN.gross(inr(order["amount_inr"] as number)),
+        "the agreed price stays a fact of the order",
+      );
+      ok(!p.q('[data-testid="today-progress"]'), "no step n of 5 on a sale called off");
+    } finally {
+      await p.unmount();
+    }
+  });
+
+  // ============================================================================================ TD15
+
+  test("TD15 a sale she started is forgotten once AIAIC holds a lot of any crop listed since, read on AIAIC's own clock (her newest lot then, as AIAIC said it): a phone whose clock runs ahead, or a lot of another crop, never keeps inviting a second listing", async () => {
+    const T = app.today;
+    const now = Date.now();
+    const iso = (ms: number) => new Date(ms).toISOString();
+    // DERIVED: AIAIC's recorded practice lot, as many lots as asked, each with its crop and its time on AIAIC's clock
+    const mineWith = (lots: { crop: string; at: string }[]) => {
+      const base = app.mineForBrowser(copy(OFFER));
+      const one = base.listings[0];
+      return {
+        ...base,
+        listings: lots.map((l, i) => ({
+          ...one,
+          listing_id: `lst_derived_${i}`,
+          crop: l.crop,
+          created_at: l.at,
+        })),
+      } as never;
+    };
+    const kept = (at: number, seen: string | null) => ({
+      crop: "onion",
+      district: "Nashik",
+      at: iso(at),
+      seen,
+    });
+    assert.equal(
+      T.sellStillOpen(kept(now + 2 * 86_400_000, ""), mineWith([{ crop: "onion", at: iso(now) }])),
+      false,
+      "the phone's clock two days ahead: a lot listed since, on AIAIC's clock, ends it",
+    );
+    assert.equal(
+      T.sellStillOpen(kept(now + 2 * 3_600_000, null), mineWith([{ crop: "onion", at: iso(now) }])),
+      false,
+      "no mark of AIAIC's at her press: the phone's clock less the slack still finds the lot",
+    );
+    assert.equal(
+      T.sellStillOpen(kept(now - 60_000, ""), mineWith([{ crop: "tur", at: iso(now) }])),
+      false,
+      "a lot of another crop listed since ends it too",
+    );
+    const then = iso(now - 3_600_000);
+    assert.equal(
+      T.sellStillOpen(kept(now - 60_000, then), mineWith([{ crop: "onion", at: then }])),
+      true,
+      "nothing listed since her press: still offered back",
+    );
+    assert.equal(
+      T.newestLotAt(
+        mineWith([
+          { crop: "tur", at: iso(now - 7_200_000) },
+          { crop: "onion", at: then },
+        ]),
+      ),
+      then,
+      "her newest lot, as AIAIC said it",
+    );
+    // on her page: AIAIC held none of her lots at her press; the phone stamped it a minute after AIAIC's clock says she listed
+    window.localStorage.clear();
+    T.keepSellStart("onion", "Nashik", "", now - 5_000);
+    const listed = copy(OFFER) as Raw;
+    (listed.listings[0] as Record<string, unknown>)["created_at"] = iso(now - 65_000);
+    const p = await mount("en", screenOf(listed), { keep: true });
+    try {
+      await ready(p);
+      await settle(200);
+      ok(!p.q('[data-testid="today-resume"]'), "listed since on AIAIC's clock: not offered back");
+      assert.equal(window.localStorage.getItem(T.SELL_STARTED_KEY), null, "and forgotten");
+    } finally {
+      await p.unmount();
+    }
+  });
+
+  // ============================================================================================ TD16
+
+  test("TD16 practice is said on every kind of item a practice account has, word for word: an offer, a lot, a sale and each of its steps, with the page's practice line", async () => {
+    const chipOf = (el: Element | undefined) =>
+      el?.querySelector('[data-testid="today-practice-chip"]')?.textContent ?? null;
+    const offer = await mount("en", screenOf(OFFER));
+    try {
+      await ready(offer);
+      const o = offer.items().find((i) => i.getAttribute("data-kind") === "offer");
+      assert.equal(chipOf(o), EN.practice, "a practice offer says Practice");
+      ok(offer.text().includes(EN.practiceTip), "the page's practice line");
+    } finally {
+      await offer.unmount();
+    }
+    // DERIVED: AIAIC's recorded practice lot, its offer removed (a lot with no offer)
+    const lotOnly = copy(OFFER) as Raw;
+    (lotOnly.listings[0] as Record<string, unknown>)["offers"] = [];
+    const lot = await mount("en", screenOf(lotOnly));
+    try {
+      await ready(lot);
+      const l = lot.items().find((i) => i.getAttribute("data-kind") === "lot");
+      ok(l, "her lot is on her page");
+      assert.equal(chipOf(l), EN.practice, "a practice lot says Practice");
+    } finally {
+      await lot.unmount();
+    }
+    const sale = await mount("en", screenOf(JOURNEY));
+    try {
+      await ready(sale);
+      const s = sale.items()[0];
+      assert.equal(chipOf(s), EN.practice, "a practice sale says Practice");
+      assert.deepEqual(
+        [...(s?.querySelectorAll('[data-testid="today-practice-step"]') ?? [])].map((e) =>
+          (e.textContent ?? "").trim(),
+        ),
+        [EN.practiceStep, EN.practiceStep],
+        "each practice step says so",
+      );
+    } finally {
+      await sale.unmount();
+    }
   });
 
   return learn;
