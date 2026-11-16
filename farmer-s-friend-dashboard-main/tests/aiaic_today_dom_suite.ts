@@ -28,9 +28,10 @@
  * sale whose quantities were checked (a recorded collect order given a pickup, a delivery and a reconciliation, and
  * AIAIC's lane for that), a sale called off after its link was made (a recorded collect order, its state cancelled), a
  * sale called off after people's word of a payment made outside AIAIC (TD18: recorded orders given only the fields AIAIC's
- * call-off sets, after a word as AIAIC keeps it), the recorded group journey with the buyer's pay terms not said (TD2), a
- * lot with no offer (a recorded practice lot, its offer removed), and Hindi crop and district names (no Hindi place list
- * is recorded in her fixtures).
+ * call-off sets, after a word as AIAIC keeps it), the recorded group journey with the buyer's pay terms not said, with its
+ * link sent and not paid, and called off before any link with only the fields AIAIC's call-off sets (TD2), a lot with no
+ * offer (a recorded practice lot, its offer removed), and Hindi crop and district names (no Hindi place list is recorded
+ * in her fixtures).
  *
  * THE ENGLISH SAFETY WORDS AND THE MONEY FIGURES ARE PINNED LITERALLY (the fix round of 16 Nov 2026, the skeptic's
  * SK-ANN-2): an estimate said as an estimate, the uncalibrated warning, the guest's practice line, the practice labels,
@@ -316,6 +317,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     groupAwaited: "The buyer's payment is awaited.",
     noPayment: "No payment yet",
     paidByProvider: "The buyer paid (the payment company's word)",
+    linkSent: "Link sent to the buyer: not paid yet",
     beforeHandover: "before you hand over",
   };
   /** A read that throws: the phone lost its network (DERIVED). */
@@ -646,7 +648,7 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   // ============================================================================================ TD2
 
-  test("TD2 her sale on AIAIC's recorded group journey: four separate states (the order being readied, no payment, the collection and the testing each a practice step done, her money not paid), said as part of a group sale with no stale handover step and no 'needs you' (AUD-3), and no 'step n of 5' of a sale sold alone, on the recording, on a copy whose buyer paid and on one whose group facts AIAIC did not send (RC-ANN-1); the buyer's payment while no link is made said as the group sale's own page says it at its money step ('The buyer says it pays within 3 days of delivery.', in English, Marathi and Hindi; the buyer's terms not said: 'awaited'; no group facts sent: the payment's own state), never 'agree the payment with the buyer before you hand over', a link made: the sale page's own line, and a sale sold alone keeps its page's line (RC2-ANN-2); and a direct sale waiting on her (AIAIC's recording of a real account): her next step in the order's own terms, whom it waits on (her), 'needs you', no practice word; the sale's own page one press away", async () => {
+  test("TD2 her sale on AIAIC's recorded group journey: four separate states (the order being readied, no payment, the collection and the testing each a practice step done, her money not paid), said as part of a group sale with no stale handover step and no 'needs you' (AUD-3), and no 'step n of 5' of a sale sold alone, on the recording, on a copy whose buyer paid and on one whose group facts AIAIC did not send (RC-ANN-1); the buyer's payment while no link is made said as the group sale's own page says it at its money step ('The buyer says it pays within 3 days of delivery.', in English, Marathi and Hindi; the buyer's terms not said: 'awaited'; no group facts sent: the payment's own state), never 'agree the payment with the buyer before you hand over', a link made (paid, or sent and not paid): the sale page's own line, which the group page's payment card says too, called off before any link: the sale page's own line there (the payment's own state), and a sale sold alone keeps its page's line (RC2-ANN-2); and a direct sale waiting on her (AIAIC's recording of a real account): her next step in the order's own terms, whom it waits on (her), 'needs you', no practice word; the sale's own page one press away", async () => {
     const direct = await mount("en", screenOf(HELD));
     try {
       await ready(direct);
@@ -809,12 +811,43 @@ function suite(app: App, window: Window & typeof globalThis) {
     ((noTerms.orders[0] as Record<string, unknown>)["pool"] as Record<string, unknown>)[
       "pay_within_days"
     ] = null;
-    // the buyer's payment on each (RC2-ANN-2): a link made, the sale page's own line; no group facts sent, the payment's
-    // own state; the buyer's terms not said, the group page's money step for that; never "before you hand over"
-    for (const [raw, what, paySaid] of [
-      [paidCopy, "the buyer paid", EN.paidByProvider],
-      [bare, "AIAIC's group facts not sent", EN.noPayment],
-      [noTerms, "the buyer's pay terms not said", EN.groupAwaited],
+    // DERIVED, in memory: the same recorded group order with the buyer's link made and not paid (`payment_state` and the
+    // payment's state link_created, a link made). Its group page then draws its payment card, and its money step is
+    // still awaited, so only the link decides what is said (the paid copy's money step is not awaited)
+    const linkCopy = copy(JOURNEY) as Raw;
+    const linkOrder = linkCopy.orders[0] as Record<string, unknown>;
+    linkOrder["payment_state"] = "link_created";
+    linkOrder["payment"] = {
+      ...(linkOrder["payment"] as Record<string, unknown>),
+      state: "link_created",
+      link_made: true,
+    };
+    // DERIVED, in memory: the same recorded group order called off before any link, with only the fields AIAIC's call-off
+    // sets (`store.cancel_order`: the state, the reason's code, the time, the lane called off; `money_for_her`: no report
+    // taken, order_closed). Its money step is no longer awaited (stopped), and nobody's word is held
+    const offCopy = copy(JOURNEY) as Raw;
+    const offOrder = offCopy.orders[0] as Record<string, unknown>;
+    const offAt = "2026-11-14T06:00:00+00:00";
+    offOrder["order_state"] = "cancelled";
+    offOrder["cancel_reason_code"] = "buyer_called_off";
+    offOrder["updated_at"] = offAt;
+    offOrder["lane"] = { code: "called_off", since: offAt, waiting_on: null, synthetic: true };
+    const offMoney = offOrder["money"] as Record<string, unknown>;
+    offMoney["can_report"] = false;
+    offMoney["why_not_report"] = {
+      code: "order_closed",
+      why: "The order was called off: it takes no payment report.",
+    };
+    // the buyer's payment on each (RC2-ANN-2): a link made (paid, or sent and not paid), the sale page's own line, which
+    // the group page's payment card says too; no group facts sent, the payment's own state; the buyer's terms not said,
+    // the group page's money step for that; called off before any link, the sale page's own line on a sale called off
+    // (the payment's own state, as before the fix); never "before you hand over"
+    for (const [raw, what, code, paySaid, says] of [
+      [paidCopy, "the buyer paid", "paid", EN.paidByProvider, "line"],
+      [linkCopy, "a link sent to the buyer, not paid", "link_created", EN.linkSent, "line"],
+      [bare, "AIAIC's group facts not sent", "not_connected", EN.noPayment, "state"],
+      [noTerms, "the buyer's pay terms not said", "not_connected", EN.groupAwaited, "step"],
+      [offCopy, "her sale called off before any link", "not_connected", EN.noPayment, "line"],
     ] as const) {
       const g = await mount("en", screenOf(raw));
       try {
@@ -822,11 +855,7 @@ function suite(app: App, window: Window & typeof globalThis) {
         const s = g.items().find((i) => i.getAttribute("data-kind") === "sale");
         ok(s, `${what}: her group sale is on her page`);
         const payNow = statusOf(s, "today-state-payment");
-        assert.deepEqual(
-          payNow.codes,
-          [what === "the buyer paid" ? "paid" : "not_connected"],
-          `${what}: the buyer's payment, its own state`,
-        );
+        assert.deepEqual(payNow.codes, [code], `${what}: the buyer's payment, its own state`);
         assert.equal(
           payNow.text,
           paySaid,
@@ -834,13 +863,25 @@ function suite(app: App, window: Window & typeof globalThis) {
         );
         const read = app.mineForBrowser(copy(raw)).orders[0];
         ok(read, `${what}: her order, as her server reads it`);
-        if (what === "the buyer paid")
+        if (says === "line") {
           assert.equal(
             payNow.text,
             words("en", app.paymentLine(read).key),
-            `${what}: a link made, the sale page's own payment line`,
+            `${what}: the sale page's own payment line`,
           );
-        else if (what === "AIAIC's group facts not sent")
+          if (read.payment.link_made)
+            assert.equal(
+              groupPage("en", raw).paymentCard,
+              true,
+              `${what}: a link made, the group sale's own page draws its payment card with that line`,
+            );
+          else
+            assert.equal(
+              s.getAttribute("data-lane"),
+              "called_off",
+              `${what}: the order, called off`,
+            );
+        } else if (says === "state")
           assert.equal(
             payNow.text,
             words("en", `aiaic.pay.state.${read.payment.state}`),
