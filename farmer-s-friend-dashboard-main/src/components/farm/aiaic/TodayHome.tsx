@@ -339,7 +339,8 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
       <p className="mt-1 break-words text-foreground" style={BODY} data-name="">
         {buyerLine(t, data.districtNames, o.buyer_type, o.buyer_district, o.buyer_name)}
       </p>
-      {/* "step n of 5" on the five steps her sale's own page draws (the brief's progress rule) */}
+      {/* "step n of 5" on the five steps her sale's own page draws (the brief's progress rule), said as the step in
+          progress, never as a milestone reached: "Step 2 of 5: the buyer's payment", never "... Buyer paid" */}
       {item.progress ? (
         <p
           className="mt-1 break-words font-bold text-foreground"
@@ -347,8 +348,13 @@ function SaleCard({ item, data }: { item: SaleNow; data: MineForScreen }) {
           data-testid="today-progress"
           data-step={item.progress.key}
         >
-          {t("aiaic.store.step.of", { n: item.progress.n, total: item.progress.of })}{" "}
-          {t(`aiaic.step.${item.progress.key}`)}
+          {item.progress.allDone
+            ? t("aiaic.today.progress.all_done", { total: item.progress.of })
+            : t("aiaic.today.progress.now", {
+                n: item.progress.n,
+                total: item.progress.of,
+                step: t(`aiaic.today.progress.step.${item.progress.key}`),
+              })}
         </p>
       ) : null}
 

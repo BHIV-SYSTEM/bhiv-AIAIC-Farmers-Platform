@@ -104,8 +104,9 @@ export type MoneyNow = {
   /** what AIAIC holds for her and why it waits (its closed reasons), only as AIAIC says it */
   holds: Holds | null;
 };
-/** Where her sale is on the five steps her sale's own page draws (`saleSteps`): "step n of m", the step she is at. */
-export type Progress = { n: number; of: number; key: SaleStep["key"] };
+/** Where her sale is on the five steps her sale's own page draws (`saleSteps`): "step n of m", the step in progress
+ *  (never said as reached: "Step 2 of 5: the buyer's payment"), or every step done. */
+export type Progress = { n: number; of: number; key: SaleStep["key"]; allDone: boolean };
 
 export type SaleNow = {
   kind: "sale";
@@ -239,7 +240,7 @@ export function progressOf(order: AiaicOrder): Progress | null {
   const at = steps.findIndex((s) => s.state !== "done");
   const i = at < 0 ? steps.length - 1 : at;
   const step = steps[i];
-  return step ? { n: i + 1, of: steps.length, key: step.key } : null;
+  return step ? { n: i + 1, of: steps.length, key: step.key, allDone: at < 0 } : null;
 }
 
 /** Her next step as AIAIC names it, on an order neither called off nor part of a group sale (whose own page says the

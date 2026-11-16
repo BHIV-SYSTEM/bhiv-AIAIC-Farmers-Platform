@@ -681,9 +681,15 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   test("TD3 her money's parts said apart on AIAIC's recorded sends, every figure the recorded one and every safety word pinned: held for the pickup (her amount an estimate), sent but not reached (still an estimate), reached her bank (confirmed, the payment company's word); the agreed price gross, AIAIC's commission and the GST on it each on its own line with its rate, transport said as no part of AIAIC's figures; the sale's step n of 5", async () => {
     const cases: [Record<string, unknown>, string, string, "yes" | "no", string][] = [
-      [PAID, "collect_mine_paid", "held", "no", "Step 3 of 5: Handed over"],
-      [SENDING, "collect_mine_processing", "sent", "no", "Step 4 of 5: Delivered"],
-      [REACHED, "collect_mine_processed", "reached", "yes", "Step 4 of 5: Delivered"],
+      [PAID, "collect_mine_paid", "held", "no", "Step 3 of 5: handing over your produce"],
+      [SENDING, "collect_mine_processing", "sent", "no", "Step 4 of 5: the delivery to the buyer"],
+      [
+        REACHED,
+        "collect_mine_processed",
+        "reached",
+        "yes",
+        "Step 4 of 5: the delivery to the buyer",
+      ],
     ];
     for (const [raw, name, state, confirmed, progress] of cases) {
       const order = (raw as Raw).orders.find((o) => o["from_aiaic"]) as Record<string, unknown>;
@@ -708,7 +714,11 @@ function suite(app: App, window: Window & typeof globalThis) {
             `${name}: why AIAIC holds it, AIAIC's own reason`,
           );
         }
-        assert.equal(text("today-progress"), progress, `${name}: step n of 5`);
+        assert.equal(
+          text("today-progress"),
+          progress,
+          `${name}: step n of 5, said as the step in progress, never as a milestone reached`,
+        );
         const toHer = p.q('[data-testid="today-money-to-her"]');
         ok(toHer, `${name}: her amount is said`);
         assert.equal(
@@ -1333,6 +1343,11 @@ function suite(app: App, window: Window & typeof globalThis) {
         EN.reconciled,
       );
       assert.deepEqual(statusOf(sale, "today-state-money").codes, ["reached"]);
+      assert.equal(
+        sale.querySelector('[data-testid="today-progress"]')?.textContent,
+        "All 5 steps done",
+        "every step done, said so",
+      );
     } finally {
       await done.unmount();
     }
