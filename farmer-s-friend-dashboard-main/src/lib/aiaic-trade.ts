@@ -1930,6 +1930,11 @@ export function holdsShown(money: FromAiaic | null | undefined, calledOff: boole
  * here for her guided home (Crowe EOD, 16 Nov 2026). The money is never in it: the buyer's payment and her money stay
  * their own states. Closed lists, AIAIC's own: a code outside them is no lane (fail closed), a `waiting_on` outside them
  * is none.
+ *
+ * THE ADHTIYA (17 Nov 2026): AIAIC models the commission agent at the mandi as a partner kind of its own, with the
+ * aggregator's two stages; an order assigned to one waits on `partner:adhtiya` until the adhtiya records its gathering
+ * (AIAIC's `trade/store.py` WAITING_ON). Listed here so her Today card says whom her sale waits on, never a blank; an
+ * AIAIC that does not send it leaves her page as it was.
  */
 export const LANE_CODES = [
   "called_off",
@@ -1949,6 +1954,7 @@ export const WAITING_ON = [
   "partner:processor",
   "partner:warehouse",
   "partner:transporter",
+  "partner:adhtiya",
 ] as const;
 export type WaitingOn = (typeof WAITING_ON)[number];
 export type Lane = {

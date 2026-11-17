@@ -31,7 +31,8 @@
  * call-off sets, after a word as AIAIC keeps it), the recorded group journey with the buyer's pay terms not said, with its
  * link sent and not paid, and called off before any link with only the fields AIAIC's call-off sets (TD2), a lot with no
  * offer (a recorded practice lot, its offer removed), and Hindi crop and district names (no Hindi place list is recorded
- * in her fixtures).
+ * in her fixtures). A sale waiting on the adhtiya (TD29, 17 Nov 2026) is a recorded order whose lane's `waiting_on`
+ * alone is set, as AIAIC's `lane_of` sets it once an adhtiya is assigned and has not recorded its gathering.
  *
  * THE ENGLISH SAFETY WORDS AND THE MONEY FIGURES ARE PINNED LITERALLY (the fix round of 16 Nov 2026, the skeptic's
  * SK-ANN-2): an estimate said as an estimate, the uncalibrated warning, the guest's practice line, the practice labels,
@@ -236,6 +237,8 @@ async function loadApp() {
   const { problem, laneOf, moneyCard, paymentLine, groupView, groupSaid, groupPaidWords } =
     await import("../src/lib/aiaic-trade");
   const today = await import("../src/lib/aiaic-today");
+  // whom a sale waits on, AIAIC's list as her app holds it (TD29: the adhtiya, 17 Nov 2026)
+  const { WAITING_ON } = await import("../src/lib/aiaic-trade");
   return {
     React,
     createRoot,
@@ -267,6 +270,7 @@ async function loadApp() {
     groupView,
     groupSaid,
     groupPaidWords,
+    WAITING_ON,
     today,
   };
 }
@@ -3403,6 +3407,73 @@ function suite(app: App, window: Window & typeof globalThis) {
     }
     window.localStorage.clear();
     window.sessionStorage.clear();
+  });
+
+  // ============================================================================================ TD29
+
+  test("TD29 a sale waiting on the adhtiya (AIAIC's partner kind of 17 Nov 2026, the commission agent at the mandi: an order assigned to one waits on `partner:adhtiya` until it records its gathering): her server's reading keeps whom the sale waits on, and her Today card says it in English, Marathi and Hindi, never a blank, a raw code or a key, with no English word on her Marathi or Hindi card; her app's list of whom a sale waits on is AIAIC's, and each has its words in all three", async () => {
+    // AIAIC's list, as its engine holds it (`trade/store.py` WAITING_ON on the adhtiya's branch at 9b39f3bb)
+    assert.deepEqual(
+      [...app.WAITING_ON],
+      [
+        "farmer",
+        "buyer",
+        "team",
+        "partner:aggregator",
+        "partner:processor",
+        "partner:warehouse",
+        "partner:transporter",
+        "partner:adhtiya",
+      ],
+      "her app's list of whom a sale waits on is AIAIC's",
+    );
+    const key = (code: string) => `aiaic.today.waiting.${code.replace(":", "_")}`;
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const missing = app.WAITING_ON.filter((code) => !String(DICTS[lang][key(code)] ?? "").trim());
+      assert.deepEqual(missing, [], `${lang}: words for whom each sale waits on`);
+    }
+    // DERIVED, in memory: AIAIC's recorded direct sale of a real account (farmer_app_refund_mine_held,
+    // ord_8228437b1b3c8521dd76: agreed, no step recorded, waiting on her), given an adhtiya as AIAIC's `lane_of` reads
+    // it: only its lane's `waiting_on` changes, to `partner:adhtiya` (its code and since stay: no step is recorded)
+    const id = "ord_8228437b1b3c8521dd76";
+    const recorded = (HELD as Raw).orders.find((o) => o["order_id"] === id);
+    ok(recorded, "AIAIC's recorded direct sale");
+    const lane = recorded["lane"] as Record<string, unknown>;
+    assert.deepEqual(
+      [lane["code"], lane["waiting_on"], recorded["pool_id"], recorded["order_state"]],
+      ["agreed", "farmer", null, "accepted"],
+      "the recording: agreed, waiting on her, sold alone",
+    );
+    const order = copy(recorded);
+    order["lane"] = { ...lane, waiting_on: "partner:adhtiya" };
+    const one = { ...copy(HELD), orders: [order], listings: [] };
+    assert.equal(
+      app.mineForBrowser(copy(one)).orders[0]?.lane?.waiting_on,
+      "partner:adhtiya",
+      "her server passes whom the sale waits on",
+    );
+    // her words, pinned literally (drafts for the native reader; AIAIC's website says the same code in these words)
+    const said = { en: "Waits on the adhtiya", mr: "अडत्याची वाट", hi: "आढ़तिया का इंतज़ार" };
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const p = await mount(lang, screenOf(one, lang));
+      try {
+        await ready(p);
+        const sale = saleCard(p, id);
+        const line = sale.querySelector('[data-testid="today-waiting"]');
+        ok(line, `${lang}: her card says whom the sale waits on`);
+        assert.equal(line.getAttribute("data-waiting"), "partner:adhtiya");
+        assert.equal(line.textContent, said[lang], `${lang}: the adhtiya, in her words`);
+        const text = sale.textContent ?? "";
+        ok(
+          !text.includes("partner:") && !text.includes("aiaic.today."),
+          `${lang}: never a raw code or key`,
+        );
+        if (lang !== "en")
+          assert.deepEqual(latinIn(sale), [], `${lang}: no English word on her card`);
+      } finally {
+        await p.unmount();
+      }
+    }
   });
 
   return learn;

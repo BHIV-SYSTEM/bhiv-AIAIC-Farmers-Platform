@@ -34,7 +34,9 @@ export const BUSINESS = {
  * A PAGE WHOSE WORDS CHANGED SINCE (14 Nov 2026, India's day; AIAIC's audit AE4-03-V3): its own day, so the date at
  * the top of the other pages stays true. The privacy page names the officers of an organisation working with AIAIC
  * and the partners, and what each reads of her sale (its words also changed on 13 Nov, with what buyers see). 17 Nov
- * 2026: its device list names the sale she started and did not finish and the registration's boxes (AUD-ANN-F1).
+ * 2026: its device list names the sale she started and did not finish and the registration's boxes (AUD-ANN-F1);
+ * the same day, its partners' line names the adhtiya (a commission agent at the mandi), the partner kind AIAIC added
+ * that day, and when an adhtiya sees the buyer (AIAIC's adhtiya re-check RCK-02).
  */
 export const PAGE_UPDATED = { privacy: "17 November 2026" } as const;
 
