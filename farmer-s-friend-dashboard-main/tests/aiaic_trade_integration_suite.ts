@@ -144,6 +144,7 @@ import {
   moreTimeGiven,
   needsDestination,
   orderOfOffer,
+  WAITING_ON,
   WAITS_FOR,
   type AiaicOffer,
   type AiaicPool,
@@ -7057,7 +7058,7 @@ test("B21 AN-1 a form this phone would not refuse goes to AIAIC, whose crisis mi
   }
 });
 
-test("A77 AE4-03-V3 her privacy page names the officers of an organisation working with AIAIC and what they read of her sale, AIAIC's fixed rule list for list and both ways (its words her own fixture's, held by their sha256), never her name; and the partners; her Only list holds both; the page's own date", () => {
+test("A77 AE4-03-V3 her privacy page names the officers of an organisation working with AIAIC and what they read of her sale, AIAIC's fixed rule list for list and both ways (its words her own fixture's, held by their sha256), never her name; and the partners, every kind her app knows (the adhtiya too, 17 Nov 2026), and when an adhtiya sees the buyer; her Only list holds both; the page's own date", () => {
   // AIAIC'S RULE, AS AIAIC'S GET /trade/settings ANSWERS IT (her fixture, copied from AIAIC's recording with its commit
   // and sha256; never read from AIAIC's tree): its words are the ones copied
   const rule = JSON.parse(
@@ -7210,12 +7211,32 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
   // THE PARTNERS AIAIC'S TEAM ASSIGNS TO HER ORDER: what they read, never her name or her sale's price
   const partners = lines.find((l) => l.startsWith("- **What partners see of your sales:**"));
   assert.ok(partners, "her page names the partners");
+  // EVERY KIND OF PARTNER HER APP KNOWS, NAMED (17 Nov 2026; AIAIC's adhtiya re-check RCK-02: an adhtiya, the
+  // commission agent at the mandi, sees her order as the other kinds do, and her page named four kinds): the kinds
+  // her page lists are the partner kinds of whom her sale may wait on (`WAITING_ON`, AIAIC's list), no more, no fewer
+  const kindsLead = "a partner AIAIC's team assigns to your order (";
+  assert.ok(partners.includes(kindsLead), "her page says which partners");
+  const kindsAt = partners.indexOf(kindsLead) + kindsLead.length;
+  const kindsText = partners.slice(kindsAt, partners.indexOf(")", kindsAt));
+  const named = kindsText.split(/, | or /).map((k) => k.replace(/^an? /, ""));
+  const waitsOnPartner = WAITING_ON.filter((w) => w.startsWith("partner:"));
+  const known = waitsOnPartner.map((w) => w.slice("partner:".length));
+  assert.deepEqual(
+    [...named].sort(),
+    [...known].sort(),
+    "the kinds of partner her page names are her app's",
+  );
+  // what they see, and when an adhtiya sees the buyer: its kind and district (and so AIAIC's trip to the buyer) only
+  // for a buyer that agreed to a notice naming the adhtiya (AIAIC's `partners.sees_buyer`; none did on 17 Nov 2026)
   assert.ok(
     partners.includes(
-      "never your name or number, the buyer's name, your sale's price or its payment (a transporter or an aggregator " +
-        "sees AIAIC's own estimate of each trip's cost).",
+      "sees that order's crop and quantity, where it goes from (your district and taluka) and the buyer's kind and " +
+        "district (an adhtiya, a commission agent at the mandi, only where the buyer has agreed to a version of " +
+        "AIAIC's buyer notice that names the adhtiya), never your name or number, the buyer's name, your sale's " +
+        "price or its payment (a transporter or an aggregator sees AIAIC's own estimate of each trip's cost, and " +
+        "an adhtiya where it sees the buyer's district).",
     ),
-    "what partners never see, and AIAIC's own trip estimate a transporter or an aggregator sees",
+    "what partners see and never see, when an adhtiya sees the buyer, and who sees AIAIC's own trip estimate",
   );
   // HER "ONLY AS DESCRIBED ABOVE" LIST HOLDS BOTH
   const only = lines.find((l) => l.startsWith("Only as described above:"));
@@ -7228,6 +7249,7 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
     assert.ok(only.includes(who), `the sharing list leaves out ${who}`);
   // THE PAGE'S OWN DATE (its words changed since the other pages'): said at its top by its own route
   // 17 Nov 2026 (the night audit's AUD-ANN-F1): her device list names the sale she started and the registration's boxes
+  // and, the same day (AIAIC's adhtiya re-check RCK-02), her partners' line names the adhtiya
   assert.equal(PAGE_UPDATED.privacy, "17 November 2026");
   // HER DEVICE LIST NAMES HER UNFINISHED WORK HER PHONE KEEPS (AUD-ANN-F1): the sale she started and did not finish, for
   // her account only and until when, and the registration's boxes, in this tab only; never her password
