@@ -336,6 +336,8 @@ export type AiaicOrder = {
   /** The group sale her order is part of (AIAIC section 27); null when not. */
   pool_id?: string | null | undefined;
   pool?: AiaicPool | null | undefined;
+  /** AIAIC's one word for where the order stands, and whom it waits on (`laneOf`); null when AIAIC sent none. */
+  lane?: Lane | null | undefined;
 };
 
 export type PayoutAccountView = {
@@ -643,6 +645,52 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
     { key: "delivered", state: deliveredState },
     { key: "money", state: money },
   ];
+}
+
+/** AIAIC's sentences of people's word THAT THE MONEY WAS PAID, on a payment made outside it (`money.say`, each worded by
+ *  `aiaic.farmer.money.*`): her word that she got it, the buyer's that he paid. NEVER her word that it has NOT come
+ *  (`farmer.money.direct.said_not_yet`: AIAIC keeps the route direct after it, `say` being the last word said): the bar
+ *  then says the buyer's payment and her money as not seen by AIAIC, under her money card's "You told us the money has not
+ *  come", never as people's word that it was paid (the night audit's AUD-ANN-F3). */
+const WORD_SAYS = [
+  "farmer.money.direct.said_got",
+  "farmer.money.direct.said_got_any",
+  "farmer.money.direct.buyer_says",
+  "farmer.money.direct.buyer_says_any",
+];
+/** A step of her sale's bar (`barSteps`): a step's own state, or `told` / `unseen` on a payment made outside AIAIC. */
+export type BarStep = { key: SaleStep["key"]; state: StepState | "told" | "unseen" };
+/**
+ * HER SALE'S BAR (`SaleStepper`): her sale's five steps (`saleSteps`), except ON A PAYMENT MADE OUTSIDE AIAIC (AIAIC's
+ * `money.route` "direct", a payment AIAIC never sees: the night run's A3, TRACE's T1-09 = RC2-ANN-6): there the buyer's
+ * payment and her money have no state of AIAIC's own, so they are drawn as people's word (`told`, where AIAIC holds a
+ * sentence of her word that she got it or the buyer's that he paid, which her money card says) or as unseen by AIAIC
+ * (`unseen`: nobody's word, or her word that the money has NOT come, AUD-ANN-F3): never a done payment, and never "to
+ * come" beside "You told us you got ...". A step that stopped (a sale called off) stays stopped.
+ */
+export function barSteps(order: AiaicOrder): BarStep[] {
+  const steps = saleSteps(order);
+  if (order.money?.route !== "direct") return steps;
+  const word = WORD_SAYS.includes(order.money?.say?.key ?? "");
+  return steps.map((s) =>
+    (s.key === "paid" || s.key === "money") && s.state !== "stopped"
+      ? { key: s.key, state: word ? "told" : "unseen" }
+      : s,
+  );
+}
+
+/** THE BUYER'S PAYMENT AND THE DELIVERY RUNNING SIDE BY SIDE (the night run's A2, TRACE's INT-D6): her sale's bar shows
+ *  both as "now" where the buyer's payment is under way while her produce is handed over or on its way (AIAIC's payment
+ *  is a state of its own, never a step of its delivery chain); the bar then says so in words, never two "now" unsaid.
+ *  The two steps' keys, the payment's first; null when they do not run together. */
+export function stepsTogether(
+  steps: readonly { key: SaleStep["key"]; state: string }[],
+): [SaleStep["key"], SaleStep["key"]] | null {
+  const paid = steps.find((s) => s.key === "paid");
+  const moving = steps.find(
+    (s) => (s.key === "handover" || s.key === "delivered") && s.state === "now",
+  );
+  return paid?.state === "now" && moving ? ["paid", moving.key] : null;
 }
 
 /**
@@ -1874,6 +1922,58 @@ export function holdsOf(raw: unknown): Holds | null {
 export function holdsShown(money: FromAiaic | null | undefined, calledOff: boolean): Holds | null {
   if (calledOff || !money) return null;
   return money.holds ?? null;
+}
+
+/**
+ * WHERE HER ORDER STANDS, AIAIC'S ONE WORD (its `trade.store.lane_of`, Round 2, DESIGN 2g: "every answer that carries an
+ * order carries its lane, so no page works out a state of its own"), and WHOM IT WAITS ON NOW (its `WAITING_ON`). Read
+ * here for her guided home (Crowe EOD, 16 Nov 2026). The money is never in it: the buyer's payment and her money stay
+ * their own states. Closed lists, AIAIC's own: a code outside them is no lane (fail closed), a `waiting_on` outside them
+ * is none.
+ */
+export const LANE_CODES = [
+  "called_off",
+  "disputed",
+  "reconciled",
+  "delivered",
+  "on_the_way",
+  "being_readied",
+  "agreed",
+] as const;
+export type LaneCode = (typeof LANE_CODES)[number];
+export const WAITING_ON = [
+  "farmer",
+  "buyer",
+  "team",
+  "partner:aggregator",
+  "partner:processor",
+  "partner:warehouse",
+  "partner:transporter",
+] as const;
+export type WaitingOn = (typeof WAITING_ON)[number];
+export type Lane = {
+  code: LaneCode;
+  since: string | null;
+  waiting_on: WaitingOn | null;
+  synthetic: boolean;
+};
+
+/** AIAIC's `lane` block, field by field; null when it is not one or its code is not AIAIC's. */
+export function laneOf(raw: unknown): Lane | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  const code = r["code"];
+  if (typeof code !== "string" || !(LANE_CODES as readonly string[]).includes(code)) return null;
+  const waiting = r["waiting_on"];
+  return {
+    code: code as LaneCode,
+    since: typeof r["since"] === "string" ? r["since"] : null,
+    waiting_on:
+      typeof waiting === "string" && (WAITING_ON as readonly string[]).includes(waiting)
+        ? (waiting as WaitingOn)
+        : null,
+    synthetic: r["synthetic"] === true,
+  };
 }
 
 /**

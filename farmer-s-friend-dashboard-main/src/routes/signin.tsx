@@ -8,6 +8,7 @@ import { CrisisCard } from "@/components/farm/aiaic/CrisisFirst";
 import { accountWords, wordsToScan } from "@/lib/aiaic-account";
 import { signInFarmer } from "@/lib/aiaic-account.functions";
 import { forgetPersonalReads } from "@/lib/aiaic-hooks";
+import { accountMark, forgetOthersSellStart } from "@/lib/aiaic-today";
 import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import { problem } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
@@ -49,8 +50,10 @@ function SignInPage() {
     onSuccess: async (r) => {
       if (r.ok) {
         setPassword("");
-        // whoever was here before: none of their reads is shown to the farmer now signed in (R5P-09)
+        // whoever was here before: none of their reads is shown to the farmer now signed in (R5P-09), and a sale another
+        // account started and left on this phone is forgotten (AUD-ANN-F1)
         forgetPersonalReads(qc);
+        forgetOthersSellStart(accountMark(username.trim()));
         await qc.invalidateQueries();
         void navigate({ to: "/" });
       }

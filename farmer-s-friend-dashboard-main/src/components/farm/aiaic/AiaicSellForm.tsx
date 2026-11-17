@@ -15,6 +15,7 @@ import {
 
 import { useRaiseCrisis, usePress } from "@/lib/aiaic-crisis";
 import { plainNumber } from "@/lib/aiaic-heard";
+import { useMe } from "@/lib/aiaic-me";
 import { useScanBeforeRefusing } from "@/lib/aiaic-scan";
 import { cropsOffered } from "@/lib/aiaic-storage";
 import {
@@ -32,6 +33,15 @@ import {
   type ReferencePrice,
 } from "@/lib/aiaic-trade";
 import { getSalePrice, getTripTalukas, sellProduce } from "@/lib/aiaic-trade.functions";
+import {
+  accountMark,
+  forgetSellStart,
+  keepSellAnswers,
+  newestLotAt,
+  readSellStart,
+  sellStillOpen,
+  type SellAnswers,
+} from "@/lib/aiaic-today";
 import { useI18n } from "@/lib/i18n";
 import {
   getPlacesCrops,
@@ -41,7 +51,7 @@ import {
 } from "@/lib/places.functions";
 import { cn } from "@/lib/utils";
 
-import { ModeChip, ProblemCard, WithMine } from "./AiaicBits";
+import { Loading, ModeChip, ProblemCard, WithMine } from "./AiaicBits";
 import {
   BoxStep,
   CheckStep,
@@ -143,6 +153,20 @@ function suggestedText(ref: ReferencePrice | null): string {
   return typeof s === "number" ? String(Math.round(s)) : "";
 }
 
+/** HER ANSWERS FROM BEFORE (the night run's A1, TRACE's T2-ANN-01 and INT-D2): what her phone keeps of a sale she started
+ *  and left (`aiaic-today`'s keeper: her choices only, checked field by field), given back to HER ACCOUNT ONLY (`who`, its
+ *  mark: another account's is never given back, and is forgotten, the night audit's AUD-ANN-F1) while AIAIC holds no lot
+ *  she listed since (read on AIAIC's own clock, `sellStillOpen`); a start AIAIC's records have overtaken is forgotten here. */
+function keptAtOpening(mine: MineForScreen["mine"], who: string | null): SellAnswers | null {
+  const start = readSellStart(who);
+  if (!start) return null;
+  if (!sellStillOpen(start, mine)) {
+    forgetSellStart();
+    return null;
+  }
+  return start.answers ?? null;
+}
+
 /** The farmer's sale, listed in AIAIC, one decision a screen. The page reads their records only when opened (nothing on
  * it moves): never again by itself under the form (R5P-09). */
 export function AiaicSellForm({
@@ -152,20 +176,36 @@ export function AiaicSellForm({
   initialCrop?: string | undefined;
   initialDistrict?: string | undefined;
 }) {
+  // the account signed in (AUD-ANN-F1): her answers are kept for her account and given back to it only; the form opens
+  // once it is known (a new account signed in opens a new form)
+  const me = useMe();
+  const who = me.data?.signedIn ? accountMark(me.data.username) : null;
   return (
     <WithMine pace="opened">
-      {(data) => (
-        <SellForm data={data} initialCrop={initialCrop} initialDistrict={initialDistrict} />
-      )}
+      {(data) =>
+        me.isPending ? (
+          <Loading />
+        ) : (
+          <SellForm
+            key={who ?? ""}
+            who={who}
+            data={data}
+            initialCrop={initialCrop}
+            initialDistrict={initialDistrict}
+          />
+        )
+      }
     </WithMine>
   );
 }
 
 function SellForm({
+  who,
   data,
   initialCrop,
   initialDistrict,
 }: {
+  who: string | null;
   data: MineForScreen;
   initialCrop?: string | undefined;
   initialDistrict?: string | undefined;
@@ -197,20 +237,28 @@ function SellForm({
   );
 
   const place = data.mine.profile_place;
-  const [estate, setEstate] = useState<Estate>(estateOf(place.state));
-  const [district, setDistrict] = useState("");
+  // her answers from before, read once as the form opens (it is drawn only in the browser, once her records are read)
+  const [kept] = useState<SellAnswers | null>(() => keptAtOpening(data.mine, who));
+  const keptQty = kept?.quantity ?? null;
+  const [estate, setEstate] = useState<Estate>(kept?.state ?? estateOf(place.state));
+  const [district, setDistrict] = useState(kept?.district ?? "");
   // her taluka (28 Oct 2026): her lot's trips start at its main town
-  const [taluka, setTaluka] = useState("");
-  const [crop, setCrop] = useState("");
-  const [qty, setQty] = useState<number | null>(null);
+  const [taluka, setTaluka] = useState(kept?.taluka ?? "");
+  const [crop, setCrop] = useState(kept?.crop ?? "");
+  const [qty, setQty] = useState<number | null>(keptQty);
   // what the Other box holds, kept in memory while it is closed: Other pressed again finds it as it was left
-  const [qtyText, setQtyText] = useState("");
+  const [qtyText, setQtyText] = useState(
+    keptQty !== null && !(QUANTITY_CHOICES as readonly number[]).includes(keptQty)
+      ? String(keptQty)
+      : "",
+  );
   // not graded unless she says: the step is answered from the start, and one tap on its Change gives a grade
-  const [grade, setGrade] = useState<Grade>("none");
-  const [priceText, setPriceText] = useState("");
-  const [priceTouched, setPriceTouched] = useState(false);
+  const [grade, setGrade] = useState<Grade>(kept?.grade ?? "none");
+  const [priceText, setPriceText] = useState(kept?.price != null ? String(kept.price) : "");
+  // her own price from before is her figure: nothing given later overwrites it
+  const [priceTouched, setPriceTouched] = useState(kept?.price != null);
   // her price, given on its step's Continue
-  const [price, setPrice] = useState<number | null>(null);
+  const [price, setPrice] = useState<number | null>(kept?.price ?? null);
   const [pressKey, setPressKey] = useState(SELL_PRESS.take);
   const [sending, setSending] = useState(false);
   const [refusal, setRefusal] = useState<AiaicProblem | null>(null);
@@ -270,8 +318,11 @@ function SellForm({
   // the page is still reading what fills its first steps: no step opens yet, and the address decides nothing. Only when
   // it opens: a list read again later (another state, another language) never closes the step she is in
   const settledOnce = useRef(false);
+  // (her crop from before waits for her district's list too: a crop the list no longer holds says "check again" first)
   const settlingNow =
-    districts.isPending || Boolean(district && initialCrop && !crop && crops.isPending);
+    districts.isPending ||
+    Boolean(district && initialCrop && !crop && crops.isPending) ||
+    Boolean(kept?.crop && district && crops.isPending);
   if (!settlingNow) settledOnce.current = true;
   const settling = !settledOnce.current && settlingNow;
   const flow = useStepFlow("sell", SELL_STEPS, {
@@ -287,6 +338,34 @@ function SellForm({
       check: null,
     },
   });
+
+  // HER ANSWERS KEPT ON THIS PHONE (A1): each answer she gives is kept beside her start, with the open step, so a reload,
+  // a closed tab or her home's Continue opens the first step still to answer with her answers in it, each with Change.
+  // Nothing is kept before an answer of her own (her profile's place is AIAIC's), while the page is still reading, or once
+  // her lot is listed (it is forgotten then); never a word she typed that is not her answer (`keepSellAnswers`).
+  const [keptNote, setKeptNote] = useState(kept !== null);
+  useEffect(() => {
+    if (listed || settling) return;
+    const own =
+      kept !== null || Boolean(crop) || qty !== null || price !== null || grade !== "none";
+    if (!own && !readSellStart(who)) return;
+    keepSellAnswers(
+      who,
+      {
+        state: estate,
+        district: district || null,
+        taluka: taluka || null,
+        crop: crop || null,
+        quantity: qty,
+        grade,
+        price,
+        step: flow.open as SellAnswers["step"],
+      },
+      // her newest lot as AIAIC said it on this page: a lot listed after it ends this start (SK-ANN-11)
+      newestLotAt(data.mine),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [who, listed, settling, kept, estate, district, taluka, crop, qty, grade, price, flow.open]);
 
   // THE DISTRICT'S OWN CROPS: the link's crop is taken once, when the list holds it; a crop chosen before the district
   // changed, which the new district's list does not hold, is dropped and its step says "check again" (C.6): never silently
@@ -395,6 +474,9 @@ function SellForm({
       if (r.ok) {
         listedNowOk = true;
         listedNow.current = true;
+        // her lot is listed: what her phone kept of this sale is forgotten (A1)
+        forgetSellStart();
+        setKeptNote(false);
         setListed(r.data.listing_id);
         setAskBack(null);
         setPressKey(newPressKey());
@@ -528,6 +610,15 @@ function SellForm({
         </h1>
         {data.mine.practice ? <ModeChip kind="practice" /> : null}
       </div>
+      {keptNote ? (
+        <p
+          role="status"
+          className="rounded-xl border-2 border-primary bg-card px-3 py-2 text-base font-bold text-foreground"
+          data-testid="sell-kept"
+        >
+          {t("aiaic.sell.kept")}
+        </p>
+      ) : null}
       <Flow
         flow={flow}
         label={t("aiaic.sell.step.list")}

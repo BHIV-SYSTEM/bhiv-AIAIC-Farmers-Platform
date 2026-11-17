@@ -29,6 +29,7 @@ import {
 import { eraseMyAccount, markNoticeRead, signOutFarmer } from "@/lib/aiaic-account.functions";
 import { forgetPersonalReads, useMine, useMyNotices } from "@/lib/aiaic-hooks";
 import { useMe } from "@/lib/aiaic-me";
+import { forgetSellStart } from "@/lib/aiaic-today";
 import { offerViews } from "@/lib/aiaic-trade";
 import { useI18n } from "@/lib/i18n";
 
@@ -53,6 +54,8 @@ export function AccountChip() {
       setOpen(false);
       setEraseAsked(false);
       forgetPersonalReads(qc);
+      // a sale she started and left, kept on this phone, ends with her account (AUD-ANN-F1)
+      forgetSellStart();
       await qc.invalidateQueries();
       void navigate({ to: "/" });
     },
@@ -62,6 +65,8 @@ export function AccountChip() {
     onSuccess: async () => {
       setOpen(false);
       forgetPersonalReads(qc);
+      // signed out: a sale she started and left is no longer kept on this phone for the next person (AUD-ANN-F1)
+      forgetSellStart();
       await qc.invalidateQueries();
       void navigate({ to: "/" });
     },

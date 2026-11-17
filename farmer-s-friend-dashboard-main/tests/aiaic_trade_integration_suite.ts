@@ -7227,7 +7227,28 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
   ])
     assert.ok(only.includes(who), `the sharing list leaves out ${who}`);
   // THE PAGE'S OWN DATE (its words changed since the other pages'): said at its top by its own route
-  assert.equal(PAGE_UPDATED.privacy, "14 November 2026");
+  // 17 Nov 2026 (the night audit's AUD-ANN-F1): her device list names the sale she started and the registration's boxes
+  assert.equal(PAGE_UPDATED.privacy, "17 November 2026");
+  // HER DEVICE LIST NAMES HER UNFINISHED WORK HER PHONE KEEPS (AUD-ANN-F1): the sale she started and did not finish, for
+  // her account only and until when, and the registration's boxes, in this tab only; never her password
+  const device =
+    page
+      .slice(page.indexOf("## On your device"))
+      .split("\n")
+      .find((l) => l.startsWith("The app keeps in your browser:")) ?? "";
+  for (const part of [
+    "**A sale you started and did not finish:** your answers in the sale's form",
+    "with a mark made from your account's username (never the username itself) so that only your account is offered it again",
+    'it is forgotten once you list the lot or press "Not now", when you sign out or erase your account, and when another account signs in on this phone',
+    "**While you register:** what you typed in its boxes",
+    "only in this browser tab, until you close it or AIAIC has your registration",
+  ])
+    assert.ok(device.includes(part), `her device list says: ${part}`);
+  assert.ok(
+    device.includes("never your name, phone number or password") &&
+      device.includes("never your password"),
+    "never her password, on either",
+  );
   const route = fs.readFileSync(path.join(APP, "src", "routes", "privacy.tsx"), "utf-8");
   assert.ok(
     route.includes("last_updated: PAGE_UPDATED.privacy") && route.includes("fields={FIELDS}"),

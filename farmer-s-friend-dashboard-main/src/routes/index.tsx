@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ChevronRight, RotateCcw, Warehouse } from "lucide-react";
+import { AlertTriangle, ChevronRight, ListChecks, RotateCcw, Warehouse } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { LanguageSwitcher } from "@/components/farm/LanguageSwitcher";
@@ -106,6 +106,33 @@ function Home() {
           </span>
           <span className="block break-words text-sm text-muted-foreground sm:text-base">
             {t("aiaic.store.home_tip")}
+          </span>
+        </span>
+        <ChevronRight aria-hidden className="size-6 shrink-0 text-primary" />
+      </Link>
+
+      {/* HER GUIDED HOME (Crowe EOD, 16 Nov 2026): one card to "What would you like to do today?", AFTER the landing's own
+          two actions, so the first screen she knew is unchanged ("Get my advice" stays where it was on a 360 x 640 phone);
+          everything else of this page stays as it was */}
+      <Link
+        to="/today"
+        className="mt-3 flex w-full items-center gap-3 rounded-3xl border-2 border-primary bg-card px-4 py-3 shadow-sm transition-colors hover:bg-secondary focus:outline-none focus:ring-4 focus:ring-ring"
+        style={{ minHeight: "max(72px, 4.5rem)" }}
+        data-testid="home-today-link"
+      >
+        <ListChecks aria-hidden className="size-8 shrink-0 text-primary" />
+        <span className="min-w-0 flex-1">
+          <span
+            className="block break-words font-extrabold text-foreground"
+            style={{ fontSize: "max(18px, 1.125rem)" }}
+          >
+            {t("aiaic.today.title")}
+          </span>
+          <span
+            className="block break-words text-foreground"
+            style={{ fontSize: "max(16px, 1rem)" }}
+          >
+            {t("aiaic.today.entry_tip")}
           </span>
         </span>
         <ChevronRight aria-hidden className="size-6 shrink-0 text-primary" />

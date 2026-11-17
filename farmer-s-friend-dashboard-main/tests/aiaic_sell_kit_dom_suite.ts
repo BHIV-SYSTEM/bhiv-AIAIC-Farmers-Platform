@@ -198,7 +198,9 @@ async function loadApp() {
   const { Route: SaleRoute } = await import("../src/routes/listing.new");
   // her storage page, which keeps its own step in the address (KA9L: her sale's answer lands after she went there)
   const { Route: StorageRoute } = await import("../src/routes/storage");
-  const { scanFirst } = await import("../src/lib/aiaic-account.functions");
+  // who is signed in (the night audit's AUD-ANN-F1: her sale's kept answers are her account's alone)
+  const { scanFirst, whoAmI } = await import("../src/lib/aiaic-account.functions");
+  const today = await import("../src/lib/aiaic-today");
   const { getMyTrade, getSalePrice, getTripTalukas, giveMyDestination, sellProduce } =
     await import("../src/lib/aiaic-trade.functions");
   const { DestinationForm } = await import("../src/components/farm/aiaic/FromAiaicCard");
@@ -220,6 +222,8 @@ async function loadApp() {
     SaleRoute,
     StorageRoute,
     scanFirst,
+    whoAmI,
+    today,
     getMyTrade,
     getSalePrice,
     getTripTalukas,
@@ -353,9 +357,12 @@ function suite(app: App, window: Window & typeof globalThis) {
   /** Each read the page asked, in order, with what it sent. */
   const asked: { read: string; sent: Record<string, unknown> }[] = [];
 
+  /** The account signed in on her phone (`whoAmI`'s answer): a case may sign in another (AUD-ANN-F1). */
+  const account = { username: "practice-farmer" };
   const handlers = new Map<unknown, string>();
   const named = {
     scanFirst: app.scanFirst,
+    whoAmI: app.whoAmI,
     getMyTrade: app.getMyTrade,
     getPlacesDistricts: app.getPlacesDistricts,
     getPlacesCrops: app.getPlacesCrops,
@@ -374,6 +381,18 @@ function suite(app: App, window: Window & typeof globalThis) {
             result: await shared.askScanFirst({
               data: ctx["data"] as { text: string; lang: Lang },
             }),
+          };
+        // who is signed in: the practice farmer, or the account a case signs in (AUD-ANN-F1)
+        if (name === "whoAmI")
+          return {
+            ...ctx,
+            result: {
+              signedIn: true,
+              username: account.username,
+              displayName: null,
+              signedOutNote: false,
+              erasedNote: false,
+            },
           };
         if (name && name in answers) {
           // the call's own validator first, as Start's RPC runs it on this server
@@ -500,9 +519,11 @@ function suite(app: App, window: Window & typeof globalThis) {
   // ------------------------------------------------------------------------------------------- her page
   type Page = Awaited<ReturnType<typeof mountSale>>;
   /** The sale page at an address, as she opens it: a phone of her own, her language, AIAIC set up on this server. */
-  const mountSale = async (address: string, lang: Lang) => {
-    window.localStorage.clear();
-    window.sessionStorage.clear();
+  const mountSale = async (address: string, lang: Lang, { keep = false } = {}) => {
+    if (!keep) {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+    }
     window.localStorage.setItem("aiaic.lang", lang);
     const qc = new app.QueryClient({ defaultOptions: { queries: { retry: false } } });
     // where sales live: this server's own answer, AIAIC (as getTradeMode answers once the farmer settings are set)
@@ -670,6 +691,8 @@ function suite(app: App, window: Window & typeof globalThis) {
       price: app.rupees(price),
     });
   const ONION_MR = "कांदा";
+  /** Where her phone keeps a sale she started (her home's keeper, `aiaic-today`'s SELL_STARTED_KEY). */
+  const SELL_KEY = "aiaic.today.sell_started";
 
   // ======================================================================================== A9 / KA12
   test("KA12 A9 her sale on the kit keeps the price check against her district's mandis: the read asks for the flow's own crop and district, AIAIC's range is drawn before her box, the box starts from its middle, and a price far from them is asked back, her yes the SAME press with its same key", async () => {
@@ -1981,14 +2004,14 @@ function suite(app: App, window: Window & typeof globalThis) {
   });
 
   // ======================================================================================== KA11
-  test("KA11 on her sale: what she types is kept nowhere: never in the address, localStorage, sessionStorage or the query cache", async () => {
+  test("KA11 on her sale: what she types that is not her answer is kept nowhere: never in the address, localStorage, sessionStorage or the query cache; her answers given (a quantity as a number) are kept only beside her sale, in the record her home reads (the night run's A1: her choices, never her words)", async () => {
     await inStart(async () => {
       const p = await toCrop();
       const kept = () => {
         const stores = [window.localStorage, window.sessionStorage].flatMap((s) =>
           Array.from({ length: s.length }, (_, i) => {
             const key = s.key(i) ?? "";
-            return `${key}=${s.getItem(key) ?? ""}`;
+            return key === SELL_KEY ? "" : `${key}=${s.getItem(key) ?? ""}`;
           }),
         );
         const cache = p.qc
@@ -2016,8 +2039,178 @@ function suite(app: App, window: Window & typeof globalThis) {
         const held = kept();
         for (const v of ["37 bags", "bags", "37.5", "3931", "rupees"])
           ok(!held.includes(v), `${v}: kept nowhere`);
+        // beside her sale: her answers only, each as the form takes it (A1)
+        const draftRaw = window.localStorage.getItem(SELL_KEY) ?? "";
+        const draft = (
+          JSON.parse(draftRaw || "null") as { answers?: Record<string, unknown> } | null
+        )?.answers;
+        assert.equal(
+          draft?.["quantity"],
+          37.5,
+          "her quantity, given as her answer, is kept as a number",
+        );
+        assert.equal(draft?.["price"], null, "a price box holding words is no answer: not kept");
+        for (const v of ["37 bags", "bags", "3931", "rupees"])
+          ok(!draftRaw.includes(v), `${v}: not in what her phone keeps of her sale`);
       } finally {
         await p.unmount();
+      }
+    });
+  });
+
+  // ============================================================ KA13 (the night run of 16-17 Nov 2026, A1)
+  test("KA13 her sale kept on her phone (the night run's A1; TRACE's T2-ANN-01, INT-D2): her answers (her state and district, the crop, how much, the grade, her price and the open step) are kept as she gives them; a reload, or her home's Continue (the same page opened again with her phone's storage), opens the step she was at, or the first one still to answer, with every earlier answer done and its Change, and says what was kept; once her lot is listed what was kept is forgotten", async () => {
+    await inStart(async () => {
+      // her answers as she gives them: at the price step, her price not given yet
+      const p = await toPrice(40);
+      try {
+        const kept = JSON.parse(window.localStorage.getItem(SELL_KEY) ?? "null") as {
+          answers?: Record<string, unknown>;
+        } | null;
+        ok(kept?.answers, "her answers are kept on her phone as she gives them");
+        assert.deepEqual(
+          kept.answers,
+          {
+            state: "mh",
+            district: "nashik",
+            taluka: null,
+            crop: "onion",
+            quantity: 40,
+            grade: "none",
+            price: null,
+            step: "price",
+          },
+          "her choices only, with the open step; her price is not given yet",
+        );
+      } finally {
+        await p.unmount();
+      }
+      // the tab closed at the price step; her home's Continue opens the page again
+      const back = await mountSale("/listing/new?crop=onion&region=nashik&step=price", "mr", {
+        keep: true,
+      });
+      try {
+        await openSettled(back, "price");
+        for (const id of ["where", "crop", "quantity", "grade"])
+          assert.equal(back.stateOf(id), "done", `${id}: done, with her answer`);
+        ok(back.step("crop")?.textContent?.includes(ONION_MR), "her crop, said");
+        ok(
+          back.step("quantity")?.textContent?.includes(app.quintalWords(tOf("mr"), 40)),
+          "how much, said",
+        );
+        noEl(
+          back.q('[data-testid="sell-flow-restarted"]'),
+          "never 'the earlier answers were not kept'",
+        );
+        assert.equal(
+          back.q('[data-testid="sell-kept"]')?.textContent,
+          words("mr", "aiaic.sell.kept"),
+          "what was kept is said, in her language",
+        );
+        await tap(back.q('[data-testid="sell-price-use"]'), "Use this price");
+        await openSettled(back, "check");
+      } finally {
+        await back.unmount();
+      }
+      // a reload at the check step: every answer back, each with its Change, and her one button says the sale
+      const again = await mountSale("/listing/new?step=check", "mr", { keep: true });
+      try {
+        await openSettled(again, "check");
+        for (const part of ["where", "crop", "quantity", "grade", "price"])
+          ok(again.q(`[data-testid="sell-check-change-${part}"]`), `${part}: its Change`);
+        assert.equal(
+          (press(again)?.textContent ?? "").trim(),
+          saleSentence("mr", 40, ONION_MR, 3930),
+          "her button says the sale she gave: 40 quintals of onion at her price",
+        );
+        noEl(again.q('[data-testid="sell-flow-restarted"]'), "nothing said as lost");
+        ok(again.q('[data-testid="sell-kept"]'), "what was kept is said");
+        // listed: what was kept is forgotten
+        await tap(press(again), "her sale's button");
+        await waitFor(() => again.q('[data-testid="sell-done"]'), "her lot listed");
+        assert.equal(
+          window.localStorage.getItem(SELL_KEY),
+          null,
+          "listed: what was kept is forgotten",
+        );
+        noEl(again.q('[data-testid="sell-kept"]'), "and no longer said");
+      } finally {
+        await again.unmount();
+      }
+      // with nothing kept, the same address opens the first step still to answer and says so (as before)
+      const fresh = await mountSale("/listing/new?step=check", "en");
+      try {
+        await openSettled(fresh, "crop");
+        ok(fresh.q('[data-testid="sell-flow-restarted"]'), "nothing kept: said");
+        noEl(fresh.q('[data-testid="sell-kept"]'), "and nothing said as kept");
+      } finally {
+        await fresh.unmount();
+      }
+    });
+  });
+
+  // ============================================================ KA14 (the night fix of 17 Nov 2026, AUD-ANN-F1)
+  test("KA14 her sale's kept answers are her account's alone (the night audit's AUD-ANN-F1): kept by one account on a shared phone, her sale's page opened by another account gives nothing back (no kept note, no step done with her answers, the first step still to answer open, as with nothing kept) and forgets them; the account that kept them is given them back at the step it was at", async () => {
+    await inStart(async () => {
+      const A = "practice-farmer-a";
+      const B = "practice-farmer-b";
+      const markA = app.today.accountMark(A) as string;
+      const keptByA = () => {
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+        app.today.keepSellAnswers(
+          markA,
+          {
+            state: "mh",
+            district: "nashik",
+            taluka: null,
+            crop: "onion",
+            quantity: 40,
+            grade: "none",
+            price: 3930,
+            step: "check",
+          },
+          "",
+          Date.now() - 30_000,
+        );
+        const raw = window.localStorage.getItem(SELL_KEY) ?? "";
+        ok(raw, "A's answers are kept");
+        ok(!raw.includes(A), "her username is never kept on the phone");
+      };
+      try {
+        // B opens the sale page on the same phone
+        keptByA();
+        account.username = B;
+        const b = await mountSale("/listing/new?step=check", "en", { keep: true });
+        try {
+          await openSettled(b, "crop");
+          noEl(b.q('[data-testid="sell-kept"]'), "nothing said as kept to B");
+          ok(b.q('[data-testid="sell-flow-restarted"]'), "B's form opens as with nothing kept");
+          for (const id of ["crop", "quantity", "price"])
+            ok(b.stateOf(id) !== "done", `${id}: none of A's answers given to B`);
+          assert.equal(
+            window.localStorage.getItem(SELL_KEY),
+            null,
+            "and A's answers are forgotten",
+          );
+        } finally {
+          await b.unmount();
+        }
+        // A opens it: her own answers, at the step she was at
+        keptByA();
+        account.username = A;
+        const a = await mountSale("/listing/new?step=check", "en", { keep: true });
+        try {
+          await openSettled(a, "check");
+          ok(a.q('[data-testid="sell-kept"]'), "her own answers, said as kept");
+          for (const id of ["where", "crop", "quantity", "grade", "price"])
+            assert.equal(a.stateOf(id), "done", `${id}: done, with her own answer`);
+        } finally {
+          await a.unmount();
+        }
+      } finally {
+        account.username = "practice-farmer";
+        window.localStorage.clear();
       }
     });
   });
