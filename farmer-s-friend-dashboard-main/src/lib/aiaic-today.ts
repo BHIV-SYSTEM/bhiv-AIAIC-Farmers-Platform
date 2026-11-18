@@ -109,9 +109,9 @@ export type DeliveryStep = {
 
 export type MoneyState =
   "reached" | "sent" | "held" | "buyer_paid" | "told" | "not_paid" | "stopped";
-/** AIAIC's sentences of people's word of a payment made outside it (engine `trade/payout_store.py` `money_for_her`, with no
- *  share of hers at the payment provider: her word that she got it, that it has not come, the buyer's that he paid, or its
- *  question where nobody said), each worded by her app's `aiaic.farmer.money.direct.*`; an `_any` sentence is the same one
+/** AIAIC's sentences of people's word of a payment made outside it (engine `trade/payout_store.py` `money_for_her`: her
+ *  word that she got it, that it has not come, the buyer's that he paid, or its question where nobody said), each worded
+ *  by her app's `aiaic.farmer.money.direct.*`; an `_any` sentence is the same one
  *  without a fact AIAIC did not send. A key outside this list is never said here (no raw key on her page). */
 export const TOLD_SAYS = [
   "farmer.money.direct.said_got",

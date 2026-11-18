@@ -234,8 +234,16 @@ async function loadApp() {
   const { SaleStepper } = await import("../src/components/farm/aiaic/SaleStepper");
   const { getMyTrade } = await import("../src/lib/aiaic-trade.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
-  const { problem, laneOf, moneyCard, paymentLine, groupView, groupSaid, groupPaidWords } =
-    await import("../src/lib/aiaic-trade");
+  const {
+    problem,
+    laneOf,
+    moneyCard,
+    paymentLine,
+    saleSteps,
+    groupView,
+    groupSaid,
+    groupPaidWords,
+  } = await import("../src/lib/aiaic-trade");
   const today = await import("../src/lib/aiaic-today");
   // whom a sale waits on, AIAIC's list as her app holds it (TD29: the adhtiya, 17 Nov 2026)
   const { WAITING_ON } = await import("../src/lib/aiaic-trade");
@@ -267,6 +275,7 @@ async function loadApp() {
     laneOf,
     moneyCard,
     paymentLine,
+    saleSteps,
     groupView,
     groupSaid,
     groupPaidWords,
@@ -2081,6 +2090,42 @@ function suite(app: App, window: Window & typeof globalThis) {
       }
     } finally {
       await p.unmount();
+    }
+
+    // DERIVED, in memory (18 Nov 2026, Route out of her app, D-294): a sale AIAIC sends no steps of its own for, its
+    // buyer paid (as a history row of the earlier provider's is: no `from_aiaic`), from AIAIC's recorded paid sale with
+    // only `from_aiaic` taken out: said by its payment alone, "The buyer paid", never in her bank, as her sale's own payment
+    // line and its five-step bar say it
+    const plain = copy(paidLink);
+    delete plain["from_aiaic"];
+    const plainId = String(plain["order_id"]);
+    const plainRead = app.mineForBrowser(copy({ ...copy(raw), orders: [copy(plain)] })).orders[0];
+    ok(plainRead, "her server reads the derived sale");
+    assert.equal(plainRead.payment.state, "paid", "its buyer paid, on the provider's word");
+    assert.equal(
+      app.saleSteps(plainRead).find((s) => s.key === "money")?.state,
+      "todo",
+      "its five-step bar: her money to come, never done",
+    );
+    assert.equal(app.paymentLine(plainRead).key, "aiaic.pay.state.paid", "its payment line");
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const q = await mount(lang, screenOf({ ...copy(raw), orders: [plain], listings: [] }, lang));
+      try {
+        await ready(q);
+        const m = statusOf(saleOn(q, plainId), "today-state-money");
+        assert.deepEqual(m.codes, ["buyer_paid"], `${lang}: the buyer paid, nothing more`);
+        assert.equal(m.text, words(lang, "aiaic.today.money.buyer_paid"), `${lang}: its word`);
+        ok(
+          !(saleOn(q, plainId).textContent ?? "").includes(
+            words(lang, "aiaic.today.money.reached"),
+          ),
+          `${lang}: never in her bank`,
+        );
+        if (lang !== "en")
+          assert.deepEqual(latinIn(saleOn(q, plainId)), [], `${lang}: no English word on her card`);
+      } finally {
+        await q.unmount();
+      }
     }
 
     // the DERIVED copy: her word "I got the money" sent without an amount
