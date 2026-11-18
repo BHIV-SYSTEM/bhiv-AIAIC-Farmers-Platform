@@ -2077,16 +2077,34 @@ function suite(app: App, window: Window & typeof globalThis) {
         ny.querySelector('[data-testid="today-progress"]'),
         "a payment AIAIC can see (the buyer's link): its step n of 5 stays",
       );
-      // AIAIC's own words where nobody said anything: unchanged
-      // (the buyer's paid link is AIAIC's Cashfree collect link: AIAIC holds her money, as TD3 says it)
+      // AIAIC's own words where nobody said anything: unchanged, each word for word
+      // (the buyer's paid link is AIAIC's Cashfree collect link: AIAIC holds her money, as TD3 says it; its box also
+      // says why, in AIAIC's own reason, read apart from its word: lane A's skeptic, F3, 18 Nov 2026)
       ok(paidLink["from_aiaic"], "the recording: the paid link is AIAIC's collect link");
-      for (const [o, code, said] of [
-        [paidLink, "held", EN.held],
-        [nobody, "not_paid", EN.notPaid],
+      const waitsFor = (paidLink["from_aiaic"] as { holds?: { waits_for?: string } | null }).holds
+        ?.waits_for;
+      ok(waitsFor, "the recording: AIAIC says why it holds her money");
+      for (const [o, code, said, why] of [
+        [paidLink, "held", EN.held, words("en", `aiaic.money.holds.waits_for.${waitsFor}`)],
+        [nobody, "not_paid", EN.notPaid, null],
       ] as const) {
-        const m = statusOf(saleOn(p, String(o["order_id"])), "today-state-money");
+        const sale = saleOn(p, String(o["order_id"]));
+        const m = statusOf(sale, "today-state-money");
         assert.deepEqual(m.codes, [code], `${String(o["order_id"])}: AIAIC's own state`);
-        ok(m.text.startsWith(said), `${String(o["order_id"])}: its word ("${m.text}")`);
+        const box = sale.querySelector('[data-testid="today-state-money"] dd')?.cloneNode(true) as
+          Element | undefined;
+        const whyBox = box?.querySelector('[data-testid="today-money-why"]') ?? null;
+        assert.equal(
+          whyBox?.textContent ?? null,
+          why,
+          `${String(o["order_id"])}: why AIAIC holds it, only where it holds it`,
+        );
+        whyBox?.remove();
+        assert.equal(
+          (box?.textContent ?? "").replace(/\s+/g, " ").trim(),
+          said,
+          `${String(o["order_id"])}: its word, word for word`,
+        );
       }
     } finally {
       await p.unmount();
