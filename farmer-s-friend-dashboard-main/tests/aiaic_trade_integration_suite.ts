@@ -4344,8 +4344,14 @@ test("B19 her sale's news through this server: one per offer (the newest, more t
 // ------------- A and B, the Cashfree switch (4 Nov 2026; AIAIC's design C10): her provider named only as AIAIC names it
 
 /** THE EARLIER PROVIDER'S NAME (D-294, 15 Nov 2026: Cashfree is AIAIC's one provider): her app holds it once, as a history
- * row's value (`EARLIER`, aiaic-trade.ts), and no word, key or screen of hers names it, its payouts product included. */
-const EARLIER_NAMED = new RegExp(EARLIER, "i");
+ * row's value (`EARLIER`, aiaic-trade.ts), and no word, key or screen of hers names it, its payouts product included.
+ * The name is held here apart from the code it guards (lane A's skeptic, F2, 18 Nov 2026): AIAIC's own value for a
+ * history row's provider (its website's `paymentProvider.js` `EARLIER`; AIAIC passes `x_destination.provider` through
+ * as its row holds it), spelled by its letters' codes so that her tracked tree names it on one line only, `EARLIER`'s.
+ * Every guard reads this name, never `EARLIER`; A47 holds `EARLIER` to it, and each history row the tests model carries
+ * it. */
+const EARLIER_NAME = String.fromCharCode(114, 97, 122, 111, 114, 112, 97, 121);
+const EARLIER_NAMED = new RegExp(EARLIER_NAME, "i");
 const sourceOf = (file: string) =>
   fs.readFileSync(path.join(APP, "src", "components", "farm", "aiaic", file), "utf-8");
 
@@ -4369,9 +4375,9 @@ const inApp = (el: ReactElement, lang: (typeof LANGS)[number] = "en") =>
 
 test("A47 her money's provider is named only as AIAIC names it: Cashfree where it says so, a history row's as AIAIC's earlier payment company, none where it names none; the earlier provider by name nowhere", () => {
   assert.equal(
-    EARLIER_NAMED.source.toLowerCase(),
     EARLIER,
-    "the history row's value, read from her app",
+    EARLIER_NAME,
+    "her app's value for a history row's provider is AIAIC's own (its website's paymentProvider.js EARLIER)",
   );
   for (const lang of LANGS) {
     const named = Object.entries(DICTS[lang])
@@ -4391,7 +4397,7 @@ test("A47 her money's provider is named only as AIAIC names it: Cashfree where i
       assert.ok(said.includes("Cashfree") && !HOLE.test(said), `${lang} ${key}: "${said}"`);
       // a history row's provider (the value AIAIC passes through for details given before Cashfree): the same sentence
       // saying AIAIC's earlier payment company, in her app's own words for it (`aiaic.dest.given_before`), never its name
-      const earlier = providerKey(key, EARLIER);
+      const earlier = providerKey(key, EARLIER_NAME);
       assert.equal(earlier.key, `${key}_earlier`, `${key} for a history row`);
       const e = wordsIn(lang)(earlier.key, earlier.values);
       assert.ok(
@@ -4433,13 +4439,13 @@ test("A47 her money's provider is named only as AIAIC names it: Cashfree where i
   const given = dest as XDestination;
   assert.equal(destinationGivenBefore(given), false, "Cashfree's own details: nothing to say");
   assert.equal(
-    destinationGivenBefore({ ...given, provider: EARLIER }),
+    destinationGivenBefore({ ...given, provider: EARLIER_NAME }),
     true,
     "an earlier provider's details: give them again",
   );
   assert.equal(destinationGivenBefore({ ...given, provider: undefined }), false, "none named");
   assert.equal(
-    destinationGivenBefore({ ...given, provider: EARLIER, ready: false }),
+    destinationGivenBefore({ ...given, provider: EARLIER_NAME, ready: false }),
     false,
     "not ready: no such line",
   );
@@ -5072,7 +5078,7 @@ test("A56 AN-6 a group sale asks her to give her details again when they went to
   const cashfree = (mineOf("collect_mine_processing") as { x_destination?: XDestination | null })
     .x_destination;
   assert.ok(cashfree?.ready && cashfree.provider === "cashfree", "AIAIC's Cashfree destination");
-  const earlier: XDestination = { ...cashfree, provider: EARLIER };
+  const earlier: XDestination = { ...cashfree, provider: EARLIER_NAME };
   const withDest = (dest: XDestination | null) => ({ ...mine, x_destination: dest }) as AiaicMine;
   const page = (dest: XDestination | null) =>
     inApp(
