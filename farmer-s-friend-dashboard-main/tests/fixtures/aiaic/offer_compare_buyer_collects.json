@@ -1,18 +1,18 @@
 {
   "_recorded": {
     "by": "reports/handover_tools/record_trip_and_payout_answers.py",
-    "route": "GET /trade/offers/ofr_fe2a9ebc3d169fc63086/compare",
-    "at": "2026-11-13T12:25:25+00:00",
+    "route": "GET /trade/offers/ofr_0faf3b7e57f8fbd058c2/compare",
+    "at": "2026-11-18T16:32:56+00:00",
     "status": 200,
     "request": {
       "params": {
         "tenant_id": "rec-trip"
       }
     },
-    "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Cashfree stood in for on the recording machine (its sandbox, test-only keys; one order's plain link made with Razorpay named and stood in for), no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
+    "note": "A real answer of the real route on a *_test database, in the workspace rec-trip: practice farmer accounts and a rehearsal buyer (rehearsal data), Cashfree stood in for on the recording machine (its sandbox, test-only keys), no road key (the straight line x 1.3), the price clock at the committed price slice's day. Replayed by the web tests, never edited by hand."
   },
   "answer": {
-    "offer_id": "ofr_fe2a9ebc3d169fc63086",
+    "offer_id": "ofr_0faf3b7e57f8fbd058c2",
     "crop": "onion",
     "quantity_q": 4.0,
     "from": {

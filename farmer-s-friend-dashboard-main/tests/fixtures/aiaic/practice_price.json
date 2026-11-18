@@ -2,7 +2,7 @@
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
     "route": "GET /farmer/trade/price",
-    "at": "2026-11-13T12:26:47+00:00",
+    "at": "2026-11-18T16:34:14+00:00",
     "status": 200,
     "replay": null,
     "signed_in": true,
@@ -12,8 +12,7 @@
       },
       "body": null
     },
-    "note": "A real answer of the real route on a *_test database: a PRACTICE account's own sale in the app (the owner's decision D-185; tenant rec-farmer, the farmers' workspace for the run), so its records are rehearsal data (synthetic: true), never a farmer's income; its buyer is a rehearsal buyer named as a recording; for the payment Razorpay is STOOD IN FOR on this machine (test-only TEST keys; no request reached Razorpay; no money). Replayed by the web and phone tests, never edited by hand. Razorpay is NAMED IN-PROCESS for this recording (AIAIC_PAYMENT_PROVIDER=razorpay): kept but not wired since 4 Nov 2026, when Cashfree became the server's default provider.",
-    "provider": "razorpay (named in-process)"
+    "note": "A real answer of the real route on a *_test database: a PRACTICE account's own sale in the app (the owner's decision D-185; tenant rec-farmer, the farmers' workspace for the run), so its records are rehearsal data (synthetic: true), never a farmer's income; its buyer is a rehearsal buyer named as a recording. Replayed by the web and phone tests, never edited by hand. No payment provider's key was set for this read (Cashfree's are not), so its payment says not configured, as a server without Cashfree's keys answers it."
   },
   "answer": {
     "crop": "onion",
@@ -239,7 +238,7 @@
       "hi": "नासिक"
     },
     "trace": {
-      "request_id": "37bb94b1c40541de8691d9526457c857",
+      "request_id": "fc810cabd92c430cba6d0a6663dd32eb",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

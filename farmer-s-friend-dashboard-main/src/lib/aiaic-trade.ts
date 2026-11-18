@@ -702,7 +702,7 @@ export function stepsTogether(
  * NO LINK YET, SAID AS AIAIC SAYS IT NOW (the walk of 13 Nov 2026, WF-05: right after she accepted, her page told her to
  * agree the payment with the buyer before she hands over, while AIAIC was making the buyer's link by itself). AIAIC says
  * per order whether a link can still come, in `money.why_not_report` (its `payout_store.her_report_refusal`):
- * `payment_route_is_razorpay` with no link made is a link BEING MADE now (a live link is a made one); `link_still_possible`,
+ * `payment_route_is_link` with no link made is a link BEING MADE now (a live link is a made one); `link_still_possible`,
  * AIAIC can still make it, by itself or by its team. Only where AIAIC says no link can be made, the payment being between
  * her and the buyer (`noLinkByAiaic`), is she told to agree it with the buyer before she hands over. Whatever else AIAIC
  * says (a real order on a server that takes no word of a payment outside AIAIC, `direct_payment_not_approved`; a code this
@@ -735,7 +735,7 @@ export function noLinkByAiaic(order: AiaicOrder): boolean {
 function noLinkKey(order: AiaicOrder): string {
   if (order.order_state !== "cancelled") {
     const code = order.money?.why_not_report?.code ?? null;
-    if (code === "payment_route_is_razorpay") return "aiaic.pay.link_being_made";
+    if (code === "payment_route_is_link") return "aiaic.pay.link_being_made";
     if (code === "link_still_possible") return "aiaic.pay.link_by_aiaic";
     if (noLinkByAiaic(order)) return "aiaic.pay.no_link";
   }

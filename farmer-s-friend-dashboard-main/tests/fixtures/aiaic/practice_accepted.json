@@ -1,8 +1,8 @@
 {
   "_recorded": {
     "by": "reports/handover_tools/record_trade_answers.py",
-    "route": "POST /farmer/trade/offers/ofr_a6ebdccd8e1d182f0e97/accept",
-    "at": "2026-11-13T12:26:47+00:00",
+    "route": "POST /farmer/trade/offers/ofr_1ab6f1a5ca077a69b5fe/accept",
+    "at": "2026-11-18T16:34:15+00:00",
     "status": 201,
     "replay": "false",
     "signed_in": true,
@@ -10,18 +10,17 @@
       "params": null,
       "body": {}
     },
-    "note": "A real answer of the real route on a *_test database: a PRACTICE account's own sale in the app (the owner's decision D-185; tenant rec-farmer, the farmers' workspace for the run), so its records are rehearsal data (synthetic: true), never a farmer's income; its buyer is a rehearsal buyer named as a recording; for the payment Razorpay is STOOD IN FOR on this machine (test-only TEST keys; no request reached Razorpay; no money). Replayed by the web and phone tests, never edited by hand. Razorpay is NAMED IN-PROCESS for this recording (AIAIC_PAYMENT_PROVIDER=razorpay): kept but not wired since 4 Nov 2026, when Cashfree became the server's default provider.",
-    "provider": "razorpay (named in-process)"
+    "note": "A real answer of the real route on a *_test database: a PRACTICE account's own sale in the app (the owner's decision D-185; tenant rec-farmer, the farmers' workspace for the run), so its records are rehearsal data (synthetic: true), never a farmer's income; its buyer is a rehearsal buyer named as a recording. Replayed by the web and phone tests, never edited by hand. No payment provider's key was set for this read (Cashfree's are not), so its payment says not configured, as a server without Cashfree's keys answers it."
   },
   "answer": {
-    "order_id": "ord_76a0e13d06aa51f560cb",
-    "transaction_id": "txn_4168029cced02182a57f",
+    "order_id": "ord_d85bc55ad0d0805d85ab",
+    "transaction_id": "txn_c8600a6e768451084b08",
     "tenant_id": "rec-farmer",
-    "offer_id": "ofr_a6ebdccd8e1d182f0e97",
-    "listing_id": "lst_6da366ecfdd12d08699a",
-    "lot_id": "lot_a5c8cc75683ff1c36d8f",
-    "farmer_id": "frm_d91436482c22d5693502",
-    "buyer_id": "byr_be0b4684f4b72cc0f284",
+    "offer_id": "ofr_1ab6f1a5ca077a69b5fe",
+    "listing_id": "lst_3292ea9ebfe5026005a2",
+    "lot_id": "lot_d12b88f24b570672451e",
+    "farmer_id": "frm_ad7495bbeb59ed87a28a",
+    "buyer_id": "byr_dc238b67b5f361ff1216",
     "crop": "onion",
     "variety": null,
     "grade": null,
@@ -39,21 +38,20 @@
     "settlement_state": "not_connected",
     "fee_state": "no_approved_fee_rule",
     "payment_route": "none",
-    "payout_timing": null,
     "synthetic": true,
-    "trace_id": "502f892afbe74313acc34de97af6f819",
-    "created_at": "2026-11-13T12:26:47.807493+00:00",
-    "updated_at": "2026-11-13T12:26:47.807493+00:00",
+    "trace_id": "ceda1ccff74044d7ab47415b2d96c8a3",
+    "created_at": "2026-11-18T16:34:15.210372+00:00",
+    "updated_at": "2026-11-18T16:34:15.210372+00:00",
     "pool_id": null,
     "offers_closed": [],
     "command": {
-      "command_id": "cmd_bb418ce96ad27e897060",
+      "command_id": "cmd_d3c4e2c6dd3ecac2a530",
       "delivery_state": "not_sent",
       "blocker": "TANTRA's order gate is not configured on this server (AIAIC_TANTRA_GATE_URL): its address and authentication have not been supplied, and TANTRA's live /initiate answered 400 on 21 Oct 2026 (Ranjit). Nothing is sent; the command is kept.",
-      "command_sha256": "43fade5612acbd894569716309f1527c333ef742448feb11f3837363c86f1268"
+      "command_sha256": "c0451f8f14544916e7b70e6109b931e98e08e30d35f7e81a95e703b5d31ed5fc"
     },
     "trace": {
-      "request_id": "502f892afbe74313acc34de97af6f819",
+      "request_id": "ceda1ccff74044d7ab47415b2d96c8a3",
       "decision_ids": [],
       "price_day": "not held",
       "price_from": "not held",

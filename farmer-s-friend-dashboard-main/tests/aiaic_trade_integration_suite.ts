@@ -280,7 +280,9 @@ test("A1 only what the screens show leaves the server (no contact path, no ids o
 });
 
 test("A2 the sale's five steps are AIAIC's own states: paid only on the provider's word, sent is never received", () => {
-  const sending = mineOf("payout_mine_sending").orders[0] as AiaicOrder;
+  // AIAIC's real answer (its record_trip_and_payout_answers.py): the buyer paid through AIAIC's Cashfree link, nothing
+  // sent to her yet
+  const sending = mineOf("collect_mine_paid").orders[0] as AiaicOrder;
   assert.equal(sending.payment_state, "paid");
   const s1 = saleSteps(sending);
   assert.deepEqual(
@@ -288,7 +290,7 @@ test("A2 the sale's five steps are AIAIC's own states: paid only on the provider
     ["agreed", "paid", "handover", "delivered", "money"],
   );
   assert.equal(s1[1]?.state, "done");
-  assert.equal(s1[4]?.state, "now", "paid, her share not yet transferred: money is the step NOW");
+  assert.equal(s1[4]?.state, "now", "paid, nothing sent to her: money is the step NOW");
 
   const settled = mineOf("payout_mine_settled").orders[0] as AiaicOrder;
   assert.equal(
@@ -316,7 +318,7 @@ test("A2 the sale's five steps are AIAIC's own states: paid only on the provider
     (o) => o.order_state === "cancelled",
   ) as AiaicOrder;
   const s4 = saleSteps(called);
-  assert.equal(s4[4]?.state, "stopped", "a reversed share stopped");
+  assert.equal(s4[4]?.state, "stopped", "called off after the buyer paid: her money step stopped");
   assert.equal(s4[2]?.state, "stopped");
 
   // AIAIC COLLECTS, THEN SENDS HER MONEY (since 4 Nov 2026 through Cashfree Payouts; AIAIC's real answers, recorded by its
@@ -356,6 +358,24 @@ test("A3 a link that does not carry her share is said to pay AIAIC's account, ne
   assert.ok(route && plain, "the recording has one order of each");
   assert.equal(paymentLine(route).notOnward, false);
   assert.equal(paymentLine(plain).notOnward, true);
+  // AIAIC's own sentence for an order whose money it does not send her (`payment.not_onward`, on its Cashfree branch: paid
+  // outside AIAIC, or through a link made before AIAIC collected buyers' payments), in its recorded D-lite answer
+  const direct = mineOf("payout_mine_dlite_direct").orders.find(
+    (o) => o.money?.route === "direct",
+  ) as AiaicOrder;
+  assert.ok(direct?.payment.not_onward, "AIAIC says its sentence on the direct order");
+  assert.equal(direct.payment.link_made, false);
+  assert.equal(paymentLine(direct).notOnward, false, "no link made: nothing is said of a link");
+  // DERIVED, LABELLED: the same order with a link made, as a link made before AIAIC collected is (no recording holds one)
+  const earlier = {
+    ...direct,
+    payment: { ...direct.payment, link_made: true, state: "paid" },
+  } as AiaicOrder;
+  assert.equal(
+    paymentLine(earlier).notOnward,
+    true,
+    "a made link AIAIC says does not send her money on",
+  );
   const noLink = mineOf("farmer_app_mine_after_pickup").orders[0] as AiaicOrder;
   assert.equal(noLink.payment.link_made, false);
   // (R2-4 lane PA, WF-05: CHANGED ON PURPOSE. A real order, picked up, on a server that takes no word of a payment
@@ -400,6 +420,22 @@ test("A4 her money's sentence is AIAIC's key, with rupees and India's day filled
   const india = new Date(Date.parse(at) + 330 * 60_000).toISOString().slice(0, 10);
   assert.ok(/^\d{4}-\d{2}-\d{2}T/.test(at), `AIAIC's time: "${at}"`);
   assert.equal(said.values["day"], india);
+  // AIAIC's real answer (its D-lite recording): an operator recorded that she got the money outside AIAIC
+  const direct = mineOf("payout_mine_dlite_direct").orders.find(
+    (o) => o.money?.route === "direct",
+  ) as AiaicOrder;
+  const got = sayKey(direct.money?.say ?? null);
+  assert.ok(got);
+  assert.equal(got.key, "aiaic.farmer.money.direct.said_got");
+  assert.equal(got.values["amount"], "₹23,880");
+  assert.equal(got.values["ref"], undefined, "a reference AIAIC did not send is not said");
+  const gotAt = String(direct.money?.say?.values["day"] ?? "");
+  assert.ok(/^\d{4}-\d{2}-\d{2}T/.test(gotAt), `AIAIC's time: "${gotAt}"`);
+  assert.equal(
+    got.values["day"],
+    new Date(Date.parse(gotAt) + 330 * 60_000).toISOString().slice(0, 10),
+    "India's day of AIAIC's own time",
+  );
   assert.equal(dayOf("2026-10-23T20:00:50+00:00"), "2026-10-24", "01:30 on 24 Oct in India");
   assert.equal(dayOf("2026-10-23T18:29:59+00:00"), "2026-10-23");
   assert.equal(dayOf("2026-10-23T18:30:00+00:00"), "2026-10-24");
@@ -500,7 +536,11 @@ test("A7 the payments page's totals: agreed leaves out a called-off sale; sent a
   );
   const refundOrders = mineOf("farmer_app_mine_refund_owed").orders;
   const refund = moneyTotals(refundOrders);
-  assert.equal(refund.sentToHer, 0, "a reversed share was never sent to her");
+  assert.equal(
+    refund.sentToHer,
+    0,
+    "a sale called off after the buyer paid: nothing was sent to her",
+  );
   const standing = refundOrders.filter((o) => o.order_state !== "cancelled");
   assert.ok(standing.length < refundOrders.length, "the recording has a called-off sale");
   assert.equal(
@@ -936,10 +976,11 @@ test("A16 ANN-1 a sentence never shows a hole: a fact AIAIC did not send is said
 
 test("A17 ENG-01 'Did the buyer pay you?' only where the money is outside AIAIC or her produce was handed over", () => {
   const en = wordsIn("en");
-  // AIAIC's real answer: her practice order just accepted, no link yet; AIAIC takes no word of hers there while it can
-  // still make the buyer's link (its own rule since the push 2 audit, ENG-01: `link_still_possible`)
-  const fresh = mineOf("payout_mine_offered").orders.find(
-    (o) => o.order_state === "accepted" && !o.payment.link_made,
+  // AIAIC's real answer (its D-lite recording): her practice order just accepted, no link yet; AIAIC takes no word of hers
+  // there while it can still make the buyer's link (its own rule since the audit of 24 Oct 2026, ENG-01:
+  // `link_still_possible`)
+  const fresh = mineOf("payout_mine_dlite_direct").orders.find(
+    (o) => o.order_state === "accepted" && !o.payment.link_made && o.money?.route !== "direct",
   ) as AiaicOrder;
   assert.ok(fresh, "the recording's practice order, just accepted, no link yet");
   assert.equal(
@@ -2275,8 +2316,6 @@ async function standIn(): Promise<StandIn> {
           return send(201, answer("practice_listed"));
         }
         if (u.pathname.endsWith("/accept")) return send(201, answer("practice_accepted"));
-        if (u.pathname === "/farmer/trade/payout-account")
-          return send(200, answer("farmer_app_refund_payout_account"));
         if (u.pathname.endsWith("/payment-report"))
           return send(201, {
             order_id: u.pathname.split("/")[4] ?? "",
@@ -2534,27 +2573,31 @@ test("B9 her payout details pass through to AIAIC and are never said back or log
   try {
     settings(s.url, USER, PASSWORD);
     asHer(s);
+    // her details for AIAIC's send through Cashfree (POST /farmer/trade/payout-destination); Cashfree's own test account
+    // and IFSC (its data-to-test page): a stand-in, never a person's
+    const ACCOUNT = "026291800001191";
+    const IFSC = "YESB0000262";
     const { value, said } = await captured(() =>
-      client.givePayoutAccount(newPressKey(), {
-        notice_version: "pn-0b66a47d1399",
-        shown_in: "mr",
-        destination: "bank_account",
-        pan: PAN,
-        name_on_pan: "Practice Payee Testname",
-        account_number: "000123456789",
-        ifsc: "RECT0000001",
+      client.giveDestination(newPressKey(), {
+        agreed: true,
+        notice_version: "xn-standin00",
+        read_in: "mr",
+        kind: "bank_account",
+        name: "Practice Payee Testname",
+        account_number: ACCOUNT,
+        ifsc: IFSC,
       }),
     );
     assert.equal(value.ok, true);
-    assert.deepEqual(value.ok ? value.data : null, { status: "created" });
-    const sent = s.posts.find((p) => p.path === "/farmer/trade/payout-account");
-    assert.equal(sent?.body["pan"], PAN, "AIAIC got her details");
+    const sent = s.posts.find((p) => p.path === "/farmer/trade/payout-destination");
+    assert.equal(sent?.body["account_number"], ACCOUNT, "AIAIC got her details");
+    assert.equal(sent?.body["ifsc"], IFSC);
     assert.equal(sent?.body["agreed"], true);
-    assert.ok(!JSON.stringify(value).includes(PAN), "her PAN is not said back to the browser");
     assert.ok(
-      !said.includes(PAN) && !said.includes("000123456789"),
-      "her details are never logged",
+      !JSON.stringify(value).includes(ACCOUNT) && !JSON.stringify(value).includes(IFSC),
+      "her account number and IFSC are not said back to the browser",
     );
+    assert.ok(!said.includes(ACCOUNT) && !said.includes(IFSC), "her details are never logged");
   } finally {
     await s.close();
   }
@@ -4153,14 +4196,43 @@ test("A75 WF-05 no payment link yet, said as AIAIC says it now (the walk of 13 N
   const route = orderIn("payout_mine_offered", noLinkYet);
   assert.equal(route.money?.why_not_report?.code, "link_still_possible");
   assert.equal(paymentLine(route).key, "aiaic.pay.link_by_aiaic");
-  // DERIVED, LABELLED: the seconds while AIAIC asks its provider for the link (no recording holds them: AIAIC's recorders
+  // DERIVED, LABELLED: the seconds while AIAIC asks Cashfree for the link (no recording holds them: AIAIC's recorders
   // read once a link is made). AIAIC's own code and sentence for a link live or being made, as its recordings hold them
-  // on a made link (`payment_route_is_razorpay`), on the walk's order with no link made yet
+  // on a made link (`payment_route_is_link`, its name since D-294), on the walk's order with no link made yet
   const said = mineOf("buyer_farmer_mine_more_time").orders.find(
-    (o) => o.payment.link_made && o.money?.why_not_report?.code === "payment_route_is_razorpay",
+    (o) => o.payment.link_made && o.money?.why_not_report?.code === "payment_route_is_link",
   )?.money?.why_not_report;
   assert.ok(said, "a recorded order holds AIAIC's code and sentence for it");
   assert.match(said.why, /being made/, "AIAIC's sentence: a link live or being made");
+  // AIAIC's code for a link live, paid or being made is said in her words, in en, mr and hi, as every code AIAIC records
+  // for her money (`why_not_report`, which her report's refusal says): its D-lite answer holds it on a live and a paid link
+  const dlite = mineOf("payout_mine_dlite_direct").orders.filter(
+    (o) => o.money?.why_not_report?.code === "payment_route_is_link",
+  );
+  assert.deepEqual(
+    dlite.map((o) => o.payment.state).sort(),
+    ["link_created", "paid"],
+    "AIAIC's D-lite answer holds the code on a live link and on a paid one",
+  );
+  const codes = new Set<string>();
+  const madeAt = (
+    JSON.parse(fs.readFileSync(path.join(FIXTURES, "trade_recording_manifest.json"), "utf-8")) as {
+      files: Record<string, unknown>;
+    }
+  ).files;
+  for (const name of MINE_FIXTURES.filter((n) => `${n}.json` in madeAt))
+    for (const o of mineOf(name).orders)
+      if (o.money?.why_not_report?.code) codes.add(o.money.why_not_report.code);
+  assert.ok(
+    codes.has("payment_route_is_link"),
+    "AIAIC's answers at its recorded commit carry the code",
+  );
+  for (const code of codes)
+    for (const lang of LANGS) {
+      const words = DICTS[lang][`aiaic.refused.${code}`];
+      assert.ok(words, `${lang} has no words for AIAIC's code ${code}`);
+      if (lang !== "en") assert.deepEqual(latinIn(words), [], `${lang} ${code}: no English word`);
+    }
   const beingMade = {
     ...collect,
     money: { ...(collect.money as AiaicMoney), why_not_report: said },
@@ -4699,13 +4771,8 @@ test("A49 her details' refusals on AIAIC's Cashfree branch are worded in en, mr 
 
 test("A50 Razorpay Route's card shows only where AIAIC wires Route; AIAIC's Cashfree answers say it does not", () => {
   const cashfree = mineOf("collect_mine_paid");
-  assert.equal(
-    cashfree.payout_account?.wired,
-    false,
-    "AIAIC's Cashfree branch: Route is not wired",
-  );
-  assert.equal(cashfree.payout_notice, undefined, "and it sends no Route notice");
-  assert.equal(routeCardShown(cashfree.payout_account), false, "no Route card");
+  assert.equal(cashfree.payout_account, undefined, "AIAIC's answers carry nothing of Route");
+  assert.equal(cashfree.payout_notice, undefined, "and no Route notice");
   // recorded with Razorpay named in-process (AIAIC's trade recorder): Route wired, its card as before
   assert.equal(routeCardShown(mineOf("payout_mine_settled").payout_account), true, "Route wired");
   assert.equal(routeCardShown(undefined), true, "an AIAIC that does not say: as before");

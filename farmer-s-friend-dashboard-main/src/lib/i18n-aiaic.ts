@@ -528,7 +528,7 @@ export const AIAIC_EN: Dict = {
     "The payment company answered, but AIAIC could not keep the answer: try again.",
   "aiaic.refused.direct_payment_not_approved":
     "What you say of a payment is not taken on this server.",
-  "aiaic.refused.payment_route_is_razorpay":
+  "aiaic.refused.payment_route_is_link":
     "This sale's money moves through its payment link: AIAIC says what reached you.",
   "aiaic.refused.link_still_possible":
     "AIAIC can still make the buyer's payment link for this sale: nothing was recorded.",
@@ -1848,7 +1848,7 @@ export const AIAIC_MR: Dict = {
     "पेमेंट कंपनीने उत्तर दिले, पण AIAIC ते ठेवू शकले नाही: पुन्हा प्रयत्न करा.",
   "aiaic.refused.direct_payment_not_approved":
     "पेमेंटबद्दल तुम्ही सांगितलेले या सर्व्हरवर घेतले जात नाही.",
-  "aiaic.refused.payment_route_is_razorpay":
+  "aiaic.refused.payment_route_is_link":
     "या विक्रीचे पैसे तिच्या पेमेंट लिंकमार्फत जातात: तुमच्यापर्यंत काय पोहोचले ते AIAIC सांगते.",
   "aiaic.refused.link_still_possible":
     "AIAIC अजून या विक्रीसाठी खरेदीदाराची पेमेंट लिंक बनवू शकते: काहीही नोंदवले गेले नाही.",
@@ -3162,7 +3162,7 @@ export const AIAIC_HI: Dict = {
     "भुगतान कंपनी ने जवाब दिया, पर AIAIC उसे रख नहीं सका: फिर से कोशिश करें।",
   "aiaic.refused.direct_payment_not_approved":
     "भुगतान के बारे में आपकी बात इस सर्वर पर नहीं ली जाती।",
-  "aiaic.refused.payment_route_is_razorpay":
+  "aiaic.refused.payment_route_is_link":
     "इस बिक्री का पैसा उसके पेमेंट लिंक के ज़रिए जाता है: आप तक क्या पहुँचा, यह AIAIC बताता है।",
   "aiaic.refused.link_still_possible":
     "AIAIC अभी भी इस बिक्री के लिए खरीदार का भुगतान लिंक बना सकता है: कुछ भी दर्ज नहीं हुआ।",
