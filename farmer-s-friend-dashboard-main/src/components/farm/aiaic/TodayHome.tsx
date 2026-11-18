@@ -143,7 +143,7 @@ const MONEY: Record<MoneyState, { icon: LucideIcon; tone: Tone }> = {
  *  word as her sale's own money card says it, never "The buyer has not paid" (RC-ANN-3), nor on a sale called off "No
  *  money moves on this sale" (RC2-ANN-1); else her money state's word. */
 function moneyWords(t: (k: string, v?: Record<string, string | number>) => string, m: MoneyNow) {
-  const said = m.told ? moneySaid(t, "money", m.told) : null;
+  const said = m.told ? moneySaid(t, m.told) : null;
   return said ?? t(`aiaic.today.money.${m.state}`);
 }
 function payTone(state: string): { icon: LucideIcon; tone: Tone } {

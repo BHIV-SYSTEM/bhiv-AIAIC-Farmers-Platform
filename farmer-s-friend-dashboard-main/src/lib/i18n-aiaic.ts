@@ -2,20 +2,18 @@
  * The words of the screens that read AIAIC's sale, payment and transport routes, in English, Marathi and Hindi.
  *
  * Merged into the app's dictionaries (`i18n.tsx`). The Marathi and Hindi carry no English word: names (AIAIC,
- * Cashfree, Razorpay, Geoapify, OpenStreetMap, MSRTC), short codes people read on their bank's messages (PAN, IFSC, UPI)
- * and numbers excepted. Many lines are AIAIC's own app's words for the same thing; every Marathi and Hindi line still
- * needs a native reader before a real farmer reads it.
+ * Cashfree, Geoapify, OpenStreetMap, MSRTC), short codes people read on their bank's messages (IFSC, UPI) and numbers
+ * excepted. Many lines are AIAIC's own app's words for the same thing; every Marathi and Hindi line still needs a native
+ * reader before a real farmer reads it.
  *
- * THE PAYMENTS PROVIDER IS NAMED ONLY AS AIAIC NAMES IT (4 Nov 2026: Cashfree is AIAIC's provider, Razorpay is kept but
- * not wired, RazorpayX is gone): a `{provider}` line is filled from AIAIC's own name for it (`providerKey`), its `_any`
- * twin says the same without a name, and a line about a fact AIAIC names no provider for names none.
+ * THE PAYMENTS PROVIDER IS NAMED ONLY AS AIAIC NAMES IT (Cashfree, AIAIC's one provider since 15 Nov 2026, D-294): a
+ * `{provider}` line is filled from AIAIC's own name for it (`providerKey`); its `_earlier` twin says a history row's
+ * provider as AIAIC's earlier payment company, never by its name; its `_any` twin says the same without a name; and a line
+ * about a fact AIAIC names no provider for names none.
  *
- * `aiaic.farmer.money.*` and `aiaic.farmer.payout.*` word AIAIC's own keys (`say.key` in its answers): "sent" is never
- * "received", a time is always "usually", and nothing asks her to pay anything back. Those keys are Razorpay Route's
- * (a share of hers carried by the buyer's link, her Route account), as is `aiaic.payout.send`, `aiaic.gs.paid.settled` and
- * `aiaic.refused.test_keys_synthetic_payees_only`: they name Razorpay, and show only on Route's own facts ("settled" only
- * on Razorpay's word). Her money AIAIC collects and then sends (`aiaic.money.*`, `aiaic.dest.*`) is said by its own
- * steps.
+ * `aiaic.farmer.money.direct.*` word AIAIC's own keys for people's word of a payment made outside AIAIC (`say.key` in its
+ * answers): said as people's word, never as a fact AIAIC saw. Her money AIAIC collects and then sends (`aiaic.money.*`,
+ * `aiaic.dest.*`) is said by its own steps: "sent" is never "received", and nothing asks her to pay anything back.
  */
 
 type Dict = Record<string, string>;
@@ -131,14 +129,19 @@ export const AIAIC_EN: Dict = {
   "aiaic.dest.remove": "Remove",
   "aiaic.dest.remove_ask":
     "Remove your UPI ID or bank account from AIAIC and {provider}? AIAIC sends nothing new to it after this.",
+  "aiaic.dest.remove_ask_earlier":
+    "Remove your UPI ID or bank account from AIAIC and its earlier payment company? AIAIC sends nothing new to it after this.",
   "aiaic.dest.remove_ask_any":
     "Remove your UPI ID or bank account from AIAIC? AIAIC sends nothing new to it after this.",
   "aiaic.dest.remove_yes": "Yes, remove them",
   "aiaic.dest.keep": "Keep them",
   "aiaic.dest.removed": "Removed. {provider} has deleted them.",
+  "aiaic.dest.removed_earlier": "Removed. AIAIC's earlier payment company has deleted them.",
   "aiaic.dest.removed_any": "Removed. The payment company has deleted them.",
   "aiaic.dest.removed_pending":
     "Removed here. A person from AIAIC will finish deleting them at {provider}.",
+  "aiaic.dest.removed_pending_earlier":
+    "Removed here. A person from AIAIC will finish deleting them at AIAIC's earlier payment company.",
   "aiaic.dest.removed_pending_any":
     "Removed here. A person from AIAIC will finish removing them at the payment company.",
   "aiaic.dest.given_before":
@@ -171,24 +174,6 @@ export const AIAIC_EN: Dict = {
     "Cashfree did not accept AIAIC's server just now (a setting AIAIC's team must change): your details were not taken. Try again later.",
   "aiaic.refused.cashfree_details_already_registered":
     "Cashfree already holds these details under another AIAIC record: nothing new was made. Ask a person from AIAIC to check it.",
-  // AN-5 (the audit of 4 Nov 2026; the re-check, RC-4): an AIAIC not yet on its Cashfree release still answers her form
-  // with these seven RazorpayX codes (its razorpayx.refusal(): keys half set, not set up, keys in the other mode, live not
-  // approved; then refused, no answer, an address not allowed); each is said by what it means for her, naming no
-  // provider. REMOVE once AIAIC's Cashfree release is live.
-  "aiaic.refused.razorpayx_keys_incomplete":
-    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
-  "aiaic.refused.razorpayx_keys_other_mode":
-    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
-  "aiaic.refused.razorpayx_not_configured":
-    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
-  "aiaic.refused.razorpayx_live_not_approved":
-    "AIAIC cannot take payment details here yet: the team will ask you when it can.",
-  "aiaic.refused.razorpayx_refused":
-    "The payment company did not accept these details: check them and try again.",
-  "aiaic.refused.razorpayx_no_answer":
-    "The payment company did not answer: try again in a little while.",
-  "aiaic.refused.razorpayx_ip_not_allowlisted":
-    "The payment company did not accept AIAIC's server just now (a setting AIAIC's team must change): your details were not taken. Try again later.",
   "aiaic.refused.destination_being_made":
     "Your details are being given right now: try again in a minute.",
   "aiaic.refused.destination_ended_while_asked":
@@ -509,21 +494,12 @@ export const AIAIC_EN: Dict = {
   "aiaic.refused.farmers_only":
     "This is a farmer's page: the AIAIC account set here is not a farmer's.",
   "aiaic.refused.payout_consent_required": "Tick that you have read and agree first.",
-  "aiaic.refused.payout_details_not_valid": "Check this box: {field}. Nothing was kept.",
-  "aiaic.refused.test_keys_synthetic_payees_only":
-    "This server has Razorpay's test keys: only a practice account can give payout details here.",
   "aiaic.refused.payment_not_configured": "No payment service is connected on this server.",
-  "aiaic.refused.payout_account_exists": "Your payout account is already made.",
-  "aiaic.refused.payout_account_being_made": "Your payout account is being made: look again soon.",
   "aiaic.refused.unknown_notice_version":
     "The notice changed while you read it: read the new one, then agree again.",
   "aiaic.refused.no_sale_record":
     "List your produce first: then you can give where your money goes.",
   "aiaic.refused.live_payments_not_approved": "Real payments are not approved on this server.",
-  "aiaic.refused.route_live_not_approved": "Paying farmers with real money is not approved yet.",
-  "aiaic.refused.live_keys_no_synthetic_payee":
-    "This server takes real payments: a practice account cannot give payout details here.",
-  "aiaic.refused.payout_consent_already_withdrawn": "You already stopped this.",
   "aiaic.refused.answer_not_kept":
     "The payment company answered, but AIAIC could not keep the answer: try again.",
   "aiaic.refused.direct_payment_not_approved":
@@ -544,8 +520,6 @@ export const AIAIC_EN: Dict = {
   "aiaic.refused.state_not_held": "AIAIC covers Maharashtra and Madhya Pradesh.",
   "aiaic.refused.refused": "AIAIC did not accept this.",
 
-  "aiaic.field.pan": "PAN",
-  "aiaic.field.name_on_pan": "Name as on PAN card",
   "aiaic.field.account_number": "Account number",
   "aiaic.field.ifsc": "IFSC",
   "aiaic.field.upi_id": "UPI ID",
@@ -742,50 +716,6 @@ export const AIAIC_EN: Dict = {
   "aiaic.money.title": "Your money",
   "aiaic.money.got": "I got the money",
   "aiaic.money.not_yet": "Not yet",
-  "aiaic.farmer.money.will_send_bank":
-    "When the buyer pays through the link, Razorpay sends your {amount} to your bank account ending {hint}.",
-  "aiaic.farmer.money.will_send_bank_any":
-    "When the buyer pays through the link, Razorpay sends your {amount} to your bank account.",
-  "aiaic.farmer.money.will_send_upi":
-    "When the buyer pays through the link, Razorpay sends your {amount} to your UPI ID.",
-  "aiaic.farmer.money.fee_on_top":
-    "The buyer pays the payment fee on top: you receive your full {amount}.",
-  "aiaic.farmer.money.fee_on_top_after_commission":
-    "The buyer pays the payment fee on top. After AIAIC's commission, you receive {amount}.",
-  "aiaic.commission.title": "AIAIC's commission ({rate})",
-  "aiaic.commission.title_no_rate": "AIAIC's commission",
-  "aiaic.commission.agreed": "Agreed price",
-  "aiaic.commission.you_receive": "You receive",
-  "aiaic.commission.by_buyer":
-    "The buyer pays it on top of the price: it does not come out of your share.",
-  "aiaic.commission.by_farmer": "It comes out of your share.",
-  "aiaic.commission.by_both":
-    "Shared: the buyer pays {buyer} on top, and {her} comes out of your share.",
-  "aiaic.commission.by_both_plain": "Shared between the buyer and you.",
-  "aiaic.commission.none": "AIAIC takes no commission on this sale.",
-  "aiaic.commission.line": "AIAIC's commission ({rate}): {amount}. You receive {share}.",
-  "aiaic.farmer.money.sending": "The buyer paid. Razorpay is sending your {amount} now.",
-  "aiaic.farmer.money.held":
-    "The buyer paid. Razorpay keeps your {amount} until your produce is delivered.",
-  "aiaic.farmer.money.sent_bank":
-    "Your {amount} was sent to your bank account ending {hint}. It usually arrives in about 2 working days.",
-  "aiaic.farmer.money.sent_bank_any":
-    "Your {amount} was sent to your bank account. It usually arrives in about 2 working days.",
-  "aiaic.farmer.money.sent_upi":
-    "Your {amount} was sent to your UPI ID. It usually arrives within a few minutes.",
-  "aiaic.farmer.money.settled":
-    "Razorpay says your {amount} was paid into your bank on {day}. Bank reference: {utr}.",
-  "aiaic.farmer.money.settled_no_utr":
-    "Razorpay says your {amount} was paid into your bank on {day}.",
-  "aiaic.farmer.money.failed":
-    "Your {amount} has not reached you: Razorpay could not send it ({reason}). This is on the AIAIC team's list.",
-  "aiaic.farmer.money.reason.vpa_inactive": "your UPI ID is not active",
-  "aiaic.farmer.money.reason.daily_limit_exceeded": "the day's UPI limit was passed",
-  "aiaic.farmer.money.reason.other": "Razorpay's reason is with the AIAIC team",
-  "aiaic.farmer.money.reversed":
-    "The sale was called off, so your held {amount} went back to the buyer's side before it reached you. You owe nothing.",
-  "aiaic.farmer.money.partly_back":
-    "The buyer did not accept all of the produce, so {back} of your held money went back; {left} stays held. You owe nothing.",
   "aiaic.farmer.money.direct.ask":
     "Did the buyer pay you? First check your own bank's message or UPI app.",
   "aiaic.farmer.money.direct.said_got":
@@ -798,46 +728,6 @@ export const AIAIC_EN: Dict = {
     "The buyer says they paid {amount}. Check your own bank's message or UPI app.",
   "aiaic.farmer.money.direct.buyer_says_any":
     "The buyer says they paid. Check your own bank's message or UPI app.",
-
-  "aiaic.payout.title": "Where your money goes",
-  "aiaic.payout.not_offered": "Paying you through AIAIC is not switched on here.",
-  "aiaic.payout.give": "Give where your money should go",
-  "aiaic.payout.read": "Read before you agree",
-  "aiaic.payout.agree": "I have read this and I agree",
-  "aiaic.payout.bank": "Bank account",
-  "aiaic.payout.upi": "UPI ID",
-  "aiaic.payout.send": "Send to Razorpay",
-  "aiaic.payout.sending": "Sending…",
-  "aiaic.payout.test_values": "TEST: test values only, never your real details.",
-  "aiaic.payout.fill_test": "Fill test values",
-  "aiaic.payout.kept_none": "AIAIC keeps none of these numbers.",
-  "aiaic.payout.withdraw": "Stop sending my money here",
-  "aiaic.payout.withdraw.confirm": "Stop? No new sale sends money to this account.",
-  "aiaic.payout.withdraw.yes": "Yes, stop",
-  "aiaic.farmer.payout.none":
-    "To be paid through AIAIC, give where your money should go. A person from AIAIC can help you.",
-  "aiaic.farmer.payout.checking":
-    "Your details are with Razorpay, the payment company, for checking. This will show here when they are checked.",
-  "aiaic.farmer.payout.needs_correction":
-    "Razorpay needs a correction to your details: {reason}. A person from AIAIC can help you.",
-  "aiaic.farmer.payout.reason.field_missing": "some information is missing",
-  "aiaic.farmer.payout.reason.needs_clarification": "some information must be explained",
-  "aiaic.farmer.payout.reason.document_missing": "a document is needed",
-  "aiaic.farmer.payout.reason.other": "Razorpay's reason is with the AIAIC team",
-  "aiaic.farmer.payout.name_check":
-    "The name your bank holds does not look the same as the name you gave. A person from AIAIC will check it with you.",
-  "aiaic.farmer.payout.cooling":
-    "Your details are checked. Money can be sent through AIAIC after {time}.",
-  "aiaic.farmer.payout.ready_bank":
-    "Ready: your money will be sent to your bank account ending {hint}.",
-  "aiaic.farmer.payout.ready_bank_any": "Ready: your money will be sent to your bank account.",
-  "aiaic.farmer.payout.ready_upi": "Ready: your money will be sent to your UPI ID.",
-  "aiaic.farmer.payout.refused":
-    "Razorpay did not accept these details. AIAIC kept none of them. A person from AIAIC can help you try again.",
-  "aiaic.farmer.payout.route_not_enabled":
-    "AIAIC cannot send money through Razorpay yet. Agree the payment with the buyer before you hand over your produce.",
-  "aiaic.farmer.payout.withdrawn":
-    "You withdrew your consent: AIAIC no longer sends your money through Razorpay.",
 
   "aiaic.payments.title": "Payments",
   "aiaic.payments.agreed": "Agreed",
@@ -1207,7 +1097,6 @@ export const AIAIC_EN: Dict = {
   "aiaic.gs.collection.not_done":
     "The collection is recorded as not done: ask AIAIC's team on the Help page.",
   "aiaic.gs.paid.reached": "Your money reached your bank.",
-  "aiaic.gs.paid.settled": "Your money is settled (Razorpay's word).",
   "aiaic.gs.paid.cancelled": "No payment: this sale was called off.",
   "aiaic.gs.paid.sent": "AIAIC is sending your money.",
   "aiaic.gs.paid.buyer_paid": "The buyer paid.",
@@ -1450,14 +1339,19 @@ export const AIAIC_MR: Dict = {
   "aiaic.dest.remove": "काढा",
   "aiaic.dest.remove_ask":
     "तुमचा UPI आयडी किंवा बँक खाते AIAIC आणि {provider} मधून काढायचे? यानंतर AIAIC तिथे नवे पैसे पाठवत नाही.",
+  "aiaic.dest.remove_ask_earlier":
+    "तुमचा UPI आयडी किंवा बँक खाते AIAIC आणि त्याच्या आधीच्या पेमेंट कंपनीमधून काढायचे? यानंतर AIAIC तिथे नवे पैसे पाठवत नाही.",
   "aiaic.dest.remove_ask_any":
     "तुमचा UPI आयडी किंवा बँक खाते AIAIC मधून काढायचे? यानंतर AIAIC तिथे नवे पैसे पाठवत नाही.",
   "aiaic.dest.remove_yes": "होय, काढा",
   "aiaic.dest.keep": "ठेवा",
   "aiaic.dest.removed": "काढले. {provider} ने ते हटवले.",
+  "aiaic.dest.removed_earlier": "काढले. AIAIC च्या आधीच्या पेमेंट कंपनीने ते हटवले.",
   "aiaic.dest.removed_any": "काढले. पेमेंट कंपनीने ते हटवले.",
   "aiaic.dest.removed_pending":
     "इथून काढले. AIAIC ची व्यक्ती {provider} वरून ते हटवण्याचे काम पूर्ण करेल.",
+  "aiaic.dest.removed_pending_earlier":
+    "इथून काढले. AIAIC ची व्यक्ती AIAIC च्या आधीच्या पेमेंट कंपनीकडून ते हटवण्याचे काम पूर्ण करेल.",
   "aiaic.dest.removed_pending_any":
     "इथून काढले. AIAIC ची व्यक्ती पेमेंट कंपनीकडून ते हटवण्याचे काम पूर्ण करेल.",
   "aiaic.dest.given_before":
@@ -1490,24 +1384,6 @@ export const AIAIC_MR: Dict = {
     "Cashfree ने आत्ता AIAIC चा सर्व्हर स्वीकारला नाही (AIAIC च्या टीमला बदलायची एक सेटिंग): तुमचे तपशील घेतले गेले नाहीत. नंतर पुन्हा प्रयत्न करा.",
   "aiaic.refused.cashfree_details_already_registered":
     "Cashfree कडे हे तपशील AIAIC च्या दुसऱ्या नोंदीखाली आधीच आहेत: नवे काहीही केले गेले नाही. AIAIC च्या व्यक्तीला हे तपासायला सांगा.",
-  // AN-5 (the audit of 4 Nov 2026; the re-check, RC-4): an AIAIC not yet on its Cashfree release still answers her form
-  // with these seven RazorpayX codes (its razorpayx.refusal(): keys half set, not set up, keys in the other mode, live not
-  // approved; then refused, no answer, an address not allowed); each is said by what it means for her, naming no
-  // provider. REMOVE once AIAIC's Cashfree release is live.
-  "aiaic.refused.razorpayx_keys_incomplete":
-    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
-  "aiaic.refused.razorpayx_keys_other_mode":
-    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
-  "aiaic.refused.razorpayx_not_configured":
-    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
-  "aiaic.refused.razorpayx_live_not_approved":
-    "AIAIC अजून इथे पेमेंट तपशील घेऊ शकत नाही: शक्य झाल्यावर टीम तुम्हाला विचारेल.",
-  "aiaic.refused.razorpayx_refused":
-    "पेमेंट कंपनीने हे तपशील स्वीकारले नाहीत: तपासून पुन्हा प्रयत्न करा.",
-  "aiaic.refused.razorpayx_no_answer":
-    "पेमेंट कंपनीने उत्तर दिले नाही: थोड्या वेळाने पुन्हा प्रयत्न करा.",
-  "aiaic.refused.razorpayx_ip_not_allowlisted":
-    "पेमेंट कंपनीने आत्ता AIAIC चा सर्व्हर स्वीकारला नाही (AIAIC च्या टीमला बदलायची एक सेटिंग): तुमचे तपशील घेतले गेले नाहीत. नंतर पुन्हा प्रयत्न करा.",
   "aiaic.refused.destination_being_made":
     "तुमचे तपशील आत्ता दिले जात आहेत: एका मिनिटाने पुन्हा प्रयत्न करा.",
   "aiaic.refused.destination_ended_while_asked":
@@ -1828,22 +1704,12 @@ export const AIAIC_MR: Dict = {
   "aiaic.refused.account_not_found": "AIAIC चे खाते सापडले नाही. काहीही लिहिले गेले नाही.",
   "aiaic.refused.farmers_only": "हे पान शेतकऱ्याचे आहे: इथे दिलेले AIAIC खाते शेतकऱ्याचे नाही.",
   "aiaic.refused.payout_consent_required": "आधी वाचले आहे आणि मान्य आहे यावर खूण करा.",
-  "aiaic.refused.payout_details_not_valid": "ही जागा तपासा: {field}. काहीही ठेवले गेले नाही.",
-  "aiaic.refused.test_keys_synthetic_payees_only":
-    "या सर्व्हरवर Razorpay च्या चाचणीच्या चाव्या आहेत: इथे फक्त सरावाचे खाते पैसे मिळण्याची माहिती देऊ शकते.",
   "aiaic.refused.payment_not_configured": "या सर्व्हरवर कोणतीही पेमेंट सेवा जोडलेली नाही.",
-  "aiaic.refused.payout_account_exists": "तुमचे पैसे मिळण्याचे खाते आधीच बनले आहे.",
-  "aiaic.refused.payout_account_being_made":
-    "तुमचे पैसे मिळण्याचे खाते बनत आहे: थोड्या वेळाने पुन्हा पाहा.",
   "aiaic.refused.unknown_notice_version":
     "तुम्ही वाचत असताना सूचना बदलली: नवीन सूचना वाचा, मग पुन्हा मान्य करा.",
   "aiaic.refused.no_sale_record":
     "आधी तुमचा माल विक्रीसाठी नोंदवा: मग पैसे कुठे जावेत ते देता येईल.",
   "aiaic.refused.live_payments_not_approved": "या सर्व्हरवर खऱ्या पेमेंटला मान्यता नाही.",
-  "aiaic.refused.route_live_not_approved": "शेतकऱ्यांना खरे पैसे पाठवण्याला अजून मान्यता नाही.",
-  "aiaic.refused.live_keys_no_synthetic_payee":
-    "हा सर्व्हर खरी पेमेंट घेतो: इथे सरावाचे खाते पैसे मिळण्याची माहिती देऊ शकत नाही.",
-  "aiaic.refused.payout_consent_already_withdrawn": "तुम्ही हे आधीच थांबवले आहे.",
   "aiaic.refused.answer_not_kept":
     "पेमेंट कंपनीने उत्तर दिले, पण AIAIC ते ठेवू शकले नाही: पुन्हा प्रयत्न करा.",
   "aiaic.refused.direct_payment_not_approved":
@@ -1863,8 +1729,6 @@ export const AIAIC_MR: Dict = {
   "aiaic.refused.state_not_held": "AIAIC महाराष्ट्र आणि मध्य प्रदेशसाठी आहे.",
   "aiaic.refused.refused": "AIAIC ने हे स्वीकारले नाही.",
 
-  "aiaic.field.pan": "PAN",
-  "aiaic.field.name_on_pan": "PAN कार्डवरील नाव",
   "aiaic.field.account_number": "खाते क्रमांक",
   "aiaic.field.ifsc": "IFSC",
   "aiaic.field.upi_id": "UPI आयडी",
@@ -2061,50 +1925,6 @@ export const AIAIC_MR: Dict = {
   "aiaic.money.title": "तुमचे पैसे",
   "aiaic.money.got": "मला पैसे मिळाले",
   "aiaic.money.not_yet": "अजून नाही",
-  "aiaic.farmer.money.will_send_bank":
-    "खरेदीदाराने लिंकवरून पैसे भरले की Razorpay तुमचे {amount} {hint} ने संपणाऱ्या बँक खात्यात पाठवेल.",
-  "aiaic.farmer.money.will_send_bank_any":
-    "खरेदीदाराने लिंकवरून पैसे भरले की Razorpay तुमचे {amount} तुमच्या बँक खात्यात पाठवेल.",
-  "aiaic.farmer.money.will_send_upi":
-    "खरेदीदाराने लिंकवरून पैसे भरले की Razorpay तुमचे {amount} तुमच्या UPI आयडीवर पाठवेल.",
-  "aiaic.farmer.money.fee_on_top":
-    "पेमेंटचे शुल्क खरेदीदार वरून भरतो: तुम्हाला तुमचे पूर्ण {amount} मिळतात.",
-  "aiaic.farmer.money.fee_on_top_after_commission":
-    "पेमेंटचे शुल्क खरेदीदार वरून भरतो. AIAIC चे कमिशन वजा जाता तुम्हाला {amount} मिळतात.",
-  "aiaic.commission.title": "AIAIC चे कमिशन ({rate})",
-  "aiaic.commission.title_no_rate": "AIAIC चे कमिशन",
-  "aiaic.commission.agreed": "ठरलेली किंमत",
-  "aiaic.commission.you_receive": "तुम्हाला मिळतात",
-  "aiaic.commission.by_buyer":
-    "खरेदीदार ते किमतीवर वरून भरतो: ते तुमच्या वाट्यातून कापले जात नाही.",
-  "aiaic.commission.by_farmer": "ते तुमच्या वाट्यातून कापले जाते.",
-  "aiaic.commission.by_both":
-    "दोघांत वाटलेले: खरेदीदार {buyer} वरून भरतो, आणि {her} तुमच्या वाट्यातून कापले जातात.",
-  "aiaic.commission.by_both_plain": "खरेदीदार आणि तुमच्यात वाटलेले.",
-  "aiaic.commission.none": "या विक्रीवर AIAIC कोणतेही कमिशन घेत नाही.",
-  "aiaic.commission.line": "AIAIC चे कमिशन ({rate}): {amount}. तुम्हाला {share} मिळतात.",
-  "aiaic.farmer.money.sending": "खरेदीदाराने पैसे भरले. Razorpay आत्ता तुमचे {amount} पाठवत आहे.",
-  "aiaic.farmer.money.held":
-    "खरेदीदाराने पैसे भरले. तुमचा माल पोहोचेपर्यंत Razorpay तुमचे {amount} राखून ठेवते.",
-  "aiaic.farmer.money.sent_bank":
-    "तुमचे {amount} {hint} ने संपणाऱ्या बँक खात्यात पाठवले. ते साधारणपणे सुमारे 2 कामकाजाच्या दिवसांत पोहोचतात.",
-  "aiaic.farmer.money.sent_bank_any":
-    "तुमचे {amount} तुमच्या बँक खात्यात पाठवले. ते साधारणपणे सुमारे 2 कामकाजाच्या दिवसांत पोहोचतात.",
-  "aiaic.farmer.money.sent_upi":
-    "तुमचे {amount} तुमच्या UPI आयडीवर पाठवले. ते साधारणपणे काही मिनिटांत पोहोचतात.",
-  "aiaic.farmer.money.settled":
-    "Razorpay नुसार तुमचे {amount} {day} रोजी तुमच्या बँकेत भरले गेले. बँकेचा संदर्भ क्रमांक: {utr}.",
-  "aiaic.farmer.money.settled_no_utr":
-    "Razorpay नुसार तुमचे {amount} {day} रोजी तुमच्या बँकेत भरले गेले.",
-  "aiaic.farmer.money.failed":
-    "तुमचे {amount} तुमच्यापर्यंत पोहोचलेले नाहीत: Razorpay ते पाठवू शकले नाही ({reason}). हे AIAIC च्या लोकांच्या यादीत आहे.",
-  "aiaic.farmer.money.reason.vpa_inactive": "तुमचा UPI आयडी चालू नाही",
-  "aiaic.farmer.money.reason.daily_limit_exceeded": "एका दिवसाची UPI मर्यादा ओलांडली",
-  "aiaic.farmer.money.reason.other": "Razorpay चे कारण AIAIC च्या लोकांकडे आहे",
-  "aiaic.farmer.money.reversed":
-    "विक्री रद्द झाली, म्हणून राखून ठेवलेले {amount} तुमच्यापर्यंत पोहोचण्याआधी खरेदीदाराकडे परत गेले. तुम्हाला काहीही परत द्यायचे नाही.",
-  "aiaic.farmer.money.partly_back":
-    "खरेदीदाराने सगळा माल स्वीकारला नाही, म्हणून राखून ठेवलेल्यापैकी {back} परत गेले; {left} राखून ठेवलेले आहेत. तुम्हाला काहीही परत द्यायचे नाही.",
   "aiaic.farmer.money.direct.ask":
     "खरेदीदाराने तुम्हाला पैसे दिले का? आधी तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
   "aiaic.farmer.money.direct.said_got":
@@ -2117,46 +1937,6 @@ export const AIAIC_MR: Dict = {
     "खरेदीदार म्हणतात की त्यांनी {amount} भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
   "aiaic.farmer.money.direct.buyer_says_any":
     "खरेदीदार म्हणतात की त्यांनी पैसे भरले. तुमच्या स्वतःच्या बँकेचा संदेश किंवा UPI अॅप तपासा.",
-
-  "aiaic.payout.title": "तुमचे पैसे कुठे जातात",
-  "aiaic.payout.not_offered": "AIAIC मार्फत तुम्हाला पैसे देणे इथे सुरू नाही.",
-  "aiaic.payout.give": "तुमचे पैसे कुठे जमा व्हावेत ते द्या",
-  "aiaic.payout.read": "मान्य करण्यापूर्वी वाचा",
-  "aiaic.payout.agree": "मी हे वाचले आहे आणि मला मान्य आहे",
-  "aiaic.payout.bank": "बँक खाते",
-  "aiaic.payout.upi": "UPI आयडी",
-  "aiaic.payout.send": "Razorpay कडे पाठवा",
-  "aiaic.payout.sending": "पाठवत आहे…",
-  "aiaic.payout.test_values": "चाचणी: फक्त चाचणीची माहिती, तुमची खरी माहिती कधीच नाही.",
-  "aiaic.payout.fill_test": "चाचणीची माहिती भरा",
-  "aiaic.payout.kept_none": "यातील कोणताही क्रमांक AIAIC ठेवत नाही.",
-  "aiaic.payout.withdraw": "माझे पैसे इथे पाठवणे थांबवा",
-  "aiaic.payout.withdraw.confirm": "थांबवायचे? कोणतीही नवी विक्री या खात्यात पैसे पाठवणार नाही.",
-  "aiaic.payout.withdraw.yes": "हो, थांबवा",
-  "aiaic.farmer.payout.none":
-    "AIAIC मार्फत पैसे मिळवण्यासाठी तुमचे पैसे कुठे जमा व्हावेत ते नोंदवा. AIAIC ची व्यक्ती तुम्हाला मदत करू शकते.",
-  "aiaic.farmer.payout.checking":
-    "तुमची माहिती तपासणीसाठी Razorpay या पेमेंट कंपनीकडे आहे. तपासणी झाली की इथे दिसेल.",
-  "aiaic.farmer.payout.needs_correction":
-    "Razorpay ला तुमच्या माहितीत दुरुस्ती हवी आहे: {reason}. AIAIC ची व्यक्ती तुम्हाला मदत करू शकते.",
-  "aiaic.farmer.payout.reason.field_missing": "काही माहिती राहून गेली आहे",
-  "aiaic.farmer.payout.reason.needs_clarification": "काही माहिती स्पष्ट करायची आहे",
-  "aiaic.farmer.payout.reason.document_missing": "एक कागदपत्र हवे आहे",
-  "aiaic.farmer.payout.reason.other": "Razorpay चे कारण AIAIC च्या लोकांकडे आहे",
-  "aiaic.farmer.payout.name_check":
-    "बँकेकडील नाव तुम्ही दिलेल्या नावासारखे दिसत नाही. AIAIC ची व्यक्ती तुमच्यासोबत ते तपासेल.",
-  "aiaic.farmer.payout.cooling":
-    "तुमची माहिती तपासली गेली. AIAIC मार्फत पैसे {time} नंतर पाठवता येतील.",
-  "aiaic.farmer.payout.ready_bank":
-    "तयार: तुमचे पैसे {hint} ने संपणाऱ्या बँक खात्यात पाठवले जातील.",
-  "aiaic.farmer.payout.ready_bank_any": "तयार: तुमचे पैसे तुमच्या बँक खात्यात पाठवले जातील.",
-  "aiaic.farmer.payout.ready_upi": "तयार: तुमचे पैसे तुमच्या UPI आयडीवर पाठवले जातील.",
-  "aiaic.farmer.payout.refused":
-    "Razorpay ने ही माहिती स्वीकारली नाही. यातील काहीही AIAIC ने ठेवलेले नाही. पुन्हा प्रयत्न करण्यासाठी AIAIC ची व्यक्ती मदत करू शकते.",
-  "aiaic.farmer.payout.route_not_enabled":
-    "AIAIC अजून Razorpay मार्फत पैसे पाठवू शकत नाही. माल देण्यापूर्वी खरेदीदारासोबत पैसे कसे द्यायचे ते ठरवा.",
-  "aiaic.farmer.payout.withdrawn":
-    "तुम्ही संमती मागे घेतली: AIAIC आता Razorpay मार्फत तुमचे पैसे पाठवत नाही.",
 
   "aiaic.payments.title": "पेमेंट",
   "aiaic.payments.agreed": "ठरलेले",
@@ -2529,7 +2309,6 @@ export const AIAIC_MR: Dict = {
   "aiaic.gs.collection.not_done":
     "संकलन झाले नाही अशी नोंद आहे: मदत पानावर AIAIC च्या टीमला विचारा.",
   "aiaic.gs.paid.reached": "तुमचे पैसे तुमच्या बँकेत पोहोचले.",
-  "aiaic.gs.paid.settled": "तुमचे पैसे जमा झाले (Razorpay नुसार).",
   "aiaic.gs.paid.cancelled": "पैसे नाहीत: ही विक्री रद्द झाली.",
   "aiaic.gs.paid.sent": "AIAIC तुमचे पैसे पाठवत आहे.",
   "aiaic.gs.paid.buyer_paid": "खरेदीदाराने पैसे दिले.",
@@ -2769,14 +2548,19 @@ export const AIAIC_HI: Dict = {
   "aiaic.dest.remove": "हटाएँ",
   "aiaic.dest.remove_ask":
     "अपनी UPI आईडी या बैंक खाता AIAIC और {provider} से हटाएँ? इसके बाद AIAIC वहाँ नया पैसा नहीं भेजता।",
+  "aiaic.dest.remove_ask_earlier":
+    "अपनी UPI आईडी या बैंक खाता AIAIC और उसकी पिछली भुगतान कंपनी से हटाएँ? इसके बाद AIAIC वहाँ नया पैसा नहीं भेजता।",
   "aiaic.dest.remove_ask_any":
     "अपनी UPI आईडी या बैंक खाता AIAIC से हटाएँ? इसके बाद AIAIC वहाँ नया पैसा नहीं भेजता।",
   "aiaic.dest.remove_yes": "हाँ, हटाएँ",
   "aiaic.dest.keep": "रहने दें",
   "aiaic.dest.removed": "हटा दिया। {provider} ने इन्हें मिटा दिया।",
+  "aiaic.dest.removed_earlier": "हटा दिया। AIAIC की पिछली भुगतान कंपनी ने इन्हें मिटा दिया।",
   "aiaic.dest.removed_any": "हटा दिया। भुगतान कंपनी ने इन्हें मिटा दिया।",
   "aiaic.dest.removed_pending":
     "यहाँ से हटा दिया। AIAIC का व्यक्ति {provider} से इन्हें मिटाने का काम पूरा करेगा।",
+  "aiaic.dest.removed_pending_earlier":
+    "यहाँ से हटा दिया। AIAIC का व्यक्ति AIAIC की पिछली भुगतान कंपनी से इन्हें मिटाने का काम पूरा करेगा।",
   "aiaic.dest.removed_pending_any":
     "यहाँ से हटा दिया। AIAIC का व्यक्ति भुगतान कंपनी से इन्हें हटाने का काम पूरा करेगा।",
   "aiaic.dest.given_before":
@@ -2808,24 +2592,6 @@ export const AIAIC_HI: Dict = {
     "Cashfree ने अभी AIAIC का सर्वर स्वीकार नहीं किया (AIAIC की टीम को बदलनी एक सेटिंग): आपकी जानकारी नहीं ली गई। बाद में फिर कोशिश करें।",
   "aiaic.refused.cashfree_details_already_registered":
     "Cashfree के पास यह जानकारी AIAIC के किसी दूसरे रिकॉर्ड में पहले से है: कुछ नया नहीं बनाया गया। AIAIC के किसी व्यक्ति से इसकी जाँच करने को कहें।",
-  // AN-5 (the audit of 4 Nov 2026; the re-check, RC-4): an AIAIC not yet on its Cashfree release still answers her form
-  // with these seven RazorpayX codes (its razorpayx.refusal(): keys half set, not set up, keys in the other mode, live not
-  // approved; then refused, no answer, an address not allowed); each is said by what it means for her, naming no
-  // provider. REMOVE once AIAIC's Cashfree release is live.
-  "aiaic.refused.razorpayx_keys_incomplete":
-    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
-  "aiaic.refused.razorpayx_keys_other_mode":
-    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
-  "aiaic.refused.razorpayx_not_configured":
-    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
-  "aiaic.refused.razorpayx_live_not_approved":
-    "AIAIC अभी यहाँ पेमेंट विवरण नहीं ले सकता: संभव होने पर टीम आपसे पूछेगी।",
-  "aiaic.refused.razorpayx_refused":
-    "भुगतान कंपनी ने यह विवरण स्वीकार नहीं किया: जाँचकर फिर कोशिश करें।",
-  "aiaic.refused.razorpayx_no_answer":
-    "भुगतान कंपनी ने जवाब नहीं दिया: थोड़ी देर बाद फिर कोशिश करें।",
-  "aiaic.refused.razorpayx_ip_not_allowlisted":
-    "भुगतान कंपनी ने अभी AIAIC का सर्वर स्वीकार नहीं किया (AIAIC की टीम को बदलनी एक सेटिंग): आपकी जानकारी नहीं ली गई। बाद में फिर कोशिश करें।",
   "aiaic.refused.destination_being_made":
     "आपकी जानकारी अभी दी जा रही है: एक मिनट बाद फिर कोशिश करें।",
   "aiaic.refused.destination_ended_while_asked":
@@ -3142,22 +2908,12 @@ export const AIAIC_HI: Dict = {
   "aiaic.refused.account_not_found": "AIAIC का खाता नहीं मिला। कुछ भी नहीं लिखा गया।",
   "aiaic.refused.farmers_only": "यह किसान का पेज है: यहाँ दिया गया AIAIC खाता किसान का नहीं है।",
   "aiaic.refused.payout_consent_required": "पहले निशान लगाएँ कि आपने पढ़ लिया है और आप सहमत हैं।",
-  "aiaic.refused.payout_details_not_valid": "यह खाना जाँचें: {field}। कुछ भी नहीं रखा गया।",
-  "aiaic.refused.test_keys_synthetic_payees_only":
-    "इस सर्वर पर Razorpay की परीक्षण चाबियाँ हैं: यहाँ सिर्फ़ अभ्यास खाता भुगतान पाने की जानकारी दे सकता है।",
   "aiaic.refused.payment_not_configured": "इस सर्वर पर कोई भुगतान सेवा जुड़ी नहीं है।",
-  "aiaic.refused.payout_account_exists": "आपका भुगतान पाने का खाता पहले ही बन चुका है।",
-  "aiaic.refused.payout_account_being_made":
-    "आपका भुगतान पाने का खाता बन रहा है: थोड़ी देर बाद फिर देखें।",
   "aiaic.refused.unknown_notice_version":
     "आपके पढ़ते समय सूचना बदल गई: नई सूचना पढ़ें, फिर दोबारा सहमति दें।",
   "aiaic.refused.no_sale_record":
     "पहले अपनी उपज बिक्री के लिए दर्ज करें: फिर बता सकते हैं कि पैसा कहाँ जाए।",
   "aiaic.refused.live_payments_not_approved": "इस सर्वर पर असली भुगतान की मंज़ूरी नहीं है।",
-  "aiaic.refused.route_live_not_approved": "किसानों को असली पैसा भेजने की अभी मंज़ूरी नहीं है।",
-  "aiaic.refused.live_keys_no_synthetic_payee":
-    "यह सर्वर असली भुगतान लेता है: यहाँ अभ्यास खाता भुगतान पाने की जानकारी नहीं दे सकता।",
-  "aiaic.refused.payout_consent_already_withdrawn": "आप इसे पहले ही रोक चुके हैं।",
   "aiaic.refused.answer_not_kept":
     "भुगतान कंपनी ने जवाब दिया, पर AIAIC उसे रख नहीं सका: फिर से कोशिश करें।",
   "aiaic.refused.direct_payment_not_approved":
@@ -3177,8 +2933,6 @@ export const AIAIC_HI: Dict = {
   "aiaic.refused.state_not_held": "AIAIC महाराष्ट्र और मध्य प्रदेश के लिए है।",
   "aiaic.refused.refused": "AIAIC ने इसे स्वीकार नहीं किया।",
 
-  "aiaic.field.pan": "PAN",
-  "aiaic.field.name_on_pan": "PAN कार्ड पर लिखा नाम",
   "aiaic.field.account_number": "खाता संख्या",
   "aiaic.field.ifsc": "IFSC",
   "aiaic.field.upi_id": "UPI आईडी",
@@ -3373,49 +3127,6 @@ export const AIAIC_HI: Dict = {
   "aiaic.money.title": "आपका पैसा",
   "aiaic.money.got": "मुझे पैसा मिल गया",
   "aiaic.money.not_yet": "अभी नहीं",
-  "aiaic.farmer.money.will_send_bank":
-    "खरीदार के लिंक से भुगतान करते ही Razorpay आपके {amount} {hint} पर ख़त्म होने वाले बैंक खाते में भेजेगा।",
-  "aiaic.farmer.money.will_send_bank_any":
-    "खरीदार के लिंक से भुगतान करते ही Razorpay आपके {amount} आपके बैंक खाते में भेजेगा।",
-  "aiaic.farmer.money.will_send_upi":
-    "खरीदार के लिंक से भुगतान करते ही Razorpay आपके {amount} आपकी UPI आईडी पर भेजेगा।",
-  "aiaic.farmer.money.fee_on_top":
-    "भुगतान का शुल्क खरीदार ऊपर से देता है: आपको आपके पूरे {amount} मिलते हैं।",
-  "aiaic.farmer.money.fee_on_top_after_commission":
-    "भुगतान का शुल्क खरीदार ऊपर से देता है। AIAIC का कमीशन घटाकर आपको {amount} मिलते हैं।",
-  "aiaic.commission.title": "AIAIC का कमीशन ({rate})",
-  "aiaic.commission.title_no_rate": "AIAIC का कमीशन",
-  "aiaic.commission.agreed": "तय कीमत",
-  "aiaic.commission.you_receive": "आपको मिलते हैं",
-  "aiaic.commission.by_buyer": "खरीदार इसे कीमत के ऊपर से देता है: यह आपके हिस्से से नहीं कटता।",
-  "aiaic.commission.by_farmer": "यह आपके हिस्से से कटता है।",
-  "aiaic.commission.by_both":
-    "दोनों में बँटा हुआ: खरीदार {buyer} ऊपर से देता है, और {her} आपके हिस्से से कटते हैं।",
-  "aiaic.commission.by_both_plain": "खरीदार और आपके बीच बँटा हुआ।",
-  "aiaic.commission.none": "इस बिक्री पर AIAIC कोई कमीशन नहीं लेता।",
-  "aiaic.commission.line": "AIAIC का कमीशन ({rate}): {amount}। आपको {share} मिलते हैं।",
-  "aiaic.farmer.money.sending": "खरीदार ने भुगतान कर दिया। Razorpay अभी आपके {amount} भेज रहा है।",
-  "aiaic.farmer.money.held":
-    "खरीदार ने भुगतान कर दिया। आपका माल पहुँचने तक Razorpay आपके {amount} रोककर रखता है।",
-  "aiaic.farmer.money.sent_bank":
-    "आपके {amount} {hint} पर ख़त्म होने वाले बैंक खाते में भेजे गए। आम तौर पर ये लगभग 2 कामकाजी दिनों में पहुँचते हैं।",
-  "aiaic.farmer.money.sent_bank_any":
-    "आपके {amount} आपके बैंक खाते में भेजे गए। आम तौर पर ये लगभग 2 कामकाजी दिनों में पहुँचते हैं।",
-  "aiaic.farmer.money.sent_upi":
-    "आपके {amount} आपकी UPI आईडी पर भेजे गए। आम तौर पर ये कुछ मिनटों में पहुँचते हैं।",
-  "aiaic.farmer.money.settled":
-    "Razorpay के अनुसार आपके {amount} {day} को आपके बैंक में जमा किए गए। बैंक का संदर्भ नंबर: {utr}।",
-  "aiaic.farmer.money.settled_no_utr":
-    "Razorpay के अनुसार आपके {amount} {day} को आपके बैंक में जमा किए गए।",
-  "aiaic.farmer.money.failed":
-    "आपके {amount} अभी आप तक नहीं पहुँचे: Razorpay इन्हें भेज नहीं सका ({reason})। यह AIAIC के लोगों की सूची में है।",
-  "aiaic.farmer.money.reason.vpa_inactive": "आपकी UPI आईडी चालू नहीं है",
-  "aiaic.farmer.money.reason.daily_limit_exceeded": "एक दिन की UPI सीमा पार हो गई",
-  "aiaic.farmer.money.reason.other": "Razorpay का कारण AIAIC के लोगों के पास है",
-  "aiaic.farmer.money.reversed":
-    "बिक्री रद्द हुई, इसलिए रोके गए {amount} आप तक पहुँचने से पहले खरीदार की ओर लौट गए। आपको कुछ भी लौटाना नहीं है।",
-  "aiaic.farmer.money.partly_back":
-    "खरीदार ने पूरा माल स्वीकार नहीं किया, इसलिए रोके गए पैसों में से {back} लौट गए; {left} रुके हैं। आपको कुछ भी लौटाना नहीं है।",
   "aiaic.farmer.money.direct.ask":
     "क्या खरीदार ने आपको पैसा दिया? पहले अपने बैंक का संदेश या UPI ऐप देखें।",
   "aiaic.farmer.money.direct.said_got":
@@ -3428,46 +3139,6 @@ export const AIAIC_HI: Dict = {
     "खरीदार कहते हैं कि उन्होंने {amount} दिए। अपने बैंक का संदेश या UPI ऐप देखें।",
   "aiaic.farmer.money.direct.buyer_says_any":
     "खरीदार कहते हैं कि उन्होंने पैसा दिया। अपने बैंक का संदेश या UPI ऐप देखें।",
-
-  "aiaic.payout.title": "आपका पैसा कहाँ जाता है",
-  "aiaic.payout.not_offered": "AIAIC के ज़रिए आपको भुगतान यहाँ चालू नहीं है।",
-  "aiaic.payout.give": "बताएँ कि आपका पैसा कहाँ जमा हो",
-  "aiaic.payout.read": "सहमति देने से पहले पढ़ें",
-  "aiaic.payout.agree": "मैंने यह पढ़ लिया है और मैं सहमत हूँ",
-  "aiaic.payout.bank": "बैंक खाता",
-  "aiaic.payout.upi": "UPI आईडी",
-  "aiaic.payout.send": "Razorpay को भेजें",
-  "aiaic.payout.sending": "भेज रहे हैं…",
-  "aiaic.payout.test_values": "परीक्षण: सिर्फ़ परीक्षण की जानकारी, आपकी असली जानकारी कभी नहीं।",
-  "aiaic.payout.fill_test": "परीक्षण की जानकारी भरें",
-  "aiaic.payout.kept_none": "इनमें से कोई भी संख्या AIAIC नहीं रखता।",
-  "aiaic.payout.withdraw": "मेरा पैसा यहाँ भेजना बंद करें",
-  "aiaic.payout.withdraw.confirm": "बंद करें? कोई नई बिक्री इस खाते में पैसा नहीं भेजेगी।",
-  "aiaic.payout.withdraw.yes": "हाँ, बंद करें",
-  "aiaic.farmer.payout.none":
-    "AIAIC के ज़रिए पैसा पाने के लिए दर्ज करें कि आपका पैसा कहाँ जमा हो। AIAIC का कोई व्यक्ति आपकी मदद कर सकता है।",
-  "aiaic.farmer.payout.checking":
-    "आपकी जानकारी जाँच के लिए Razorpay नाम की भुगतान कंपनी के पास है। जाँच होने पर यहाँ दिखेगा।",
-  "aiaic.farmer.payout.needs_correction":
-    "Razorpay को आपकी जानकारी में सुधार चाहिए: {reason}। AIAIC का कोई व्यक्ति आपकी मदद कर सकता है।",
-  "aiaic.farmer.payout.reason.field_missing": "कुछ जानकारी छूट गई है",
-  "aiaic.farmer.payout.reason.needs_clarification": "कुछ जानकारी स्पष्ट करनी है",
-  "aiaic.farmer.payout.reason.document_missing": "एक दस्तावेज़ चाहिए",
-  "aiaic.farmer.payout.reason.other": "Razorpay का कारण AIAIC के लोगों के पास है",
-  "aiaic.farmer.payout.name_check":
-    "बैंक के पास जो नाम है वह आपके दिए नाम जैसा नहीं दिखता। AIAIC का कोई व्यक्ति आपके साथ इसे जाँचेगा।",
-  "aiaic.farmer.payout.cooling":
-    "आपकी जानकारी जाँच ली गई। AIAIC के ज़रिए पैसा {time} के बाद भेजा जा सकेगा।",
-  "aiaic.farmer.payout.ready_bank":
-    "तैयार: आपका पैसा {hint} पर ख़त्म होने वाले बैंक खाते में भेजा जाएगा।",
-  "aiaic.farmer.payout.ready_bank_any": "तैयार: आपका पैसा आपके बैंक खाते में भेजा जाएगा।",
-  "aiaic.farmer.payout.ready_upi": "तैयार: आपका पैसा आपकी UPI आईडी पर भेजा जाएगा।",
-  "aiaic.farmer.payout.refused":
-    "Razorpay ने यह जानकारी स्वीकार नहीं की। AIAIC ने इसमें से कुछ भी नहीं रखा। दोबारा कोशिश करने में AIAIC का कोई व्यक्ति मदद कर सकता है।",
-  "aiaic.farmer.payout.route_not_enabled":
-    "AIAIC अभी Razorpay के ज़रिए पैसा नहीं भेज सकता। माल देने से पहले खरीदार के साथ भुगतान तय करें।",
-  "aiaic.farmer.payout.withdrawn":
-    "आपने सहमति वापस ले ली: AIAIC अब Razorpay के ज़रिए आपका पैसा नहीं भेजता।",
 
   "aiaic.payments.title": "भुगतान",
   "aiaic.payments.agreed": "तय",
@@ -3834,7 +3505,6 @@ export const AIAIC_HI: Dict = {
   "aiaic.gs.collection.not_done":
     "संग्रह नहीं हुआ, ऐसा दर्ज है: मदद पन्ने पर AIAIC की टीम से पूछें।",
   "aiaic.gs.paid.reached": "आपका पैसा आपके बैंक में पहुँचा।",
-  "aiaic.gs.paid.settled": "आपका पैसा जमा हुआ (Razorpay के अनुसार)।",
   "aiaic.gs.paid.cancelled": "भुगतान नहीं: यह बिक्री रद्द हुई।",
   "aiaic.gs.paid.sent": "AIAIC आपके पैसे भेज रहा है।",
   "aiaic.gs.paid.buyer_paid": "खरीदार ने भुगतान किया।",

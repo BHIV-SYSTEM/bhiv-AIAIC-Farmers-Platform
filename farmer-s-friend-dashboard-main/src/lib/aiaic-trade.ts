@@ -152,25 +152,14 @@ export type AiaicPayment = {
 
 export type AiaicSay = { key: string; values: Record<string, Json> } | null;
 
+/** HER ORDER'S MONEY AS PEOPLE SAID IT (AIAIC's `payout_store.money_for_her`): how its money moves (`route`: none, or
+ * direct, paid outside AIAIC), the last thing people said of the payment (`say`, `farmer.money.direct.*`), whether her
+ * own word is asked, and why not. What AIAIC sends her is said by her order's own `from_aiaic`. */
 export type AiaicMoney = {
   route: string;
-  settlement_state: string | null;
-  timing?: string | null | undefined;
   say: AiaicSay;
   can_report: boolean;
   why_not_report: WhyNot;
-  share_inr?: number | null | undefined;
-  destination_kind?: string | null | undefined;
-  destination_hint?: string | null | undefined;
-  fee_on_top?: boolean | undefined;
-  fee_line_key?: string | undefined;
-  /** AIAIC's commission on this sale, from its payment link's own record (`commissionOf`). */
-  commission?: AiaicCommission | null | undefined;
-  state?: string | null | undefined;
-  utr?: string | null | undefined;
-  settled_at?: string | null | undefined;
-  held_until?: string | null | undefined;
-  test_mode?: boolean | null | undefined;
   reports?:
     | {
         report_id: string;
@@ -182,85 +171,8 @@ export type AiaicMoney = {
     | undefined;
 };
 
-/**
- * AIAIC's commission on one sale (its contract, section 17d: `money.commission`, 24 Oct 2026), from that sale's
- * payment link's own record, never from the setting now: `set` false when the link was made with no commission.
- * `price_inr` is the agreed price, `she_receives_inr` what the link sends her, `commission_inr` what AIAIC keeps.
- * `payer` is who pays it: "buyer" (on top), "farmer" (out of her share), or another word a later AIAIC may send.
- */
-export type AiaicCommission = {
-  set: boolean;
-  bps: number | null;
-  percent: number | null;
-  payer: string | null;
-  commission_inr: number | null;
-  price_inr: number | null;
-  she_receives_inr: number | null;
-};
-
 function finiteOrNull(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
-}
-
-/** AIAIC's `money.commission`, field by field (nothing else of it reaches the browser); null when it is not one. */
-export function commissionOf(raw: unknown): AiaicCommission | null {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
-  const r = raw as Record<string, unknown>;
-  if (typeof r["set"] !== "boolean") return null;
-  return {
-    set: r["set"],
-    bps: finiteOrNull(r["bps"]),
-    percent: finiteOrNull(r["percent"]),
-    payer: typeof r["payer"] === "string" ? r["payer"] : null,
-    commission_inr: finiteOrNull(r["commission_inr"]),
-    price_inr: finiteOrNull(r["price_inr"]),
-    she_receives_inr: finiteOrNull(r["she_receives_inr"]),
-  };
-}
-
-/** What her commission block says, worked from AIAIC's own numbers only (in paise, so no rupee is mis-rounded). */
-export type CommissionParts = {
-  /** "2.5%" */
-  rate: string | null;
-  amount: number | null;
-  youReceive: number | null;
-  /** "buyer" | "farmer" | "split" as AIAIC sends it; null for a word this app does not know. */
-  payer: "buyer" | "farmer" | "split" | null;
-  /** Of the commission: what came out of her share (price less what she receives) and what the buyer paid on top. */
-  fromHer: number | null;
-  fromBuyer: number | null;
-};
-
-export function commissionParts(c: AiaicCommission): CommissionParts {
-  const p = c.percent ?? (c.bps === null ? null : c.bps / 100);
-  const rate = p === null ? null : `${Number(p.toFixed(2))}%`;
-  const payer = c.payer === "buyer" || c.payer === "farmer" || c.payer === "split" ? c.payer : null;
-  let fromHer: number | null = null;
-  let fromBuyer: number | null = null;
-  if (c.commission_inr !== null && c.price_inr !== null && c.she_receives_inr !== null) {
-    const her = Math.round(c.price_inr * 100) - Math.round(c.she_receives_inr * 100);
-    const buyer = Math.round(c.commission_inr * 100) - her;
-    if (her >= 0 && buyer >= 0) {
-      fromHer = her / 100;
-      fromBuyer = buyer / 100;
-    }
-  }
-  return {
-    rate,
-    amount: c.commission_inr,
-    youReceive: c.she_receives_inr,
-    payer,
-    fromHer,
-    fromBuyer,
-  };
-}
-
-/** Whether some of AIAIC's commission on this sale comes out of her share (then "your full amount" is not said). */
-export function commissionFromHer(c: AiaicCommission | null | undefined): boolean {
-  if (!c || !c.set) return false;
-  if (c.payer === "farmer" || c.payer === "split") return true;
-  const parts = commissionParts(c);
-  return parts.fromHer !== null && parts.fromHer > 0;
 }
 
 /**
@@ -319,7 +231,6 @@ export type AiaicOrder = {
   order_state: string;
   cancel_reason_code?: string | null | undefined;
   payment_state: string;
-  settlement_state?: string | null | undefined;
   synthetic: boolean;
   created_at: string;
   updated_at?: string | undefined;
@@ -340,43 +251,6 @@ export type AiaicOrder = {
   lane?: Lane | null | undefined;
 };
 
-export type PayoutAccountView = {
-  payout_account_id: string;
-  status: string;
-  refused_code?: string | null | undefined;
-  destination_kind: string;
-  destination_hint?: string | null | undefined;
-  ready: boolean;
-  why_not_ready: (WhyNot & { until?: string | null | undefined }) | null;
-  test_mode?: boolean | undefined;
-  synthetic?: boolean | undefined;
-};
-
-export type PayoutAccountBlock = {
-  offered: boolean;
-  why_not_offered: WhyNot;
-  test_mode: boolean | null;
-  test_values_only: boolean;
-  account: PayoutAccountView | null;
-  say: AiaicSay;
-  can_create: boolean;
-  can_withdraw: boolean;
-  /** False when AIAIC does not wire Razorpay Route at all (4 Nov 2026: Cashfree is its provider): nothing of Route is
-   * offered, said or shown. Absent from an AIAIC not yet updated. */
-  wired?: boolean | undefined;
-};
-
-/**
- * Whether the Payments page shows the card of her Razorpay Route account (`payout_account`): not when AIAIC says Route is
- * not wired (`wired: false`), as AIAIC shows nothing of Route then (its design, C1) and sends her money through its own
- * send instead (her sale's "Your money" card); an AIAIC that does not say keeps the card as before.
- */
-export function routeCardShown(block: PayoutAccountBlock | null | undefined): boolean {
-  return block?.wired !== false;
-}
-
-export type PayoutNotice = { version: string; en: string[]; mr: string[]; hi: string[] };
-
 export type AiaicMine = {
   tenant_id: string;
   profile_place: { state: string | null; district: string | null };
@@ -385,8 +259,6 @@ export type AiaicMine = {
   party: { party_id: string; synthetic: boolean; district: string; state: string } | null;
   listings: AiaicListing[];
   orders: AiaicOrder[];
-  payout_account?: PayoutAccountBlock | undefined;
-  payout_notice?: PayoutNotice | undefined;
 };
 
 /** What the server adds to her answer: the names of crops and districts in her language, from AIAIC's own lists. */
@@ -587,9 +459,10 @@ export function handedOver(order: AiaicOrder): boolean {
 /**
  * The five steps of one sale, the transaction in order: agreed -> paid by the buyer -> handed over -> delivered ->
  * her money. Each is read from AIAIC's own states, never assumed: "paid" only on the payment provider's verified word
- * (`payment_state`), and "sent" is never "received". Her money: where AIAIC collects and then sends it to her
- * (`from_aiaic`, since 4 Nov 2026 through Cashfree Payouts), AIAIC's own steps (done only once it reached her bank, on the
- * provider's word); else Razorpay Route's word about her share (`settlement_state`: only `settled` is done).
+ * (`payment_state`), and "sent" is never "received". Her money: AIAIC collects and then sends it to her (`from_aiaic`,
+ * since 4 Nov 2026 through Cashfree Payouts), by AIAIC's own steps (done only once it reached her bank, on the provider's
+ * word); a sale AIAIC sends nothing for (paid outside AIAIC, or an AIAIC that says no steps) is to come, or stopped once
+ * called off.
  */
 export function saleSteps(order: AiaicOrder): SaleStep[] {
   const cancelled = order.order_state === "cancelled";
@@ -614,7 +487,6 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
       : given
         ? "now"
         : "todo";
-  const settlement = order.money?.settlement_state ?? order.settlement_state ?? "not_connected";
   // AIAIC collects, then sends her money (its own steps; an AIAIC that does not say them: only that the buyer paid)
   const fa = (order as { from_aiaic?: FromAiaic | null }).from_aiaic ?? null;
   const own = fa ? (fa.steps ?? { buyer_paid: fa.buyer_paid, sent: false, reached: false }) : null;
@@ -626,18 +498,9 @@ export function saleSteps(order: AiaicOrder): SaleStep[] {
         : own.sent || own.buyer_paid
           ? "now"
           : "todo"
-    : settlement === "settled"
-      ? "done"
-      : settlement === "failed" || settlement === "reversed" || settlement === "partially_reversed"
-        ? "stopped"
-        : settlement === "held" ||
-            settlement === "transferred" ||
-            settlement === "released" ||
-            (settlement === "no_transfer_yet" && pay === "paid")
-          ? "now"
-          : cancelled
-            ? "stopped"
-            : "todo";
+    : cancelled
+      ? "stopped"
+      : "todo";
   return [
     { key: "agreed", state: "done" },
     { key: "paid", state: paid },
@@ -746,14 +609,10 @@ function noLinkKey(order: AiaicOrder): string {
 
 /**
  * A SENTENCE IS NEVER SHOWN WITH A HOLE IN IT (as AIAIC's own web and phone say it, their `WITHOUT`): a fact AIAIC did
- * not send (an amount she did not say, the last characters of a bank account Razorpay Route gave none of) is said by the
- * same sentence without it. Each key lists the facts ITS sentence here prints (this app's buyer sentence names no
- * reference, so only his amount).
+ * not send (an amount she did not say, the day of a word nobody dated) is said by the same sentence without it. Each key
+ * lists the facts ITS sentence here prints (this app's buyer sentence names no reference, so only his amount).
  */
 export const WITHOUT: Readonly<Record<string, readonly [readonly string[], string]>> = {
-  "farmer.money.will_send_bank": [["hint"], "farmer.money.will_send_bank_any"],
-  "farmer.money.sent_bank": [["hint"], "farmer.money.sent_bank_any"],
-  "farmer.payout.ready_bank": [["hint"], "farmer.payout.ready_bank_any"],
   "farmer.money.direct.said_got": [["amount", "day"], "farmer.money.direct.said_got_any"],
   "farmer.money.direct.buyer_says": [["amount"], "farmer.money.direct.buyer_says_any"],
 };
@@ -768,9 +627,9 @@ export function keyFor(key: string, values: Readonly<Record<string, unknown>>): 
     : key;
 }
 
-/** The key her money's sentence is worded from (AIAIC's own key, `farmer.money.*` or `farmer.payout.*`, under this
- * app's `aiaic.` prefix; the same sentence without a fact AIAIC did not send, `keyFor`), and the values it fills in;
- * null when AIAIC says nothing of her money on this order. */
+/** The key her money's sentence is worded from (AIAIC's own key, `farmer.money.direct.*`, under this app's `aiaic.`
+ * prefix; the same sentence without a fact AIAIC did not send, `keyFor`), and the values it fills in; null when AIAIC
+ * says nothing of her money on this order. */
 export function sayKey(say: AiaicSay): { key: string; values: Record<string, string> } | null {
   if (!say || typeof say.key !== "string" || !say.key) return null;
   const values: Record<string, string> = {};
@@ -789,25 +648,12 @@ export function sayKey(say: AiaicSay): { key: string; values: Record<string, str
 
 type Words = (key: string, vars?: Record<string, string | number>) => string;
 
-/** The reason inside a money or payout sentence, as a key of its own (a code, never English text): AIAIC's code when
- * this app has words for it, else `.other` ("Razorpay's reason is with the AIAIC team"), never a raw key. */
-export function reasonKey(
-  t: Words,
-  prefix: "money" | "payout",
-  code: string | null | undefined,
-): string {
-  const other = `aiaic.farmer.${prefix}.reason.other`;
-  if (!code || !/^[a-z_]+$/.test(code)) return other;
-  const key = `aiaic.farmer.${prefix}.reason.${code}`;
-  return t(key) === key ? other : key;
-}
-
-/** Her money's (or her payout account's) sentence in her words, from AIAIC's key and facts: rupees, India's day, a
- * reason from its code, never a hole. Null when AIAIC says nothing. */
-export function moneySaid(t: Words, prefix: "money" | "payout", say: AiaicSay): string | null {
+/** Her money's sentence in her words, from AIAIC's key and facts: rupees, India's day, never a hole. Null when AIAIC
+ * says nothing. */
+export function moneySaid(t: Words, say: AiaicSay): string | null {
   const said = sayKey(say);
   if (!said) return null;
-  return t(said.key, { ...said.values, reason: t(reasonKey(t, prefix, said.values["reason"])) });
+  return t(said.key, said.values);
 }
 
 /**
@@ -827,8 +673,7 @@ export function asksHerWord(order: AiaicOrder): boolean {
 export function moneyCard(t: Words, order: AiaicOrder): { line: string; asks: boolean } | null {
   const asks = asksHerWord(order);
   const line =
-    moneySaid(t, "money", order.money?.say ?? null) ??
-    (asks ? t("aiaic.farmer.money.direct.ask") : null);
+    moneySaid(t, order.money?.say ?? null) ?? (asks ? t("aiaic.farmer.money.direct.ask") : null);
   return line ? { line, asks } : null;
 }
 
@@ -1108,12 +953,10 @@ export function listingOfOrder(mine: AiaicMine, order: AiaicOrder): AiaicListing
 }
 
 /** Money summed over her orders, for the payments page's bars: what was agreed, what buyers paid (the payment
- * provider's verified word, `payment_state`), what was sent to her and what reached her bank. Her money moves one of two
- * ways, each counted by AIAIC's own facts: through Razorpay Route (`money.settlement_state`: sent when transferred or
- * released, in her bank when settled, Razorpay's word about her share), or AIAIC collects and then sends it to her
- * (`from_aiaic.steps`, since 4 Nov 2026 through Cashfree Payouts: sent for a send on its way or a transfer AIAIC's team
- * recorded by hand, in her bank only on the provider's word that it reached it). Called-off orders are left out of
- * "agreed". */
+ * provider's verified word, `payment_state`), what was sent to her and what reached her bank. AIAIC collects and then
+ * sends her money (`from_aiaic.steps`, since 4 Nov 2026 through Cashfree Payouts), counted by AIAIC's own facts: sent for
+ * a send on its way or a transfer AIAIC's team recorded by hand, in her bank only on the provider's word that it reached
+ * it. Called-off orders are left out of "agreed". */
 export function moneyTotals(orders: AiaicOrder[]): {
   agreed: number;
   paidByBuyers: number;
@@ -1128,10 +971,6 @@ export function moneyTotals(orders: AiaicOrder[]): {
   for (const o of orders) {
     if (o.order_state !== "cancelled") agreed += o.amount_inr;
     if (o.payment_state === "paid") paidByBuyers += o.amount_inr;
-    const s = o.money?.settlement_state;
-    const share = o.money?.share_inr ?? 0;
-    if (s === "transferred" || s === "released" || s === "settled") sentToHer += share;
-    if (s === "settled") settled += share;
     // AIAIC collects, then sends her money (its own steps): the send's own amount, else the link's figure for her
     const fa = (o as { from_aiaic?: FromAiaic | null }).from_aiaic;
     const toHer = fa?.sending?.amount_inr ?? fa?.to_her_inr ?? 0;
@@ -1148,52 +987,13 @@ export function moneyTotals(orders: AiaicOrder[]): {
   };
 }
 
-// ---------------------------------------------------------------------------------- her payout details (TEST)
+// ---------------------------------------------------------------------------------- her payout details
 
-export type PayoutDetailsIn = {
-  destination: "bank_account" | "upi_id";
-  pan: string;
-  name_on_pan: string;
-  account_number?: string | undefined;
-  ifsc?: string | undefined;
-  upi_id?: string | undefined;
-};
-
-const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-const ACCOUNT_RE = /^[0-9A-Z]{5,20}$/;
-const UPI_RE = /^[A-Za-z0-9._-]{2,256}@[A-Za-z]{2,64}$/;
-const NAME_RE = /^[A-Za-z][A-Za-z .'-]{0,98}[A-Za-z.]$/;
-/** THE LONGEST UPI ID THIS SERVER TAKES (the validators of `givePayoutAccount` and `giveMyDestination` read this very
- * number): both payout forms refuse a longer one after the scan, so no press of hers meets a validator's refusal,
- * which would be said as AIAIC not answering (the re-check of 4 Nov 2026, round 3's observation). */
+/** THE LONGEST UPI ID THIS SERVER TAKES (the validator of `giveMyDestination` reads this very number): her form refuses
+ * a longer one after the scan, so no press of hers meets a validator's refusal, which would be said as AIAIC not
+ * answering (the re-check of 4 Nov 2026, round 3's observation). */
 export const UPI_ID_MOST = 300;
-
-/**
- * The same checks AIAIC makes (its `trade/payouts.py`), so she is told at once which box to correct; the field is
- * named, never the value. AIAIC checks again, and only AIAIC's answer counts. Never more than this server takes: a
- * UPI ID of `UPI_ID_MOST` characters at most (AIAIC's own shape allows 321).
- */
-export function payoutDetailsProblem(d: PayoutDetailsIn): string | null {
-  const pan = d.pan.replace(/\s+/g, "").toUpperCase();
-  if (!PAN_RE.test(pan)) return "pan";
-  const name = d.name_on_pan.replace(/\s+/g, " ").trim();
-  if (!NAME_RE.test(name)) return "name_on_pan";
-  if (d.destination === "bank_account") {
-    const acc = (d.account_number ?? "").replace(/[\s-]+/g, "").toUpperCase();
-    if (!ACCOUNT_RE.test(acc)) return "account_number";
-    if (!IFSC_RE.test((d.ifsc ?? "").replace(/\s+/g, "").toUpperCase())) return "ifsc";
-    if (d.upi_id) return "upi_id";
-    return null;
-  }
-  const upi = (d.upi_id ?? "").trim();
-  if (!UPI_RE.test(upi) || upi.length > UPI_ID_MOST) return "upi_id";
-  if (d.account_number || d.ifsc) return "account_number";
-  return null;
-}
-
-/** Her press on Route's form: she opened AIAIC's notice and ticked that she agrees, and AIAIC sent one. */
-export type PayoutConsent = { agreed: boolean; readNotice: boolean; notice: boolean };
 
 /**
  * NO BOX IS BLIND TO A PERSON IN CRISIS, AND NO NUMBER OF HERS GOES TO THE SCAN (the re-check of 4 Nov 2026, RC-3 and
@@ -1216,49 +1016,6 @@ export function bankBoxWords(
   const inCode = wordsIn(code);
   if (inCode && !IFSC_RE.test(code.replace(/\s+/g, "").toUpperCase())) words.push(inCode);
   return words;
-}
-
-/** The words in Route's free boxes (the name on her PAN; a UPI ID typed as words; what her account and IFSC boxes hold
- * that cannot be her bank's details, `bankBoxWords`), read for distress before any refusal (the audit of 4 Nov 2026,
- * AN-1; D-105), as on the Cashfree form (`destinationWords`). */
-export function payoutWords(d: PayoutDetailsIn): string {
-  return [
-    d.name_on_pan,
-    ...(d.destination === "upi_id" ? [d.upi_id] : bankBoxWords(d.account_number, d.ifsc)),
-  ]
-    .map((b) => (b ?? "").trim())
-    .filter(Boolean)
-    .join(". ");
-}
-
-/** Route's Save can be pressed whenever its free boxes hold words, else once she opened and agreed to the notice. */
-export function payoutSaveOpen(d: PayoutDetailsIn, c: PayoutConsent): boolean {
-  return payoutWords(d) !== "" || (c.agreed && c.readNotice && c.notice);
-}
-
-/** What this phone would refuse Route's form for: the box it names (`payoutDetailsProblem`), else her consent
- * (`payout_consent_required`), or null. Said only after her words were read for distress. */
-export function payoutFormRefusal(d: PayoutDetailsIn, c: PayoutConsent): string | null {
-  return (
-    payoutDetailsProblem(d) ??
-    (c.agreed && c.readNotice && c.notice ? null : "payout_consent_required")
-  );
-}
-
-/** One press of Route's Save, in the Cashfree form's order (`pressDestination`): a form this phone would refuse goes to
- * the distress scan first (`refuse`); a form it would not refuse whose bank boxes hold words goes to the scan first too
- * (`readFirst`: AIAIC gets the account without its spaces and hyphens; the re-check of 4 Nov 2026, RC2-3); a form whose
- * bank boxes hold only her bank's details goes to AIAIC (`give`). */
-export async function pressPayout(
-  d: PayoutDetailsIn,
-  c: PayoutConsent,
-  run: PressRun,
-): Promise<void> {
-  const refusal = payoutFormRefusal(d, c);
-  if (refusal) return run.refuse(payoutWords(d), refusal);
-  if (d.destination === "bank_account" && bankBoxWords(d.account_number, d.ifsc).length > 0)
-    return run.readFirst(payoutWords(d));
-  return run.give();
 }
 
 // ------------------------------------------------------------------------------------------------ transport
@@ -2009,29 +1766,39 @@ export type XDestination = {
   hint: string;
   status: string;
   ready: boolean;
-  /** The payments provider her details were given to, as AIAIC names it (4 Nov 2026: "cashfree"; an older one
-   * "razorpay"); absent from an AIAIC not yet updated. A name, never an id. */
+  /** The payments provider her details were given to, as AIAIC names it ("cashfree"; a history row's own value for the
+   * provider before Cashfree, `EARLIER`); absent from an AIAIC that names none. A name, never an id. */
   provider?: string | null | undefined;
 };
 
 /**
- * THE PAYMENTS PROVIDER'S NAME, ONLY AS AIAIC NAMES IT (4 Nov 2026: Cashfree is AIAIC's provider; Razorpay is kept but not
- * wired, and RazorpayX, its payouts product, is gone). AIAIC's own code to the name her words print; null for a code this
- * app does not name (an older provider's details, an AIAIC that names none): her sentence then names no provider
- * (`providerKey`), so a Cashfree payment is never said as Razorpay's and nothing is guessed.
+ * THE PAYMENTS PROVIDER'S NAME, ONLY AS AIAIC NAMES IT (Cashfree is AIAIC's one provider since 15 Nov 2026, D-294). AIAIC's
+ * own code to the name her words print; null for a code this app does not name (a history row's provider, an AIAIC that
+ * names none), so a payment is never said as another provider's and nothing is guessed.
  */
 export function providerName(code: string | null | undefined): string | null {
   return code === "cashfree" ? "Cashfree" : null;
 }
 
+/**
+ * A HISTORY ROW'S PROVIDER (D-294, 15 Nov 2026): the value AIAIC passes through, read and never acted on, for her details
+ * given to the provider before Cashfree (AIAIC's migrations keep it). Her words say it as "the earlier provider", never
+ * by its name, as AIAIC's own website says it (its `paymentProvider.js`, `EARLIER`).
+ */
+export const EARLIER = "razorpay";
+
 /** The key a sentence that names her money's provider is said with: `key` filled with the name AIAIC gave
- * (`providerName`), else the same sentence without it (`<key>_any`). */
+ * (`providerName`); a history row's provider, the same sentence saying "the earlier provider" (`<key>_earlier`); else
+ * the same sentence without a name (`<key>_any`). */
 export function providerKey(
   key: string,
   code: string | null | undefined,
 ): { key: string; values: Record<string, string> } {
   const name = providerName(code);
-  return name ? { key, values: { provider: name } } : { key: `${key}_any`, values: {} };
+  if (name) return { key, values: { provider: name } };
+  return code === EARLIER
+    ? { key: `${key}_earlier`, values: {} }
+    : { key: `${key}_any`, values: {} };
 }
 
 /** Her details were given to a provider AIAIC no longer sends through (AIAIC's own rule, `destination_other_provider`:
@@ -2261,8 +2028,8 @@ const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v)
  * HER OWN SALE IS READ FIRST (the audit of 30 Oct 2026, AUD-2): AIAIC calls one order of a group off on its own
  * (`cancel_order`), so a sale called off is said once, on the step where her sale stood, with AIAIC's reason
  * (`cancel_reason_code`); it is never "still gathering" or "your own sale stays", and it asks nothing of her.
- * 5. PAID: her money as AIAIC says it (`from_aiaic.steps`: reached; else Razorpay Route's word: settled), now while the buyer
- *    paid and her money moves; the page adds AIAIC's own sentence for her money.
+ * 5. PAID: her money as AIAIC says it (`from_aiaic.steps`: reached), now while the buyer paid and her money moves; the
+ *    page adds AIAIC's own sentence for her money.
  */
 export function groupView(
   pool: AiaicPool,
@@ -2443,7 +2210,6 @@ export function groupView(
     const money = sale[4]?.state ?? "todo";
     const days = pool.pay_within_days;
     if (fa?.steps?.reached === true) paid = { state: "done", say: say("aiaic.gs.paid.reached") };
-    else if (money === "done") paid = { state: "done", say: say("aiaic.gs.paid.settled") };
     // her sale called off: where it stood (her lot collected first), else no payment
     else if (cancelledSale)
       paid = {

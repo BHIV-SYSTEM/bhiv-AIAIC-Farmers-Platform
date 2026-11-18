@@ -29,7 +29,6 @@ import {
   type HerSession,
 } from "./aiaic-identity.server";
 import {
-  commissionOf,
   evidenceKindOf,
   holdsOf,
   laneOf,
@@ -320,7 +319,6 @@ const ORDER_KEYS = [
   "order_state",
   "cancel_reason_code",
   "payment_state",
-  "settlement_state",
   "synthetic",
   "created_at",
   "updated_at",
@@ -438,47 +436,8 @@ const PAYMENT_KEYS = [
   "refund_owed_inr",
   "refund_note",
 ] as const;
-const MONEY_KEYS = [
-  "route",
-  "settlement_state",
-  "timing",
-  "say",
-  "can_report",
-  "why_not_report",
-  "share_inr",
-  "destination_kind",
-  "destination_hint",
-  "fee_on_top",
-  "fee_line_key",
-  "state",
-  "utr",
-  "settled_at",
-  "held_until",
-  "test_mode",
-  "reports",
-] as const;
-const ACCOUNT_KEYS = [
-  "payout_account_id",
-  "status",
-  "refused_code",
-  "destination_kind",
-  "destination_hint",
-  "ready",
-  "why_not_ready",
-  "test_mode",
-  "synthetic",
-] as const;
-const PAYOUT_KEYS = [
-  "offered",
-  "why_not_offered",
-  "test_mode",
-  "test_values_only",
-  "say",
-  "can_create",
-  "can_withdraw",
-  // 4 Nov 2026: false when AIAIC does not wire Razorpay Route (Cashfree is its provider): nothing of Route is shown
-  "wired",
-] as const;
+/** Her order's money as people said it (AIAIC's `payout_store.money_for_her`): these keys are all it sends. */
+const MONEY_KEYS = ["route", "say", "can_report", "why_not_report", "reports"] as const;
 
 /**
  * Only what this app shows leaves the server: the answer is copied field by field (the contact path's blocks, ids of
@@ -536,14 +495,6 @@ export function mineForBrowser(raw: unknown): AiaicMine {
   const listings = Array.isArray(r["listings"]) ? r["listings"] : [];
   const orders = Array.isArray(r["orders"]) ? r["orders"] : [];
   const party = r["party"] && typeof r["party"] === "object" ? r["party"] : null;
-  const payout =
-    r["payout_account"] && typeof r["payout_account"] === "object"
-      ? (r["payout_account"] as Record<string, unknown>)
-      : null;
-  const notice =
-    r["payout_notice"] && typeof r["payout_notice"] === "object"
-      ? (r["payout_notice"] as Record<string, unknown>)
-      : null;
   const place =
     r["profile_place"] && typeof r["profile_place"] === "object"
       ? (r["profile_place"] as Record<string, unknown>)
@@ -596,13 +547,8 @@ export function mineForBrowser(raw: unknown): AiaicMine {
         m["holds"] = holdsOf((fa as Record<string, unknown>)["holds"]);
         order["from_aiaic"] = m;
       }
-      if (src["money"] && typeof src["money"] === "object") {
-        const money = pick<Record<string, unknown>>(src["money"], MONEY_KEYS);
-        // AIAIC's commission on this sale (24 Oct 2026), field by field; an AIAIC not yet updated sends none.
-        const commission = commissionOf((src["money"] as Record<string, unknown>)["commission"]);
-        if (commission) money["commission"] = commission;
-        order["money"] = money;
-      }
+      if (src["money"] && typeof src["money"] === "object")
+        order["money"] = pick<Record<string, unknown>>(src["money"], MONEY_KEYS);
       return order as unknown as AiaicMine["orders"][number];
     }),
   };
@@ -612,24 +558,6 @@ export function mineForBrowser(raw: unknown): AiaicMine {
     collect_then_pay: r["collect_then_pay"] === true,
     x_notice: noticeOf(r["x_notice"]),
   });
-  if (payout) {
-    const block = pick<Record<string, unknown>>(payout, PAYOUT_KEYS);
-    block["account"] =
-      payout["account"] && typeof payout["account"] === "object"
-        ? pick(payout["account"], ACCOUNT_KEYS)
-        : null;
-    mine.payout_account = block as unknown as NonNullable<AiaicMine["payout_account"]>;
-  }
-  if (notice && typeof notice["version"] === "string") {
-    const lines = (k: string) =>
-      Array.isArray(notice[k]) ? (notice[k] as unknown[]).map((x) => String(x)) : [];
-    mine.payout_notice = {
-      version: notice["version"],
-      en: lines("en"),
-      mr: lines("mr"),
-      hi: lines("hi"),
-    };
-  }
   return mine;
 }
 
@@ -892,57 +820,6 @@ export async function answerGroupPlan(
     key,
     { answer },
   );
-  return r.ok ? { ok: true, data: true } : r;
-}
-
-export type PayoutAccountInput = {
-  notice_version: string;
-  shown_in: "en" | "mr" | "hi";
-  destination: "bank_account" | "upi_id";
-  pan: string;
-  name_on_pan: string;
-  account_number?: string | undefined;
-  ifsc?: string | undefined;
-  upi_id?: string | undefined;
-};
-
-/**
- * Her payout details for Razorpay Route (only where AIAIC wires Route: its `payout_account.wired`) go to AIAIC, which
- * sends them to Razorpay and keeps none of them: this server passes them on in the request's memory only, never logs
- * them, never keeps them, and says back only AIAIC's account state.
- */
-export async function givePayoutAccount(
-  key: string,
-  d: PayoutAccountInput,
-): Promise<AiaicResult<{ status: string | null }>> {
-  const body: Record<string, unknown> = {
-    notice_version: d.notice_version,
-    shown_in: d.shown_in,
-    agreed: true,
-    destination: d.destination,
-    pan: d.pan,
-    name_on_pan: d.name_on_pan,
-  };
-  if (d.destination === "bank_account") {
-    body["account_number"] = d.account_number ?? "";
-    body["ifsc"] = d.ifsc ?? "";
-  } else {
-    body["upi_id"] = d.upi_id ?? "";
-  }
-  const r = await write<Record<string, unknown>>("/farmer/trade/payout-account", key, body);
-  if (!r.ok) return r;
-  const account = r.data["account"];
-  const status =
-    account && typeof account === "object"
-      ? String((account as Record<string, unknown>)["status"] ?? "")
-      : r.data["requesting"]
-        ? "requesting"
-        : null;
-  return { ok: true, data: { status } };
-}
-
-export async function withdrawPayoutAccount(key: string): Promise<AiaicResult<true>> {
-  const r = await write<unknown>("/farmer/trade/payout-account/withdraw", key, {});
   return r.ok ? { ok: true, data: true } : r;
 }
 
