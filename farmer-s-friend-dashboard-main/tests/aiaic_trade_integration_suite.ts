@@ -2036,7 +2036,6 @@ test("A30 R5P-09 only the order page reads every 5 s while money moves, the sell
 
 const USER = "standin-practice-farmer";
 const PASSWORD = "standin-password-not-real-41f9";
-const PAN = "AAAPZ4321K";
 
 type StandIn = {
   url: string;
@@ -4671,25 +4670,24 @@ test("A50 nothing of Route is read or shown: her Payments page has no card of it
   );
 });
 
-test("A51 the policies name Cashfree as AIAIC's payment processor and its refund time as AIAIC's own page states it; RazorpayX nowhere", () => {
+test("A51 the policies name Cashfree as AIAIC's payment processor and its refund time as AIAIC's own page states it; the earlier provider nowhere", () => {
   const page = (name: string) =>
     fs.readFileSync(path.join(APP, "src", "content", "policies", `${name}.md`), "utf-8");
   for (const name of ["about", "contact", "pricing", "privacy", "refund", "terms"]) {
+    // its payout form left her app with it (D-294): no page names it, nor a PAN asked on its form
     const text = page(name);
-    assert.ok(!/razorpayx/i.test(text), `${name} names RazorpayX`);
-    // Razorpay only as Razorpay Route's own form (shown only where AIAIC uses Route): never as AIAIC's processor
     for (const line of text.split(/\r?\n/))
-      if (line.includes("Razorpay"))
-        assert.ok(
-          line.includes("Razorpay Route"),
-          `${name}: Razorpay named outside Route: "${line}"`,
-        );
+      assert.ok(!EARLIER_NAMED.test(line), `${name} names the earlier provider: "${line}"`);
   }
+  assert.ok(
+    page("privacy").includes("a PAN is never asked"),
+    "her privacy page says no PAN is asked",
+  );
   for (const name of ["pricing", "privacy", "refund"])
     assert.ok(page(name).includes("Cashfree"), `${name} names Cashfree`);
   // AIAIC's own refund page (its Cashfree branch): "Cashfree states that a refund can take 7 to 10 business days"
   assert.ok(page("refund").includes("7 to 10 business days"), "Cashfree's own refund time");
-  assert.ok(!/5 to 7/.test(page("refund")), "Razorpay's earlier refund time is gone");
+  assert.ok(!/5 to 7/.test(page("refund")), "the earlier provider's refund time is gone");
   assert.ok(
     page("pricing").includes("Cashfree Payouts"),
     "AIAIC pays her through Cashfree Payouts",
@@ -6934,8 +6932,9 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
     assert.ok(only.includes(who), `the sharing list leaves out ${who}`);
   // THE PAGE'S OWN DATE (its words changed since the other pages'): said at its top by its own route
   // 17 Nov 2026 (the night audit's AUD-ANN-F1): her device list names the sale she started and the registration's boxes
-  // and, the same day (AIAIC's adhtiya re-check RCK-02), her partners' line names the adhtiya
-  assert.equal(PAGE_UPDATED.privacy, "17 November 2026");
+  // and, the same day (AIAIC's adhtiya re-check RCK-02), her partners' line names the adhtiya; 18 Nov 2026: her
+  // officers' item says AIAIC's re-copied rule ("the payment route"), and the earlier provider's payout form's lines go
+  assert.equal(PAGE_UPDATED.privacy, "18 November 2026");
   // HER DEVICE LIST NAMES HER UNFINISHED WORK HER PHONE KEEPS (AUD-ANN-F1): the sale she started and did not finish, for
   // her account only and until when, and the registration's boxes, in this tab only; never her password
   const device =
