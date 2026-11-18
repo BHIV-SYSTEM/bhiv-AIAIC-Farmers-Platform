@@ -436,7 +436,9 @@ const PAYMENT_KEYS = [
   "refund_owed_inr",
   "refund_note",
 ] as const;
-/** Her order's money as people said it (AIAIC's `payout_store.money_for_her`): these keys are all it sends. */
+/** Her order's money as people said it (AIAIC's `payout_store.money_for_her`): the keys passed on. AIAIC also sends
+ * `settlement_state` (the order's own: `not_connected`, `direct`, or a history order's earlier value); nothing here
+ * reads it, and it stays on this server. */
 const MONEY_KEYS = ["route", "say", "can_report", "why_not_report", "reports"] as const;
 
 /**
