@@ -234,8 +234,16 @@ async function loadApp() {
   const { SaleStepper } = await import("../src/components/farm/aiaic/SaleStepper");
   const { getMyTrade } = await import("../src/lib/aiaic-trade.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
-  const { problem, laneOf, moneyCard, paymentLine, groupView, groupSaid, groupPaidWords } =
-    await import("../src/lib/aiaic-trade");
+  const {
+    problem,
+    laneOf,
+    moneyCard,
+    paymentLine,
+    saleSteps,
+    groupView,
+    groupSaid,
+    groupPaidWords,
+  } = await import("../src/lib/aiaic-trade");
   const today = await import("../src/lib/aiaic-today");
   // whom a sale waits on, AIAIC's list as her app holds it (TD29: the adhtiya, 17 Nov 2026)
   const { WAITING_ON } = await import("../src/lib/aiaic-trade");
@@ -267,6 +275,7 @@ async function loadApp() {
     laneOf,
     moneyCard,
     paymentLine,
+    saleSteps,
     groupView,
     groupSaid,
     groupPaidWords,
@@ -355,7 +364,7 @@ function suite(app: App, window: Window & typeof globalThis) {
   const EMPTY = recording("practice_mine_empty");
   const MANY = recording("buyer_farmer_mine_more_time");
   const REAL = recording("farmer_app_mine_offer_expired");
-  const HELD = recording("farmer_app_refund_mine_held");
+  const REAL_DIRECT = recording("farmer_app_mine_refund_owed");
   const DIRECT = recording("payout_mine_dlite_direct");
   const NO_AMOUNT = derived("derived_mine_report_without_amount");
   const MR = marathiNames();
@@ -749,10 +758,10 @@ function suite(app: App, window: Window & typeof globalThis) {
   // ============================================================================================ TD2
 
   test("TD2 her sale on AIAIC's recorded group journey: four separate states (the order being readied, no payment, the collection and the testing each a practice step done, her money not paid), said as part of a group sale with no stale handover step and no 'needs you' (AUD-3), and no 'step n of 5' of a sale sold alone, on the recording, on a copy whose buyer paid and on one whose group facts AIAIC did not send (RC-ANN-1); the buyer's payment while no link is made said as the group sale's own page says it at its money step ('The buyer says it pays within 3 days of delivery.', in English, Marathi and Hindi; the buyer's terms not said: 'awaited'; no group facts sent: the payment's own state), never 'agree the payment with the buyer before you hand over', a link made (paid, or sent and not paid): the sale page's own line, which the group page's payment card says too, called off before any link: the sale page's own line there (the payment's own state), and a sale sold alone keeps its page's line (RC2-ANN-2); and a direct sale waiting on her (AIAIC's recording of a real account): her next step in the order's own terms, whom it waits on (her), 'needs you', no practice word; the sale's own page one press away", async () => {
-    const direct = await mount("en", screenOf(HELD));
+    const direct = await mount("en", screenOf(REAL_DIRECT));
     try {
       await ready(direct);
-      const raw = (HELD as Raw).orders.find(
+      const raw = (REAL_DIRECT as Raw).orders.find(
         (o) => o["her_next_step"] === "farmer_delivers" && !o["pool_id"],
       ) as Record<string, unknown>;
       ok(raw, "the recording holds a direct sale she delivers");
@@ -1989,7 +1998,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     const moneyBox = (s: Element) =>
       s.querySelector('[data-testid="today-state-money"] [data-status]') as HTMLElement | null;
 
-    // AIAIC's recording: five practice sales of one account, as AIAIC keeps them
+    // AIAIC's recording: four practice sales of one account, as AIAIC keeps them
     const raw = DIRECT as Raw;
     const direct = raw.orders.find((o) => moneyOf(o)["route"] === "direct");
     ok(direct, "the recording holds a sale whose payment AIAIC recorded as made outside it");
@@ -2011,12 +2020,11 @@ function suite(app: App, window: Window & typeof globalThis) {
       (o) => moneyOf(o).say?.key === "farmer.money.direct.said_not_yet",
     );
     ok(notYet, "the recording holds her word that the money has not come");
-    const settled = raw.orders.find((o) => moneyOf(o).say?.key === "farmer.money.settled");
     const paidLink = raw.orders.find((o) => o["payment_state"] === "paid" && !moneyOf(o).say);
     const nobody = raw.orders.find(
       (o) => o["payment_state"] === "not_connected" && !moneyOf(o).say,
     );
-    ok(settled && paidLink && nobody, "the recording's other three sales");
+    ok(paidLink && nobody, "the recording's other two sales");
 
     const p = await mount("en", screenOf(DIRECT));
     try {
@@ -2069,18 +2077,73 @@ function suite(app: App, window: Window & typeof globalThis) {
         ny.querySelector('[data-testid="today-progress"]'),
         "a payment AIAIC can see (the buyer's link): its step n of 5 stays",
       );
-      // AIAIC's own words where nobody said anything: unchanged
-      for (const [o, code, said] of [
-        [settled, "reached", EN.inBank],
-        [paidLink, "buyer_paid", EN.buyerPaid],
-        [nobody, "not_paid", EN.notPaid],
+      // AIAIC's own words where nobody said anything: unchanged, each word for word
+      // (the buyer's paid link is AIAIC's Cashfree collect link: AIAIC holds her money, as TD3 says it; its box also
+      // says why, in AIAIC's own reason, read apart from its word: lane A's skeptic, F3, 18 Nov 2026)
+      ok(paidLink["from_aiaic"], "the recording: the paid link is AIAIC's collect link");
+      const waitsFor = (paidLink["from_aiaic"] as { holds?: { waits_for?: string } | null }).holds
+        ?.waits_for;
+      ok(waitsFor, "the recording: AIAIC says why it holds her money");
+      for (const [o, code, said, why] of [
+        [paidLink, "held", EN.held, words("en", `aiaic.money.holds.waits_for.${waitsFor}`)],
+        [nobody, "not_paid", EN.notPaid, null],
       ] as const) {
-        const m = statusOf(saleOn(p, String(o["order_id"])), "today-state-money");
+        const sale = saleOn(p, String(o["order_id"]));
+        const m = statusOf(sale, "today-state-money");
         assert.deepEqual(m.codes, [code], `${String(o["order_id"])}: AIAIC's own state`);
-        assert.equal(m.text, said, `${String(o["order_id"])}: its word`);
+        const box = sale.querySelector('[data-testid="today-state-money"] dd')?.cloneNode(true) as
+          Element | undefined;
+        const whyBox = box?.querySelector('[data-testid="today-money-why"]') ?? null;
+        assert.equal(
+          whyBox?.textContent ?? null,
+          why,
+          `${String(o["order_id"])}: why AIAIC holds it, only where it holds it`,
+        );
+        whyBox?.remove();
+        assert.equal(
+          (box?.textContent ?? "").replace(/\s+/g, " ").trim(),
+          said,
+          `${String(o["order_id"])}: its word, word for word`,
+        );
       }
     } finally {
       await p.unmount();
+    }
+
+    // DERIVED, in memory (18 Nov 2026, Route out of her app, D-294): a sale AIAIC sends no steps of its own for, its
+    // buyer paid (as a history row of the earlier provider's is: no `from_aiaic`), from AIAIC's recorded paid sale with
+    // only `from_aiaic` taken out: said by its payment alone, "The buyer paid", never in her bank, as her sale's own payment
+    // line and its five-step bar say it
+    const plain = copy(paidLink);
+    delete plain["from_aiaic"];
+    const plainId = String(plain["order_id"]);
+    const plainRead = app.mineForBrowser(copy({ ...copy(raw), orders: [copy(plain)] })).orders[0];
+    ok(plainRead, "her server reads the derived sale");
+    assert.equal(plainRead.payment.state, "paid", "its buyer paid, on the provider's word");
+    assert.equal(
+      app.saleSteps(plainRead).find((s) => s.key === "money")?.state,
+      "todo",
+      "its five-step bar: her money to come, never done",
+    );
+    assert.equal(app.paymentLine(plainRead).key, "aiaic.pay.state.paid", "its payment line");
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const q = await mount(lang, screenOf({ ...copy(raw), orders: [plain], listings: [] }, lang));
+      try {
+        await ready(q);
+        const m = statusOf(saleOn(q, plainId), "today-state-money");
+        assert.deepEqual(m.codes, ["buyer_paid"], `${lang}: the buyer paid, nothing more`);
+        assert.equal(m.text, words(lang, "aiaic.today.money.buyer_paid"), `${lang}: its word`);
+        ok(
+          !(saleOn(q, plainId).textContent ?? "").includes(
+            words(lang, "aiaic.today.money.reached"),
+          ),
+          `${lang}: never in her bank`,
+        );
+        if (lang !== "en")
+          assert.deepEqual(latinIn(saleOn(q, plainId)), [], `${lang}: no English word on her card`);
+      } finally {
+        await q.unmount();
+      }
     }
 
     // the DERIVED copy: her word "I got the money" sent without an amount
@@ -2707,11 +2770,11 @@ function suite(app: App, window: Window & typeof globalThis) {
   };
   test("TD21 one current step (the night run's A2; TRACE's T1-07, T2-ANN-03, INT-D6): on a DERIVED copy of AIAIC's recorded sale with the buyer's link sent and not paid, given a pickup done as AIAIC records one (the order on the way, waiting on AIAIC's team, her next step the delivery), her home's progress names the step AIAIC names as hers, the delivery, with the buyer's payment said as running at the same time, never 'Step 2 of 5: the buyer's payment' beside 'Next: the delivery to the buyer.'; the four states stay apart; her sale's bar says in words that the two run at the same time; before the pickup the handover AIAIC names, the payment beside it; a sale whose buyer paid keeps its one step; in Marathi and Hindi", async () => {
     // DERIVED, in memory: AIAIC's recorded practice sale with the buyer's link sent and not paid
-    // (buyer_farmer_mine_more_time, ord_bd132f59e0bbb326a758), given what AIAIC sets once a pickup is recorded, as its
+    // (buyer_farmer_mine_more_time, its first such sale), given what AIAIC sets once a pickup is recorded, as its
     // recorded after-pickup order holds them (farmer_app_mine_after_pickup): the order in fulfilment, a pickup done, its
     // lane on the way waiting on AIAIC's team, her next step the delivery (engine `trade/store.py` `her_next_step`)
     const linkOrder = (MANY as Raw).orders.find(
-      (o) => o["order_id"] === "ord_bd132f59e0bbb326a758",
+      (o) => o["payment_state"] === "link_created",
     ) as Record<string, unknown>;
     ok(linkOrder, "AIAIC's recorded sale with the buyer's link sent");
     assert.equal(linkOrder["payment_state"], "link_created", "its link is sent and not paid");
@@ -2734,7 +2797,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     const p = await mount("en", screenOf(one(picked)));
     try {
       await ready(p);
-      const sale = saleCard(p, "ord_bd132f59e0bbb326a758");
+      const sale = saleCard(p, String(linkOrder["order_id"]));
       assert.equal(
         sale.querySelector('[data-testid="today-progress"]')?.textContent,
         "Step 4 of 5: the delivery to the buyer. At the same time, step 2: the buyer's payment.",
@@ -2777,7 +2840,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     const before = await mount("en", screenOf(one(linkOrder)));
     try {
       await ready(before);
-      const sale = saleCard(before, "ord_bd132f59e0bbb326a758");
+      const sale = saleCard(before, String(linkOrder["order_id"]));
       assert.equal(
         sale.querySelector('[data-testid="today-progress"]')?.textContent,
         "Step 3 of 5: handing over your produce. At the same time, step 2: the buyer's payment.",
@@ -2824,7 +2887,7 @@ function suite(app: App, window: Window & typeof globalThis) {
       try {
         await ready(m);
         const line =
-          saleCard(m, "ord_bd132f59e0bbb326a758").querySelector('[data-testid="today-progress"]')
+          saleCard(m, String(linkOrder["order_id"])).querySelector('[data-testid="today-progress"]')
             ?.textContent ?? "";
         assert.equal(
           line,
@@ -2862,7 +2925,7 @@ function suite(app: App, window: Window & typeof globalThis) {
         order as never,
       )?.line ?? null;
     const directOrder = (DIRECT as Raw).orders.find(
-      (o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c",
+      (o) => (o["money"] as Record<string, unknown> | undefined)?.["route"] === "direct",
     ) as Record<string, unknown>;
     ok(directOrder, "AIAIC's recorded sale paid outside it");
     assert.equal((directOrder["money"] as Record<string, unknown>)["route"], "direct");
@@ -2892,7 +2955,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     );
     // a sale whose buyer's link AIAIC sees keeps its own states (AIAIC's recording)
     const linkOrder = (DIRECT as Raw).orders.find(
-      (o) => o["order_id"] === "ord_d6cae7be9dbe4dd4ac7c",
+      (o) => o["payment_state"] === "link_created",
     ) as Record<string, unknown>;
     ok(
       (await barOf("en", readOne(DIRECT, linkOrder))).label.includes("Buyer paid: now"),
@@ -2944,7 +3007,9 @@ function suite(app: App, window: Window & typeof globalThis) {
     const T = app.today;
     // RC2-ANN-3: reconciled, paid outside AIAIC
     const direct = copy(
-      (DIRECT as Raw).orders.find((o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c"),
+      (DIRECT as Raw).orders.find(
+        (o) => (o["money"] as Record<string, unknown> | undefined)?.["route"] === "direct",
+      ),
     ) as Record<string, unknown>;
     ok(direct, "AIAIC's recorded sale paid outside it");
     const at = (m: number) =>
@@ -3006,7 +3071,9 @@ function suite(app: App, window: Window & typeof globalThis) {
     }
     // RC2-ANN-4: AIAIC's own state wins over people's word held beside it
     const word = copy(
-      (DIRECT as Raw).orders.find((o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c"),
+      (DIRECT as Raw).orders.find(
+        (o) => (o["money"] as Record<string, unknown> | undefined)?.["route"] === "direct",
+      ),
     ) as Record<string, unknown>;
     const wordMoney = word["money"] as Record<string, unknown>;
     for (const [raw, name, state] of [
@@ -3124,17 +3191,18 @@ function suite(app: App, window: Window & typeof globalThis) {
   });
 
   // ================================================================ the night fix of 17 Nov 2026 (AUD-ANN-F2)
-  test("TD26 the buyer's payment is said beside her step only while it is under way (the night audit's AUD-ANN-F2): on AIAIC's recorded sales with no payment link made (ord_821b47489ac57f6a8118 in buyer_farmer_mine_more_time, and the picked-up ord_5b4cd43a8d8a378a0e43 in farmer_app_mine_after_pickup) her home's progress names her step alone, never 'At the same time, step 2: the buyer's payment', as her sale's bar draws no two steps at once and her payment line names no link; a link sent and not paid keeps the payment beside her step (TD21); in Marathi and Hindi", async () => {
+  test("TD26 the buyer's payment is said beside her step only while it is under way (the night audit's AUD-ANN-F2): on AIAIC's recorded sales with no payment link made (the walk's sale with no link in buyer_farmer_mine_more_time, and the picked-up sale in farmer_app_mine_after_pickup) her home's progress names her step alone, never 'At the same time, step 2: the buyer's payment', as her sale's bar draws no two steps at once and her payment line names no link; a link sent and not paid keeps the payment beside her step (TD21); in Marathi and Hindi", async () => {
     const AFTER = recording("farmer_app_mine_after_pickup");
-    for (const [raw, id, en] of [
-      [MANY, "ord_821b47489ac57f6a8118", "Step 3 of 5: handing over your produce"],
-      [AFTER, "ord_5b4cd43a8d8a378a0e43", "Step 4 of 5: the delivery to the buyer"],
+    for (const [raw, which, en] of [
+      [MANY, "not_connected", "Step 3 of 5: handing over your produce"],
+      [AFTER, "in_fulfilment", "Step 4 of 5: the delivery to the buyer"],
     ] as const) {
-      const order = (raw as Raw).orders.find((o) => o["order_id"] === id) as Record<
-        string,
-        unknown
-      >;
-      ok(order, `AIAIC's recorded ${id}`);
+      // found by AIAIC's own facts (the walk's sale with no link made; the picked-up sale), never by an id
+      const order = (raw as Raw).orders.find((o) =>
+        which === "in_fulfilment" ? o["order_state"] === which : o["payment_state"] === which,
+      ) as Record<string, unknown>;
+      ok(order, `AIAIC's recorded sale: ${which}`);
+      const id = String(order["order_id"]);
       const one = { ...copy(raw), orders: [copy(order)] };
       const read = app.mineForBrowser(copy(one)).orders[0];
       ok(read, `${id}: read by her server`);
@@ -3183,9 +3251,9 @@ function suite(app: App, window: Window & typeof globalThis) {
   });
 
   // ================================================================ the night fix of 17 Nov 2026 (AUD-ANN-F3)
-  test("TD27 her sale's bar on a payment made outside AIAIC says its two money steps in words on the screen, and never says people's word that it was paid when her last word is that the money has not come (the night audit's AUD-ANN-F3): on AIAIC's recording payout_mine_dlite_direct (ord_67978c9f5bfb73cfb86c, her word that she got the money) the buyer's payment and her money are people's word, said under the bar; on its copy DERIVED with her later word that the money has not come (AIAIC keeps the route direct and says the last word: one report not_received after the recorded one, say farmer.money.direct.said_not_yet), both are not seen by AIAIC, never people's word, beside her money card's 'You told us the money has not come'; a payment AIAIC sees adds no such line; in Marathi and Hindi", async () => {
+  test("TD27 her sale's bar on a payment made outside AIAIC says its two money steps in words on the screen, and never says people's word that it was paid when her last word is that the money has not come (the night audit's AUD-ANN-F3): on AIAIC's recording payout_mine_dlite_direct (its direct sale, her word that she got the money) the buyer's payment and her money are people's word, said under the bar; on its copy DERIVED with her later word that the money has not come (AIAIC keeps the route direct and says the last word: one report not_received after the recorded one, say farmer.money.direct.said_not_yet), both are not seen by AIAIC, never people's word, beside her money card's 'You told us the money has not come'; a payment AIAIC sees adds no such line; in Marathi and Hindi", async () => {
     const directOrder = (DIRECT as Raw).orders.find(
-      (o) => o["order_id"] === "ord_67978c9f5bfb73cfb86c",
+      (o) => (o["money"] as Record<string, unknown> | undefined)?.["route"] === "direct",
     ) as Record<string, unknown>;
     ok(directOrder, "AIAIC's recorded sale paid outside it");
     const readOne = (o: Record<string, unknown>) =>
@@ -3252,7 +3320,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     );
     // a payment AIAIC sees: no such line (AIAIC's recording)
     const linkOrder = (DIRECT as Raw).orders.find(
-      (o) => o["order_id"] === "ord_d6cae7be9dbe4dd4ac7c",
+      (o) => o["payment_state"] === "link_created",
     ) as Record<string, unknown>;
     assert.deepEqual((await barOf("en", readOne(linkOrder))).worded, [], "a payment AIAIC sees");
     for (const lang of ["mr", "hi"] as const) {
@@ -3432,12 +3500,14 @@ function suite(app: App, window: Window & typeof globalThis) {
       const missing = app.WAITING_ON.filter((code) => !String(DICTS[lang][key(code)] ?? "").trim());
       assert.deepEqual(missing, [], `${lang}: words for whom each sale waits on`);
     }
-    // DERIVED, in memory: AIAIC's recorded direct sale of a real account (farmer_app_refund_mine_held,
-    // ord_8228437b1b3c8521dd76: agreed, no step recorded, waiting on her), given an adhtiya as AIAIC's `lane_of` reads
-    // it: only its lane's `waiting_on` changes, to `partner:adhtiya` (its code and since stay: no step is recorded)
-    const id = "ord_8228437b1b3c8521dd76";
-    const recorded = (HELD as Raw).orders.find((o) => o["order_id"] === id);
+    // DERIVED, in memory: AIAIC's recorded direct sale of a real account (farmer_app_mine_refund_owed: the sale she
+    // delivers, agreed, no step recorded, waiting on her), given an adhtiya as AIAIC's `lane_of` reads it: only its lane's
+    // `waiting_on` changes, to `partner:adhtiya` (its code and since stay: no step is recorded)
+    const recorded = (REAL_DIRECT as Raw).orders.find(
+      (o) => o["her_next_step"] === "farmer_delivers" && !o["pool_id"],
+    );
     ok(recorded, "AIAIC's recorded direct sale");
+    const id = String(recorded["order_id"]);
     const lane = recorded["lane"] as Record<string, unknown>;
     assert.deepEqual(
       [lane["code"], lane["waiting_on"], recorded["pool_id"], recorded["order_state"]],
@@ -3446,7 +3516,7 @@ function suite(app: App, window: Window & typeof globalThis) {
     );
     const order = copy(recorded);
     order["lane"] = { ...lane, waiting_on: "partner:adhtiya" };
-    const one = { ...copy(HELD), orders: [order], listings: [] };
+    const one = { ...copy(REAL_DIRECT), orders: [order], listings: [] };
     assert.equal(
       app.mineForBrowser(copy(one)).orders[0]?.lane?.waiting_on,
       "partner:adhtiya",

@@ -78,27 +78,44 @@ The Pricing Details page says AIAIC's commission from AIAIC's own setting, read 
 without that route yet answers 404: the page then says the commission could not be read, and when a commission is
 fixed and shown. It never guesses a rate.
 
-Where an AIAIC order's money is shown (the order page's "Your money" card and the Payments page), AIAIC's
-`money.commission` is shown when AIAIC sends it: the agreed price, AIAIC's commission and who pays it, and what she
-receives, all AIAIC's own numbers for that sale's payment link. An AIAIC server not yet updated sends none, and nothing
-is shown. Nothing to set.
+AIAIC's commission on her sale is shown from AIAIC's own figures for that sale (`from_aiaic`, where AIAIC collects the
+buyer's payment and then pays her through Cashfree): her sale's "Your money" card (`FromAiaicCard`) says the agreed
+price, AIAIC's commission and the GST on it, each with its rate (`commission_inr`, `commission_percent`, `gst_inr`,
+`gst_percent`), and what she receives (`to_her_inr`), and her guided home (`/today`) says the commission and the GST the
+same way. An order's `money` holds no commission at AIAIC's D-294 release (the one it held came from the earlier
+provider's link record), and this app reads none there. Nothing to set.
 
-## Cashfree, AIAIC's payment processor (since 4 Nov 2026)
+## Cashfree, AIAIC's payment processor (since 4 Nov 2026; its one provider since 15 Nov 2026)
 
-**Deploy order: this app's Cashfree words go live only after AIAIC's Cashfree release is live.** Deploy AIAIC's
-branch `payments-cashfree-2026-11-04` first, check it answers as below, then deploy this app. The other way round is not
-read as before (see the end of this section).
+**Deploy order (18 Nov 2026): AIAIC's release of its D-294 removal first; this app is merged only once that release is
+live (AIAIC's deployed commit checked), in the same sitting.** AIAIC's deploy gate can run longer than this app's, so
+two merges made one right after the other can put this app live first, the order to avoid. Each side reads the other's
+build as follows:
 
-AIAIC's payments moved to Cashfree on its branch `payments-cashfree-2026-11-04` (its design C1 to C10): the buyer pays
-AIAIC through a Cashfree payment link, and once the link is paid in full and her produce has left her, AIAIC sends the
-farmer her amount through Cashfree Payouts. Razorpay is kept in AIAIC's code but not wired; RazorpayX, Razorpay's payouts
-product, is gone. This app follows what AIAIC's answers say, field by field; nothing to set:
+- **This app's earlier build on AIAIC's release** (between the two deploys): the Payments page shows the earlier
+  provider's card with "Paying you through AIAIC is not switched on here" (that build shows the card whenever AIAIC
+  sends no `payout_account`), and a payment link being made reads "No payment yet" (that build knows the code
+  `payment_route_is_link` by its earlier name only).
+- **This app on an AIAIC before that release** (the order to avoid): no card, which is right, and a link being made
+  reads "No payment yet". But an order that holds a payout of the earlier provider (from its test-mode time; whether
+  AIAIC's live database holds one is not measured) has its money worded by keys this app no longer has words for: her
+  sale's money card, its line on the Payments page and her group sale's money step print the key itself (such as
+  `aiaic.farmer.money.settled`). A refusal of her press with the code's earlier name shows that name, which holds the
+  earlier provider's, inside "That did not work (...)" (only in a race: her two buttons show only where AIAIC takes her
+  word). Her guided home shows neither: it says only the sentences it has words for.
+
+AIAIC's payments moved to Cashfree on 4 Nov 2026 (its design C1 to C10): the buyer pays AIAIC through a Cashfree payment
+link, and once the link is paid in full and her produce has left her, AIAIC sends the farmer her amount through Cashfree
+Payouts. AIAIC's earlier payment provider was removed from AIAIC on 15 Nov 2026 (D-294), and from this app with it: its
+card, its form, its server functions, its words and its recorded answers. This app follows what AIAIC's answers say,
+field by field; nothing to set:
 
 - **The provider is named only as AIAIC names it.** Her destination names its provider (`x_destination.provider`,
-  `cashfree`): the words for removing it say Cashfree, and a destination given to an earlier provider (`razorpay`) is
-  said as such, with a line asking her to give it again (AIAIC refuses its send to it). Where AIAIC's answer names no
-  provider (an order's own payment state, a refusal), the words name none ("the payment company"). Nothing says
-  RazorpayX.
+  `cashfree`): the words for removing it say Cashfree. A destination given to the earlier provider is a history row:
+  AIAIC passes its provider's value through, read and never acted on (`EARLIER` in `src/lib/aiaic-trade.ts`), and this
+  app says it as AIAIC's earlier payment company, never by its name, with a line asking her to give her details again
+  (AIAIC refuses its send to it), as AIAIC's own website says it. Where AIAIC's answer names no provider (an order's own
+  payment state, a refusal), the words name none ("the payment company").
 - **Her money, step by step, from AIAIC's own steps** (`from_aiaic.steps` and `sending.status`): each of Cashfree's
   states as AIAIC maps them is said in plain words (asked for and not reached yet; waiting for a confirmation, which
   covers a transfer held for an approval; on its way; reached her bank; did not go through or came back, on AIAIC's team's
@@ -113,26 +130,20 @@ product, is gone. This app follows what AIAIC's answers say, field by field; not
   typed in the IFSC box too), and no well-formed IFSC, ever goes to the scan. A press whose account or IFSC box holds
   words has them read first even when nothing here would refuse it (AIAIC gets the number without its spaces, and its
   own reader misses her words joined); a press with only her bank's details goes straight to AIAIC, whose middleware
-  reads the name in its body. Route's form, where AIAIC wires it, does the same. The account box keeps the spaces she
+  reads the name in its body. The account box keeps the spaces she
   types (AIAIC gets the number without them) and is held to AIAIC's own rule (5 to 35 letters and digits) after the
   scan, so a press never sends more than AIAIC takes; the IFSC box cuts nothing off at 11. Every code AIAIC's Cashfree
   branch answers her form with (`cashfree_*`, `live_keys_no_rehearsal`, ...) has words in English, Marathi and Hindi
   (drafts for a native reader).
-- **Razorpay Route's card** on the Payments page shows only while AIAIC wires Route (`payout_account.wired`); Route's
-  own lines keep naming Razorpay and show only on Route's own facts.
 - **The policy pages** (Pricing, Privacy, Refund) name Cashfree as AIAIC's payment processor, the collect-then-pay flow,
   and the refund time as AIAIC's own Refund page states it (Cashfree's 7 to 10 business days).
 
-An AIAIC server not yet on its Cashfree release is **not** read as before everywhere, which is why the order above
-holds:
-
-- What reads as before: with no `provider`, her destination's words name no provider; with no `wired`, Route's card shows
-  as it did; with no `provider` or `model` in its pricing, the commission sentence is the older one.
-- What does not: its seven RazorpayX refusals (`razorpayx_keys_incomplete`, `razorpayx_not_configured`,
-  `razorpayx_keys_other_mode`, `razorpayx_live_not_approved`, `razorpayx_refused`, `razorpayx_no_answer`,
-  `razorpayx_ip_not_allowlisted`) are kept here with words that name no provider, only for that time, and are removed
-  once AIAIC's Cashfree release is live; but this app's Pricing, Privacy and Refund pages already name Cashfree as
-  AIAIC's payment processor and its refund time, which that AIAIC does not use.
+- **Her money's word from AIAIC** (`money`, AIAIC's `payout_store.money_for_her`): how the order's money moves
+  (`route`: none, or direct, paid outside AIAIC), what people said of the payment (`say`: `farmer.money.direct.*`), and
+  whether her own word is asked (`can_report`, `why_not_report`). Nothing else of `money` is read. AIAIC also sends
+  `settlement_state` there (the order's own: `not_connected`, `direct`, or a history order's earlier value), and this
+  app neither reads it nor passes it to the browser. AIAIC's code for a link live, paid or being made,
+  `payment_route_is_link`, is said in English, Marathi and Hindi.
 
 The recorded answers the tests replay (`tests/fixtures/aiaic/`) are recorded again from AIAIC's branch by one command;
 `trade_recording_manifest.json` beside them names the AIAIC commit they came from and that command.

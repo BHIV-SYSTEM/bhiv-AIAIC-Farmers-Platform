@@ -1,17 +1,17 @@
 /**
- * BOTH PAYOUT FORMS, DRIVEN AS SHE DRIVES THEM (the re-check of 5 Nov 2026, round 4: RC4-1 and RC4-2; the platform's
+ * HER PAYOUT FORM, DRIVEN AS SHE DRIVES IT (the re-check of 5 Nov 2026, round 4: RC4-1 and RC4-2; the platform's
  * rule D-105: nothing answers a person in crisis before the scan does). Four rounds of compiler pins on the forms' source
  * each left an expression outside them that brought back AN-1's harm with every suite green, so the distress path's
- * guard on both payout forms is this behavioural test: the REAL `DestinationForm` (FromAiaicCard.tsx) and Route's REAL
- * card (AiaicPayments.tsx) are rendered in jsdom under React's `act`, typed into one character at a time and tapped, as
- * she does, and their presses ask the REAL `scanFirst` server function in this process (`askScanFirst`, shared with the
- * trade suite).
+ * guard on her payout form is this behavioural test: the REAL `DestinationForm` (FromAiaicCard.tsx) is rendered in jsdom
+ * under React's `act`, typed into one character at a time and tapped, as she does, and its presses ask the REAL
+ * `scanFirst` server function in this process (`askScanFirst`, shared with the trade suite). (Route's card and its form
+ * were the second payout form until 18 Nov 2026, D-294: they left her app with Route, and their cases with them.)
  *
  * Run:  npx tsx tests/aiaic_payout_forms_dom_suite.ts   (AIAIC_TEST_JUNIT=<file.xml> also writes a JUnit file)
  * `bun install` gives it jsdom (a devDependency). Without jsdom the suite fails, and says so; it never skips.
  *
- * For each form, every combination of: every box she can type words in (the name, the account, the IFSC, the UPI ID,
- * Route's name on PAN), each copied crisis phrase, her tick on and off, the other fields valid and empty, bank and UPI.
+ * For the form, every combination of: every box she can type words in (the name, the account, the IFSC, the UPI ID),
+ * each copied crisis phrase, her tick on and off, the other fields valid and empty, bank and UPI.
  * In every case:
  *  (a) while she types, after each input event and each move of her finger, nothing on the form changes but her boxes'
  *      own values and Save's enabled state (the form as the DOM holds it, its text and every alert or status region,
@@ -31,14 +31,13 @@
  *      not stuck, as she finds it: her second tap asks the scan again, first, and gets the card again, and with every
  *      other field valid and ticked her box corrected is given at once (the re-check of 5 Nov 2026, round 5: RC5-1,
  *      RC5-2).
- * She pauses (round 6, RC6-2): in P1 and P2 she waits PAUSE_MS after her last keystroke and (a) is read again, and
+ * She pauses (round 6, RC6-2): in P1 she waits PAUSE_MS after her last keystroke and (a) is read again, and
  * PAUSE_MS after the card and (d) is read again.
  * The Cashfree form in each of its three states (round 5, RC5-3): her first destination (AIAIC's notice, none given
  * before); a replacement (a destination given before, as a recording holds it, and Change tapped: her tick is hers to
  * give again); and a form AIAIC sent no notice for (nothing to tick). Held fixed: `largeAmount` (false: her amount
- * under Rs 1,00,000, so the UPI box is offered), and Route's card only as AIAIC offers it on a TEST server (its TEST
- * values button fills the other fields; no recording holds a live Route form).
- * A slow scan (round 5, RC5-4): in T1 to T4 AIAIC answers after SLOW_MS (12 s), within this server's own limit on its
+ * under Rs 1,00,000, so the UPI box is offered).
+ * A slow scan (round 5, RC5-4): in T1 and T2 AIAIC answers after SLOW_MS (12 s), within this server's own limit on its
  * answer (15 s, whose signal the stand-in honours, as a real fetch does); (c) and (d) still hold, and while the scan is
  * asked nothing is given and no refusal is on screen. A time limit of the phone's of SLOW_MS or more is not seen here.
  * The one kind of press the re-check's RC2-3 decision sends to AIAIC as now (CRISIS_EN in a name box, every other field
@@ -218,16 +217,10 @@ async function loadApp() {
   const { runWithStartContext } = await import("@tanstack/start-storage-context");
   const { DICTS, I18nProvider } = await import("../src/lib/i18n");
   const { DestinationForm } = await import("../src/components/farm/aiaic/FromAiaicCard");
-  const { AiaicPayments } = await import("../src/components/farm/aiaic/AiaicPayments");
   const { CrisisFirst } = await import("../src/components/farm/aiaic/CrisisFirst");
   const { scanFirst } = await import("../src/lib/aiaic-account.functions");
-  const {
-    getMyTrade,
-    getNearbyMandis,
-    getTransportEstimate,
-    giveMyDestination,
-    givePayoutAccount,
-  } = await import("../src/lib/aiaic-trade.functions");
+  const { getMyTrade, getNearbyMandis, getTransportEstimate, giveMyDestination } =
+    await import("../src/lib/aiaic-trade.functions");
   const { getPlacesDistricts } = await import("../src/lib/places.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
   const { placeShown, rupeeRange } = await import("../src/lib/aiaic-trade");
@@ -246,7 +239,6 @@ async function loadApp() {
     DICTS,
     I18nProvider,
     DestinationForm,
-    AiaicPayments,
     CrisisFirst,
     scanFirst,
     getMyTrade,
@@ -254,7 +246,6 @@ async function loadApp() {
     getTransportEstimate,
     getPlacesDistricts,
     giveMyDestination,
-    givePayoutAccount,
     mineForBrowser,
     placeShown,
     rupeeRange,
@@ -282,10 +273,11 @@ function suite(app: App, window: Window & typeof globalThis) {
   const givenBefore = (
     app.mineForBrowser(recorded("collect_mine_processing")) as { x_destination?: unknown }
   ).x_destination as Record<string, unknown>;
+  // her records, as AIAIC's Cashfree branch answers them (a read again after a press is answered with it)
   const mineAnswer = {
     ok: true,
     data: {
-      mine: app.mineForBrowser(recorded("payout_mine_offered")),
+      mine: app.mineForBrowser(recorded("collect_mine_paid")),
       cropNames: {},
       districtNames: {},
     },
@@ -297,7 +289,6 @@ function suite(app: App, window: Window & typeof globalThis) {
   const named = {
     scanFirst: app.scanFirst,
     giveMyDestination: app.giveMyDestination,
-    givePayoutAccount: app.givePayoutAccount,
     getMyTrade: app.getMyTrade,
     getPlacesDistricts: app.getPlacesDistricts,
     getNearbyMandis: app.getNearbyMandis,
@@ -341,7 +332,7 @@ function suite(app: App, window: Window & typeof globalThis) {
               data: ctx["data"] as { text: string; lang: Lang },
             }),
           };
-        if (name === "giveMyDestination" || name === "givePayoutAccount") {
+        if (name === "giveMyDestination") {
           seen.events.push("give");
           const sent = { ...(ctx["data"] as Record<string, unknown>) };
           try {
@@ -486,11 +477,11 @@ function suite(app: App, window: Window & typeof globalThis) {
   /** A payout form, opened as she opens it: its own area, her boxes by their labels, Save, her tick. */
   type Opened = {
     scope: () => Element;
-    box: (b: Box | "pan") => HTMLInputElement;
+    box: (b: Box) => HTMLInputElement;
     save: () => HTMLButtonElement | null;
     choose: (k: Kind) => Promise<void>;
     tick: () => Promise<void>;
-    /** the other fields valid; each change through what she does (a box's input event, or Route's TEST values button) */
+    /** the other fields valid; each change through what she does (a box's input event) */
     restValid: (except: Box, kind: Kind, after: () => void) => Promise<void>;
     container: HTMLElement;
     unmount: () => Promise<void>;
@@ -548,12 +539,11 @@ function suite(app: App, window: Window & typeof globalThis) {
         "Change opens the form: her replacement",
       );
     }
-    const LABEL: Record<Box | "pan", string> = {
+    const LABEL: Record<Box, string> = {
       name: "aiaic.dest.name",
       account: "aiaic.dest.account",
       ifsc: "aiaic.dest.ifsc",
       upi: "aiaic.dest.upi",
-      pan: "-",
     };
     return {
       scope,
@@ -586,56 +576,6 @@ function suite(app: App, window: Window & typeof globalThis) {
             await input(boxByLabel(scope(), words(lang, LABEL[b as Box])), v);
             after();
           }
-      },
-      container: m.container,
-      unmount: m.unmount,
-    };
-  };
-
-  const openRoute = async (lang: Lang, gate = false): Promise<Opened> => {
-    const page = createElement(app.AiaicPayments);
-    const m = await mount(
-      gate ? createElement(app.CrisisFirst, { children: page }) : page,
-      lang,
-      (qc) => qc.setQueryData(["aiaic-mine", lang], mineAnswer),
-    );
-    const give = [...m.container.querySelectorAll("button")].find(
-      (b) => (b.textContent ?? "").trim() === words(lang, "aiaic.payout.give"),
-    );
-    assert.ok(give, "Route's card offers her form");
-    await tap(give);
-    const scope = () => m.container.querySelector("form")?.closest("section") ?? m.container;
-    const LABEL: Record<Box | "pan", string> = {
-      name: "aiaic.field.name_on_pan",
-      account: "aiaic.field.account_number",
-      ifsc: "aiaic.field.ifsc",
-      upi: "aiaic.field.upi_id",
-      pan: "aiaic.field.pan",
-    };
-    return {
-      scope,
-      box: (b) => boxByLabel(scope(), words(lang, LABEL[b])),
-      save: () => scope().querySelector('form button[type="submit"]'),
-      choose: (k) =>
-        tap(radio(scope(), words(lang, k === "bank" ? "aiaic.payout.bank" : "aiaic.payout.upi"))),
-      tick: async () => {
-        const read = scope().querySelector("form button[aria-expanded]");
-        assert.ok(read, "the notice's own button");
-        if (read.getAttribute("aria-expanded") !== "true") await tap(read);
-        const tick = scope().querySelector('form input[type="checkbox"]');
-        assert.ok(tick, "her tick");
-        await tap(tick);
-      },
-      restValid: async (except, _kind, after) => {
-        // Route's own TEST values (its card is offered on a TEST server only), then her box emptied, as she would
-        const fill = [...scope().querySelectorAll("button")].find(
-          (b) => (b.textContent ?? "").trim() === words(lang, "aiaic.payout.fill_test"),
-        );
-        assert.ok(fill, "Route's TEST values button");
-        await tap(fill);
-        after();
-        await input(boxByLabel(scope(), words(lang, LABEL[except])), "");
-        after();
       },
       container: m.container,
       unmount: m.unmount,
@@ -850,7 +790,7 @@ function suite(app: App, window: Window & typeof globalThis) {
   // ---------------------------------------------------------------------------------------- one case, all of it
   type Case = {
     id: string;
-    form: "cashfree" | "route";
+    form: "cashfree";
     kind: Kind;
     box: Box;
     phrase: Phrase;
@@ -865,22 +805,13 @@ function suite(app: App, window: Window & typeof globalThis) {
     /** she pauses PAUSE_MS after her last keystroke, and again with the card before her */
     pause?: boolean;
   };
-  /** Route's TEST values (AiaicPayments.tsx's own; AIAIC's recorder uses the same kind): never a person's. */
-  const ROUTE_VALID = {
-    name: "Practice Payee Testname",
-    pan: "AAAPZ4321K",
-    account: "000123456789",
-    ifsc: "RECT0000001",
-    upi: "practicepayee@rzptest",
-  };
   const CASHFREE_VALID = { name: "Recording Farmer", ...TEST_BANK, upi: "success@upi" };
-  const VALID = { cashfree: CASHFREE_VALID, route: ROUTE_VALID };
+  const VALID = { cashfree: CASHFREE_VALID };
   /** Each box as her press sends it to its server function. */
   const SENT_AS: Record<Case["form"], Record<Box, string>> = {
     cashfree: { name: "name", account: "account_number", ifsc: "ifsc", upi: "upi_id" },
-    route: { name: "name_on_pan", account: "account_number", ifsc: "ifsc", upi: "upi_id" },
   };
-  const FN_OF = { cashfree: "giveMyDestination", route: "givePayoutAccount" } as const;
+  const FN_OF = { cashfree: "giveMyDestination" } as const;
   const notStuck = (f: Opened) => {
     const save = f.save();
     assert.ok(save, "Save is still on her form");
@@ -896,8 +827,7 @@ function suite(app: App, window: Window & typeof globalThis) {
   };
   /** Every other field valid and ticked (or the Cashfree UPI form, whose only box is hers, ticked): her box corrected
    * is a well-formed form, given at once. */
-  const correctable = (c: Case) =>
-    !c.gate && c.ticked && (c.rest === "valid" || (c.form === "cashfree" && c.kind === "upi"));
+  const correctable = (c: Case) => !c.gate && c.ticked && (c.rest === "valid" || c.kind === "upi");
   /** The press the re-check's RC2-3 decision sends to AIAIC as now: no rule of this phone refuses it, and AIAIC's own
    * middleware reads the name in its body first (the trade suite's B21). Asserted exactly, so a change to it is seen. */
   const sentAsNow = (c: Case) =>
@@ -911,21 +841,15 @@ function suite(app: App, window: Window & typeof globalThis) {
     const lang = LANG_OF[c.phrase];
     const phrase = PHRASE[c.phrase];
     await inStart(async () => {
-      const f =
-        c.form === "cashfree"
-          ? await openCashfree(lang, c.gate, c.state)
-          : await openRoute(lang, c.gate);
+      const f = await openCashfree(lang, c.gate, c.state);
       try {
         await f.choose(c.kind);
         if (c.ticked) await f.tick();
         const typing = watchTyping(f, lang);
         if (c.rest === "valid") {
           await f.restValid(c.box, c.kind, () => typing.check("the other fields", false));
-          // a name, or Route's UPI ID, among the valid fields is words already: Save is open on them
-          typing.check(
-            "the other fields filled",
-            c.box !== "name" || (c.form === "route" && c.kind === "upi"),
-          );
+          // a name among the valid fields is words already: Save is open on them
+          typing.check("the other fields filled", c.box !== "name");
         }
         const box = f.box(c.box);
         for (const ch of Array.from(phrase)) {
@@ -1187,13 +1111,8 @@ function suite(app: App, window: Window & typeof globalThis) {
     { form: "cashfree", kind: "bank", box: "ifsc", rests: ["valid", "empty"] },
     // the Cashfree UPI form has no other box: the rest valid and the rest empty are the same form
     { form: "cashfree", kind: "upi", box: "upi", rests: ["empty"] },
-    { form: "route", kind: "bank", box: "name", rests: ["valid", "empty"] },
-    { form: "route", kind: "bank", box: "account", rests: ["valid", "empty"] },
-    { form: "route", kind: "bank", box: "ifsc", rests: ["valid", "empty"] },
-    { form: "route", kind: "upi", box: "name", rests: ["valid", "empty"] },
-    { form: "route", kind: "upi", box: "upi", rests: ["valid", "empty"] },
   ];
-  const FORM_SAID = { cashfree: "Cashfree", route: "Route" };
+  const FORM_SAID = { cashfree: "Cashfree" };
   const BOX_SAID = { name: "name", account: "account", ifsc: "IFSC", upi: "UPI ID" };
   const STATE_SAID: Record<CashfreeState, string> = {
     first: "",
@@ -1214,23 +1133,23 @@ function suite(app: App, window: Window & typeof globalThis) {
             const c: Case = { id: `M${String(n).padStart(3, "0")}`, ...b, phrase, ticked, rest };
             if (state !== "first") c.state = state;
             test(
-              `${c.id} ${FORM_SAID[c.form]}${STATE_SAID[state]} ${c.kind === "bank" ? "bank" : "UPI"} form, ${b.form === "route" && b.box === "name" ? "name on PAN" : BOX_SAID[c.box]} box: ${c.phrase} (${LANG_OF[c.phrase]}), ${ticked ? "ticked" : "not ticked"}, the rest ${rest === "valid" ? "valid" : "empty"}: ${outcome(c)}`,
+              `${c.id} ${FORM_SAID[c.form]}${STATE_SAID[state]} ${c.kind === "bank" ? "bank" : "UPI"} form, ${BOX_SAID[c.box]} box: ${c.phrase} (${LANG_OF[c.phrase]}), ${ticked ? "ticked" : "not ticked"}, the rest ${rest === "valid" ? "valid" : "empty"}: ${outcome(c)}`,
               crisisCase(c),
             );
           }
   };
-  // M001 to M102: both forms, the Cashfree form as her first destination
-  matrix("first", ["cashfree", "route"]);
+  // M001 to M042: the Cashfree form as her first destination
+  matrix("first", ["cashfree"]);
+  // (M043 to M102 were Route's form, removed with its card on 18 Nov 2026, D-294: the Cashfree cases keep their ids)
+  n = 102;
   // M103 to M165: the Cashfree form's other two states (the re-check's round 5, RC5-3)
   matrix("replace", ["cashfree"]);
   matrix("nonotice", ["cashfree"]);
 
-  // a slow scan (the re-check's round 5, RC5-4): each form, a press this phone would refuse and one it gives once read
+  // a slow scan (the re-check's round 5, RC5-4): a press this phone would refuse and one it gives once read
   const SLOW: [Case["form"], Box, Phrase, string][] = [
     ["cashfree", "name", "CRISIS_HI", "a press this phone would refuse"],
     ["cashfree", "account", "CRISIS_EN", "a press read first, nothing here refusing it"],
-    ["route", "name", "CRISIS_HI", "a press this phone would refuse"],
-    ["route", "account", "CRISIS_EN", "a press read first, nothing here refusing it"],
   ];
   SLOW.forEach(([form, box, phrase, press], i) => {
     const c: Case = {
@@ -1244,16 +1163,13 @@ function suite(app: App, window: Window & typeof globalThis) {
       slow: true,
     };
     test(
-      `${c.id} a slow scan (AIAIC answers after ${SLOW_MS / 1000} s), ${FORM_SAID[form]} bank form, ${form === "route" && box === "name" ? "name on PAN" : BOX_SAID[box]} box: ${phrase} (${LANG_OF[phrase]}), ticked, the rest valid (${press}): while it is asked nothing is given and no refusal shows; then ${outcome(c)}`,
+      `${c.id} a slow scan (AIAIC answers after ${SLOW_MS / 1000} s), ${FORM_SAID[form]} bank form, ${BOX_SAID[box]} box: ${phrase} (${LANG_OF[phrase]}), ticked, the rest valid (${press}): while it is asked nothing is given and no refusal shows; then ${outcome(c)}`,
       crisisCase(c),
     );
   });
 
-  // she pauses (the re-check's round 6, RC6-2): each form, a phrase in the name box, the rest valid and ticked
-  const PAUSED: [Case["form"], Phrase][] = [
-    ["cashfree", "CRISIS_HI"],
-    ["route", "CRISIS_MR"],
-  ];
+  // she pauses (the re-check's round 6, RC6-2): a phrase in the name box, the rest valid and ticked
+  const PAUSED: [Case["form"], Phrase][] = [["cashfree", "CRISIS_HI"]];
   PAUSED.forEach(([form, phrase], i) => {
     const c: Case = {
       id: `P${i + 1}`,
@@ -1266,22 +1182,17 @@ function suite(app: App, window: Window & typeof globalThis) {
       pause: true,
     };
     test(
-      `${c.id} she pauses ${PAUSE_MS} ms, ${FORM_SAID[form]} bank form, ${form === "route" ? "name on PAN" : "name"} box: ${phrase} (${LANG_OF[phrase]}), ticked, the rest valid: nothing is said while she waits; then ${outcome(c)}, and ${PAUSE_MS} ms on the card still shows and nothing is refused`,
+      `${c.id} she pauses ${PAUSE_MS} ms, ${FORM_SAID[form]} bank form, name box: ${phrase} (${LANG_OF[phrase]}), ticked, the rest valid: nothing is said while she waits; then ${outcome(c)}, and ${PAUSE_MS} ms on the card still shows and nothing is refused`,
       crisisCase(c),
     );
   });
 
-  // inside the app's own gate, a crisis in each box of each form: the page becomes the card alone
+  // inside the app's own gate, a crisis in each box of the form: the page becomes the card alone
   const GATED: [Case["form"], Kind, Box, Phrase][] = [
     ["cashfree", "bank", "name", "CRISIS_MR"],
     ["cashfree", "bank", "account", "CRISIS_HI"],
     ["cashfree", "bank", "ifsc", "CRISIS_EN"],
     ["cashfree", "upi", "upi", "CRISIS_MR"],
-    ["route", "bank", "name", "CRISIS_HI"],
-    ["route", "bank", "account", "CRISIS_EN"],
-    ["route", "bank", "ifsc", "CRISIS_MR"],
-    ["route", "upi", "name", "CRISIS_MR"],
-    ["route", "upi", "upi", "CRISIS_HI"],
   ];
   GATED.forEach(([form, kind, box, phrase], i) => {
     const c: Case = {
@@ -1291,11 +1202,11 @@ function suite(app: App, window: Window & typeof globalThis) {
       box,
       phrase,
       ticked: false,
-      rest: form === "cashfree" && kind === "upi" ? "empty" : "valid",
+      rest: kind === "upi" ? "empty" : "valid",
       gate: true,
     };
     test(
-      `${c.id} inside the app's own gate, ${FORM_SAID[form]} ${kind === "bank" ? "bank" : "UPI"} form, ${form === "route" && box === "name" ? "name on PAN" : BOX_SAID[box]} box: ${phrase} (${LANG_OF[phrase]}), not ticked: the scan first, then the page is AIAIC's crisis card alone`,
+      `${c.id} inside the app's own gate, ${FORM_SAID[form]} ${kind === "bank" ? "bank" : "UPI"} form, ${BOX_SAID[box]} box: ${phrase} (${LANG_OF[phrase]}), not ticked: the scan first, then the page is AIAIC's crisis card alone`,
       crisisCase(c),
     );
   });
@@ -1307,14 +1218,14 @@ function suite(app: App, window: Window & typeof globalThis) {
     form: Case["form"],
     lang: Lang,
     kind: Kind,
-    values: Partial<Record<Box | "pan", string>>,
+    values: Partial<Record<Box, string>>,
   ) => {
-    const f = form === "cashfree" ? await openCashfree(lang) : await openRoute(lang);
+    const f = await openCashfree(lang);
     await f.choose(kind);
     await f.tick();
     const typing = watchTyping(f, lang);
     for (const [b, v] of Object.entries(values)) {
-      await input(f.box(b as Box | "pan"), v);
+      await input(f.box(b as Box), v);
       typing.check(`the ${b} box`, false);
     }
     seen.reset();
@@ -1339,17 +1250,9 @@ function suite(app: App, window: Window & typeof globalThis) {
    * AFTER A REFUSAL, A CRISIS (the re-check's round 5, RC5-1): she types a copied phrase into a box, one character at a
    * time, and taps again. Save stays on her form and open while she types, and nothing is said but what her first press
    * left; her tap asks the scan first, in her chosen language, with her words; AIAIC's crisis card is shown with its
-   * helplines; her form is never given, and Save is not stuck. The Cashfree form then says no refusal at all; Route's
-   * may keep her first press's box line beside the card (Route's second press, older than this branch, accepted as it
-   * is: inside the app's gate the card stands alone), and nothing else.
+   * helplines; her form is never given, and Save is not stuck. The form then says no refusal at all.
    */
-  const crisisAfterRefusal = async (
-    f: Opened,
-    form: Case["form"],
-    lang: Lang,
-    b: Box,
-    phrase: Phrase,
-  ) => {
+  const crisisAfterRefusal = async (f: Opened, lang: Lang, b: Box, phrase: Phrase) => {
     const left = refusalOnScreen(f.scope(), lang);
     const nothingNew = (where: string) => {
       for (const why of refusalOnScreen(f.scope(), lang))
@@ -1407,16 +1310,9 @@ function suite(app: App, window: Window & typeof globalThis) {
         `${press}: no digit goes to the scan ("${scan.text}")`,
       );
     cardShown(f.scope(), press);
-    if (form === "cashfree")
-      assert.deepEqual(refusalOnScreen(f.scope(), lang), [], `${press}: no refusal is on screen`);
-    else nothingNew(press);
+    assert.deepEqual(refusalOnScreen(f.scope(), lang), [], `${press}: no refusal is on screen`);
     notStuck(f);
   };
-  const routeSaid = (lang: Lang, field: string) =>
-    words(lang, "aiaic.refused.payout_details_not_valid").replace(
-      "{field}",
-      words(lang, `aiaic.field.${field}`),
-    );
   const quietly =
     (run: () => Promise<Opened>, then: (f: Opened) => void | Promise<void>) => async () => {
       await inStart(async () => {
@@ -1454,36 +1350,6 @@ function suite(app: App, window: Window & typeof globalThis) {
     ),
   );
   test(
-    "N3 Route bank form, well formed, read and ticked: given at once with no scan",
-    quietly(
-      () =>
-        pressFilled("route", "en", "bank", {
-          name: ROUTE_VALID.name,
-          pan: ROUTE_VALID.pan,
-          account: ROUTE_VALID.account,
-          ifsc: ROUTE_VALID.ifsc,
-        }),
-      () =>
-        givenAtOnce("givePayoutAccount", {
-          name_on_pan: ROUTE_VALID.name,
-          account_number: ROUTE_VALID.account,
-          ifsc: ROUTE_VALID.ifsc,
-        }),
-    ),
-  );
-  test(
-    "N4 Route UPI form, well formed, read and ticked: given at once with no scan",
-    quietly(
-      () =>
-        pressFilled("route", "hi", "upi", {
-          name: ROUTE_VALID.name,
-          pan: ROUTE_VALID.pan,
-          upi: ROUTE_VALID.upi,
-        }),
-      () => givenAtOnce("givePayoutAccount", { upi_id: ROUTE_VALID.upi, shown_in: "hi" }),
-    ),
-  );
-  test(
     "N5 Cashfree, a 41-character account: refused after the scan read her name, never given, Save not stuck; then CRISIS_HI typed in the account box and tapped: the scan first, AIAIC's crisis card",
     quietly(
       () =>
@@ -1496,34 +1362,18 @@ function suite(app: App, window: Window & typeof globalThis) {
         assert.equal(ACCOUNT_41.length, 41);
         assert.deepEqual(seen.scans, [{ text: CASHFREE_VALID.name, lang: "en" }]);
         refusedAfterScan(f, words("en", "aiaic.refused.account_number_not_valid"));
-        return crisisAfterRefusal(f, "cashfree", "en", "account", "CRISIS_HI");
-      },
-    ),
-  );
-  test(
-    "N6 Route, a 41-character account: refused after the scan read her name, never given, Save not stuck; then CRISIS_HI typed in the account box and tapped: the scan first, AIAIC's crisis card",
-    quietly(
-      () =>
-        pressFilled("route", "en", "bank", {
-          name: ROUTE_VALID.name,
-          pan: ROUTE_VALID.pan,
-          account: ACCOUNT_41,
-          ifsc: ROUTE_VALID.ifsc,
-        }),
-      (f) => {
-        assert.deepEqual(seen.scans, [{ text: ROUTE_VALID.name, lang: "en" }]);
-        refusedAfterScan(f, routeSaid("en", "account_number"));
-        return crisisAfterRefusal(f, "route", "en", "account", "CRISIS_HI");
+        return crisisAfterRefusal(f, "en", "account", "CRISIS_HI");
       },
     ),
   );
   // an account number typed where the IFSC goes: no digit of it reaches the scan (the re-check's RC2-4)
-  const MISTYPED: [string, "empty" | "number" | "ifsc", string, string][] = [
-    ["the account box empty", "empty", "account_number_not_valid", "account_number"],
-    ["the account number in both boxes", "number", "ifsc_not_valid", "ifsc"],
-    ["the IFSC in the account box", "ifsc", "ifsc_not_valid", "ifsc"],
+  const MISTYPED: [string, "empty" | "number" | "ifsc", string][] = [
+    ["the account box empty", "empty", "account_number_not_valid"],
+    ["the account number in both boxes", "number", "ifsc_not_valid"],
+    ["the IFSC in the account box", "ifsc", "ifsc_not_valid"],
   ];
-  MISTYPED.forEach(([what, account, cashfreeCode, routeField], i) => {
+  // (N8, N10 and N12 were Route's form's, and N3, N4 and N6: removed with its card on 18 Nov 2026, D-294)
+  MISTYPED.forEach(([what, account, cashfreeCode], i) => {
     const accountBox = (valid: { account: string; ifsc: string }) =>
       account === "empty" ? "" : account === "ifsc" ? valid.ifsc : valid.account;
     test(
@@ -1537,23 +1387,7 @@ function suite(app: App, window: Window & typeof globalThis) {
           }),
         (f) => {
           refusedAfterScan(f, words("en", `aiaic.refused.${cashfreeCode}`));
-          return crisisAfterRefusal(f, "cashfree", "en", "ifsc", "CRISIS_MR");
-        },
-      ),
-    );
-    test(
-      `N${8 + 2 * i} Route, an account number typed in the IFSC box, ${what}: no digit goes to the scan, then the refusal; then CRISIS_MR typed in the IFSC box and tapped: the scan first, AIAIC's crisis card`,
-      quietly(
-        () =>
-          pressFilled("route", "en", "bank", {
-            name: ROUTE_VALID.name,
-            pan: ROUTE_VALID.pan,
-            account: accountBox(ROUTE_VALID),
-            ifsc: ROUTE_VALID.account,
-          }),
-        (f) => {
-          refusedAfterScan(f, routeSaid("en", routeField));
-          return crisisAfterRefusal(f, "route", "en", "ifsc", "CRISIS_MR");
+          return crisisAfterRefusal(f, "en", "ifsc", "CRISIS_MR");
         },
       ),
     );
@@ -1561,8 +1395,8 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   // ---------------------------------------- what she gives is what its server function's own validator takes
   /**
-   * EVERY FIELD OF BOTH FORMS AGAINST ITS SERVER FUNCTION'S OWN VALIDATOR (aiaic-trade.functions.ts: `giveMyDestination`
-   * for the Cashfree form, `givePayoutAccount` for Route's; the re-check of 4 Nov 2026, round 3's observation): each
+   * EVERY FIELD OF HER FORM AGAINST ITS SERVER FUNCTION'S OWN VALIDATOR (aiaic-trade.functions.ts:
+   * `giveMyDestination`; the re-check of 4 Nov 2026, round 3's observation): each
    * field's boundary values, typed into the real form with every other field valid and her tick on, then tapped. The
    * phone's rule and the validator agree: what the phone gives, the validator takes (a validator's refusal reaches her
    * as "AIAIC is not answering", a refusal AIAIC never made); what the validator would refuse, the phone refuses after
@@ -1574,14 +1408,14 @@ function suite(app: App, window: Window & typeof globalThis) {
     (
       form: Case["form"],
       kind: Kind,
-      field: Box | "pan",
-      valid: Partial<Record<Box | "pan", string>>,
+      field: Box,
+      valid: Partial<Record<Box, string>>,
       edges: Edge[],
       bounds: { key: string; most: number; least?: number },
       langs: Lang[] = ["en"],
     ) =>
     async () => {
-      const fn = form === "cashfree" ? "giveMyDestination" : "givePayoutAccount";
+      const fn = FN_OF[form];
       let taken: Record<string, unknown> | null = null;
       for (const lang of langs)
         for (const edge of edges) {
@@ -1636,21 +1470,12 @@ function suite(app: App, window: Window & typeof globalThis) {
       }
     };
   const cf = (code: string) => ({ refused: words("en", `aiaic.refused.${code}`) });
-  const rt = (field: string) => ({ refused: routeSaid("en", field) });
   const cashfreeBank = {
     name: CASHFREE_VALID.name,
     account: CASHFREE_VALID.account,
     ifsc: CASHFREE_VALID.ifsc,
   };
-  const routeBank = {
-    name: ROUTE_VALID.name,
-    pan: ROUTE_VALID.pan,
-    account: ROUTE_VALID.account,
-    ifsc: ROUTE_VALID.ifsc,
-  };
-  const routeUpi = { name: ROUTE_VALID.name, pan: ROUTE_VALID.pan, upi: ROUTE_VALID.upi };
   const upiOf = (n: number) => `${"a".repeat(n - 4)}@upi`;
-  const routeUpiOf = (n: number) => `${"a".repeat(256)}@${"b".repeat(n - 257)}`;
 
   test(
     "V01 Cashfree name: the phone gives only what giveMyDestination's validator takes; her words go joined by single spaces, as Cashfree's rule read them",
@@ -1739,98 +1564,6 @@ function suite(app: App, window: Window & typeof globalThis) {
       cashfreeBank,
       [{ typed: CASHFREE_VALID.name, then: "taken" }],
       { key: "notice_version", most: 40, least: 3 },
-      ["en", "mr", "hi"],
-    ),
-  );
-  test(
-    "V06 Route name on PAN: the phone gives only what givePayoutAccount's validator takes; her words go as its rule read them",
-    agree(
-      "route",
-      "bank",
-      "name",
-      routeBank,
-      [
-        { typed: "A".repeat(100), then: "taken" },
-        { typed: "A".repeat(101), then: rt("name_on_pan") },
-        { typed: `Practice${" ".repeat(120)}Payee`, then: "taken", sent: "Practice Payee" },
-        { typed: "Ab", then: "taken" },
-        { typed: "A", then: rt("name_on_pan") },
-      ],
-      { key: "name_on_pan", most: 100, least: 2 },
-    ),
-  );
-  test(
-    "V07 Route PAN: the phone gives only what givePayoutAccount's validator takes",
-    agree(
-      "route",
-      "bank",
-      "pan",
-      routeBank,
-      [
-        { typed: ROUTE_VALID.pan, then: "taken" },
-        { typed: ROUTE_VALID.pan.toLowerCase(), then: "taken", sent: ROUTE_VALID.pan },
-        { typed: ROUTE_VALID.pan.slice(0, 9), then: rt("pan") },
-      ],
-      { key: "pan", most: 20, least: 10 },
-    ),
-  );
-  test(
-    "V08 Route account: the phone gives only what givePayoutAccount's validator takes",
-    agree(
-      "route",
-      "bank",
-      "account",
-      routeBank,
-      [
-        { typed: "9".repeat(20), then: "taken" },
-        { typed: "9".repeat(21), then: rt("account_number") },
-        { typed: "0001-2345-6789", then: "taken", sent: "000123456789" },
-        { typed: "9".repeat(41), then: rt("account_number") },
-      ],
-      { key: "account_number", most: 40 },
-    ),
-  );
-  test(
-    "V09 Route IFSC: the phone gives only what givePayoutAccount's validator takes; the IFSC goes as its rule read it, its spaces out",
-    agree(
-      "route",
-      "bank",
-      "ifsc",
-      routeBank,
-      [
-        { typed: ROUTE_VALID.ifsc, then: "taken" },
-        { typed: "RECT 0000001", then: "taken", sent: ROUTE_VALID.ifsc },
-        { typed: Array.from(ROUTE_VALID.ifsc).join(" "), then: "taken", sent: ROUTE_VALID.ifsc },
-        { typed: ROUTE_VALID.ifsc.slice(0, 10), then: rt("ifsc") },
-      ],
-      { key: "ifsc", most: 20 },
-    ),
-  );
-  test(
-    "V10 Route UPI ID: the phone refuses, after the scan, one longer than givePayoutAccount's validator takes",
-    agree(
-      "route",
-      "upi",
-      "upi",
-      routeUpi,
-      [
-        { typed: routeUpiOf(300), then: "taken" },
-        { typed: routeUpiOf(301), then: rt("upi_id") },
-        { typed: routeUpiOf(321), then: rt("upi_id") },
-        { typed: ROUTE_VALID.upi, then: "taken" },
-      ],
-      { key: "upi_id", most: 300 },
-    ),
-  );
-  test(
-    "V11 Route, the rest of her press (its key, AIAIC's notice version, her language, the destination, her tick): taken in en, mr and hi",
-    agree(
-      "route",
-      "bank",
-      "name",
-      routeBank,
-      [{ typed: ROUTE_VALID.name, then: "taken" }],
-      { key: "notice_version", most: 20, least: 3 },
       ["en", "mr", "hi"],
     ),
   );

@@ -36,9 +36,11 @@ export const BUSINESS = {
  * and the partners, and what each reads of her sale (its words also changed on 13 Nov, with what buyers see). 17 Nov
  * 2026: its device list names the sale she started and did not finish and the registration's boxes (AUD-ANN-F1);
  * the same day, its partners' line names the adhtiya (a commission agent at the mandi), the partner kind AIAIC added
- * that day, and when an adhtiya sees the buyer (AIAIC's adhtiya re-check RCK-02).
+ * that day, and when an adhtiya sees the buyer (AIAIC's adhtiya re-check RCK-02). 18 Nov 2026: its officers' item says
+ * AIAIC's officers' rule as AIAIC now words it ("the payment route", without its timing), and its lines of the earlier
+ * provider's payout form go with the form (D-294).
  */
-export const PAGE_UPDATED = { privacy: "17 November 2026" } as const;
+export const PAGE_UPDATED = { privacy: "18 November 2026" } as const;
 
 /** Krishi Sampada (AIAIC), where real sales and their payments are made. Its home page links all its own policies. */
 export const AIAIC_SITE_URL = "https://krishisampada.blackholeinfiverse.com/";

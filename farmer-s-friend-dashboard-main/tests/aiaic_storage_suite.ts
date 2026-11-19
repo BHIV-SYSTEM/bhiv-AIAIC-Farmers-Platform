@@ -1161,9 +1161,6 @@ const BOXES: Record<string, [count: number, how: "heard" | "demo" | "secret", wh
   "components/farm/BigSelect.tsx": [
     [1, "heard", "words that match nothing go to onUnmatched: useHearWords, or the page's scan"],
   ],
-  "components/farm/aiaic/AiaicPayments.tsx": [
-    [5, "heard", "the payout details: an AIAIC route, by `press`"],
-  ],
   "components/farm/aiaic/FromAiaicCard.tsx": [
     [4, "heard", "the payout destination: an AIAIC route, by `press`"],
   ],

@@ -115,36 +115,6 @@ export const answerGroupPlan = createServerFn({ method: "POST" })
     return answer(data.key, data.plan_id, data.answer);
   });
 
-export const givePayoutAccount = createServerFn({ method: "POST" })
-  .validator((d: unknown) =>
-    z
-      .object({
-        key: pressKey,
-        notice_version: z.string().min(3).max(20),
-        shown_in: lang,
-        agreed: z.literal(true),
-        destination: z.enum(["bank_account", "upi_id"]),
-        pan: z.string().min(10).max(20),
-        name_on_pan: z.string().min(2).max(100),
-        account_number: z.string().max(40).optional(),
-        ifsc: z.string().max(20).optional(),
-        upi_id: z.string().max(UPI_ID_MOST).optional(),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data }): Promise<AiaicResult<{ status: string | null }>> => {
-    const { givePayoutAccount: give } = await import("./aiaic-trade.server");
-    const { key, agreed: _agreed, ...details } = data;
-    return give(key, details);
-  });
-
-export const withdrawPayoutAccount = createServerFn({ method: "POST" })
-  .validator((d: unknown) => z.object({ key: pressKey }).parse(d))
-  .handler(async ({ data }): Promise<AiaicResult<true>> => {
-    const { withdrawPayoutAccount: withdraw } = await import("./aiaic-trade.server");
-    return withdraw(data.key);
-  });
-
 export const reportPayment = createServerFn({ method: "POST" })
   .validator((d: unknown) =>
     z
