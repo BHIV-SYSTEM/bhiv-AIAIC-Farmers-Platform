@@ -31,7 +31,7 @@ import { renderToString } from "react-dom/server";
 import ts from "typescript";
 
 import { NotRefreshedLine, ProblemCard } from "../src/components/farm/aiaic/AiaicBits";
-import { EachSale } from "../src/components/farm/aiaic/AiaicPayments";
+import { EachSale, Totals } from "../src/components/farm/aiaic/AiaicPayments";
 import { PaymentCard } from "../src/components/farm/aiaic/AiaicOrderDetail";
 import { CrisisOnly } from "../src/components/farm/aiaic/CrisisFirst";
 import { DestinationForm, FromAiaicCard } from "../src/components/farm/aiaic/FromAiaicCard";
@@ -6969,6 +6969,48 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
 });
 
 // ------------------------------------------------------------------------------------------------ run
+
+test("AD1 the Payments page says less and keeps her money explicit (lane AD, push 2b, 23 Nov 2026): on AIAIC's recorded sends (the buyer paid; AIAIC's send on its way; reached her bank) each total keeps its label and its amount on the first view, in English, Marathi and Hindi; what each money word rests on is behind one small Why?, closed, its words whole, and the Why? itself has no English word in Marathi or Hindi", () => {
+  const data = (mine: AiaicMine) => ({ mine, cropNames: {}, districtNames: {} });
+  for (const name of ["collect_mine_paid", "collect_mine_processing", "collect_mine_processed"]) {
+    const mine = mineOf(name);
+    const m = moneyTotals(mine.orders);
+    for (const lang of LANGS) {
+      const t = wordsIn(lang);
+      const html = inApp(createElement(Totals, { data: data(mine) }), lang);
+      const fold = html.indexOf('data-testid="aiaic-payments-why"');
+      assert.ok(fold > 0, `${name} ${lang}: the Why? fold is there`);
+      const first = html.slice(0, fold);
+      for (const [key, value] of [
+        ["aiaic.payments.agreed", m.agreed],
+        ["aiaic.payments.paid", m.paidByBuyers],
+        ["aiaic.payments.sent", m.sentToHer],
+        ["aiaic.payments.settled", m.settled],
+      ] as const) {
+        assert.ok(first.includes(escHtml(t(key))), `${name} ${lang}: ${key} said before the fold`);
+        assert.ok(
+          first.includes(escHtml(rupees(value))),
+          `${name} ${lang}: its amount ${rupees(value)} before the fold`,
+        );
+      }
+      const details = html.slice(
+        html.lastIndexOf("<details", fold),
+        html.indexOf("</details>", fold),
+      );
+      assert.ok(!/<details[^>]*\bopen\b/.test(details), `${name} ${lang}: the Why? is closed`);
+      assert.ok(
+        details.includes(`>${escHtml(t("aiaic.kit.why"))}</summary>`),
+        `${name} ${lang}: one Why?`,
+      );
+      assert.ok(
+        details.includes(escHtml(t("aiaic.payments.source"))),
+        `${name} ${lang}: its words whole`,
+      );
+      if (lang !== "en")
+        assert.ok(!/[A-Za-z]/.test(t("aiaic.kit.why")), `${lang}: no English in the Why?`);
+    }
+  }
+});
 
 async function main() {
   const saved = {

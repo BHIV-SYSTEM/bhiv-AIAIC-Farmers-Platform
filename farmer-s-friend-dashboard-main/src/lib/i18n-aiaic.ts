@@ -19,6 +19,7 @@
 type Dict = Record<string, string>;
 
 export const AIAIC_EN: Dict = {
+  "aiaic.kit.why": "Why?",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "Your taluka (for distance)",
   "aiaic.taluka.whole_district": "Whole district",
@@ -555,8 +556,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.sell.submit": "List it for sale",
   "aiaic.sell.saving": "Listing…",
   "aiaic.sell.done": "Listed. Buyers' offers will show under Orders.",
-  "aiaic.sell.kept":
-    "Your answers from before were kept on this phone. Check each one: Change opens it again.",
+  "aiaic.sell.kept": "Your answers from before were kept on this phone. Check each one.",
   "aiaic.sell.far.ask":
     "{price} a quintal is far from what mandis reported on {day}: {low} to {high}. Is your price right?",
   "aiaic.sell.far.yes": "Yes, list it at {price}",
@@ -596,7 +596,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.problem.listing_not_found": "This listing is not among yours.",
 
   "aiaic.offers.title": "Offers for you",
-  "aiaic.offers.empty": "No offer yet. Offers will show here.",
+  "aiaic.offers.empty": "No offer yet.",
   "aiaic.offer.from": "A {kind} from {district}",
   "aiaic.demand.title": "Buyers looking for produce",
   "aiaic.demand.intro":
@@ -1224,6 +1224,7 @@ export const AIAIC_EN: Dict = {
 };
 
 export const AIAIC_MR: Dict = {
+  "aiaic.kit.why": "का?",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "तुमचा तालुका (अंतरासाठी)",
   "aiaic.taluka.whole_district": "संपूर्ण जिल्हा",
@@ -1762,8 +1763,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.sell.submit": "विक्रीसाठी नोंद करा",
   "aiaic.sell.saving": "नोंद करत आहे…",
   "aiaic.sell.done": "नोंद झाली. खरेदीदारांच्या ऑफर ऑर्डरमध्ये दिसतील.",
-  "aiaic.sell.kept":
-    "तुमची आधीची उत्तरे या फोनवर ठेवली आहेत. प्रत्येक उत्तर तपासा: बदला दाबले की ते पुन्हा उघडते.",
+  "aiaic.sell.kept": "तुमची आधीची उत्तरे या फोनवर ठेवली आहेत. प्रत्येक उत्तर तपासा.",
   "aiaic.sell.far.ask":
     "क्विंटलला {price} ही किंमत {day} रोजी मंडींनी दिलेल्या भावांपासून खूप दूर आहे: {low} ते {high}. तुमची किंमत बरोबर आहे का?",
   "aiaic.sell.far.yes": "हो, {price} ने नोंद करा",
@@ -1804,7 +1804,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.problem.listing_not_found": "ही नोंद तुमच्या नोंदींमध्ये नाही.",
 
   "aiaic.offers.title": "तुमच्यासाठी ऑफर",
-  "aiaic.offers.empty": "अजून ऑफर नाही. ऑफर इथे दिसतील.",
+  "aiaic.offers.empty": "अजून ऑफर नाही.",
   "aiaic.offer.from": "{district} मधील {kind}",
   "aiaic.demand.title": "माल शोधणारे खरेदीदार",
   "aiaic.demand.intro":
@@ -2436,6 +2436,7 @@ export const AIAIC_MR: Dict = {
 };
 
 export const AIAIC_HI: Dict = {
+  "aiaic.kit.why": "क्यों?",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "आपका तालुका (दूरी के लिए)",
   "aiaic.taluka.whole_district": "पूरा ज़िला",
@@ -2964,8 +2965,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.sell.submit": "बिक्री के लिए दर्ज करें",
   "aiaic.sell.saving": "दर्ज कर रहे हैं…",
   "aiaic.sell.done": "दर्ज हो गया। खरीदारों के ऑफ़र ऑर्डर में दिखेंगे।",
-  "aiaic.sell.kept":
-    "आपके पहले के उत्तर इस फ़ोन पर रखे गए हैं। हर उत्तर जाँचें: बदलें दबाने पर वह फिर से खुलता है।",
+  "aiaic.sell.kept": "आपके पहले के उत्तर इस फ़ोन पर रखे गए हैं। हर उत्तर जाँचें।",
   "aiaic.sell.far.ask":
     "{price} प्रति क्विंटल की कीमत {day} को मंडियों के बताए भावों से बहुत दूर है: {low} से {high}। क्या आपकी कीमत सही है?",
   "aiaic.sell.far.yes": "हाँ, {price} पर दर्ज करें",
@@ -3005,7 +3005,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.problem.listing_not_found": "यह लिस्टिंग आपकी लिस्टिंग में नहीं है।",
 
   "aiaic.offers.title": "आपके लिए ऑफ़र",
-  "aiaic.offers.empty": "अभी कोई ऑफ़र नहीं। ऑफ़र यहाँ दिखेंगे।",
+  "aiaic.offers.empty": "अभी कोई ऑफ़र नहीं।",
   "aiaic.offer.from": "{district} का {kind}",
   "aiaic.demand.title": "माल खोज रहे खरीदार",
   "aiaic.demand.intro":

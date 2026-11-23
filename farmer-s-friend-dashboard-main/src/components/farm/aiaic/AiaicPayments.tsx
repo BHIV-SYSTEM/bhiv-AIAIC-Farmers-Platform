@@ -51,7 +51,8 @@ export function AiaicPayments() {
   );
 }
 
-function Totals({ data }: { data: MineForScreen }) {
+/** Her money's totals (exported for her trade suite's AD1). */
+export function Totals({ data }: { data: MineForScreen }) {
   const { t } = useI18n();
   const m = moneyTotals(data.mine.orders);
   const bars: { key: string; value: number; tone: string }[] = [
@@ -82,7 +83,17 @@ function Totals({ data }: { data: MineForScreen }) {
           </li>
         ))}
       </ul>
-      <p className="text-[11px] text-muted-foreground">{t("aiaic.payments.source")}</p>
+      <details className="rounded-2xl border-2 border-border" data-testid="aiaic-payments-why">
+        <summary
+          className="flex min-h-12 cursor-pointer items-center px-3 text-base font-bold text-foreground"
+          data-testid="aiaic-payments-why-open"
+        >
+          {t("aiaic.kit.why")}
+        </summary>
+        <p className="px-3 pb-3 text-base text-foreground" data-testid="aiaic-payments-source">
+          {t("aiaic.payments.source")}
+        </p>
+      </details>
     </section>
   );
 }
