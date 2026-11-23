@@ -239,6 +239,8 @@ async function loadApp() {
   const { getPlacesDistricts } = await import("../src/lib/places.functions");
   const { recordedTrip } = await import("./aiaic_shared_scan");
   const { SaleStepper } = await import("../src/components/farm/aiaic/SaleStepper");
+  // AIAIC's answer on her advice page, mounted alone (lane AD, 23 Nov 2026: TD32 reads what it keeps on its first view)
+  const { SimpleAdviceHero } = await import("../src/components/farm/SimpleAdviceHero");
   const { getMyTrade } = await import("../src/lib/aiaic-trade.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
   const {
@@ -282,6 +284,7 @@ async function loadApp() {
     getPlacesDistricts,
     recordedTrip,
     SaleStepper,
+    SimpleAdviceHero,
     getMyTrade,
     mineForBrowser,
     problem,
@@ -3730,6 +3733,118 @@ function suite(app: App, window: Window & typeof globalThis) {
         await sign.unmount();
       }
     }
+  });
+
+  // ============================================================================================ TD32 (lane AD)
+  /** AIAIC's answer on her advice page (`SimpleAdviceHero`, drawn by /result and /advice/$service), mounted alone in her
+   *  language, from AIAIC's RECORDED answers (tests/fixtures/aiaic/farmer_advice_*_named.json, never written by hand). */
+  const heroOf = async (lang: Lang, card: unknown, askAHuman: unknown) => {
+    window.localStorage.setItem("aiaic.lang", lang);
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = app.createRoot(container);
+    await act(async () => {
+      root.render(
+        h(app.I18nProvider, {
+          initialLang: lang,
+          children: h(app.SimpleAdviceHero, {
+            card: card as never,
+            askAHuman: askAHuman as never,
+            children: h("p", { "data-testid": "td32-details" }, "the details"),
+          }),
+        }),
+      );
+    });
+    await settle(50);
+    return {
+      container,
+      unmount: async () => {
+        await act(async () => root.unmount());
+        container.remove();
+      },
+    };
+  };
+
+  test("TD32 her advice page keeps on its first view what must stay (lane AD, push 2b, 23 Nov 2026; the brief's rules 1 to 3): on AIAIC's recorded answers each must-read line of a card is drawn whole in its own box, every one before the verdict and none behind a click; the verdict ends with the card's own note that farm scientists have not checked it; the Kisan Call Centre and Tele-MANAS are drawn outside the fold; More details is closed until pressed; in English, Marathi and Hindi", async () => {
+    type Card = { service: string; read_these_first?: string[]; checked_note?: string };
+    type Human = { kisan_call_centre?: string; tele_manas?: string };
+    const recorded = (name: string) =>
+      (
+        JSON.parse(fs.readFileSync(path.join(FIXTURES, name), "utf8")) as {
+          answer: { cards: Card[]; ask_a_human?: Human };
+        }
+      ).answer;
+    const answers = [
+      recorded("farmer_advice_onion_nashik_mr_named.json"),
+      recorded("farmer_advice_soybean_indore_hi_named.json"),
+    ];
+    const digits = (s: string | undefined, or: string) => (s ?? "").replace(/[^0-9]/g, "") || or;
+    let held = 0;
+    for (const lang of ["en", "mr", "hi"] as const)
+      for (const answer of answers)
+        for (const card of answer.cards.filter((c) => (c.read_these_first ?? []).length > 0)) {
+          const musts = card.read_these_first ?? [];
+          const at = `${lang} ${card.service}`;
+          const hero = await heroOf(lang, card, answer.ask_a_human);
+          try {
+            const c = hero.container;
+            const urgent = c.querySelector("#simple-advice-hero > section[aria-label]");
+            ok(urgent, `${at}: the must-read lines' own section`);
+            assert.deepEqual(
+              [...urgent.querySelectorAll("p")].map((p) => p.textContent),
+              musts,
+              `${at}: each must-read line whole, in AIAIC's order`,
+            );
+            assert.equal(
+              [...urgent.querySelectorAll("span")].filter(
+                (s) => s.textContent === words(lang, "advice.readFirst"),
+              ).length,
+              musts.length,
+              `${at}: each in its own box, under her word for read this first`,
+            );
+            const verdict = c.querySelector("#simple-advice-heading")?.nextElementSibling;
+            ok(verdict, `${at}: the verdict`);
+            ok(
+              urgent.compareDocumentPosition(verdict) & Node.DOCUMENT_POSITION_FOLLOWING,
+              `${at}: the must-read lines come before the verdict`,
+            );
+            const note = (card.checked_note ?? "").trim();
+            ok(
+              note.length > 0,
+              `${at}: AIAIC's recorded note that farm scientists have not checked it`,
+            );
+            ok((verdict.textContent ?? "").includes(note), `${at}: the verdict says it`);
+            const tel = [...c.querySelectorAll('a[href^="tel:"]')].map((a) =>
+              a.getAttribute("href"),
+            );
+            ok(
+              tel.includes(`tel:${digits(answer.ask_a_human?.kisan_call_centre, "18001801551")}`) &&
+                tel.includes(`tel:${digits(answer.ask_a_human?.tele_manas, "14416")}`),
+              `${at}: the Kisan Call Centre and Tele-MANAS: ${tel.join(", ")}`,
+            );
+            const more = c.querySelector("#toggle-advice-details-btn");
+            ok(more, `${at}: More details`);
+            ok(more.getAttribute("aria-expanded") === "false", `${at}: More details is closed`);
+            ok(
+              (more.textContent ?? "").includes(words(lang, "advice.details.show")),
+              `${at}: in her words`,
+            );
+            ok(
+              c.querySelector('[data-testid="td32-details"]') === null,
+              `${at}: the details are not drawn until pressed`,
+            );
+            await act(async () => (more as HTMLElement).click());
+            ok(
+              c.querySelector('[data-testid="td32-details"]'),
+              `${at}: pressed, the details are drawn`,
+            );
+            held++;
+          } finally {
+            await hero.unmount();
+          }
+        }
+    ok(held === 21, `the recorded cards with must-read lines, in three languages: ${held}`);
+    window.localStorage.clear();
   });
 
   return learn;
