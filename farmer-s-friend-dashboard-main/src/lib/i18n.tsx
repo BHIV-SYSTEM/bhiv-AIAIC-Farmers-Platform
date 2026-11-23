@@ -15,13 +15,8 @@ type Dict = Record<string, string>;
 const en: Dict = {
   "app.name": "AIAIC Kisan",
   "app.tagline": "Simple farm advice built on real government data",
-  "home.lead":
-    "Tell us your district and your crop. We show what today's real data says — in plain words.",
+  "home.lead": "Tell us your district and your crop.",
   "home.cta": "Get my advice",
-  "home.how": "How it works",
-  "home.step1": "Tell us your district and crop",
-  "home.step2": "We read today's real data",
-  "home.step3": "You see a suggestion, why, and how sure we are",
   "home.demo.title": "Please read before you use this",
   "home.demo.body":
     "This is a demonstration. The advice is not yet checked by farm scientists, so it is a suggestion only — not a guaranteed instruction. Always confirm with your Krishi Vigyan Kendra or a trusted agri officer before spending money.",
@@ -162,8 +157,7 @@ const en: Dict = {
   "footer.operated_by": "Operated by {name}",
   "policy.in_english": "This policy is in English.",
   "policy.info_in_english": "This page is in English.",
-  "home.what":
-    "Free advice on market prices, weather, water and crop care, a plant photo check and transport cost estimates, all from Krishi Sampada (AIAIC); for a guest, selling here is practice only.",
+  "home.what": "For a guest, selling here is practice only.",
   "plant.title": "Check a plant photo",
   "plant.lead":
     "Take a clear photo of one leaf or plant. The system will describe what it can see. It will not tell you which medicine to spray.",
@@ -496,12 +490,8 @@ const en: Dict = {
 const hi: Dict = {
   "app.name": "AIAIC किसान",
   "app.tagline": "सरकारी असली आँकड़ों पर बनी आसान सलाह",
-  "home.lead": "अपना ज़िला और फ़सल बताइए। आज के असली आँकड़े आसान शब्दों में दिखाएँगे।",
+  "home.lead": "अपना ज़िला और फ़सल बताइए।",
   "home.cta": "मेरी सलाह देखें",
-  "home.how": "यह कैसे काम करता है",
-  "home.step1": "अपना ज़िला और फ़सल बताइए",
-  "home.step2": "हम आज के असली आँकड़े पढ़ते हैं",
-  "home.step3": "आपको सुझाव, कारण और भरोसे का स्तर दिखता है",
   "home.demo.title": "उपयोग से पहले पढ़ें",
   "home.demo.body":
     "यह एक प्रदर्शन है। यह सलाह अभी कृषि वैज्ञानिकों द्वारा जाँची नहीं गई है, इसलिए यह केवल सुझाव है — पक्का आदेश नहीं। पैसा खर्च करने से पहले कृषि विज्ञान केंद्र या भरोसेमंद कृषि अधिकारी से पुष्टि करें।",
@@ -642,8 +632,7 @@ const hi: Dict = {
   "footer.operated_by": "{name} द्वारा संचालित",
   "policy.in_english": "यह नीति अंग्रेज़ी में है।",
   "policy.info_in_english": "यह जानकारी अंग्रेज़ी में है।",
-  "home.what":
-    "बाज़ार भाव, मौसम, पानी और फ़सल की देखभाल पर मुफ़्त सलाह, पौधे की फोटो की जाँच और ढुलाई के खर्च का अनुमान, सब कृषि संपदा (AIAIC) से; अतिथि के लिए यहाँ बिक्री सिर्फ़ अभ्यास है।",
+  "home.what": "अतिथि के लिए यहाँ बिक्री सिर्फ़ अभ्यास है।",
   "plant.title": "पौधे की फोटो जाँचें",
   "plant.lead":
     "एक पत्ते या पौधे की साफ फोटो लें। सिस्टम बताएगा कि उसे क्या दिख रहा है। कौन सी दवा छिड़कें, यह नहीं बताएगा।",
@@ -967,12 +956,8 @@ const hi: Dict = {
 const mr: Dict = {
   "app.name": "AIAIC शेतकरी",
   "app.tagline": "सरकारी खऱ्या आकडेवारीवर आधारित सोपा सल्ला",
-  "home.lead": "तुमचा जिल्हा आणि पीक सांगा. आजची खरी आकडेवारी सोप्या शब्दांत दाखवतो.",
+  "home.lead": "तुमचा जिल्हा आणि पीक सांगा.",
   "home.cta": "माझा सल्ला पहा",
-  "home.how": "हे कसे चालते",
-  "home.step1": "तुमचा जिल्हा आणि पीक सांगा",
-  "home.step2": "आम्ही आजची खरी आकडेवारी वाचतो",
-  "home.step3": "तुम्हाला सल्ला, कारण आणि खात्री दिसते",
   "home.demo.title": "वापरण्यापूर्वी वाचा",
   "home.demo.body":
     "हे एक प्रात्यक्षिक आहे. हा सल्ला कृषी शास्त्रज्ञांनी अजून तपासलेला नाही, म्हणून तो फक्त सूचना आहे — खात्रीची आज्ञा नाही. पैसे खर्च करण्यापूर्वी कृषी विज्ञान केंद्र किंवा विश्वासू कृषी अधिकाऱ्याकडून खात्री करा.",
@@ -1113,8 +1098,7 @@ const mr: Dict = {
   "footer.operated_by": "{name} द्वारे चालवले जाते",
   "policy.in_english": "हे धोरण इंग्रजीत आहे.",
   "policy.info_in_english": "ही माहिती इंग्रजीत आहे.",
-  "home.what":
-    "बाजारभाव, हवामान, पाणी व पीक काळजी यांवर मोफत सल्ला, झाडाच्या फोटोची तपासणी आणि वाहतूक खर्चाचा अंदाज, हे सर्व कृषी संपदा (AIAIC) कडून; पाहुण्यासाठी येथे विक्री फक्त सरावासाठी आहे.",
+  "home.what": "पाहुण्यासाठी येथे विक्री फक्त सरावासाठी आहे.",
   "plant.title": "झाडाचा फोटो तपासा",
   "plant.lead":
     "एका पानाचा किंवा झाडाचा स्पष्ट फोटो काढा. यंत्रणा जे दिसते ते सांगेल. कोणते औषध फवारायचे हे सांगणार नाही.",

@@ -138,27 +138,6 @@ function Home() {
         <ChevronRight aria-hidden className="size-6 shrink-0 text-primary" />
       </Link>
 
-      <section className="mt-8 sm:mt-10" aria-labelledby="how-heading">
-        <h2 id="how-heading" className="text-xl font-bold text-foreground sm:text-2xl">
-          {t("home.how")}
-        </h2>
-        <ol className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
-          {["home.step1", "home.step2", "home.step3"].map((key, i) => (
-            <li
-              key={key}
-              className="flex items-start gap-3 rounded-2xl border-2 border-border bg-card p-3.5 sm:gap-4 sm:p-4"
-            >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-base font-extrabold text-secondary-foreground sm:size-11 sm:text-xl">
-                {i + 1}
-              </span>
-              <span className="min-w-0 flex-1 break-words text-base leading-relaxed text-foreground sm:text-lg">
-                {t(key)}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
       <section
         aria-labelledby="disclaimer-heading"
         className="mt-8 rounded-2xl border-2 border-warning bg-warning-soft p-4 sm:mt-10 sm:rounded-3xl sm:p-5"

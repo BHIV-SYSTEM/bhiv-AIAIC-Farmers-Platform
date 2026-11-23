@@ -723,9 +723,6 @@ export function TodayHome() {
         <h1 className="break-words font-extrabold leading-tight text-foreground" style={TITLE}>
           {t("aiaic.today.title")}
         </h1>
-        <p className="mt-2 break-words text-foreground" style={LEAD}>
-          {t("aiaic.today.lead")}
-        </p>
       </header>
 
       {/* her sales and lots, as AIAIC holds them now (signed in only: a guest has none of her own) */}

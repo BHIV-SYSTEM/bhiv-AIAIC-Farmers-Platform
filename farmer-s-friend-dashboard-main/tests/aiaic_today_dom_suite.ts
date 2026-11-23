@@ -3546,6 +3546,85 @@ function suite(app: App, window: Window & typeof globalThis) {
     }
   });
 
+  // ============================================================================================ TD30 (lane AD)
+
+  test("TD30 her landing and her guided home say less and keep what must stay (lane AD, push 2b, 23 Nov 2026): the landing has no how-it-works list and keeps its uncalibrated box word for word and a guest's practice line; her guided home has no line on how the page works and keeps, for a guest, the practice line, the advice cards' uncalibrated note on both advice cards and a person (AIAIC's team and the Kisan Call Centre), and for a practice account its practice line and the offer's total; in English, Marathi and Hindi (English pinned, Marathi and Hindi her dictionary's words)", async () => {
+    const PIN = {
+      demoTitle: "Please read before you use this",
+      demoBody:
+        "This is a demonstration. The advice is not yet checked by farm scientists, so it is a suggestion only — not a guaranteed instruction. Always confirm with your Krishi Vigyan Kendra or a trusted agri officer before spending money.",
+      guestHome: "For a guest, selling here is practice only.",
+    };
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const say = (key: string, en: string) => (lang === "en" ? en : words(lang, key));
+      const home = await mount(lang, screenOf(EMPTY, lang), { at: "/", signedIn: false });
+      try {
+        await waitFor(() => home.q('[data-testid="home-today-link"]'), "the landing");
+        const text = home.container.textContent ?? "";
+        ok(
+          text.includes(say("home.demo.title", PIN.demoTitle)),
+          `${lang}: the uncalibrated box's title`,
+        );
+        ok(
+          text.includes(say("home.demo.body", PIN.demoBody)),
+          `${lang}: the uncalibrated box's words, whole`,
+        );
+        ok(
+          text.includes(say("home.what", PIN.guestHome)),
+          `${lang}: a guest's selling is practice only`,
+        );
+        ok(!home.q("#how-heading") && home.all("ol").length === 0, `${lang}: no how-it-works list`);
+      } finally {
+        await home.unmount();
+      }
+      const guest = await mount(lang, screenOf(JOURNEY, lang), { signedIn: false });
+      try {
+        await ready(guest);
+        assert.equal(
+          guest.q('[data-testid="today-guest"] p')?.textContent,
+          say("aiaic.today.guest", EN.guest),
+          `${lang}: a guest's selling is practice only, word for word`,
+        );
+        const noted = guest
+          .all('[data-testid^="today-task-"]')
+          .filter((e) => e.tagName === "A")
+          .filter((e) =>
+            (e.textContent ?? "").includes(say("aiaic.today.card.price_note", EN.warning)),
+          );
+        assert.equal(noted.length, 2, `${lang}: the uncalibrated note on both advice cards`);
+        ok(
+          guest.q('[data-testid="today-person-team"]') &&
+            guest.q('[data-testid="today-person-kcc"]'),
+          `${lang}: a person, always`,
+        );
+        if (lang === "en")
+          assert.equal(
+            (guest.q('[data-testid="today-person-kcc"]')?.textContent ?? "").trim(),
+            EN.kcc,
+          );
+        assert.equal(
+          guest.q('[data-testid="today"] header p'),
+          null,
+          `${lang}: no line on how the page works`,
+        );
+      } finally {
+        await guest.unmount();
+      }
+      const practice = await mount(lang, screenOf(OFFER, lang));
+      try {
+        await ready(practice);
+        const text = practice.container.textContent ?? "";
+        ok(
+          text.includes(say("aiaic.practice.tip", EN.practiceTip)),
+          `${lang}: the practice account's line`,
+        );
+        ok(text.includes("₹1,59,200"), `${lang}: the offer's total, as AIAIC recorded it`);
+      } finally {
+        await practice.unmount();
+      }
+    }
+  });
+
   return learn;
 }
 

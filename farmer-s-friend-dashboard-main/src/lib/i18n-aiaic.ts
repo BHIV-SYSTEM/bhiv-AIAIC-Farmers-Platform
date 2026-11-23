@@ -761,13 +761,11 @@ export const AIAIC_EN: Dict = {
   // HER GUIDED HOME, `/today` (Crowe EOD, 16 Nov 2026, work package 1): the lane and waiting words mirror AIAIC's website
   // (`trade.lane.*`), "you" for the farmer
   "aiaic.today.title": "What would you like to do today?",
-  "aiaic.today.lead": "Choose one. Each choice opens the step you need, one at a time.",
-  "aiaic.today.entry_tip": "Sell, your sales, your money and help, one step at a time",
+  "aiaic.today.entry_tip": "Sell, your sales, your money and help",
   "aiaic.today.guest":
     "Sign in to see your own sales here. As a guest, selling in this app is practice only.",
   "aiaic.today.mine.title": "Your sales and lots now",
-  "aiaic.today.mine.empty":
-    "Nothing is waiting for you now. You can sell a crop, or check today's price.",
+  "aiaic.today.mine.empty": "Nothing is waiting for you now.",
   "aiaic.today.mine.more": "See everything in Orders & Offers",
   "aiaic.today.problem.kept": "The choices below still open, and a person can help.",
   "aiaic.today.problem.person": "Ask a person",
@@ -843,7 +841,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.today.money.to_her_confirmed": "Reached your bank: {amount}",
   "aiaic.today.money.more": "Money details",
   "aiaic.today.choose.title": "Choose what to do",
-  "aiaic.today.card.sell_tip": "List your crop for buyers, one step at a time",
+  "aiaic.today.card.sell_tip": "List your crop for buyers",
   "aiaic.today.card.sell_crop_tip": "Start with {crop}: you can change it",
   "aiaic.today.card.orders": "Offers and my sales",
   "aiaic.today.card.orders_tip": "Answer a buyer, and see each sale's steps",
@@ -1970,13 +1968,11 @@ export const AIAIC_MR: Dict = {
   // HER GUIDED HOME, `/today` (Crowe EOD, 16 Nov 2026): DRAFTS for a native reader; the lane and waiting words are AIAIC's
   // website's own Marathi (`trade.lane.*`)
   "aiaic.today.title": "आज तुम्हाला काय करायचे आहे?",
-  "aiaic.today.lead": "एक निवडा. प्रत्येक निवड तुम्हाला हवी ती पायरी उघडते, एका वेळी एक.",
-  "aiaic.today.entry_tip": "विक्री, तुमचे सौदे, तुमचे पैसे आणि मदत, एका वेळी एक पायरी",
+  "aiaic.today.entry_tip": "विक्री, तुमचे सौदे, तुमचे पैसे आणि मदत",
   "aiaic.today.guest":
     "तुमचे स्वतःचे सौदे इथे पाहण्यासाठी साइन इन करा. पाहुणे म्हणून या ॲपमधील विक्री फक्त सरावासाठी आहे.",
   "aiaic.today.mine.title": "तुमचे सौदे आणि माल, आत्ताची स्थिती",
-  "aiaic.today.mine.empty":
-    "आत्ता तुमच्यासाठी काहीही थांबलेले नाही. तुम्ही पीक विकू शकता, किंवा आजचा भाव पाहू शकता.",
+  "aiaic.today.mine.empty": "आत्ता तुमच्यासाठी काहीही थांबलेले नाही.",
   "aiaic.today.mine.more": "सर्व काही ऑर्डर्स आणि ऑफर्समध्ये पाहा",
   "aiaic.today.problem.kept": "खालील निवडी उघडतात, आणि एखादी व्यक्ती मदत करू शकते.",
   "aiaic.today.problem.person": "एखाद्या व्यक्तीला विचारा",
@@ -2053,7 +2049,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.today.money.to_her_confirmed": "तुमच्या बँकेत पोहोचले: {amount}",
   "aiaic.today.money.more": "पैशांचा तपशील",
   "aiaic.today.choose.title": "काय करायचे ते निवडा",
-  "aiaic.today.card.sell_tip": "खरेदीदारांसाठी तुमचे पीक नोंदवा, एका वेळी एक पायरी",
+  "aiaic.today.card.sell_tip": "खरेदीदारांसाठी तुमचे पीक नोंदवा",
   "aiaic.today.card.sell_crop_tip": "{crop} पासून सुरुवात: तुम्ही ते बदलू शकता",
   "aiaic.today.card.orders": "ऑफर्स आणि माझ्या विक्री",
   "aiaic.today.card.orders_tip": "खरेदीदाराला उत्तर द्या, आणि प्रत्येक विक्रीच्या पायऱ्या पाहा",
@@ -3172,13 +3168,11 @@ export const AIAIC_HI: Dict = {
   // HER GUIDED HOME, `/today` (Crowe EOD, 16 Nov 2026): DRAFTS for a native reader; the lane and waiting words are AIAIC's
   // website's own Hindi (`trade.lane.*`)
   "aiaic.today.title": "आज आप क्या करना चाहेंगे?",
-  "aiaic.today.lead": "एक चुनें। हर चुनाव आपको ज़रूरी कदम खोलता है, एक बार में एक।",
-  "aiaic.today.entry_tip": "बेचना, आपके सौदे, आपका पैसा और मदद, एक बार में एक कदम",
+  "aiaic.today.entry_tip": "बेचना, आपके सौदे, आपका पैसा और मदद",
   "aiaic.today.guest":
     "अपने सौदे यहाँ देखने के लिए साइन इन करें। मेहमान के रूप में इस ऐप में बिक्री सिर्फ़ अभ्यास है।",
   "aiaic.today.mine.title": "आपके सौदे और माल, अभी की स्थिति",
-  "aiaic.today.mine.empty":
-    "अभी आपके लिए कुछ भी रुका नहीं है। आप फ़सल बेच सकते हैं, या आज का भाव देख सकते हैं।",
+  "aiaic.today.mine.empty": "अभी आपके लिए कुछ भी रुका नहीं है।",
   "aiaic.today.mine.more": "सब कुछ ऑर्डर और ऑफ़र में देखें",
   "aiaic.today.problem.kept": "नीचे के विकल्प खुलते हैं, और कोई व्यक्ति मदद कर सकता है।",
   "aiaic.today.problem.person": "किसी व्यक्ति से पूछें",
@@ -3254,7 +3248,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.today.money.to_her_confirmed": "आपके बैंक में पहुँचा: {amount}",
   "aiaic.today.money.more": "पैसे का ब्योरा",
   "aiaic.today.choose.title": "क्या करना है, चुनें",
-  "aiaic.today.card.sell_tip": "खरीदारों के लिए अपनी फ़सल दर्ज करें, एक बार में एक कदम",
+  "aiaic.today.card.sell_tip": "खरीदारों के लिए अपनी फ़सल दर्ज करें",
   "aiaic.today.card.sell_crop_tip": "{crop} से शुरुआत: आप इसे बदल सकते हैं",
   "aiaic.today.card.orders": "ऑफ़र और मेरी बिक्री",
   "aiaic.today.card.orders_tip": "खरीदार को जवाब दें, और हर बिक्री के कदम देखें",
