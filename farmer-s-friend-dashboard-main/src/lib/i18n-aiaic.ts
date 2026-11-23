@@ -20,6 +20,7 @@ type Dict = Record<string, string>;
 
 export const AIAIC_EN: Dict = {
   "aiaic.kit.why": "Why?",
+  "aiaic.face.sure": "How sure: {band}",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "Your taluka (for distance)",
   "aiaic.taluka.whole_district": "Whole district",
@@ -1220,6 +1221,7 @@ export const AIAIC_EN: Dict = {
 
 export const AIAIC_MR: Dict = {
   "aiaic.kit.why": "का?",
+  "aiaic.face.sure": "किती खात्री: {band}",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "तुमचा तालुका (अंतरासाठी)",
   "aiaic.taluka.whole_district": "संपूर्ण जिल्हा",
@@ -2427,6 +2429,7 @@ export const AIAIC_MR: Dict = {
 
 export const AIAIC_HI: Dict = {
   "aiaic.kit.why": "क्यों?",
+  "aiaic.face.sure": "कितना भरोसा: {band}",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "आपका तालुका (दूरी के लिए)",
   "aiaic.taluka.whole_district": "पूरा ज़िला",

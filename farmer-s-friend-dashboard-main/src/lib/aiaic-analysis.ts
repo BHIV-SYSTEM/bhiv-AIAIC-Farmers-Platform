@@ -213,6 +213,49 @@ export function summarySourceOf(sections: unknown): SummarySource | null {
   return out.source_id || out.text ? out : null;
 }
 
+/** A source as the first view of an answer names it: AIAIC's name for it without the date AIAIC writes after it, cut to
+ * its publisher, the part before AIAIC's dash ("Agmarknet", "Central Ground Water Board"). The whole title stays in
+ * the answer's details. Null when AIAIC named none. */
+export function sourceShort(text: string | null | undefined): string | null {
+  const name = (text ?? "").replace(/\s*\(\d{4}-\d{2}-\d{2}\)\s*$/, "").trim();
+  return name.split(" — ")[0]?.trim() || name || null;
+}
+
+/** How sure AIAIC is of an answer, as its summary says it (`summary.confidence`): the band AIAIC shows after its own
+ * caps (`shown_band`: high, medium, low, insufficient or not_stated) and AIAIC's word for it in her language
+ * (`shown_text`). Never the engine's band before the caps (`engine_band`): a page shows the band AIAIC shows. */
+export type SummaryConfidence = { band: string; text: string | null };
+
+export function summaryConfidenceOf(raw: unknown): SummaryConfidence | null {
+  const c = recordOf(raw);
+  const band = textOf(c?.["shown_band"]);
+  return band ? { band, text: textOf(c?.["shown_text"]) } : null;
+}
+
+/** An answer's worst, average and best case, each in AIAIC's own words in her language, from the `case_band` items of
+ * its summary section: only when all three come from data. A fixed band (`data.fixed_band`: a fixed percentage either
+ * side of one price) is arithmetic, not a range of risk, and is never drawn as one (AIAIC's own face rule, D-138,
+ * `kit/ActionCard.jsx`); AIAIC says so in its own must-read lines. */
+export type SummaryCases = { worst: string; average: string; best: string };
+
+export function summaryCasesOf(sections: unknown): SummaryCases | null {
+  if (!Array.isArray(sections)) return null;
+  const block = sections.map(recordOf).find((s) => s?.["id"] === "summary");
+  const items = (Array.isArray(block?.["items"]) ? (block["items"] as unknown[]) : [])
+    .map(recordOf)
+    .filter((i): i is Record<string, unknown> => i?.["kind"] === "case_band");
+  if (items.some((i) => recordOf(i["data"])?.["fixed_band"])) return null;
+  const said = (key: string) => {
+    const one = items.find((i) => recordOf(i["data"])?.["case"] === key);
+    const value = recordOf(one?.["data"])?.["value"];
+    return typeof value === "number" && Number.isFinite(value) ? textOf(one?.["text"]) : null;
+  };
+  const worst = said("worst");
+  const average = said("average");
+  const best = said("best");
+  return worst && average && best ? { worst, average, best } : null;
+}
+
 // ------------------------------------------------------------------- the district's prices, a line in its band
 
 export type DayPrice = { day: string; median: number | null };

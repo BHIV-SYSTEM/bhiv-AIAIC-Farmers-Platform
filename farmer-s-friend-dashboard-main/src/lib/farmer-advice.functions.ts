@@ -3,8 +3,12 @@ import { z } from "zod";
 
 import {
   priceCompareOf,
+  summaryCasesOf,
+  summaryConfidenceOf,
   summarySourceOf,
   type PriceCompare,
+  type SummaryCases,
+  type SummaryConfidence,
   type SummarySource,
 } from "./aiaic-analysis";
 
@@ -28,6 +32,10 @@ export type FarmerAdviceSummary = {
   price_compare?: PriceCompare | undefined;
   /** The first source the answer names, with its date. */
   source?: SummarySource | undefined;
+  /** How sure AIAIC is: the band it shows after its caps, and its word for it in her language. */
+  confidence?: SummaryConfidence | undefined;
+  /** The worst, average and best case in AIAIC's words, only when all three come from data (never a fixed band). */
+  cases?: SummaryCases | undefined;
   /** The crop and place in the reader's language. */
   subject?: { crop?: string | undefined; place?: string | undefined } | undefined;
 };
@@ -78,6 +86,124 @@ export type FarmerAdviceResponse = {
 };
 
 /**
+ * AIAIC's answer to `GET /farmer/advice` as this app reads it (the handler below, and her suites on AIAIC's recorded
+ * answers): every field checked for its type, nothing composed. Exported so a suite reads a recording through this very
+ * reading (lane AD's fix round, 23 Nov 2026).
+ */
+export function farmerAdviceOf(json: any, fetchedAt: string): FarmerAdviceResponse {
+  const isDistress = Boolean(json.distress);
+
+  const parsedCards: FarmerAdviceCard[] = Array.isArray(json.cards)
+    ? json.cards.map((c: any) => ({
+        service: typeof c.service === "string" ? c.service : "",
+        answer_headline: typeof c.answer_headline === "string" ? c.answer_headline : "",
+        read_these_first: Array.isArray(c.read_these_first) ? c.read_these_first : undefined,
+        what_we_do_not_know: Array.isArray(c.what_we_do_not_know)
+          ? c.what_we_do_not_know
+          : undefined,
+        why: Array.isArray(c.why) ? c.why : undefined,
+        as_of: typeof c.as_of === "string" ? c.as_of : undefined,
+        reference: typeof c.reference === "string" ? c.reference : undefined,
+        checked_note: typeof c.checked_note === "string" ? c.checked_note : undefined,
+        action:
+          c.action && typeof c.action === "object"
+            ? {
+                code: typeof c.action.code === "string" ? c.action.code : undefined,
+                text: typeof c.action.text === "string" ? c.action.text : undefined,
+                tone: typeof c.action.tone === "string" ? c.action.tone : undefined,
+              }
+            : undefined,
+        summary:
+          c.summary && typeof c.summary === "object"
+            ? {
+                action:
+                  c.summary.action && typeof c.summary.action === "object"
+                    ? {
+                        code:
+                          typeof c.summary.action.code === "string"
+                            ? c.summary.action.code
+                            : undefined,
+                        text:
+                          typeof c.summary.action.text === "string"
+                            ? c.summary.action.text
+                            : undefined,
+                        tone:
+                          typeof c.summary.action.tone === "string"
+                            ? c.summary.action.tone
+                            : undefined,
+                      }
+                    : undefined,
+                decision_id:
+                  typeof c.summary.decision_id === "string" ? c.summary.decision_id : undefined,
+                price_compare: priceCompareOf(c.summary.price_compare) ?? undefined,
+                source: summarySourceOf(c.summary.sections) ?? undefined,
+                confidence: summaryConfidenceOf(c.summary.confidence) ?? undefined,
+                cases: summaryCasesOf(c.summary.sections) ?? undefined,
+                subject:
+                  c.summary.subject && typeof c.summary.subject === "object"
+                    ? {
+                        crop:
+                          typeof c.summary.subject.crop === "string"
+                            ? c.summary.subject.crop
+                            : undefined,
+                        place:
+                          typeof c.summary.subject.place === "string"
+                            ? c.summary.subject.place
+                            : undefined,
+                      }
+                    : undefined,
+              }
+            : undefined,
+        abstained: typeof c.abstained === "boolean" ? c.abstained : undefined,
+        abstain_note: typeof c.abstain_note === "string" ? c.abstain_note : undefined,
+      }))
+    : [];
+
+  return {
+    ok: true,
+    crop: typeof json.crop === "string" ? json.crop : undefined,
+    place: typeof json.place === "string" ? json.place : undefined,
+    state: typeof json.state === "string" ? json.state : undefined,
+    lang: typeof json.lang === "string" ? json.lang : undefined,
+    distress: isDistress,
+    distress_message: typeof json.distress_message === "string" ? json.distress_message : undefined,
+    important: typeof json.important === "string" ? json.important : undefined,
+    important_label: typeof json.important_label === "string" ? json.important_label : undefined,
+    ask_a_human:
+      json.ask_a_human && typeof json.ask_a_human === "object"
+        ? {
+            kisan_call_centre:
+              typeof json.ask_a_human.kisan_call_centre === "string"
+                ? json.ask_a_human.kisan_call_centre
+                : undefined,
+            tele_manas:
+              typeof json.ask_a_human.tele_manas === "string"
+                ? json.ask_a_human.tele_manas
+                : undefined,
+            tele_manas_toll_free:
+              typeof json.ask_a_human.tele_manas_toll_free === "string"
+                ? json.ask_a_human.tele_manas_toll_free
+                : undefined,
+          }
+        : undefined,
+    cards: parsedCards,
+    service_errors: json.service_errors ?? null,
+    trace:
+      json.trace && typeof json.trace === "object"
+        ? {
+            request_id:
+              typeof json.trace.request_id === "string" ? json.trace.request_id : undefined,
+            decision_ids: Array.isArray(json.trace.decision_ids)
+              ? json.trace.decision_ids
+              : undefined,
+            price_day: typeof json.trace.price_day === "string" ? json.trace.price_day : undefined,
+          }
+        : undefined,
+    fetchedAt,
+  };
+}
+
+/**
  * Confirmed Farmer-Facing Advice Endpoint:
  * GET /farmer/advice?crop=<crop>&region=<region>&state=<mh|mp>&lang=<en|mr|hi>
  *
@@ -112,117 +238,7 @@ export const getFarmerAdvice = createServerFn({ method: "GET" })
       }
 
       const json = await response.json();
-      const isDistress = Boolean(json.distress);
-
-      const parsedCards: FarmerAdviceCard[] = Array.isArray(json.cards)
-        ? json.cards.map((c: any) => ({
-            service: typeof c.service === "string" ? c.service : "",
-            answer_headline: typeof c.answer_headline === "string" ? c.answer_headline : "",
-            read_these_first: Array.isArray(c.read_these_first) ? c.read_these_first : undefined,
-            what_we_do_not_know: Array.isArray(c.what_we_do_not_know)
-              ? c.what_we_do_not_know
-              : undefined,
-            why: Array.isArray(c.why) ? c.why : undefined,
-            as_of: typeof c.as_of === "string" ? c.as_of : undefined,
-            reference: typeof c.reference === "string" ? c.reference : undefined,
-            checked_note: typeof c.checked_note === "string" ? c.checked_note : undefined,
-            action:
-              c.action && typeof c.action === "object"
-                ? {
-                    code: typeof c.action.code === "string" ? c.action.code : undefined,
-                    text: typeof c.action.text === "string" ? c.action.text : undefined,
-                    tone: typeof c.action.tone === "string" ? c.action.tone : undefined,
-                  }
-                : undefined,
-            summary:
-              c.summary && typeof c.summary === "object"
-                ? {
-                    action:
-                      c.summary.action && typeof c.summary.action === "object"
-                        ? {
-                            code:
-                              typeof c.summary.action.code === "string"
-                                ? c.summary.action.code
-                                : undefined,
-                            text:
-                              typeof c.summary.action.text === "string"
-                                ? c.summary.action.text
-                                : undefined,
-                            tone:
-                              typeof c.summary.action.tone === "string"
-                                ? c.summary.action.tone
-                                : undefined,
-                          }
-                        : undefined,
-                    decision_id:
-                      typeof c.summary.decision_id === "string" ? c.summary.decision_id : undefined,
-                    price_compare: priceCompareOf(c.summary.price_compare) ?? undefined,
-                    source: summarySourceOf(c.summary.sections) ?? undefined,
-                    subject:
-                      c.summary.subject && typeof c.summary.subject === "object"
-                        ? {
-                            crop:
-                              typeof c.summary.subject.crop === "string"
-                                ? c.summary.subject.crop
-                                : undefined,
-                            place:
-                              typeof c.summary.subject.place === "string"
-                                ? c.summary.subject.place
-                                : undefined,
-                          }
-                        : undefined,
-                  }
-                : undefined,
-            abstained: typeof c.abstained === "boolean" ? c.abstained : undefined,
-            abstain_note: typeof c.abstain_note === "string" ? c.abstain_note : undefined,
-          }))
-        : [];
-
-      return {
-        ok: true,
-        crop: typeof json.crop === "string" ? json.crop : undefined,
-        place: typeof json.place === "string" ? json.place : undefined,
-        state: typeof json.state === "string" ? json.state : undefined,
-        lang: typeof json.lang === "string" ? json.lang : undefined,
-        distress: isDistress,
-        distress_message:
-          typeof json.distress_message === "string" ? json.distress_message : undefined,
-        important: typeof json.important === "string" ? json.important : undefined,
-        important_label:
-          typeof json.important_label === "string" ? json.important_label : undefined,
-        ask_a_human:
-          json.ask_a_human && typeof json.ask_a_human === "object"
-            ? {
-                kisan_call_centre:
-                  typeof json.ask_a_human.kisan_call_centre === "string"
-                    ? json.ask_a_human.kisan_call_centre
-                    : undefined,
-                tele_manas:
-                  typeof json.ask_a_human.tele_manas === "string"
-                    ? json.ask_a_human.tele_manas
-                    : undefined,
-                tele_manas_toll_free:
-                  typeof json.ask_a_human.tele_manas_toll_free === "string"
-                    ? json.ask_a_human.tele_manas_toll_free
-                    : undefined,
-              }
-            : undefined,
-        cards: parsedCards,
-        service_errors: json.service_errors ?? null,
-        trace:
-          json.trace && typeof json.trace === "object"
-            ? {
-                request_id:
-                  typeof json.trace.request_id === "string" ? json.trace.request_id : undefined,
-                decision_ids: Array.isArray(json.trace.decision_ids)
-                  ? json.trace.decision_ids
-                  : undefined,
-                price_day:
-                  typeof json.trace.price_day === "string" ? json.trace.price_day : undefined,
-              }
-            : undefined,
-        fetchedAt,
-      };
+      return farmerAdviceOf(json, fetchedAt);
     } catch (err: any) {
       console.error("[farmerAdvice] failed to fetch", err);
       return {

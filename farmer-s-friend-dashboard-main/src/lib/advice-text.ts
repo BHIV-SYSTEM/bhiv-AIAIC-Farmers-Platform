@@ -4,6 +4,7 @@ import {
   daysOld,
   isAbstention,
   observedAt,
+  type ConfidenceLevel,
   type IntelligenceItem,
 } from "./aiaic-types";
 import type { FarmerAdviceCard } from "./farmer-advice.functions";
@@ -29,8 +30,34 @@ export function adviceLimits(card: FarmerAdviceCard | undefined, item: Intellige
   return said.length ? [...new Set(said)] : (item.known_unknowns ?? []);
 }
 
-/** One-line, plain-language summary of how this advice was reached. */
-export function summaryLine(item: IntelligenceItem, t: T): string {
+/** An answer's band: its level for the bars, and AIAIC's own word for it where AIAIC sent one. */
+export type Band = { level: ConfidenceLevel; word: string | null };
+
+/**
+ * THE ONE BAND OF AN ANSWER (lane AD's fix round, 23 Nov 2026): AIAIC's own, the band its card shows after its caps
+ * (`summary.confidence`: prices days old, an assessment a year old, one quote...), with AIAIC's word for it in her
+ * language; only where no card came, the band of the `/intelligence` item, as before. `/intelligence` sends the
+ * engine's band before those caps, so a page that read it said "Fairly sure" where AIAIC's card says "Somewhat sure".
+ * Every part of a page that says how sure (the first view, the meters, the summary line, the read-out, the counts)
+ * says this one band.
+ */
+export function bandOf(card: FarmerAdviceCard | undefined, item?: IntelligenceItem): Band {
+  const shown = card?.summary?.confidence;
+  if (shown && typeof shown.band === "string") {
+    const b = shown.band;
+    return {
+      level: b === "high" || b === "medium" || b === "low" ? b : "unknown",
+      word: shown.text,
+    };
+  }
+  return { level: item ? confidenceLevel(item) : "unknown", word: null };
+}
+
+/** The band's word: AIAIC's own, else the app's word for its level. */
+export const bandWord = (band: Band, t: T): string => band.word ?? t(`conf.${band.level}`);
+
+/** One-line, plain-language summary of how this advice was reached (the band: AIAIC's card's, `bandOf`). */
+export function summaryLine(item: IntelligenceItem, t: T, card?: FarmerAdviceCard): string {
   const count = (item.sources_used ?? []).length;
   const sources =
     count === 0
@@ -51,7 +78,7 @@ export function summaryLine(item: IntelligenceItem, t: T): string {
   return t("detail.summary.body", {
     sources,
     age: ageText,
-    conf: t(`conf.${confidenceLevel(item)}`),
+    conf: bandWord(bandOf(card, item), t),
   });
 }
 
@@ -78,7 +105,7 @@ export function adviceText(
     serviceLabel,
     headline,
     detail,
-    summaryLine(item, t),
+    summaryLine(item, t, card),
     why.length ? `${t("detail.why")}: ${why.join(" ")}` : "",
     t("conf.uncalibrated"),
     t("detail.next.body"),

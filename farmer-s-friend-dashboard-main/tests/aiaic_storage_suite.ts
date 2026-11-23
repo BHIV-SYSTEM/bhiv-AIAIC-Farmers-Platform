@@ -83,7 +83,9 @@ import {
 } from "../src/lib/aiaic-query";
 import { fetchService } from "../src/lib/aiaic.functions";
 import { adviceLimits, adviceText, adviceWhy } from "../src/lib/advice-text";
-import type { FarmerAdviceResponse } from "../src/lib/farmer-advice.functions";
+import { farmerAdviceOf, type FarmerAdviceResponse } from "../src/lib/farmer-advice.functions";
+import { DashboardSummary } from "../src/components/farm/DashboardSummary";
+import { RecommendationCard } from "../src/components/farm/RecommendationCard";
 import type { IntelligenceItem } from "../src/lib/aiaic-types";
 import { problem, type AiaicProblem, type StoragePlan } from "../src/lib/aiaic-trade";
 import * as client from "../src/lib/aiaic-trade.server";
@@ -2079,6 +2081,88 @@ test("S74 one tap on /advice: every line of the fold is the card's, in the reade
   );
   const noCard = adviceText(item, "x", t, "en");
   ok(noCard.includes("Sell now (no storage declared)."), "no card: the engine's words, as before");
+});
+
+test("S75 one band per answer (lane AD's fix round, 23 Nov 2026, AD-02): where AIAIC's card says how sure (the band it shows after its caps, `summary.confidence`, read through the app's own server reading), the opened advice page's meter and summary line, the read-out, /result's card under the answer and /result's counts all say that band in AIAIC's word, never the band /intelligence sends before AIAIC's caps; with no card, the item's own band, as before", () => {
+  const advice = farmerAdviceOf(
+    recorded<Record<string, unknown>>("farmer_advice_onion_nashik_mr_named"),
+    "2026-11-23T00:00:00.000Z",
+  );
+  const card = advice.cards?.find((c) => c.service === "water");
+  ok(card?.summary?.confidence?.band === "medium", "AIAIC's recorded water card shows medium");
+  const word = card.summary.confidence.text ?? "";
+  ok(/[ऀ-ॿ]/.test(word), `AIAIC's Marathi word for it: ${word}`);
+  // TEST DATA: the band /intelligence/water sends for this answer, before AIAIC's caps (the card's own engine_band)
+  const item = {
+    service: "water",
+    recommendation: "CROP_FITS_WATER",
+    confidence: "high",
+    sources_used: [],
+    calibrated: false,
+  } as unknown as IntelligenceItem;
+  const raw = DICTS.mr["conf.high"] ?? "";
+  ok(raw && raw !== word, "the app's word for the band before the caps differs from AIAIC's");
+  const opened = (matchedCard: typeof card | undefined) =>
+    textsOf(
+      pageIn(
+        "mr",
+        createElement(ItemDetail, {
+          item,
+          service: "water",
+          farm: { region: "Nashik", crop: "onion", state: "mh" },
+          matchedCard,
+          cropShown: "कांदा",
+          districtShown: "नाशिक",
+          opened: true,
+        }),
+      ),
+    );
+  const said = opened(card);
+  ok(said.includes(word), "the opened page's meter says AIAIC's word");
+  ok(
+    said.some((l) => l.includes(`खात्री: ${word}`)),
+    "and its summary line says it as the sureness",
+  );
+  ok(!said.some((l) => l.includes(raw)), `never the band before AIAIC's caps: ${raw}`);
+  const t = (key: string, vars?: Record<string, string | number>) =>
+    Object.entries(vars ?? {}).reduce(
+      (s, [k, v]) => s.replaceAll(`{${k}}`, String(v)),
+      DICTS.mr[key] ?? key,
+    );
+  const spoken = adviceText(item, "x", t, "mr", card);
+  ok(spoken.includes(word) && !spoken.includes(raw), "the read-out says AIAIC's band");
+  const under = textsOf(
+    pageIn(
+      "mr",
+      createElement(RecommendationCard, {
+        service: "water",
+        item,
+        index: 0,
+        search: { region: "Nashik", crop: "onion" },
+        subject: "कांदा • नाशिक",
+        card,
+      }),
+    ),
+  );
+  ok(under.includes(word) && !under.some((l) => l.includes(raw)), "/result's card says it");
+  const counts = textsOf(
+    pageIn(
+      "mr",
+      createElement(DashboardSummary, {
+        results: [{ ok: true, service: "water", items: [item], fetchedAt: "2026-11-23T00:00:00Z" }],
+        subject: "कांदा • नाशिक",
+        updatedAt: "2026-11-23T00:00:00Z",
+        search: { region: "Nashik", crop: "onion" },
+        cards: [card],
+      }),
+    ),
+  );
+  ok(
+    counts.includes(t("dashboard.summary", { total: 1, high: 0, medium: 1, low: 0 })),
+    "/result's counts count it at AIAIC's band",
+  );
+  // no card came: the item's own band, as before (a warning is never lost with the card, nor a band)
+  ok(opened(undefined).includes(raw), "no card: the item's band");
 });
 
 test("S71 the card under an answer prints the names the page holds, never the answer's raw keys (F11)", () => {

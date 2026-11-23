@@ -269,6 +269,9 @@ function AskForm() {
       <h1 className="break-words text-2xl font-extrabold text-foreground sm:text-3xl">
         {t("ask.title")}
       </h1>
+      <p className="mt-2 break-words text-base text-foreground/75 sm:text-lg">
+        {t("ask.subtitle")}
+      </p>
 
       {!catalogQuery.isPending && !options.live && !districtsQuery.data?.ok ? (
         <p className="mt-4 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-3.5 py-3 text-sm font-semibold text-warning-foreground sm:px-4 sm:text-base">

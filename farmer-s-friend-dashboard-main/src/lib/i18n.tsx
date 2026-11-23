@@ -22,6 +22,7 @@ const en: Dict = {
     "This is a demonstration. The advice is not yet checked by farm scientists, so it is a suggestion only — not a guaranteed instruction. Always confirm with your Krishi Vigyan Kendra or a trusted agri officer before spending money.",
   "lang.title": "Choose your language",
   "ask.title": "Your farm",
+  "ask.subtitle": "Fill only what you know. You can leave a field empty.",
   "ask.mandi": "Which market (APMC)?",
   "ask.mandi.any": "All markets",
   "ask.options.stale":
@@ -433,6 +434,7 @@ const hi: Dict = {
     "यह एक प्रदर्शन है। यह सलाह अभी कृषि वैज्ञानिकों द्वारा जाँची नहीं गई है, इसलिए यह केवल सुझाव है — पक्का आदेश नहीं। पैसा खर्च करने से पहले कृषि विज्ञान केंद्र या भरोसेमंद कृषि अधिकारी से पुष्टि करें।",
   "lang.title": "अपनी भाषा चुनें",
   "ask.title": "आपका खेत",
+  "ask.subtitle": "जो पता है वही भरें। कोई खाना खाली भी छोड़ सकते हैं।",
   "ask.mandi": "कौन सी मंडी (APMC)?",
   "ask.mandi.any": "सभी मंडियाँ",
   "ask.options.stale":
@@ -835,6 +837,7 @@ const mr: Dict = {
     "हे एक प्रात्यक्षिक आहे. हा सल्ला कृषी शास्त्रज्ञांनी अजून तपासलेला नाही, म्हणून तो फक्त सूचना आहे — खात्रीची आज्ञा नाही. पैसे खर्च करण्यापूर्वी कृषी विज्ञान केंद्र किंवा विश्वासू कृषी अधिकाऱ्याकडून खात्री करा.",
   "lang.title": "तुमची भाषा निवडा",
   "ask.title": "तुमचे शेत",
+  "ask.subtitle": "जे माहीत आहे तेच भरा. रिकामे ठेवले तरी चालेल.",
   "ask.mandi": "कोणती मंडी (APMC)?",
   "ask.mandi.any": "सर्व मंडया",
   "ask.options.stale":

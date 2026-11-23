@@ -17,7 +17,8 @@ import type {
 } from "@/lib/farmer-advice.functions";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { SERVICE_ICON } from "@/lib/service-icons";
-import type { Service } from "@/lib/aiaic-types";
+import { isService, type Service } from "@/lib/aiaic-types";
+import { AdviceFace } from "@/components/farm/AdviceFace";
 import { VaaniAudioPlayer } from "@/components/farm/VaaniAudioPlayer";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ export function SimpleAdviceHero({
   askAHuman,
   children,
   glance,
+  everyCard,
   defaultExpanded = false,
 }: {
   card?: FarmerAdviceCard | undefined;
@@ -39,6 +41,8 @@ export function SimpleAdviceHero({
   children?: ReactNode;
   /** The answer at a glance (push 4): drawn right under the paragraph, seen without opening the details. */
   glance?: ReactNode;
+  /** /result: every card AIAIC sent, whose must-read lines are all drawn here, each card's under its service's name. */
+  everyCard?: FarmerAdviceCard[] | undefined;
   defaultExpanded?: boolean;
 }) {
   const { t, lang } = useI18n();
@@ -56,27 +60,49 @@ export function SimpleAdviceHero({
   const kccPhone = askAHuman?.kisan_call_centre?.replace(/[^0-9]/g, "") || "18001801551";
   const teleManasPhone = askAHuman?.tele_manas?.replace(/[^0-9]/g, "") || "14416";
 
-  const urgentWarnings = card?.read_these_first ?? [];
+  // THE MUST-READ LINES (AIAIC's `read_these_first`), each whole in its own box, before the verdict and never behind a
+  // click (the brief's rule 2). /advice/$service hands the page's one card. /result draws the first card's verdict here
+  // and the other cards' answers below it (the storage answer at a glance among them), so it hands every card AIAIC sent,
+  // and each card's lines are drawn under its service's name (lane AD's fix round, 23 Nov 2026: before it, the lines of
+  // every card but the first were drawn nowhere on /result).
+  const groups: { service: string | null; lines: string[] }[] = everyCard
+    ? everyCard
+        .map((c) => ({ service: c.service, lines: c.read_these_first ?? [] }))
+        .filter((g) => g.lines.length > 0)
+    : [{ service: null, lines: card?.read_these_first ?? [] }].filter((g) => g.lines.length > 0);
 
   return (
     <div id="simple-advice-hero" className="space-y-4">
       {/* 1. Urgent Warnings — Always Prominent Even When Collapsed */}
-      {urgentWarnings.length > 0 ? (
+      {groups.length > 0 ? (
         <section aria-label={t("advice.urgent.title")} className="space-y-2.5">
-          {urgentWarnings.map((warning, i) => (
+          {groups.map((group, g) => (
             <div
-              key={i}
-              className="rounded-2xl border-2 border-warning bg-warning-soft p-4 text-warning-foreground shadow-sm sm:rounded-3xl sm:p-5"
+              key={`${group.service ?? "card"}-${g}`}
+              className="space-y-2.5"
+              data-must-read={group.service ?? "card"}
             >
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="size-6 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-extrabold text-xs block uppercase tracking-wider">
-                    {t("advice.readFirst")}
-                  </span>
-                  <p className="mt-1 text-base font-bold leading-relaxed">{warning}</p>
+              {group.service && isService(group.service) ? (
+                <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                  {t(`service.${group.service}`)}
+                </h2>
+              ) : null}
+              {group.lines.map((warning, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border-2 border-warning bg-warning-soft p-4 text-warning-foreground shadow-sm sm:rounded-3xl sm:p-5"
+                >
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="size-6 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-extrabold text-xs block uppercase tracking-wider">
+                        {t("advice.readFirst")}
+                      </span>
+                      <p className="mt-1 text-base font-bold leading-relaxed">{warning}</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           ))}
         </section>
@@ -117,6 +143,10 @@ export function SimpleAdviceHero({
             {summary.paragraph}
           </p>
         </div>
+
+        {/* How sure AIAIC is, its three cases where it sends them, and the source with its date: the answer's face,
+            under the verdict and outside the details (the brief's rule 1; lane AD's fix round) */}
+        <AdviceFace card={card ?? response?.cards?.[0]} className="mt-3" />
 
         {/* The answer at a glance, under the paragraph and outside the details (push 4) */}
         {glance}

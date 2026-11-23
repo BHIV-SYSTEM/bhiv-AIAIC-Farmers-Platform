@@ -6970,10 +6970,39 @@ test("A77 AE4-03-V3 her privacy page names the officers of an organisation worki
 
 // ------------------------------------------------------------------------------------------------ run
 
-test("AD1 the Payments page says less and keeps her money explicit (lane AD, push 2b, 23 Nov 2026): on AIAIC's recorded sends (the buyer paid; AIAIC's send on its way; reached her bank) each total keeps its label and its amount on the first view, in English, Marathi and Hindi; what each money word rests on is behind one small Why?, closed, its words whole, and the Why? itself has no English word in Marathi or Hindi", () => {
+test("AD1 the Payments page says less and keeps her money explicit (lane AD, push 2b, 23 Nov 2026; its fix round's AD-03 and AD-07): on AIAIC's recorded sends (the buyer paid; AIAIC's send on its way; reached her bank; a real account's sales, one called off after the buyer paid) and on a DERIVED account whose four totals all differ, each total keeps its label WITH ITS OWN amount on one line of the first view; a practice account's totals keep the Practice mark first, and a real account's never say it; what each money word rests on is behind one small Why?, closed, with the sign that it opens, its words whole, and the Why? itself has no English word in Marathi or Hindi; in English, Marathi and Hindi", () => {
   const data = (mine: AiaicMine) => ({ mine, cropNames: {}, districtNames: {} });
-  for (const name of ["collect_mine_paid", "collect_mine_processing", "collect_mine_processed"]) {
-    const mine = mineOf(name);
+  const copyOf = (name: string) => JSON.parse(JSON.stringify(mineOf(name))) as AiaicMine;
+  // DERIVED, IN MEMORY (said so): four totals that all differ, so no amount can stand in for another. AIAIC's recording
+  // collect_mine_approval_pending (three paid sales: one sent and reached her bank, two not sent), its first sale's send
+  // marked on its way (`from_aiaic.steps.sent`, as AIAIC's collect_mine_processing records a send), and the sale of
+  // buyer_farmer_mine_more_time whose link the buyer has not paid, added
+  const four = copyOf("collect_mine_approval_pending");
+  const sending = (
+    four.orders[0] as unknown as { from_aiaic?: { steps?: Record<string, boolean> } }
+  ).from_aiaic?.steps;
+  assert.ok(sending && sending["sent"] === false, "the recorded first sale is not sent yet");
+  sending["sent"] = true;
+  const unpaid = copyOf("buyer_farmer_mine_more_time").orders.find(
+    (o) => o.payment_state === "link_created",
+  );
+  assert.ok(unpaid, "the recorded sale whose link the buyer has not paid");
+  four.orders.push(unpaid);
+  const cases: [string, AiaicMine][] = [
+    ...["collect_mine_paid", "collect_mine_processing", "collect_mine_processed"].map(
+      (name) => [name, mineOf(name)] as [string, AiaicMine],
+    ),
+    ["farmer_app_mine_refund_owed (a real account)", mineOf("farmer_app_mine_refund_owed")],
+    ["DERIVED four totals", four],
+  ];
+  const fourTotals = moneyTotals(four.orders);
+  assert.equal(
+    new Set([fourTotals.agreed, fourTotals.paidByBuyers, fourTotals.sentToHer, fourTotals.settled])
+      .size,
+    4,
+    `the derived account's four totals differ: ${JSON.stringify(fourTotals)}`,
+  );
+  for (const [name, mine] of cases) {
     const m = moneyTotals(mine.orders);
     for (const lang of LANGS) {
       const t = wordsIn(lang);
@@ -6981,26 +7010,44 @@ test("AD1 the Payments page says less and keeps her money explicit (lane AD, pus
       const fold = html.indexOf('data-testid="aiaic-payments-why"');
       assert.ok(fold > 0, `${name} ${lang}: the Why? fold is there`);
       const first = html.slice(0, fold);
+      // each line of the totals, its label and its amount together (never an amount said only somewhere on the page)
+      const lines = first.match(/<li\b[\s\S]*?<\/li>/g) ?? [];
+      assert.equal(lines.length, 4, `${name} ${lang}: four lines of totals`);
       for (const [key, value] of [
         ["aiaic.payments.agreed", m.agreed],
         ["aiaic.payments.paid", m.paidByBuyers],
         ["aiaic.payments.sent", m.sentToHer],
         ["aiaic.payments.settled", m.settled],
       ] as const) {
-        assert.ok(first.includes(escHtml(t(key))), `${name} ${lang}: ${key} said before the fold`);
+        const own = lines.filter((li) => li.includes(`>${escHtml(t(key))}</span>`));
+        assert.equal(own.length, 1, `${name} ${lang}: ${key} said on one line before the fold`);
         assert.ok(
-          first.includes(escHtml(rupees(value))),
-          `${name} ${lang}: its amount ${rupees(value)} before the fold`,
+          own[0]!.includes(`>${escHtml(rupees(value))}</span>`),
+          `${name} ${lang}: ${key} with its own amount ${rupees(value)}`,
         );
       }
+      // the Practice mark (rule 2): first in the totals' box on a practice account, never on a real one
+      const chip = `>${escHtml(t("aiaic.chip.practice"))}</span>`;
+      if (mine.practice) {
+        assert.ok(first.includes(chip), `${name} ${lang}: the Practice mark`);
+        assert.ok(first.indexOf(chip) < first.indexOf("<li"), `${name} ${lang}: before the totals`);
+      } else assert.ok(!first.includes(chip), `${name} ${lang}: a real account is never practice`);
       const details = html.slice(
         html.lastIndexOf("<details", fold),
         html.indexOf("</details>", fold),
       );
       assert.ok(!/<details[^>]*\bopen\b/.test(details), `${name} ${lang}: the Why? is closed`);
+      const summary = details.slice(details.indexOf("<summary"), details.indexOf("</summary>"));
+      assert.equal(
+        summary.replace(/<[^>]*>/g, ""),
+        escHtml(t("aiaic.kit.why")),
+        `${name} ${lang}: one Why?, its word alone`,
+      );
+      const sign = summary.match(/<svg\b[^>]*>/)?.[0] ?? "";
       assert.ok(
-        details.includes(`>${escHtml(t("aiaic.kit.why"))}</summary>`),
-        `${name} ${lang}: one Why?`,
+        sign.includes('data-testid="aiaic-payments-why-sign"') &&
+          sign.includes('aria-hidden="true"'),
+        `${name} ${lang}: the sign that it opens, hidden from a screen reader: ${sign}`,
       );
       assert.ok(
         details.includes(escHtml(t("aiaic.payments.source"))),

@@ -1,17 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { AdviceFace } from "@/components/farm/AdviceFace";
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
 import { AlertTriangle } from "lucide-react";
 
+import { bandOf } from "@/lib/advice-text";
 import { recommendationLabel } from "@/lib/aiaic-labels";
 import { SERVICE_ICON } from "@/lib/service-icons";
-import {
-  confidenceLevel,
-  isAbstention,
-  type IntelligenceItem,
-  type Service,
-} from "@/lib/aiaic-types";
+import { isAbstention, type IntelligenceItem, type Service } from "@/lib/aiaic-types";
+import type { FarmerAdviceCard } from "@/lib/farmer-advice.functions";
 import { useI18n } from "@/lib/i18n";
 
 export function RecommendationCard({
@@ -20,6 +18,7 @@ export function RecommendationCard({
   index,
   search,
   subject,
+  card,
   children,
 }: {
   service: Service;
@@ -28,12 +27,14 @@ export function RecommendationCard({
   search: { region?: string; crop?: string; mandi?: string; land?: string; services?: string };
   /** The crop and place as the page says them, in the reader's language: never the answer's raw keys ("tur • Latur", F11). */
   subject: string;
+  /** AIAIC's card for this service: its band (after AIAIC's caps), its cases and its source (lane AD's fix round). */
+  card?: FarmerAdviceCard | undefined;
   /** Shown under the answer's own words (never under an abstention): the market answer's price comparison. */
   children?: ReactNode;
 }) {
   const { t, lang } = useI18n();
   const abstained = isAbstention(item);
-  const level = confidenceLevel(item);
+  const band = bandOf(card, item);
   const Icon = SERVICE_ICON[service];
 
   return (
@@ -75,7 +76,8 @@ export function RecommendationCard({
       ) : null}
 
       <div className="mt-4 border-t border-border pt-3.5 sm:pt-4">
-        <ConfidenceMeter level={level} />
+        <ConfidenceMeter level={band.level} word={band.word} />
+        <AdviceFace card={card} sure={false} className="mt-2" />
         {item.calibrated === false ? (
           <p className="mt-3 flex items-start gap-2 rounded-xl bg-warning-soft px-3 py-2 text-xs font-semibold text-warning-foreground sm:text-base">
             <AlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0 sm:size-5" />

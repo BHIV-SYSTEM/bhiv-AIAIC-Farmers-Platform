@@ -241,6 +241,15 @@ async function loadApp() {
   const { SaleStepper } = await import("../src/components/farm/aiaic/SaleStepper");
   // AIAIC's answer on her advice page, mounted alone (lane AD, 23 Nov 2026: TD32 reads what it keeps on its first view)
   const { SimpleAdviceHero } = await import("../src/components/farm/SimpleAdviceHero");
+  // /result as she opens it, its reads, and her own reading of AIAIC's /farmer/advice (lane AD's fix round, 23 Nov 2026:
+  // TD33 reads what /result keeps on its first view; TD32 reads AIAIC's recorded cards through her own reading)
+  const { Route: ResultRoute } = await import("../src/routes/result");
+  const { getFarmerAdvice, farmerAdviceOf } = await import("../src/lib/farmer-advice.functions");
+  const { getPriceSeries } = await import("../src/lib/places.functions");
+  const { getIntelligence } = await import("../src/lib/aiaic.functions");
+  const { scanFirst } = await import("../src/lib/aiaic-account.functions");
+  const { getNearbyMandis, getTransportEstimate, getStorageVerdict } =
+    await import("../src/lib/aiaic-trade.functions");
   const { getMyTrade } = await import("../src/lib/aiaic-trade.functions");
   const { mineForBrowser } = await import("../src/lib/aiaic-trade.server");
   const {
@@ -285,6 +294,15 @@ async function loadApp() {
     recordedTrip,
     SaleStepper,
     SimpleAdviceHero,
+    ResultRoute,
+    getFarmerAdvice,
+    farmerAdviceOf,
+    getPriceSeries,
+    getIntelligence,
+    scanFirst,
+    getNearbyMandis,
+    getTransportEstimate,
+    getStorageVerdict,
     getMyTrade,
     mineForBrowser,
     problem,
@@ -413,6 +431,8 @@ function suite(app: App, window: Window & typeof globalThis) {
     register: null as null | (() => unknown),
     signIn: null as null | (() => unknown),
     sent: [] as string[],
+    // AIAIC's answer to /farmer/advice as her server reads it (TD33: a recording, through `farmerAdviceOf`); none: refused
+    advice: null as unknown,
   };
   /** The mark of the suite's own account (`accountMark` of the username `whoAmI` answers): a sale is kept with it. */
   const HER = app.today.accountMark("practice-farmer") as string;
@@ -429,9 +449,28 @@ function suite(app: App, window: Window & typeof globalThis) {
     getPlacesCrops: app.getPlacesCrops,
     getTripTalukas: app.getTripTalukas,
     getMyQueries: app.getMyQueries,
+    getFarmerAdvice: app.getFarmerAdvice,
+    getPriceSeries: app.getPriceSeries,
+    getIntelligence: app.getIntelligence,
+    scanFirst: app.scanFirst,
+    getNearbyMandis: app.getNearbyMandis,
+    getTransportEstimate: app.getTransportEstimate,
+    getStorageVerdict: app.getStorageVerdict,
   };
-  // the ask form's and Help's own reads (lane AD, TD31): answered as AIAIC not answering, each page's own failed read
-  const UNREACHED = new Set(["getCatalog", "getPlacesCrops", "getTripTalukas", "getMyQueries"]);
+  // the ask form's and Help's own reads (lane AD, TD31), and /result's reads but AIAIC's advice (its fix round, TD33):
+  // answered as AIAIC not answering, each page's own failed read
+  const UNREACHED = new Set([
+    "getCatalog",
+    "getPlacesCrops",
+    "getTripTalukas",
+    "getMyQueries",
+    "getPriceSeries",
+    "getIntelligence",
+    "scanFirst",
+    "getNearbyMandis",
+    "getTransportEstimate",
+    "getStorageVerdict",
+  ]);
   const unanswered: string[] = [];
   unansweredCalls = () => unanswered.splice(0);
   const rpc = {
@@ -481,7 +520,9 @@ function suite(app: App, window: Window & typeof globalThis) {
             result: (world[name === "registerFarmer" ? "register" : "signIn"] as () => unknown)(),
           };
         }
-        if (name && UNREACHED.has(name)) throw new TypeError("AIAIC did not answer (this suite)");
+        if (name === "getFarmerAdvice" && world.advice) return { ...ctx, result: world.advice };
+        if (name && (UNREACHED.has(name) || name === "getFarmerAdvice"))
+          throw new TypeError("AIAIC did not answer (this suite)");
         unanswered.push(String(name ?? "a server function this suite does not know"));
         throw new Error("a server function this suite does not answer");
       },
@@ -551,18 +592,22 @@ function suite(app: App, window: Window & typeof globalThis) {
       keep = false,
       user = "practice-farmer",
       chip = false,
+      advice = null,
     }: {
       signedIn?: boolean;
       at?: string;
       keep?: boolean;
       user?: string;
       chip?: boolean;
+      /** AIAIC's answer to /farmer/advice as her server reads it (TD33); none: AIAIC not answering. */
+      advice?: unknown;
     } = {},
   ) => {
     world.signedIn = signedIn;
     world.username = user;
     world.trade = trade;
     world.calls = 0;
+    world.advice = advice;
     if (!keep) {
       window.localStorage.clear();
       window.sessionStorage.clear();
@@ -613,6 +658,11 @@ function suite(app: App, window: Window & typeof globalThis) {
       path: "/help",
       getParentRoute: () => root,
     } as never);
+    const resultRoute = app.ResultRoute.update({
+      id: "/result",
+      path: "/result",
+      getParentRoute: () => root,
+    } as never);
     const router = R.createRouter({
       routeTree: root.addChildren([
         todayRoute as never,
@@ -621,6 +671,7 @@ function suite(app: App, window: Window & typeof globalThis) {
         signInRoute as never,
         askRoute as never,
         helpRoute as never,
+        resultRoute as never,
       ]),
       history: R.createMemoryHistory({ initialEntries: [at] }),
     });
@@ -751,6 +802,96 @@ function suite(app: App, window: Window & typeof globalThis) {
         for (const w of el.getAttribute(at)?.match(/[A-Za-z]{2,}/g) ?? [])
           if (w !== "AIAIC") out.push(w);
     return out;
+  };
+  /** The innermost elements that hold the words whole (spaces folded). */
+  const foldSpace = (s: string | null | undefined) => (s ?? "").replace(/\s+/g, " ").trim();
+  const holdersOf = (root: Element, words: string): Element[] => {
+    const want = foldSpace(words);
+    return [...root.querySelectorAll("*")].filter(
+      (el) =>
+        foldSpace(el.textContent).includes(want) &&
+        ![...el.children].some((c) => foldSpace(c.textContent).includes(want)),
+    );
+  };
+  /** A must-keep on her first view (lane AD's fix round, AD-03): drawn, and neither behind a closed details nor inside
+   *  More details nor hidden. `textContent` alone holds the body of a closed details too. */
+  const onFirstView = (root: Element, words: string, what: string) => {
+    const at = holdersOf(root, words);
+    ok(at.length > 0, `${what}: drawn`);
+    for (const el of at) {
+      ok(!el.closest("details:not([open])"), `${what}: not behind a closed details`);
+      ok(!el.closest("#advice-expanded-details"), `${what}: not inside More details`);
+      ok(!el.closest("[hidden],[aria-hidden='true']"), `${what}: not hidden`);
+    }
+  };
+  /** THE MARATHI AND HINDI WORDS LANE AD REMOVED (b352405's dictionaries: the keys it took out, and the part it cut from
+   *  each shortened line), page by page, pinned literally: none may come back (its fix round, AD-04). */
+  const GONE: Record<"mr" | "hi", Record<string, string[]>> = {
+    mr: {
+      landing: [
+        "हे कसे चालते",
+        "आम्ही आजची खरी आकडेवारी वाचतो",
+        "आजची खरी आकडेवारी सोप्या शब्दांत दाखवतो",
+        "झाडाच्या फोटोची तपासणी",
+        "एका वेळी एक पायरी",
+      ],
+      today: [
+        "प्रत्येक निवड तुम्हाला हवी ती पायरी उघडते",
+        "एका वेळी एक पायरी",
+        "तुम्ही पीक विकू शकता, किंवा आजचा भाव पाहू शकता",
+      ],
+      ask: [
+        "महाराष्ट्रातील ३६ जिल्हे",
+        "भावाचा सल्ला एका वेळी एकाच मंडीसाठी काढला जातो",
+        "तुमच्या शेतासाठी ऐच्छिक माहिती",
+        "अधिकृत भूजल व माती माहिती सूचना",
+      ],
+      help: ["भाव, साठवण, वाहतूक, विक्री किंवा ॲपबद्दल"],
+      register: ["तुमचे प्रश्न आणि विक्री या फोनऐवजी"],
+      signin: ["नोंदणी करताना दिलेल्या वापरकर्ता नावाने"],
+    },
+    hi: {
+      landing: [
+        "यह कैसे काम करता है",
+        "हम आज के असली आँकड़े पढ़ते हैं",
+        "आज के असली आँकड़े आसान शब्दों में दिखाएँगे",
+        "पौधे की फोटो की जाँच",
+        "एक बार में एक कदम",
+      ],
+      today: [
+        "हर चुनाव आपको ज़रूरी कदम खोलता है",
+        "एक बार में एक कदम",
+        "आप फ़सल बेच सकते हैं, या आज का भाव देख सकते हैं",
+      ],
+      ask: [
+        "महाराष्ट्र के 36 ज़िले",
+        "भाव की सलाह एक बार में एक ही मंडी के लिए बनती है",
+        "आपके खेत का ऐच्छिक रिकॉर्ड",
+        "आधिकारिक भूजल और मिट्टी सूचना",
+      ],
+      help: ["भाव, भंडारण, परिवहन, बिक्री या ऐप के बारे में"],
+      register: ["आपके प्रश्न और बिक्री इस फ़ोन के बजाय"],
+      signin: ["पंजीकरण के समय दिए उपयोगकर्ता नाम और पासवर्ड से"],
+    },
+  };
+  /** Latin words on her page beyond the names a page may hold: AIAIC's name and the names it sends (`latinIn`), the
+   *  language switcher's own name for English (each language is named there in its own script, so that a reader of
+   *  Marathi finds English), and "APMC", the market committee's name in her Marathi and Hindi words as on AIAIC's mandi
+   *  names (in her dictionaries since before lane AD). */
+  const latinBeyondNames = (root: Element) => {
+    const out = latinIn(root);
+    for (const b of root.querySelectorAll('[role="radiogroup"] [role="radio"]'))
+      if (b.textContent === "English" && out.includes("English"))
+        out.splice(out.indexOf("English"), 1);
+    return out.filter((w) => w !== "APMC");
+  };
+  /** Her Marathi or Hindi page says no English word and none of the words lane AD removed from it (AD-04). */
+  const saysNoEnglishNorGone = (root: Element, lang: Lang, page: string) => {
+    if (lang === "en") return;
+    assert.deepEqual(latinBeyondNames(root), [], `${lang} ${page}: no English word`);
+    const text = foldSpace(root.textContent);
+    for (const gone of GONE[lang][page] ?? [])
+      ok(!text.includes(gone), `${lang} ${page}: the removed words "${gone}" are not back`);
   };
 
   // ============================================================================================ TD1
@@ -3583,7 +3724,7 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   // ============================================================================================ TD30 (lane AD)
 
-  test("TD30 her landing and her guided home say less and keep what must stay (lane AD, push 2b, 23 Nov 2026): the landing has no how-it-works list and keeps its uncalibrated box word for word and a guest's practice line; her guided home has no line on how the page works and keeps, for a guest, the practice line, the advice cards' uncalibrated note on both advice cards and a person (AIAIC's team and the Kisan Call Centre), and for a practice account its practice line and the offer's total; in English, Marathi and Hindi (English pinned, Marathi and Hindi her dictionary's words)", async () => {
+  test("TD30 her landing and her guided home say less and keep what must stay (lane AD, push 2b, 23 Nov 2026; its fix round's AD-03 and AD-04): the landing has no how-it-works list and keeps its uncalibrated box word for word and a guest's practice line, each on the first view (never behind a closed details or a click); her guided home has no line on how the page works and keeps, for a guest, the practice line, the advice cards' uncalibrated note on both advice cards and a person (AIAIC's team and the Kisan Call Centre), and for a practice account its practice line and the offer's total, each on the first view; in English, Marathi and Hindi (English pinned, Marathi and Hindi her dictionary's words), and on the Marathi and Hindi landing and guided home no English word and none of the words lane AD removed", async () => {
     const PIN = {
       demoTitle: "Please read before you use this",
       demoBody:
@@ -3595,20 +3736,20 @@ function suite(app: App, window: Window & typeof globalThis) {
       const home = await mount(lang, screenOf(EMPTY, lang), { at: "/", signedIn: false });
       try {
         await waitFor(() => home.q('[data-testid="home-today-link"]'), "the landing");
-        const text = home.container.textContent ?? "";
-        ok(
-          text.includes(say("home.demo.title", PIN.demoTitle)),
+        const c = home.container;
+        onFirstView(
+          c,
+          say("home.demo.title", PIN.demoTitle),
           `${lang}: the uncalibrated box's title`,
         );
-        ok(
-          text.includes(say("home.demo.body", PIN.demoBody)),
-          `${lang}: the uncalibrated box's words, whole`,
-        );
-        ok(
-          text.includes(say("home.what", PIN.guestHome)),
+        onFirstView(c, say("home.demo.body", PIN.demoBody), `${lang}: the uncalibrated box, whole`);
+        onFirstView(
+          c,
+          say("home.what", PIN.guestHome),
           `${lang}: a guest's selling is practice only`,
         );
         ok(!home.q("#how-heading") && home.all("ol").length === 0, `${lang}: no how-it-works list`);
+        saysNoEnglishNorGone(c, lang, "landing");
       } finally {
         await home.unmount();
       }
@@ -3620,6 +3761,11 @@ function suite(app: App, window: Window & typeof globalThis) {
           say("aiaic.today.guest", EN.guest),
           `${lang}: a guest's selling is practice only, word for word`,
         );
+        onFirstView(
+          guest.container,
+          say("aiaic.today.guest", EN.guest),
+          `${lang}: a guest's practice line`,
+        );
         const noted = guest
           .all('[data-testid^="today-task-"]')
           .filter((e) => e.tagName === "A")
@@ -3627,6 +3773,12 @@ function suite(app: App, window: Window & typeof globalThis) {
             (e.textContent ?? "").includes(say("aiaic.today.card.price_note", EN.warning)),
           );
         assert.equal(noted.length, 2, `${lang}: the uncalibrated note on both advice cards`);
+        for (const card of noted)
+          onFirstView(
+            card,
+            say("aiaic.today.card.price_note", EN.warning),
+            `${lang}: an advice card's uncalibrated note`,
+          );
         ok(
           guest.q('[data-testid="today-person-team"]') &&
             guest.q('[data-testid="today-person-kcc"]'),
@@ -3642,18 +3794,23 @@ function suite(app: App, window: Window & typeof globalThis) {
           null,
           `${lang}: no line on how the page works`,
         );
+        if (lang !== "en") {
+          const text = foldSpace(guest.container.textContent);
+          for (const gone of GONE[lang].today ?? [])
+            ok(!text.includes(gone), `${lang} today: the removed words "${gone}" are not back`);
+        }
       } finally {
         await guest.unmount();
       }
       const practice = await mount(lang, screenOf(OFFER, lang));
       try {
         await ready(practice);
-        const text = practice.container.textContent ?? "";
-        ok(
-          text.includes(say("aiaic.practice.tip", EN.practiceTip)),
+        onFirstView(
+          practice.container,
+          say("aiaic.practice.tip", EN.practiceTip),
           `${lang}: the practice account's line`,
         );
-        ok(text.includes("₹1,59,200"), `${lang}: the offer's total, as AIAIC recorded it`);
+        onFirstView(practice.container, "₹1,59,200", `${lang}: the offer's total, as recorded`);
       } finally {
         await practice.unmount();
       }
@@ -3662,26 +3819,29 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   // ============================================================================================ TD31 (lane AD)
 
-  test("TD31 the ask form, Help, Register and Sign in say less and keep what an action needs and what must stay (lane AD, push 2b, 23 Nov 2026): the ask form keeps each field's label, with no line on how to fill it, no help under a field beyond its label and no water caveat (the water answer says its own source and age); Help keeps its Send, a guest's privacy note whole, and its question box's label with the hint never to write a bank account, Aadhaar or PAN number; Register keeps its notice at the point of consent whole, with its link to the privacy page; Sign in keeps the guest's choice; in English, Marathi and Hindi (English safety words pinned)", async () => {
+  test("TD31 the ask form, Help, Register and Sign in say less and keep what an action needs and what must stay (lane AD, push 2b, 23 Nov 2026; its fix round's AD-03, AD-04 and AD-06): the ask form keeps each field's label and its one line that a field may be left empty, with no help under a field beyond its label and no water caveat (the water answer says its own source and age); Help keeps its Send, a guest's privacy note whole, and its question box's label with the hint never to write a bank account, Aadhaar or PAN number; Register keeps its notice at the point of consent whole, with its link to the privacy page; Sign in keeps the guest's choice; each on the first view (never behind a closed details or a click); in English, Marathi and Hindi (English safety words pinned), and on each Marathi and Hindi page no English word and none of the words lane AD removed", async () => {
     const PIN = {
       hint: "In your own words (at most 2000 letters). Please do not write a bank account, Aadhaar or PAN number.",
       guestChoice: "You can also go on as a guest: the advice is the same.",
-      gone: [
-        "Fill only what you know",
-        "Official Water & Soil Data Caveat",
-        "Optional lot record",
-        "How it works",
-      ],
+      mayLeaveEmpty: "Fill only what you know. You can leave a field empty.",
+      gone: ["Official Water & Soil Data Caveat", "Optional lot record", "How it works"],
     };
     for (const lang of ["en", "mr", "hi"] as const) {
       const say = (key: string, en?: string) => (lang === "en" && en ? en : words(lang, key));
       const ask = await mount(lang, screenOf(EMPTY, lang), { at: "/ask", signedIn: false });
       try {
         await waitFor(() => ask.q('[data-testid="ask-land"]'), "the ask form");
-        const text = ask.container.textContent ?? "";
+        const c = ask.container;
         for (const key of ["ask.title", "ask.district", "ask.crop", "ask.land", "ask.services"])
-          ok(text.includes(say(key)), `${lang}: the ask form keeps ${key}`);
+          onFirstView(c, say(key), `${lang}: the ask form keeps ${key}`);
+        onFirstView(
+          c,
+          say("ask.subtitle", PIN.mayLeaveEmpty),
+          `${lang}: the ask form says a field may be left empty`,
+        );
+        const text = c.textContent ?? "";
         for (const gone of PIN.gone) ok(!text.includes(gone), `${lang}: no "${gone}"`);
+        saysNoEnglishNorGone(c, lang, "ask");
       } finally {
         await ask.unmount();
       }
@@ -3689,46 +3849,51 @@ function suite(app: App, window: Window & typeof globalThis) {
       try {
         await waitFor(() => help.q('[data-testid="help-text"]'), "the Help page");
         ok(help.q('[data-testid="help-send"]'), `${lang}: Help keeps its Send`);
+        const note = help.q('[data-testid="help-guest-note"]');
         ok(
-          (help.q('[data-testid="help-guest-note"]')?.textContent ?? "").includes(
-            say("aiaic.help.guest_note"),
-          ),
+          (note?.textContent ?? "").includes(say("aiaic.help.guest_note")),
           `${lang}: a guest's privacy note, whole`,
         );
-        const box = help.q('[data-testid="help-text"]')?.closest("label")?.textContent ?? "";
-        ok(box.includes(say("aiaic.help.text")), `${lang}: the question box's label`);
-        ok(
-          box.includes(say("aiaic.help.text_hint", PIN.hint)),
+        onFirstView(help.container, say("aiaic.help.guest_note"), `${lang}: the privacy note`);
+        const box = help.q('[data-testid="help-text"]')?.closest("label");
+        ok(box, `${lang}: the question box's label`);
+        onFirstView(box, say("aiaic.help.text"), `${lang}: the question box's label`);
+        onFirstView(
+          box,
+          say("aiaic.help.text_hint", PIN.hint),
           `${lang}: never a bank account, Aadhaar or PAN`,
         );
+        saysNoEnglishNorGone(help.container, lang, "help");
       } finally {
         await help.unmount();
       }
       const reg = await mount(lang, screenOf(EMPTY, lang), { at: "/register", signedIn: false });
       try {
         await waitFor(() => reg.q("#register-notice"), "the Register page");
-        const notice = reg.q("#register-notice")?.closest("section")?.textContent ?? "";
-        ok(notice.includes(say("aiaic.account.notice_title")), `${lang}: the notice's title`);
-        ok(
-          notice.includes(say("aiaic.account.notice")),
+        const section = reg.q("#register-notice")?.closest("section");
+        ok(section, `${lang}: the notice's section`);
+        onFirstView(section, say("aiaic.account.notice_title"), `${lang}: the notice's title`);
+        onFirstView(
+          section,
+          say("aiaic.account.notice"),
           `${lang}: the notice at the point of consent, whole`,
         );
-        ok(
-          reg.q("#register-notice")?.closest("section")?.querySelector('a[href="/privacy"]'),
-          `${lang}: its link to the privacy page`,
-        );
+        const privacy = section.querySelector('a[href="/privacy"]');
+        ok(privacy, `${lang}: its link to the privacy page`);
+        ok(!privacy.closest("details:not([open])"), `${lang}: the link is not behind a click`);
+        saysNoEnglishNorGone(reg.container, lang, "register");
       } finally {
         await reg.unmount();
       }
       const sign = await mount(lang, screenOf(EMPTY, lang), { at: "/signin", signedIn: false });
       try {
         await waitFor(() => sign.q("h1"), "the Sign in page");
-        ok(
-          (sign.container.textContent ?? "").includes(
-            say("aiaic.account.intro_signin", PIN.guestChoice),
-          ),
+        onFirstView(
+          sign.container,
+          say("aiaic.account.intro_signin", PIN.guestChoice),
           `${lang}: the guest's choice`,
         );
+        saysNoEnglishNorGone(sign.container, lang, "signin");
       } finally {
         await sign.unmount();
       }
@@ -3736,8 +3901,102 @@ function suite(app: App, window: Window & typeof globalThis) {
   });
 
   // ============================================================================================ TD32 (lane AD)
-  /** AIAIC's answer on her advice page (`SimpleAdviceHero`, drawn by /result and /advice/$service), mounted alone in her
-   *  language, from AIAIC's RECORDED answers (tests/fixtures/aiaic/farmer_advice_*_named.json, never written by hand). */
+  /** AIAIC's answer on her advice page (`SimpleAdviceHero`) as /advice/$service draws it, handed the page's one card,
+   *  mounted alone in her language, from AIAIC's RECORDED answers (tests/fixtures/aiaic/farmer_advice_*_named.json, never
+   *  written by hand) read through her own server's reading (`farmerAdviceOf`). /result hands it every card instead:
+   *  TD33 mounts /result itself (the fix round's AD-01: TD32 alone could not see a card /result left out). */
+  const adviceOf = (name: string) => {
+    const raw = JSON.parse(fs.readFileSync(path.join(FIXTURES, name), "utf8")) as {
+      _recorded?: { route?: string };
+      answer: Record<string, unknown>;
+    };
+    assert.equal(raw._recorded?.route, "GET /farmer/advice", `${name} is AIAIC's recorded answer`);
+    readFrom[name.replace(/\.json$/, "")] = "her fixtures (AIAIC's recorded GET /farmer/advice)";
+    return {
+      raw: raw.answer,
+      read: app.farmerAdviceOf(raw.answer, "2026-11-23T00:00:00.000Z"),
+    };
+  };
+  /** The day of a source as her pages write it (en "24 Sep 2026"; mr and hi "24/9/2026"), worked out here apart. */
+  const dayOf = (iso: string, lang: Lang) => {
+    const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+    const MON = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    return lang === "en" ? `${d} ${MON[(m ?? 1) - 1]} ${y}` : `${d}/${m}/${y}`;
+  };
+  /** The face under a verdict (the fix round's AD-02): how sure, in AIAIC's own word for the band its card shows after
+   *  its caps; the source cut to its publisher, marked as a name AIAIC sends, with its day; the three cases only where
+   *  AIAIC sent all three from data; after the verdict, before More details, never behind a click. */
+  const faceHeld = (
+    c: Element,
+    lang: Lang,
+    card: {
+      summary?: {
+        confidence?: { band: string; text: string | null };
+        source?: { text: string | null; observed_on: string | null };
+        cases?: { worst: string; average: string; best: string };
+      };
+    },
+    at: string,
+  ) => {
+    const band = card.summary?.confidence;
+    ok(band?.text, `${at}: AIAIC's recorded band and its word`);
+    const face = c.querySelector('#simple-advice-hero [data-testid="advice-face"]');
+    ok(face, `${at}: the face`);
+    assert.equal(
+      face.querySelector('[data-testid="advice-face-sure"]')?.textContent,
+      lang === "en" ? `How sure: ${band.text}` : fill(lang, "aiaic.face.sure", { band: band.text }),
+      `${at}: how sure, AIAIC's own word for its shown band`,
+    );
+    const source = face.querySelector('[data-testid="advice-face-source"]');
+    ok(source, `${at}: the source`);
+    const publisher = (card.summary?.source?.text ?? "").split(" — ")[0]?.trim() ?? "";
+    ok(publisher.length > 2, `${at}: AIAIC's recorded source names its publisher`);
+    assert.equal(
+      source.querySelector('span[data-name][lang="en"]')?.textContent,
+      publisher,
+      `${at}: the source's publisher, marked as a name AIAIC sends`,
+    );
+    const day = card.summary?.source?.observed_on ?? "";
+    ok(day, `${at}: AIAIC's recorded day of the source`);
+    assert.equal(
+      foldSpace(source.textContent),
+      lang === "en"
+        ? `Source: ${publisher}, ${dayOf(day, lang)}`
+        : `${words(lang, "aiaic.transport.note.source")} ${publisher}, ${dayOf(day, lang)}`,
+      `${at}: the source and its day`,
+    );
+    const cases = face.querySelector('[data-testid="advice-face-cases"]');
+    if (card.summary?.cases)
+      assert.equal(
+        cases?.textContent,
+        [card.summary.cases.worst, card.summary.cases.average, card.summary.cases.best].join(" · "),
+        `${at}: the worst, typical and best case, in AIAIC's words`,
+      );
+    else assert.equal(cases, null, `${at}: no cases where AIAIC sent none from data`);
+    const verdict = c.querySelector("#simple-advice-heading")?.nextElementSibling;
+    const more = c.querySelector("#toggle-advice-details-btn");
+    ok(verdict && more, `${at}: the verdict and More details`);
+    ok(
+      verdict.compareDocumentPosition(face) & Node.DOCUMENT_POSITION_FOLLOWING &&
+        face.compareDocumentPosition(more) & Node.DOCUMENT_POSITION_FOLLOWING,
+      `${at}: the face is under the verdict, before More details`,
+    );
+    for (const p of face.querySelectorAll("p"))
+      onFirstView(c, p.textContent ?? "", `${at}: the face's line "${p.textContent}"`);
+  };
   const heroOf = async (lang: Lang, card: unknown, askAHuman: unknown) => {
     window.localStorage.setItem("aiaic.lang", lang);
     const container = document.createElement("div");
@@ -3765,27 +4024,23 @@ function suite(app: App, window: Window & typeof globalThis) {
     };
   };
 
-  test("TD32 her advice page keeps on its first view what must stay (lane AD, push 2b, 23 Nov 2026; the brief's rules 1 to 3): on AIAIC's recorded answers each must-read line of a card is drawn whole in its own box, every one before the verdict and none behind a click; the verdict ends with the card's own note that farm scientists have not checked it; the Kisan Call Centre and Tele-MANAS are drawn outside the fold; More details is closed until pressed; in English, Marathi and Hindi", async () => {
-    type Card = { service: string; read_these_first?: string[]; checked_note?: string };
+  test("TD32 her advice page (/advice/$service: the hero handed the page's one card) keeps on its first view what must stay (lane AD, push 2b, 23 Nov 2026; the brief's rules 1 to 3; its fix round's AD-02): on AIAIC's recorded answers, read through her own server's reading, each must-read line of a card is drawn whole in its own box, every one before the verdict and none behind a click; the verdict ends with the card's own note that farm scientists have not checked it; under the verdict, outside the fold, how sure AIAIC is in its own word for the band its card shows after its caps, and the source cut to its publisher with its day, and the worst, typical and best case only where AIAIC sends all three from data (on a DERIVED card; AIAIC's recorded cards carry a fixed band, never drawn as a range); the Kisan Call Centre and Tele-MANAS are drawn outside the fold; More details is closed until pressed; in English, Marathi and Hindi", async () => {
     type Human = { kisan_call_centre?: string; tele_manas?: string };
-    const recorded = (name: string) =>
-      (
-        JSON.parse(fs.readFileSync(path.join(FIXTURES, name), "utf8")) as {
-          answer: { cards: Card[]; ask_a_human?: Human };
-        }
-      ).answer;
     const answers = [
-      recorded("farmer_advice_onion_nashik_mr_named.json"),
-      recorded("farmer_advice_soybean_indore_hi_named.json"),
+      adviceOf("farmer_advice_onion_nashik_mr_named.json").read,
+      adviceOf("farmer_advice_soybean_indore_hi_named.json").read,
     ];
     const digits = (s: string | undefined, or: string) => (s ?? "").replace(/[^0-9]/g, "") || or;
     let held = 0;
     for (const lang of ["en", "mr", "hi"] as const)
       for (const answer of answers)
-        for (const card of answer.cards.filter((c) => (c.read_these_first ?? []).length > 0)) {
+        for (const card of (answer.cards ?? []).filter(
+          (c) => (c.read_these_first ?? []).length > 0,
+        )) {
           const musts = card.read_these_first ?? [];
           const at = `${lang} ${card.service}`;
-          const hero = await heroOf(lang, card, answer.ask_a_human);
+          const human = answer.ask_a_human as Human | undefined;
+          const hero = await heroOf(lang, card, human);
           try {
             const c = hero.container;
             const urgent = c.querySelector("#simple-advice-hero > section[aria-label]");
@@ -3814,12 +4069,13 @@ function suite(app: App, window: Window & typeof globalThis) {
               `${at}: AIAIC's recorded note that farm scientists have not checked it`,
             );
             ok((verdict.textContent ?? "").includes(note), `${at}: the verdict says it`);
+            faceHeld(c, lang, card, at);
             const tel = [...c.querySelectorAll('a[href^="tel:"]')].map((a) =>
               a.getAttribute("href"),
             );
             ok(
-              tel.includes(`tel:${digits(answer.ask_a_human?.kisan_call_centre, "18001801551")}`) &&
-                tel.includes(`tel:${digits(answer.ask_a_human?.tele_manas, "14416")}`),
+              tel.includes(`tel:${digits(human?.kisan_call_centre, "18001801551")}`) &&
+                tel.includes(`tel:${digits(human?.tele_manas, "14416")}`),
               `${at}: the Kisan Call Centre and Tele-MANAS: ${tel.join(", ")}`,
             );
             const more = c.querySelector("#toggle-advice-details-btn");
@@ -3844,7 +4100,131 @@ function suite(app: App, window: Window & typeof globalThis) {
           }
         }
     ok(held === 21, `the recorded cards with must-read lines, in three languages: ${held}`);
+    // DERIVED (said so): AIAIC's recorded storage card for onion in Nashik with its fixed band replaced by the three cases
+    // AIAIC writes when they come from data (`case_band` items with `data.case`, in AIAIC's Marathi words for them)
+    const onion = adviceOf("farmer_advice_onion_nashik_mr_named.json").raw as {
+      cards: { service: string; summary: { sections: { id: string; items: unknown[] }[] } }[];
+    };
+    const derived = JSON.parse(JSON.stringify(onion)) as typeof onion;
+    const storage = derived.cards.find((x) => x.service === "storage");
+    const block = storage?.summary.sections.find((s) => s.id === "summary");
+    ok(block, "the recorded storage card's summary section");
+    const fixed = block.items.filter((i) => (i as { kind?: string }).kind === "case_band");
+    ok(fixed.length === 1, "the recording holds one fixed band");
+    const CASES = [
+      ["best", "सर्वात चांगली स्थिती: ₹4,084/क्विंटल", 4084],
+      ["average", "बहुधा: ₹3,925/क्विंटल", 3925],
+      ["worst", "सर्वात वाईट स्थिती: ₹3,610/क्विंटल", 3610],
+    ] as const;
+    block.items = [
+      ...block.items.filter((i) => (i as { kind?: string }).kind !== "case_band"),
+      ...CASES.map(([key, text, value]) => ({
+        kind: "case_band",
+        text,
+        lang: "mr",
+        data: { case: key, value, unit: "INR_per_quintal", fixed_band: null },
+      })),
+    ];
+    const read = app.farmerAdviceOf(derived, "2026-11-23T00:00:00.000Z");
+    const card = read.cards?.find((x) => x.service === "storage");
+    assert.deepEqual(
+      card?.summary?.cases,
+      { worst: CASES[2][1], average: CASES[1][1], best: CASES[0][1] },
+      "her reading keeps the three cases from data",
+    );
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const hero = await heroOf(lang, card, read.ask_a_human);
+      try {
+        faceHeld(hero.container, lang, card!, `${lang} storage (DERIVED cases)`);
+      } finally {
+        await hero.unmount();
+      }
+    }
     window.localStorage.clear();
+  });
+
+  // ============================================================================================ TD33 (lane AD's fix round)
+
+  test("TD33 /result keeps on its first view the must-read lines of EVERY card AIAIC sent (lane AD's fix round, 23 Nov 2026: AD-01 and AD-02; before it, only the first card's were drawn, and the others' nowhere, even opened): /result mounted as she opens it, AIAIC's recorded answers read through her own server's reading, AIAIC's other reads not answering; each card's must-read lines whole, each in its own box, under her name for its service, in AIAIC's order, all before the verdict and none behind a click; under the verdict the first card's face (how sure in AIAIC's word, the source with its day); More details closed; in English, Marathi and Hindi", async () => {
+    const asked = [
+      {
+        name: "farmer_advice_onion_nashik_mr_named.json",
+        at: "/result?region=Nashik&crop=onion&state=mh",
+        lines: 9,
+      },
+      {
+        name: "farmer_advice_soybean_indore_hi_named.json",
+        at: "/result?region=Indore&crop=soybean&state=mp",
+        lines: 10,
+      },
+    ];
+    for (const lang of ["en", "mr", "hi"] as const)
+      for (const one of asked) {
+        const advice = adviceOf(one.name).read;
+        const cards = advice.cards ?? [];
+        const withMusts = cards.filter((x) => (x.read_these_first ?? []).length > 0);
+        const at = `${lang} ${one.name}`;
+        assert.equal(
+          withMusts.reduce((n, x) => n + (x.read_these_first ?? []).length, 0),
+          one.lines,
+          `${at}: AIAIC's recorded must-read lines`,
+        );
+        ok(withMusts.length > 1, `${at}: more than one card has must-read lines`);
+        const page = await mount(lang, screenOf(EMPTY, lang), {
+          at: one.at,
+          signedIn: false,
+          advice,
+        });
+        try {
+          const c = page.container;
+          const verdict = await waitFor(
+            () => c.querySelector("#simple-advice-heading")?.nextElementSibling,
+            `${at}: /result's verdict`,
+          );
+          const urgent = c.querySelector("#simple-advice-hero > section[aria-label]");
+          ok(urgent, `${at}: the must-read lines' own section`);
+          const groups = [...urgent.querySelectorAll("[data-must-read]")];
+          assert.deepEqual(
+            groups.map((g) => g.getAttribute("data-must-read")),
+            withMusts.map((x) => x.service),
+            `${at}: every card with must-read lines, in AIAIC's order`,
+          );
+          for (const [i, group] of groups.entries()) {
+            const card = withMusts[i]!;
+            const musts = card.read_these_first ?? [];
+            assert.equal(
+              group.querySelector("h2")?.textContent,
+              words(lang, `service.${card.service}`),
+              `${at} ${card.service}: under her name for the service`,
+            );
+            assert.deepEqual(
+              [...group.querySelectorAll("p")].map((p) => p.textContent),
+              musts,
+              `${at} ${card.service}: each line whole, in AIAIC's order`,
+            );
+            assert.equal(
+              [...group.querySelectorAll("span")].filter(
+                (s) => s.textContent === words(lang, "advice.readFirst"),
+              ).length,
+              musts.length,
+              `${at} ${card.service}: each in its own box`,
+            );
+            ok(
+              group.compareDocumentPosition(verdict) & Node.DOCUMENT_POSITION_FOLLOWING,
+              `${at} ${card.service}: before the verdict`,
+            );
+            for (const line of musts)
+              onFirstView(c, line, `${at} ${card.service}: a must-read line`);
+          }
+          ok(cards[0], `${at}: the first card`);
+          faceHeld(c, lang, cards[0], `${at} (the first card)`);
+          const more = c.querySelector("#toggle-advice-details-btn");
+          ok(more?.getAttribute("aria-expanded") === "false", `${at}: More details is closed`);
+          ok(!c.querySelector("#advice-expanded-details"), `${at}: nothing of the fold is drawn`);
+        } finally {
+          await page.unmount();
+        }
+      }
   });
 
   return learn;

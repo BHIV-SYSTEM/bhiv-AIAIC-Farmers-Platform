@@ -276,6 +276,7 @@ function ResultAnswer() {
           <SimpleAdviceHero
             card={farmerAdviceQuery.data?.cards?.[0]}
             response={farmerAdviceQuery.data}
+            everyCard={farmerAdviceQuery.data?.cards}
             subject={subject}
             askAHuman={farmerAdviceQuery.data?.ask_a_human}
             glance={
@@ -475,15 +476,16 @@ function ResultAnswer() {
                         index={index}
                         search={linkSearch}
                         subject={subject}
+                        card={matchedCard}
                       >
-                        {/* The price on the first line, and the mandis the market answer compared */}
+                        {/* The price on the first line, and the mandis the market answer compared (the source is said
+                            once, on the card's face below) */}
                         {result.service === "market" &&
                         index === 0 &&
                         !isDistress &&
                         matchedCard?.abstained !== true ? (
                           <PriceCompare
                             compare={matchedCard?.summary?.price_compare}
-                            source={matchedCard?.summary?.source}
                             className="mt-3"
                           />
                         ) : null}
