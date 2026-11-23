@@ -1599,6 +1599,72 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
   });
 
+  // ======================================================================================== KAD2 (lane AD)
+
+  /** Keys her code reads by name that her dictionaries ALREADY lacked at her main b352405 (her listings and orders pages
+   *  drawn when AIAIC's trade is off): there each draws its own name. Lane AD changes no behaviour and names them for her
+   *  team; every other key read by name must be in all three languages. */
+  const ABSENT_AT_B352405 = new Set([
+    "failure.request_failed.title", // routes/listings.tsx, routes/orders.index.tsx
+    "order.list.subtitle", // routes/orders.index.tsx
+    "order.empty.title", // routes/orders.index.tsx
+    "order.empty.body", // routes/orders.index.tsx
+  ]);
+
+  test("KAD2 every word her code reads by name is in her dictionaries in English, Marathi and Hindi (lane AD, push 2b, 23 Nov 2026: filter.all, read by two routes, was taken out as unread by a scan that misread mixed quotes; read here by her own TypeScript parser): each t of a literal key in src/ is a key of en, mr and hi, apart from the four already absent at b352405, and each t of a built key builds at least one key", async () => {
+    const ts = (await import("typescript")).default;
+    const src = path.join(here, "..", "src");
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (/\.(ts|tsx)$/.test(e.name)) files.push(p);
+      }
+    };
+    walk(src);
+    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const missing: string[] = [];
+    const unbuilt: string[] = [];
+    let named = 0;
+    for (const f of files) {
+      const sf = ts.createSourceFile(
+        f,
+        fs.readFileSync(f, "utf8"),
+        ts.ScriptTarget.Latest,
+        true,
+        f.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+      );
+      const at = (n: import("typescript").Node) =>
+        `${path.relative(src, f).replace(/\\/g, "/")}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
+      const visit = (n: import("typescript").Node): void => {
+        const a =
+          ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === "t"
+            ? n.arguments[0]
+            : undefined;
+        if (a && (ts.isStringLiteral(a) || ts.isNoSubstitutionTemplateLiteral(a))) {
+          named++;
+          if (!ABSENT_AT_B352405.has(a.text))
+            for (const lang of ["en", "mr", "hi"] as const)
+              if (DICTS[lang][a.text] === undefined) missing.push(`${a.text} [${lang}] ${at(a)}`);
+        } else if (a && ts.isTemplateExpression(a)) {
+          const parts = [a.head.text, ...a.templateSpans.map((s) => s.literal.text)];
+          const re = new RegExp(`^${parts.map(esc).join(".+")}$`);
+          if (!Object.keys(DICTS.en).some((k) => re.test(k)))
+            unbuilt.push(`${parts.join("{…}")} ${at(a)}`);
+        }
+        ts.forEachChild(n, visit);
+      };
+      visit(sf);
+    }
+    ok(
+      files.length > 100 && named > 500,
+      `the files read: ${files.length}; the keys read by name: ${named}`,
+    );
+    assert.deepEqual(missing, [], "a key her code reads by name, absent from a dictionary");
+    assert.deepEqual(unbuilt, [], "a built key that matches no key");
+  });
+
   // ======================================================================================== KA8
   test("KA8 K8: a money button AIAIC holds shut is aria-disabled, reachable by Tab, its reason read with it; a press says why again and sends nothing", async () => {
     await inStart(async () => {
