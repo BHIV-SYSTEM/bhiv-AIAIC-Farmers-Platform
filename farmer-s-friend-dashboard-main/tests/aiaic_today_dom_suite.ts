@@ -4145,7 +4145,7 @@ function suite(app: App, window: Window & typeof globalThis) {
 
   // ============================================================================================ TD33 (lane AD's fix round)
 
-  test("TD33 /result keeps on its first view the must-read lines of EVERY card AIAIC sent (lane AD's fix round, 23 Nov 2026: AD-01 and AD-02; before it, only the first card's were drawn, and the others' nowhere, even opened): /result mounted as she opens it, AIAIC's recorded answers read through her own server's reading, AIAIC's other reads not answering; each card's must-read lines whole, each in its own box, under her name for its service, in AIAIC's order, all before the verdict and none behind a click; under the verdict the first card's face (how sure in AIAIC's word, the source with its day); More details closed; in English, Marathi and Hindi", async () => {
+  test("TD33 /result holds the must-read lines of EVERY card AIAIC sent (lane AD's fix round, 24 Nov 2026: AD-01 and AD-02; before it, only the first card's were drawn there, and the others' nowhere, even opened): /result mounted as she opens it, AIAIC's recorded answers read through her own server's reading, AIAIC's other reads not answering; the first card's must-read lines whole, each in its own box, before the verdict and outside any fold; before the verdict too, ONE amber button that counts every must-read line of the other cards (the owner's D-138), closed until pressed, and pressed, each of those lines whole in its own box under her name for its service, in AIAIC's order, still before the verdict; under the verdict the first card's face (how sure in AIAIC's word, the source with its day); More details closed; in English, Marathi and Hindi", async () => {
     const asked = [
       {
         name: "farmer_advice_onion_nashik_mr_named.json",
@@ -4158,18 +4158,28 @@ function suite(app: App, window: Window & typeof globalThis) {
         lines: 10,
       },
     ];
+    const PIN = {
+      many: (n: number) => `Read ${n} warnings of the other answers before you act`,
+    };
     for (const lang of ["en", "mr", "hi"] as const)
       for (const one of asked) {
         const advice = adviceOf(one.name).read;
         const cards = advice.cards ?? [];
-        const withMusts = cards.filter((x) => (x.read_these_first ?? []).length > 0);
+        const first = cards[0];
         const at = `${lang} ${one.name}`;
+        ok(first, `${at}: the first card`);
         assert.equal(
-          withMusts.reduce((n, x) => n + (x.read_these_first ?? []).length, 0),
+          cards.reduce((n, x) => n + (x.read_these_first ?? []).length, 0),
           one.lines,
           `${at}: AIAIC's recorded must-read lines`,
         );
-        ok(withMusts.length > 1, `${at}: more than one card has must-read lines`);
+        const own = first.read_these_first ?? [];
+        const others = cards.slice(1).filter((x) => (x.read_these_first ?? []).length > 0);
+        const count = others.reduce((n, x) => n + (x.read_these_first ?? []).length, 0);
+        ok(
+          own.length > 0 && others.length > 1 && count > 1,
+          `${at}: lines on the first card and on others`,
+        );
         const page = await mount(lang, screenOf(EMPTY, lang), {
           at: one.at,
           signedIn: false,
@@ -4183,14 +4193,47 @@ function suite(app: App, window: Window & typeof globalThis) {
           );
           const urgent = c.querySelector("#simple-advice-hero > section[aria-label]");
           ok(urgent, `${at}: the must-read lines' own section`);
-          const groups = [...urgent.querySelectorAll("[data-must-read]")];
+          // the first card's lines: drawn, whole, each in its own box, before the verdict, outside any fold
+          const visible = [...urgent.children].filter(
+            (x) => x.getAttribute("data-testid") !== "advice-other-warnings",
+          );
+          assert.deepEqual(
+            visible.map((x) => x.querySelector("p")?.textContent),
+            own,
+            `${at}: the first card's must-read lines whole, in AIAIC's order`,
+          );
+          for (const line of own) onFirstView(c, line, `${at}: a must-read line of the first card`);
+          // the others': one counted button, before the verdict, closed
+          const box = urgent.querySelector('[data-testid="advice-other-warnings"]');
+          ok(box, `${at}: the other cards' warnings`);
+          const button = box.querySelector("#toggle-other-warnings-btn");
+          ok(button, `${at}: one button`);
+          assert.equal(
+            foldSpace(button.textContent),
+            lang === "en" ? PIN.many(count) : fill(lang, "aiaic.face.other_warnings", { n: count }),
+            `${at}: the button counts every must-read line of the other cards (${count})`,
+          );
+          ok(
+            button.compareDocumentPosition(verdict) & Node.DOCUMENT_POSITION_FOLLOWING,
+            `${at}: the button is before the verdict`,
+          );
+          assert.equal(button.getAttribute("aria-expanded"), "false", `${at}: closed`);
+          assert.equal(
+            box.querySelectorAll("p").length,
+            0,
+            `${at}: nothing of them drawn unpressed`,
+          );
+          faceHeld(c, lang, first, `${at} (the first card)`);
+          await press(button, `${at}: the counted button`);
+          assert.equal(button.getAttribute("aria-expanded"), "true", `${at}: pressed, open`);
+          const groups = [...box.querySelectorAll("[data-must-read]")];
           assert.deepEqual(
             groups.map((g) => g.getAttribute("data-must-read")),
-            withMusts.map((x) => x.service),
-            `${at}: every card with must-read lines, in AIAIC's order`,
+            others.map((x) => x.service),
+            `${at}: every other card with must-read lines, in AIAIC's order`,
           );
           for (const [i, group] of groups.entries()) {
-            const card = withMusts[i]!;
+            const card = others[i]!;
             const musts = card.read_these_first ?? [];
             assert.equal(
               group.querySelector("h2")?.textContent,
@@ -4213,11 +4256,7 @@ function suite(app: App, window: Window & typeof globalThis) {
               group.compareDocumentPosition(verdict) & Node.DOCUMENT_POSITION_FOLLOWING,
               `${at} ${card.service}: before the verdict`,
             );
-            for (const line of musts)
-              onFirstView(c, line, `${at} ${card.service}: a must-read line`);
           }
-          ok(cards[0], `${at}: the first card`);
-          faceHeld(c, lang, cards[0], `${at} (the first card)`);
           const more = c.querySelector("#toggle-advice-details-btn");
           ok(more?.getAttribute("aria-expanded") === "false", `${at}: More details is closed`);
           ok(!c.querySelector("#advice-expanded-details"), `${at}: nothing of the fold is drawn`);
