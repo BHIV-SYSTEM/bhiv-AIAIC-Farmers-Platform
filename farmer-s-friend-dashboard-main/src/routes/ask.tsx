@@ -3,7 +3,7 @@ import { TalukaSelect } from "@/components/farm/aiaic/TalukaSelect";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Info, MapPin, WifiOff } from "lucide-react";
+import { Check, MapPin, WifiOff } from "lucide-react";
 
 import { BigSelect } from "@/components/farm/BigSelect";
 import { FarmGate } from "@/components/farm/aiaic/FarmGate";
@@ -269,9 +269,6 @@ function AskForm() {
       <h1 className="break-words text-2xl font-extrabold text-foreground sm:text-3xl">
         {t("ask.title")}
       </h1>
-      <p className="mt-2 break-words text-base text-foreground/75 sm:text-lg">
-        {t("ask.subtitle")}
-      </p>
 
       {!catalogQuery.isPending && !options.live && !districtsQuery.data?.ok ? (
         <p className="mt-4 flex items-start gap-3 rounded-2xl border-2 border-warning bg-warning-soft px-3.5 py-3 text-sm font-semibold text-warning-foreground sm:px-4 sm:text-base">
@@ -328,7 +325,6 @@ function AskForm() {
         {/* District Selector */}
         <BigSelect
           label={t("ask.district")}
-          help={state === "mh" ? t("ask.district.help.mh") : t("ask.district.help.mp")}
           anyLabel={t("ask.district.any")}
           options={availableDistricts}
           display={formatDistrict}
@@ -366,7 +362,6 @@ function AskForm() {
         {selected.includes("market") ? (
           <BigSelect
             label={t("ask.mandi")}
-            help={t("ask.mandi.help")}
             anyLabel={t("ask.mandi.any")}
             options={activeOptions.mandis}
             display={displayName}
@@ -381,7 +376,6 @@ function AskForm() {
           <label htmlFor="land" className="block text-lg font-bold text-foreground sm:text-xl">
             {t("ask.land")}
           </label>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">{t("ask.land.help")}</p>
           <input
             id="land"
             type="text"
@@ -400,15 +394,6 @@ function AskForm() {
               {t("ask.land.number")}
             </p>
           ) : null}
-        </div>
-
-        {/* Official Groundwater / Soil Caveat */}
-        <div className="rounded-2xl border-2 border-border bg-muted/50 p-3.5 text-xs leading-relaxed text-foreground/80 sm:p-4">
-          <p className="flex items-center gap-1.5 font-bold text-foreground">
-            <Info className="size-4 shrink-0 text-primary" />
-            {t("ask.waterSoilCaveat.title")}
-          </p>
-          <p className="mt-1 break-words">{t("ask.waterSoilCaveat.body")}</p>
         </div>
 
         {/* Services Selection */}

@@ -317,11 +317,9 @@ export const AIAIC_EN: Dict = {
   "aiaic.account.signed_out_note":
     "You were signed out on this phone. Sign in again to use your account.",
   "aiaic.account.title_signin": "Sign in",
-  "aiaic.account.intro_signin":
-    "Sign in with the username and password you registered. You can also go on as a guest: the advice is the same.",
+  "aiaic.account.intro_signin": "You can also go on as a guest: the advice is the same.",
   "aiaic.account.title_register": "Register",
-  "aiaic.account.intro_register":
-    "Make your own account: your questions and sales are kept with your account, not this phone. AIAIC's team approves each registration.",
+  "aiaic.account.intro_register": "AIAIC's team approves each registration.",
   "aiaic.account.username": "Username",
   "aiaic.account.username_hint": "3 to 64 letters or numbers, no spaces (. _ - allowed)",
   "aiaic.account.password": "Password",
@@ -385,8 +383,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.account.code.other": "That did not work. Please try again.",
   "nav.help.title": "Help",
   "aiaic.help.title": "Help",
-  "aiaic.help.intro":
-    "Ask AIAIC's team about prices, storage, transport, selling or the app. The team answers here.",
+  "aiaic.help.intro": "Ask AIAIC's team. The team answers here.",
   "aiaic.help.ask": "Ask a question",
   "aiaic.help.topic": "What is it about?",
   "aiaic.help.topic.price": "Price",
@@ -754,7 +751,6 @@ export const AIAIC_EN: Dict = {
   "aiaic.refused.crop_required": "Choose the crop first.",
   "aiaic.refused.quantity_out_of_range": "Give a number above 0, up to 100,000 quintals.",
   "aiaic.store.title": "Store or sell now",
-  "aiaic.store.intro": "Four short steps: where, which crop, how much, then the answer.",
   "aiaic.store.home": "Store or sell now?",
   "aiaic.store.home_tip": "Prices by month, warehouses near you, wastage and cold stores",
 
@@ -1528,11 +1524,9 @@ export const AIAIC_MR: Dict = {
   "aiaic.account.signed_out_note":
     "या फोनवर तुम्ही साइन आउट झालात. तुमचे खाते वापरण्यासाठी पुन्हा साइन इन करा.",
   "aiaic.account.title_signin": "साइन इन",
-  "aiaic.account.intro_signin":
-    "नोंदणी करताना दिलेल्या वापरकर्ता नावाने आणि पासवर्डने साइन इन करा. तुम्ही पाहुणे म्हणूनही पुढे जाऊ शकता: सल्ला तोच मिळतो.",
+  "aiaic.account.intro_signin": "तुम्ही पाहुणे म्हणूनही पुढे जाऊ शकता: सल्ला तोच मिळतो.",
   "aiaic.account.title_register": "नोंदणी",
-  "aiaic.account.intro_register":
-    "तुमचे स्वतःचे खाते तयार करा: तुमचे प्रश्न आणि विक्री या फोनऐवजी तुमच्या खात्यासोबत ठेवले जातात. प्रत्येक नोंदणीला AIAIC ची टीम मंजुरी देते.",
+  "aiaic.account.intro_register": "प्रत्येक नोंदणीला AIAIC ची टीम मंजुरी देते.",
   "aiaic.account.username": "वापरकर्ता नाव",
   "aiaic.account.username_hint": "3 ते 64 अक्षरे किंवा अंक, जागा नको (. _ - चालेल)",
   "aiaic.account.password": "पासवर्ड",
@@ -1595,8 +1589,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.account.code.other": "हे झाले नाही. कृपया पुन्हा प्रयत्न करा.",
   "nav.help.title": "मदत",
   "aiaic.help.title": "मदत",
-  "aiaic.help.intro":
-    "भाव, साठवण, वाहतूक, विक्री किंवा ॲपबद्दल AIAIC च्या टीमला विचारा. टीम इथे उत्तर देते.",
+  "aiaic.help.intro": "AIAIC च्या टीमला विचारा. टीम इथे उत्तर देते.",
   "aiaic.help.ask": "प्रश्न विचारा",
   "aiaic.help.topic": "कशाबद्दल आहे?",
   "aiaic.help.topic.price": "भाव",
@@ -1961,7 +1954,6 @@ export const AIAIC_MR: Dict = {
   "aiaic.refused.crop_required": "आधी पीक निवडा.",
   "aiaic.refused.quantity_out_of_range": "0 पेक्षा जास्त आणि 100,000 क्विंटलपर्यंतची संख्या द्या.",
   "aiaic.store.title": "साठवावे की आता विकावे",
-  "aiaic.store.intro": "चार छोट्या पायऱ्या: कुठे, कोणते पीक, किती, आणि मग उत्तर.",
   "aiaic.store.home": "साठवावे की आता विकावे?",
   "aiaic.store.home_tip": "महिन्यानुसार भाव, जवळची गोदामे, नासाडी आणि शीतगृहे",
 
@@ -2732,11 +2724,9 @@ export const AIAIC_HI: Dict = {
   "aiaic.account.signed_out_note":
     "इस फ़ोन पर आप साइन आउट हो गए। अपना खाता इस्तेमाल करने के लिए फिर से साइन इन करें।",
   "aiaic.account.title_signin": "साइन इन",
-  "aiaic.account.intro_signin":
-    "पंजीकरण के समय दिए उपयोगकर्ता नाम और पासवर्ड से साइन इन करें। आप अतिथि के रूप में भी आगे बढ़ सकते हैं: सलाह वही मिलती है।",
+  "aiaic.account.intro_signin": "आप अतिथि के रूप में भी आगे बढ़ सकते हैं: सलाह वही मिलती है।",
   "aiaic.account.title_register": "पंजीकरण",
-  "aiaic.account.intro_register":
-    "अपना खाता बनाएँ: आपके प्रश्न और बिक्री इस फ़ोन के बजाय आपके खाते के साथ रखे जाते हैं। हर पंजीकरण को AIAIC की टीम मंज़ूरी देती है।",
+  "aiaic.account.intro_register": "हर पंजीकरण को AIAIC की टीम मंज़ूरी देती है।",
   "aiaic.account.username": "उपयोगकर्ता नाम",
   "aiaic.account.username_hint": "3 से 64 अक्षर या अंक, बिना जगह के (. _ - चलेगा)",
   "aiaic.account.password": "पासवर्ड",
@@ -2799,8 +2789,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.account.code.other": "यह नहीं हो पाया। कृपया फिर से कोशिश करें।",
   "nav.help.title": "मदद",
   "aiaic.help.title": "मदद",
-  "aiaic.help.intro":
-    "भाव, भंडारण, परिवहन, बिक्री या ऐप के बारे में AIAIC की टीम से पूछें। टीम यहीं उत्तर देती है।",
+  "aiaic.help.intro": "AIAIC की टीम से पूछें। टीम यहीं उत्तर देती है।",
   "aiaic.help.ask": "प्रश्न पूछें",
   "aiaic.help.topic": "किस बारे में है?",
   "aiaic.help.topic.price": "भाव",
@@ -3161,7 +3150,6 @@ export const AIAIC_HI: Dict = {
   "aiaic.refused.crop_required": "पहले फ़सल चुनें।",
   "aiaic.refused.quantity_out_of_range": "0 से ज़्यादा और 100,000 क्विंटल तक की संख्या दें।",
   "aiaic.store.title": "रखें या अभी बेचें",
-  "aiaic.store.intro": "चार छोटे चरण: कहाँ, कौन-सी फ़सल, कितनी, फिर उत्तर।",
   "aiaic.store.home": "रखें या अभी बेचें?",
   "aiaic.store.home_tip": "महीने के अनुसार भाव, पास के गोदाम, बर्बादी और शीतगृह",
 

@@ -225,6 +225,13 @@ async function loadApp() {
   // her first use (the night run of 16-17 Nov 2026): the registration and the sign-in, mounted beside her home
   const { Route: RegisterRoute } = await import("../src/routes/register");
   const { Route: SignInRoute } = await import("../src/routes/signin");
+  // the ask form and Help, mounted beside her home (lane AD, 23 Nov 2026: TD31 reads what they keep)
+  const { Route: AskRoute } = await import("../src/routes/ask");
+  const { Route: HelpRoute } = await import("../src/routes/help.index");
+  const { getCatalog } = await import("../src/lib/catalog.functions");
+  const { getPlacesCrops } = await import("../src/lib/places.functions");
+  const { getTripTalukas } = await import("../src/lib/aiaic-trade.functions");
+  const { getMyQueries } = await import("../src/lib/aiaic-account.functions");
   const { whoAmI, registerFarmer, signInFarmer, signOutFarmer, eraseMyAccount } =
     await import("../src/lib/aiaic-account.functions");
   // her account chip (the night audit's AUD-ANN-F1: her sign-out and her account's erasure forget the sale she kept)
@@ -260,6 +267,12 @@ async function loadApp() {
     IndexRoute,
     RegisterRoute,
     SignInRoute,
+    AskRoute,
+    HelpRoute,
+    getCatalog,
+    getPlacesCrops,
+    getTripTalukas,
+    getMyQueries,
     whoAmI,
     registerFarmer,
     signInFarmer,
@@ -409,7 +422,13 @@ function suite(app: App, window: Window & typeof globalThis) {
     signInFarmer: app.signInFarmer,
     signOutFarmer: app.signOutFarmer,
     eraseMyAccount: app.eraseMyAccount,
+    getCatalog: app.getCatalog,
+    getPlacesCrops: app.getPlacesCrops,
+    getTripTalukas: app.getTripTalukas,
+    getMyQueries: app.getMyQueries,
   };
+  // the ask form's and Help's own reads (lane AD, TD31): answered as AIAIC not answering, each page's own failed read
+  const UNREACHED = new Set(["getCatalog", "getPlacesCrops", "getTripTalukas", "getMyQueries"]);
   const unanswered: string[] = [];
   unansweredCalls = () => unanswered.splice(0);
   const rpc = {
@@ -459,6 +478,7 @@ function suite(app: App, window: Window & typeof globalThis) {
             result: (world[name === "registerFarmer" ? "register" : "signIn"] as () => unknown)(),
           };
         }
+        if (name && UNREACHED.has(name)) throw new TypeError("AIAIC did not answer (this suite)");
         unanswered.push(String(name ?? "a server function this suite does not know"));
         throw new Error("a server function this suite does not answer");
       },
@@ -580,12 +600,24 @@ function suite(app: App, window: Window & typeof globalThis) {
       path: "/signin",
       getParentRoute: () => root,
     } as never);
+    const askRoute = app.AskRoute.update({
+      id: "/ask",
+      path: "/ask",
+      getParentRoute: () => root,
+    } as never);
+    const helpRoute = app.HelpRoute.update({
+      id: "/help",
+      path: "/help",
+      getParentRoute: () => root,
+    } as never);
     const router = R.createRouter({
       routeTree: root.addChildren([
         todayRoute as never,
         indexRoute as never,
         registerRoute as never,
         signInRoute as never,
+        askRoute as never,
+        helpRoute as never,
       ]),
       history: R.createMemoryHistory({ initialEntries: [at] }),
     });
@@ -3621,6 +3653,81 @@ function suite(app: App, window: Window & typeof globalThis) {
         ok(text.includes("₹1,59,200"), `${lang}: the offer's total, as AIAIC recorded it`);
       } finally {
         await practice.unmount();
+      }
+    }
+  });
+
+  // ============================================================================================ TD31 (lane AD)
+
+  test("TD31 the ask form, Help, Register and Sign in say less and keep what an action needs and what must stay (lane AD, push 2b, 23 Nov 2026): the ask form keeps each field's label, with no line on how to fill it, no help under a field beyond its label and no water caveat (the water answer says its own source and age); Help keeps its Send, a guest's privacy note whole, and its question box's label with the hint never to write a bank account, Aadhaar or PAN number; Register keeps its notice at the point of consent whole, with its link to the privacy page; Sign in keeps the guest's choice; in English, Marathi and Hindi (English safety words pinned)", async () => {
+    const PIN = {
+      hint: "In your own words (at most 2000 letters). Please do not write a bank account, Aadhaar or PAN number.",
+      guestChoice: "You can also go on as a guest: the advice is the same.",
+      gone: [
+        "Fill only what you know",
+        "Official Water & Soil Data Caveat",
+        "Optional lot record",
+        "How it works",
+      ],
+    };
+    for (const lang of ["en", "mr", "hi"] as const) {
+      const say = (key: string, en?: string) => (lang === "en" && en ? en : words(lang, key));
+      const ask = await mount(lang, screenOf(EMPTY, lang), { at: "/ask", signedIn: false });
+      try {
+        await waitFor(() => ask.q('[data-testid="ask-land"]'), "the ask form");
+        const text = ask.container.textContent ?? "";
+        for (const key of ["ask.title", "ask.district", "ask.crop", "ask.land", "ask.services"])
+          ok(text.includes(say(key)), `${lang}: the ask form keeps ${key}`);
+        for (const gone of PIN.gone) ok(!text.includes(gone), `${lang}: no "${gone}"`);
+      } finally {
+        await ask.unmount();
+      }
+      const help = await mount(lang, screenOf(EMPTY, lang), { at: "/help", signedIn: false });
+      try {
+        await waitFor(() => help.q('[data-testid="help-text"]'), "the Help page");
+        ok(help.q('[data-testid="help-send"]'), `${lang}: Help keeps its Send`);
+        ok(
+          (help.q('[data-testid="help-guest-note"]')?.textContent ?? "").includes(
+            say("aiaic.help.guest_note"),
+          ),
+          `${lang}: a guest's privacy note, whole`,
+        );
+        const box = help.q('[data-testid="help-text"]')?.closest("label")?.textContent ?? "";
+        ok(box.includes(say("aiaic.help.text")), `${lang}: the question box's label`);
+        ok(
+          box.includes(say("aiaic.help.text_hint", PIN.hint)),
+          `${lang}: never a bank account, Aadhaar or PAN`,
+        );
+      } finally {
+        await help.unmount();
+      }
+      const reg = await mount(lang, screenOf(EMPTY, lang), { at: "/register", signedIn: false });
+      try {
+        await waitFor(() => reg.q("#register-notice"), "the Register page");
+        const notice = reg.q("#register-notice")?.closest("section")?.textContent ?? "";
+        ok(notice.includes(say("aiaic.account.notice_title")), `${lang}: the notice's title`);
+        ok(
+          notice.includes(say("aiaic.account.notice")),
+          `${lang}: the notice at the point of consent, whole`,
+        );
+        ok(
+          reg.q("#register-notice")?.closest("section")?.querySelector('a[href="/privacy"]'),
+          `${lang}: its link to the privacy page`,
+        );
+      } finally {
+        await reg.unmount();
+      }
+      const sign = await mount(lang, screenOf(EMPTY, lang), { at: "/signin", signedIn: false });
+      try {
+        await waitFor(() => sign.q("h1"), "the Sign in page");
+        ok(
+          (sign.container.textContent ?? "").includes(
+            say("aiaic.account.intro_signin", PIN.guestChoice),
+          ),
+          `${lang}: the guest's choice`,
+        );
+      } finally {
+        await sign.unmount();
       }
     }
   });

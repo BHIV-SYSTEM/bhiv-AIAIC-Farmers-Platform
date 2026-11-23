@@ -22,9 +22,7 @@ const en: Dict = {
     "This is a demonstration. The advice is not yet checked by farm scientists, so it is a suggestion only — not a guaranteed instruction. Always confirm with your Krishi Vigyan Kendra or a trusted agri officer before spending money.",
   "lang.title": "Choose your language",
   "ask.title": "Your farm",
-  "ask.subtitle": "Fill only what you know. You can leave a field empty.",
   "ask.mandi": "Which market (APMC)?",
-  "ask.mandi.help": "Price advice is calculated for one market at a time",
   "ask.mandi.any": "All markets",
   "ask.options.stale":
     "Could not reach the service, so this list may be out of date. Your choice may return nothing.",
@@ -36,8 +34,6 @@ const en: Dict = {
   "ask.crop": "Your crop",
   "ask.crop.any": "All crops",
   "ask.land": "Your land size (acres)",
-  "ask.land.help":
-    "Optional lot record. Advisory algorithms calculate per-quintal rates and regional weather independent of acreage.",
   "ask.services": "What do you want to know?",
   "ask.services.help": "Choose one or more",
   "ask.submit": "Show my advice",
@@ -300,11 +296,6 @@ const en: Dict = {
   "ask.state": "State",
   "state.maharashtra": "Maharashtra",
   "state.madhyapradesh": "Madhya Pradesh",
-  "ask.district.help.mh": "36 Maharashtra districts (dynamic official catalog)",
-  "ask.district.help.mp": "55 Madhya Pradesh districts (dynamic official catalog)",
-  "ask.waterSoilCaveat.title": "Official Water & Soil Data Caveat",
-  "ask.waterSoilCaveat.body":
-    "Dynamic groundwater and soil moisture assessments reflect the latest official Central Ground Water Board records (March 2025 assessment). Taluka-level conditions may vary from the broader district average.",
   "plant.notice.title": "Analysis Notice",
   "plant.distress.title": "Emergency Agricultural Support",
   "plant.distress.body":
@@ -497,9 +488,7 @@ const hi: Dict = {
     "यह एक प्रदर्शन है। यह सलाह अभी कृषि वैज्ञानिकों द्वारा जाँची नहीं गई है, इसलिए यह केवल सुझाव है — पक्का आदेश नहीं। पैसा खर्च करने से पहले कृषि विज्ञान केंद्र या भरोसेमंद कृषि अधिकारी से पुष्टि करें।",
   "lang.title": "अपनी भाषा चुनें",
   "ask.title": "आपका खेत",
-  "ask.subtitle": "जो पता है वही भरें। कोई खाना खाली भी छोड़ सकते हैं।",
   "ask.mandi": "कौन सी मंडी (APMC)?",
-  "ask.mandi.help": "भाव की सलाह एक बार में एक ही मंडी के लिए बनती है",
   "ask.mandi.any": "सभी मंडियाँ",
   "ask.options.stale":
     "सेवा से संपर्क नहीं हुआ, इसलिए यह सूची पुरानी हो सकती है। आपके चुनाव पर कुछ न मिले तो आश्चर्य न करें।",
@@ -511,8 +500,6 @@ const hi: Dict = {
   "ask.crop": "आपकी फ़सल",
   "ask.crop.any": "सभी फ़सलें",
   "ask.land": "ज़मीन का आकार (एकड़)",
-  "ask.land.help":
-    "आपके खेत का ऐच्छिक रिकॉर्ड। सलाह इंजिन प्रति-क्विंटल भाव और मौसम का हिसाब रकबे से स्वतंत्र रखता है।",
   "ask.services": "आप क्या जानना चाहते हैं?",
   "ask.services.help": "एक या अधिक चुनें",
   "ask.submit": "मेरी सलाह दिखाएँ",
@@ -773,11 +760,6 @@ const hi: Dict = {
   "ask.state": "राज्य",
   "state.maharashtra": "महाराष्ट्र",
   "state.madhyapradesh": "मध्य प्रदेश",
-  "ask.district.help.mh": "महाराष्ट्र के 36 ज़िले (आधिकारिक सूची)",
-  "ask.district.help.mp": "मध्य प्रदेश के 55 ज़िले (आधिकारिक सूची)",
-  "ask.waterSoilCaveat.title": "आधिकारिक भूजल और मिट्टी सूचना",
-  "ask.waterSoilCaveat.body":
-    "भूजल और मिट्टी की नमी का आकलन केंद्रीय भूजल बोर्ड के नवीनतम रिकॉर्ड (मार्च 2025) पर आधारित है। तालुका स्तर पर स्थिति ज़िला औसत से भिन्न हो सकती है।",
   "plant.notice.title": "विश्लेषण सूचना",
   "plant.distress.title": "आपातकालीन कृषि सहायता",
   "plant.distress.body": "गंभीर फ़सल नुकसान का संकेत। कृपया तुरंत हेल्पलाइन पर संपर्क करें।",
@@ -963,9 +945,7 @@ const mr: Dict = {
     "हे एक प्रात्यक्षिक आहे. हा सल्ला कृषी शास्त्रज्ञांनी अजून तपासलेला नाही, म्हणून तो फक्त सूचना आहे — खात्रीची आज्ञा नाही. पैसे खर्च करण्यापूर्वी कृषी विज्ञान केंद्र किंवा विश्वासू कृषी अधिकाऱ्याकडून खात्री करा.",
   "lang.title": "तुमची भाषा निवडा",
   "ask.title": "तुमचे शेत",
-  "ask.subtitle": "जे माहीत आहे तेच भरा. रिकामे ठेवले तरी चालेल.",
   "ask.mandi": "कोणती मंडी (APMC)?",
-  "ask.mandi.help": "भावाचा सल्ला एका वेळी एकाच मंडीसाठी काढला जातो",
   "ask.mandi.any": "सर्व मंडया",
   "ask.options.stale":
     "सेवेशी संपर्क झाला नाही, म्हणून ही यादी जुनी असू शकते. तुमच्या निवडीसाठी काही न मिळणे शक्य आहे.",
@@ -977,8 +957,6 @@ const mr: Dict = {
   "ask.crop": "तुमचे पीक",
   "ask.crop.any": "सर्व पिके",
   "ask.land": "जमिनीचा आकार (एकर)",
-  "ask.land.help":
-    "तुमच्या शेतासाठी ऐच्छिक माहिती. सल्ला इंजिन प्रति-क्विंटल दर आणि हवामानाचे विश्लेषण क्षेत्राव्यतिरिक्त करते.",
   "ask.services": "तुम्हाला काय जाणून घ्यायचे आहे?",
   "ask.services.help": "एक किंवा अधिक निवडा",
   "ask.submit": "माझा सल्ला दाखवा",
@@ -1240,11 +1218,6 @@ const mr: Dict = {
   "ask.state": "राज्य",
   "state.maharashtra": "महाराष्ट्र",
   "state.madhyapradesh": "मध्य प्रदेश",
-  "ask.district.help.mh": "महाराष्ट्रातील ३६ जिल्हे (अधिकृत यादी)",
-  "ask.district.help.mp": "मध्य प्रदेशातील ५५ जिल्हे (अधिकृत यादी)",
-  "ask.waterSoilCaveat.title": "अधिकृत भूजल व माती माहिती सूचना",
-  "ask.waterSoilCaveat.body":
-    "भूजल आणि मातीतील ओलाव्याचे मूल्यांकन केंद्रीय भूजल मंडळाच्या अधिकृत नोंदींवर (मार्च २०२५) आधारित आहे. तालुका पातळीवरील परिस्थिती जिल्हा सरासरीपेक्षा वेगळी असू शकते.",
   "plant.notice.title": "विश्लेषण सूचना",
   "plant.distress.title": "तातडीची कृषी सहाय्यता",
   "plant.distress.body":

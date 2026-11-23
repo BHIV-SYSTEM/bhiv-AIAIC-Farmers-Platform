@@ -95,9 +95,6 @@ function StoragePage() {
         <h1 className="break-words text-2xl font-extrabold text-foreground sm:text-3xl">
           {t("aiaic.store.title")}
         </h1>
-        <p className="mt-1 break-words text-base text-foreground/75 sm:text-lg">
-          {t("aiaic.store.intro")}
-        </p>
         <StorageFlow />
       </div>
     </FarmGate>
