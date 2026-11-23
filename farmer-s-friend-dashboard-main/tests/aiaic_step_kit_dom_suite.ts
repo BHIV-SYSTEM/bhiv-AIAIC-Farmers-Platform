@@ -1611,7 +1611,39 @@ function suite(app: App, window: Window & typeof globalThis) {
     "order.empty.body", // routes/orders.index.tsx
   ]);
 
-  test("KAD2 every word her code reads by name is in her dictionaries in English, Marathi and Hindi (lane AD, push 2b, 23 Nov 2026: filter.all, read by two routes, was taken out as unread by a scan that misread mixed quotes; read here by her own TypeScript parser): each t of a literal key in src/ is a key of en, mr and hi, apart from the four already absent at b352405, and each t of a built key builds at least one key", async () => {
+  /** STRINGS IN HER CODE SHAPED LIKE A KEY THAT ARE NOT KEYS (lane AD's fix round, 23 Nov 2026: AD-05), each named with
+   *  what it is. Every other key-shaped string in src/ (outside the two dictionary files) is a key her code reads,
+   *  whatever carries it to t(): a ternary, a variable, an array of lines, a map. A prefix is held to its family. */
+  const NOT_KEYS: Record<string, string> = {
+    "aiaic.farm": "the browser storage's name for her saved farm (lib/farm-storage.ts)",
+    "aiaic.feedback": "the browser storage's name for her feedback (lib/farm-storage.ts)",
+    "aiaic.plant": "the browser storage's name for her plant checks (lib/farm-storage.ts)",
+    "aiaic.register.draft":
+      "the tab storage's name for the registration's boxes (routes/register.tsx)",
+    "aiaic.today.sell_started":
+      "the browser storage's name for a sale she started (lib/aiaic-today.ts)",
+    "farmer.money.direct.said_got":
+      "AIAIC's own code for its sentence (lib/aiaic-today.ts TOLD_SAYS)",
+    "farmer.money.direct.said_got_any": "AIAIC's own code for its sentence",
+    "farmer.money.direct.said_not_yet": "AIAIC's own code for its sentence",
+    "farmer.money.direct.buyer_says": "AIAIC's own code for its sentence",
+    "farmer.money.direct.buyer_says_any": "AIAIC's own code for its sentence",
+    "farmer.money.direct.ask": "AIAIC's own code for its sentence",
+    "host.docker.internal": "a host name (lib/aiaic-base.server.ts)",
+    "plant.jpg": "a file name (lib/plant.functions.ts)",
+    "transactions.json": "a file name (lib/transactions.server.ts)",
+  };
+  /** Key families: a prefix her code builds keys from (`${family}.${code}`, `${key}.title`); each must lead to keys. */
+  const FAMILIES: Record<string, string[]> = {
+    "aiaic.account.code": [], // lib/aiaic-account.ts accountWords: `${family}.${code}`
+    "aiaic.help.code": [], // routes/help.*: accountWords(t, code, "aiaic.help.code")
+    "state.offline": ["title", "body"], // components/farm/StateBlock.tsx: `${entry.key}.title`, `.body`
+    "state.notfound": ["title", "body"],
+    "state.bad": ["title", "body"],
+    "state.failed": ["title", "body"],
+  };
+
+  test("KAD2 every word her code reads by name is in her dictionaries in English, Marathi and Hindi (lane AD, push 2b, 23 Nov 2026: filter.all, read by two routes, was taken out as unread by a scan that misread mixed quotes; read here by her own TypeScript parser; its fix round's AD-05: also a key carried by a ternary, a ?? or ||, a variable, an array or a map): every key-shaped string in src/ outside the dictionaries is a key of en, mr and hi, apart from the four already absent at b352405 and the strings named as no key (each with what it is), a key family leads to keys in all three, and each t of a built key builds at least one key", async () => {
     const ts = (await import("typescript")).default;
     const src = path.join(here, "..", "src");
     const files: string[] = [];
@@ -1627,7 +1659,23 @@ function suite(app: App, window: Window & typeof globalThis) {
     const missing: string[] = [];
     const unbuilt: string[] = [];
     let named = 0;
+    // every string shaped like a key, wherever it is (a ternary, a variable, an array, a map), outside the dictionaries
+    const SHAPE = /^[a-z][a-zA-Z0-9_]*(\.[a-zA-Z0-9_]+)+$/;
+    const DICT_FILES = new Set(["lib/i18n.tsx", "lib/i18n-aiaic.ts"]);
+    const notKeysSeen = new Set<string>();
+    let shaped = 0;
+    for (const [family, tails] of Object.entries(FAMILIES))
+      for (const lang of ["en", "mr", "hi"] as const) {
+        const keys = Object.keys(DICTS[lang]);
+        if (tails.length)
+          for (const tail of tails)
+            if (DICTS[lang][`${family}.${tail}`] === undefined)
+              missing.push(`${family}.${tail} [${lang}] (a key family's member)`);
+        if (!keys.some((k) => k.startsWith(`${family}.`)))
+          missing.push(`${family}.… [${lang}] (a key family with no key)`);
+      }
     for (const f of files) {
+      const rel = path.relative(src, f).replace(/\\/g, "/");
       const sf = ts.createSourceFile(
         f,
         fs.readFileSync(f, "utf8"),
@@ -1653,13 +1701,30 @@ function suite(app: App, window: Window & typeof globalThis) {
           if (!Object.keys(DICTS.en).some((k) => re.test(k)))
             unbuilt.push(`${parts.join("{…}")} ${at(a)}`);
         }
+        if (
+          !DICT_FILES.has(rel) &&
+          (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) &&
+          SHAPE.test(n.text) &&
+          !(n.parent && (ts.isImportDeclaration(n.parent) || ts.isExportDeclaration(n.parent)))
+        ) {
+          shaped++;
+          if (n.text in NOT_KEYS || n.text in FAMILIES) notKeysSeen.add(n.text);
+          else if (!ABSENT_AT_B352405.has(n.text))
+            for (const lang of ["en", "mr", "hi"] as const)
+              if (DICTS[lang][n.text] === undefined) missing.push(`${n.text} [${lang}] ${at(n)}`);
+        }
         ts.forEachChild(n, visit);
       };
       visit(sf);
     }
     ok(
-      files.length > 100 && named > 500,
-      `the files read: ${files.length}; the keys read by name: ${named}`,
+      files.length > 100 && named > 500 && shaped > named,
+      `the files read: ${files.length}; the keys read by name: ${named}; key-shaped strings: ${shaped}`,
+    );
+    assert.deepEqual(
+      [...Object.keys(NOT_KEYS), ...Object.keys(FAMILIES)].filter((k) => !notKeysSeen.has(k)),
+      [],
+      "a string named as no key that her code no longer holds (take it out of the list)",
     );
     assert.deepEqual(missing, [], "a key her code reads by name, absent from a dictionary");
     assert.deepEqual(unbuilt, [], "a built key that matches no key");
