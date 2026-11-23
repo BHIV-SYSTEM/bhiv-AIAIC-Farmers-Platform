@@ -1574,6 +1574,31 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
   });
 
+  // ======================================================================================== KAD1 (lane AD)
+
+  test("KAD1 the kit says less (lane AD, push 2b, 23 Nov 2026): no step flow says how its steps work (each step's own title says what to do), and the storage flow's first step still says what to do; in English, Marathi and Hindi", async () => {
+    await inStart(async () => {
+      for (const lang of ["en", "mr", "hi"] as const) {
+        const p = await mountStorage("/storage?state=mh", lang);
+        try {
+          for (let i = 0; i < 40 && p.stateOf(1) !== "open"; i++) await settle(50);
+          noEl(p.q('[data-kit="g13"]'), `${lang}: no line on how the steps work`);
+          ok(
+            !(p.container.textContent ?? "").includes("Each choice opens the next step"),
+            `${lang}: not in English either`,
+          );
+          ok(p.stateOf(1) === "open", `${lang}: the first step is open`);
+          ok(
+            (p.q('[data-testid="store-step-1"]')?.textContent ?? "").trim().length > 0,
+            `${lang}: the first step says what to do`,
+          );
+        } finally {
+          await p.unmount();
+        }
+      }
+    });
+  });
+
   // ======================================================================================== KA8
   test("KA8 K8: a money button AIAIC holds shut is aria-disabled, reachable by Tab, its reason read with it; a press says why again and sends nothing", async () => {
     await inStart(async () => {

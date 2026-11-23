@@ -95,13 +95,6 @@ export function Flow({
   return (
     <FlowContext.Provider value={heard}>
       <div className={className} data-testid={testid} data-flow={flow.id}>
-        <p
-          className="text-sm font-semibold text-muted-foreground sm:text-base"
-          data-kit="g13"
-          data-testid={`${testid}-g13`}
-        >
-          {t("aiaic.kit.g13")}
-        </p>
         {flow.restarted ? (
           <p
             role="status"

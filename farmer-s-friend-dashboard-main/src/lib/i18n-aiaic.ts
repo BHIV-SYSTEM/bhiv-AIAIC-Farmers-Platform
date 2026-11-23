@@ -894,7 +894,6 @@ export const AIAIC_EN: Dict = {
   "aiaic.store.qty.example_plain": "An example quantity",
   // THE STEP KIT'S OWN WORDS (R2-3 lane A, 12 Nov 2026; DESIGN_UPDATE C.11): `kit/StepFlow.tsx`. The hidden ones
   // too (Error:, done, now, not yet). Marathi and Hindi: drafts for a native reader, as the website's kit words are.
-  "aiaic.kit.g13": "Each choice opens the next step. You can change any answer.",
   "aiaic.kit.restarted":
     "The earlier answers were not kept here, so this starts at the first step that needs one.",
   "aiaic.kit.step_of": "Step {n} of {total}:",
@@ -2098,7 +2097,6 @@ export const AIAIC_MR: Dict = {
   "aiaic.store.qty.example_plain": "उदाहरणाचे प्रमाण",
   // THE STEP KIT'S OWN WORDS (R2-3 lane A): DRAFTS for a native reader, the hidden ones (Error:, done, now, not yet)
   // included; the same words as the website's kit (aiaic-frontend/src/i18n/kit.js), with the storage page's colon.
-  "aiaic.kit.g13": "प्रत्येक निवड पुढची पायरी उघडते. तुम्ही कोणतेही उत्तर बदलू शकता.",
   "aiaic.kit.restarted":
     "आधीची उत्तरे येथे ठेवलेली नव्हती, म्हणून उत्तर हवे असलेल्या पहिल्या पायरीपासून सुरुवात होते.",
   "aiaic.kit.step_of": "{total} पैकी पायरी {n}:",
@@ -3293,7 +3291,6 @@ export const AIAIC_HI: Dict = {
   "aiaic.store.qty.example_plain": "उदाहरण की मात्रा",
   // THE STEP KIT'S OWN WORDS (R2-3 lane A): DRAFTS for a native reader, the hidden ones (Error:, done, now, not yet)
   // included; the same words as the website's kit (aiaic-frontend/src/i18n/kit.js), with the storage page's colon.
-  "aiaic.kit.g13": "हर चुनाव अगला चरण खोलता है। आप कोई भी उत्तर बदल सकते हैं।",
   "aiaic.kit.restarted":
     "पहले के उत्तर यहाँ नहीं रखे गए थे, इसलिए यह उस पहले चरण से शुरू होता है जिसे उत्तर चाहिए।",
   "aiaic.kit.step_of": "{total} में से चरण {n}:",
