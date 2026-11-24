@@ -59,6 +59,10 @@ RUN apk add --no-cache curl
 # Create non-privileged user and group for security hardening
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
+# Create writable persistent-data directory
+RUN mkdir -p /app/data && \
+    chown -R appuser:appgroup /app/data
+
 # Set production runtime environment variables
 ENV NODE_ENV=production \
     PORT=3000 \
