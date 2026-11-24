@@ -14,10 +14,13 @@ const STYLES: Record<ConfidenceLevel, { bars: number; className: string; icon: L
 /** Visual sureness — deliberately never a percentage. */
 export function ConfidenceMeter({
   level,
+  word = null,
   showBody = false,
   className,
 }: {
   level: ConfidenceLevel;
+  /** AIAIC's own word for the band, in her language (`bandOf`); none: the app's word for the level. */
+  word?: string | null | undefined;
   showBody?: boolean;
   className?: string;
 }) {
@@ -45,7 +48,9 @@ export function ConfidenceMeter({
               />
             ))}
           </div>
-          <span className={cn("text-lg font-bold", style.className)}>{t(`conf.${level}`)}</span>
+          <span className={cn("text-lg font-bold", style.className)}>
+            {word ?? t(`conf.${level}`)}
+          </span>
         </div>
         {showBody ? (
           <p className="mt-1 text-lg leading-relaxed text-foreground/80">

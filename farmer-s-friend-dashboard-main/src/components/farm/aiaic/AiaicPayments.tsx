@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, RefreshCw, Wallet } from "lucide-react";
+import { ChevronDown, ExternalLink, RefreshCw, Wallet } from "lucide-react";
 
 import { useMine } from "@/lib/aiaic-hooks";
 import {
@@ -51,7 +51,8 @@ export function AiaicPayments() {
   );
 }
 
-function Totals({ data }: { data: MineForScreen }) {
+/** Her money's totals (exported for her trade suite's AD1). */
+export function Totals({ data }: { data: MineForScreen }) {
   const { t } = useI18n();
   const m = moneyTotals(data.mine.orders);
   const bars: { key: string; value: number; tone: string }[] = [
@@ -82,7 +83,26 @@ function Totals({ data }: { data: MineForScreen }) {
           </li>
         ))}
       </ul>
-      <p className="text-[11px] text-muted-foreground">{t("aiaic.payments.source")}</p>
+      <details
+        className="group rounded-2xl border-2 border-border"
+        data-testid="aiaic-payments-why"
+      >
+        <summary
+          className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-2 px-3 text-base font-bold text-foreground"
+          data-testid="aiaic-payments-why-open"
+        >
+          {t("aiaic.kit.why")}
+          {/* the sign that it opens, as her other folds draw it (a flex summary draws no marker of its own) */}
+          <ChevronDown
+            aria-hidden
+            className="size-5 shrink-0 transition-transform group-open:rotate-180"
+            data-testid="aiaic-payments-why-sign"
+          />
+        </summary>
+        <p className="px-3 pb-3 text-base text-foreground" data-testid="aiaic-payments-source">
+          {t("aiaic.payments.source")}
+        </p>
+      </details>
     </section>
   );
 }

@@ -33,7 +33,7 @@ import {
 
 import { AdviceActions } from "@/components/farm/AdviceActions";
 import { FeedbackBlock } from "@/components/farm/FeedbackBlock";
-import { adviceLimits, adviceText, adviceWhy, summaryLine } from "@/lib/advice-text";
+import { adviceLimits, adviceText, adviceWhy, bandOf, summaryLine } from "@/lib/advice-text";
 import { isTechnicalLine, recommendationLabel } from "@/lib/aiaic-labels";
 import { SERVICE_ICON } from "@/lib/service-icons";
 import { farmSearchSchema, intelligenceQueryOptions, parseServices } from "@/lib/aiaic-query";
@@ -45,7 +45,6 @@ import {
 } from "@/lib/farmer-advice.functions";
 import { getPriceSeries } from "@/lib/places.functions";
 import {
-  confidenceLevel,
   daysOld,
   isAbstention,
   isService,
@@ -258,7 +257,8 @@ export function ItemDetail({
   const [showTechnical, setShowTechnical] = useState(opened);
 
   const abstained = isAbstention(item) || matchedCard?.abstained === true;
-  const level = confidenceLevel(item);
+  // one band per answer: AIAIC's card's, after its caps, as the first view says it (lane AD's fix round)
+  const band = bandOf(matchedCard, item);
 
   // The card's own lines, in her language; `item`'s only where no card came (F40)
   const lines = adviceWhy(matchedCard, item);
@@ -422,7 +422,7 @@ export function ItemDetail({
             {t("detail.summary")}
           </h2>
           <p className="mt-2 rounded-2xl border-2 border-border bg-card p-4 text-lg leading-relaxed text-foreground">
-            {summaryLine(item, t)}
+            {summaryLine(item, t, matchedCard)}
           </p>
           <div className="mt-3">
             <AdviceActions text={spoken} title={serviceLabel} />
@@ -521,7 +521,7 @@ export function ItemDetail({
             {t("detail.confidence")}
           </h2>
           <div className="mt-2 rounded-3xl border-2 border-border bg-card p-5">
-            <ConfidenceMeter level={level} showBody />
+            <ConfidenceMeter level={band.level} word={band.word} showBody />
           </div>
 
           <h3 className="mt-5 text-lg font-bold uppercase tracking-wide text-muted-foreground">

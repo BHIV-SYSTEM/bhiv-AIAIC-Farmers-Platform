@@ -17,7 +17,8 @@ import type {
 } from "@/lib/farmer-advice.functions";
 import { useI18n, type Lang } from "@/lib/i18n";
 import { SERVICE_ICON } from "@/lib/service-icons";
-import type { Service } from "@/lib/aiaic-types";
+import { isService, type Service } from "@/lib/aiaic-types";
+import { AdviceFace } from "@/components/farm/AdviceFace";
 import { VaaniAudioPlayer } from "@/components/farm/VaaniAudioPlayer";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ export function SimpleAdviceHero({
   askAHuman,
   children,
   glance,
+  everyCard,
   defaultExpanded = false,
 }: {
   card?: FarmerAdviceCard | undefined;
@@ -39,10 +41,13 @@ export function SimpleAdviceHero({
   children?: ReactNode;
   /** The answer at a glance (push 4): drawn right under the paragraph, seen without opening the details. */
   glance?: ReactNode;
+  /** /result: every card AIAIC sent; the others' must-read lines are behind one counted button before the verdict. */
+  everyCard?: FarmerAdviceCard[] | undefined;
   defaultExpanded?: boolean;
 }) {
   const { t, lang } = useI18n();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [othersOpen, setOthersOpen] = useState(false);
 
   const activeLang = (["en", "mr", "hi"].includes(lang) ? lang : "en") as Lang;
   const summary = buildSimpleAdviceParagraph({
@@ -56,29 +61,77 @@ export function SimpleAdviceHero({
   const kccPhone = askAHuman?.kisan_call_centre?.replace(/[^0-9]/g, "") || "18001801551";
   const teleManasPhone = askAHuman?.tele_manas?.replace(/[^0-9]/g, "") || "14416";
 
-  const urgentWarnings = card?.read_these_first ?? [];
+  // THE MUST-READ LINES (AIAIC's `read_these_first`) of the answer drawn here: each whole in its own box, before the
+  // verdict and never behind a click (the brief's rule 2). /result draws the first card's verdict here and the other
+  // answers below it (the storage answer at a glance among them), and hands every card AIAIC sent (`everyCard`): the
+  // other cards' must-read lines are behind ONE amber button that counts them all, before the verdict, closed until she
+  // presses it, each card's lines under its service's name (the owner's D-138: verdict first, warnings fold behind one
+  // counted button; lane AD's fix round, 24 Nov 2026: before it, they were drawn nowhere on /result, even opened).
+  const own = card ?? response?.cards?.[0];
+  const mustReads = own?.read_these_first ?? [];
+  const others = (everyCard ?? [])
+    .filter((c) => c !== own)
+    .map((c) => ({ service: c.service, lines: c.read_these_first ?? [] }))
+    .filter((g) => g.lines.length > 0);
+  const otherCount = others.reduce((n, g) => n + g.lines.length, 0);
 
   return (
     <div id="simple-advice-hero" className="space-y-4">
       {/* 1. Urgent Warnings — Always Prominent Even When Collapsed */}
-      {urgentWarnings.length > 0 ? (
+      {mustReads.length > 0 || otherCount > 0 ? (
         <section aria-label={t("advice.urgent.title")} className="space-y-2.5">
-          {urgentWarnings.map((warning, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border-2 border-warning bg-warning-soft p-4 text-warning-foreground shadow-sm sm:rounded-3xl sm:p-5"
-            >
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="size-6 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-extrabold text-xs block uppercase tracking-wider">
-                    {t("advice.readFirst")}
-                  </span>
-                  <p className="mt-1 text-base font-bold leading-relaxed">{warning}</p>
-                </div>
-              </div>
-            </div>
+          {mustReads.map((warning, i) => (
+            <MustRead key={i} label={t("advice.readFirst")} text={warning} />
           ))}
+          {otherCount > 0 ? (
+            <div data-testid="advice-other-warnings">
+              <button
+                id="toggle-other-warnings-btn"
+                type="button"
+                onClick={() => setOthersOpen((v) => !v)}
+                aria-expanded={othersOpen}
+                aria-controls="advice-other-warnings-list"
+                className="flex min-h-12 w-full items-center justify-between gap-2 rounded-2xl border-2 border-warning bg-warning-soft px-4 py-2 text-left text-base font-extrabold text-warning-foreground shadow-sm touch-manipulation sm:min-h-14"
+              >
+                <span className="flex items-center gap-2">
+                  <AlertTriangle aria-hidden className="size-5 shrink-0" />
+                  <span>
+                    {t(
+                      otherCount === 1
+                        ? "aiaic.face.other_warnings.one"
+                        : "aiaic.face.other_warnings",
+                      { n: otherCount },
+                    )}
+                  </span>
+                </span>
+                {othersOpen ? (
+                  <ChevronUp aria-hidden className="size-5 shrink-0" />
+                ) : (
+                  <ChevronDown aria-hidden className="size-5 shrink-0" />
+                )}
+              </button>
+              {othersOpen ? (
+                <div id="advice-other-warnings-list" className="mt-2.5 space-y-2.5">
+                  {others.map((group, g) => (
+                    <div
+                      key={`${group.service}-${g}`}
+                      className="space-y-2.5"
+                      data-must-read={group.service}
+                    >
+                      {isService(group.service) ? (
+                        <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
+                          {t(`service.${group.service}`)}
+                        </h2>
+                      ) : null}
+                      {group.lines.map((warning, i) => (
+                        <MustRead key={i} label={t("advice.readFirst")} text={warning} />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </section>
       ) : null}
 
@@ -117,6 +170,10 @@ export function SimpleAdviceHero({
             {summary.paragraph}
           </p>
         </div>
+
+        {/* How sure AIAIC is, its three cases where it sends them, and the source with its date: the answer's face,
+            under the verdict and outside the details (the brief's rule 1; lane AD's fix round) */}
+        <AdviceFace card={card ?? response?.cards?.[0]} className="mt-3" />
 
         {/* The answer at a glance, under the paragraph and outside the details (push 4) */}
         {glance}
@@ -175,6 +232,21 @@ export function SimpleAdviceHero({
           {children}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/** One must-read line of AIAIC's, whole, in its own amber box under her word for "read this first". */
+function MustRead({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="rounded-2xl border-2 border-warning bg-warning-soft p-4 text-warning-foreground shadow-sm sm:rounded-3xl sm:p-5">
+      <div className="flex items-start gap-3">
+        <AlertTriangle className="size-6 shrink-0 mt-0.5" />
+        <div>
+          <span className="font-extrabold text-xs block uppercase tracking-wider">{label}</span>
+          <p className="mt-1 text-base font-bold leading-relaxed">{text}</p>
+        </div>
+      </div>
     </div>
   );
 }

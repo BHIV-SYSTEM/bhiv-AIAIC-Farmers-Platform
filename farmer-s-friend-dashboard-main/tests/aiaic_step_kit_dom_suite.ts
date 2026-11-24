@@ -1574,6 +1574,162 @@ function suite(app: App, window: Window & typeof globalThis) {
     });
   });
 
+  // ======================================================================================== KAD1 (lane AD)
+
+  test("KAD1 the kit says less (lane AD, push 2b, 23 Nov 2026): no step flow says how its steps work (each step's own title says what to do), and the storage flow's first step still says what to do; in English, Marathi and Hindi", async () => {
+    await inStart(async () => {
+      for (const lang of ["en", "mr", "hi"] as const) {
+        const p = await mountStorage("/storage?state=mh", lang);
+        try {
+          for (let i = 0; i < 40 && p.stateOf(1) !== "open"; i++) await settle(50);
+          noEl(p.q('[data-kit="g13"]'), `${lang}: no line on how the steps work`);
+          ok(
+            !(p.container.textContent ?? "").includes("Each choice opens the next step"),
+            `${lang}: not in English either`,
+          );
+          ok(p.stateOf(1) === "open", `${lang}: the first step is open`);
+          ok(
+            (p.q('[data-testid="store-step-1"]')?.textContent ?? "").trim().length > 0,
+            `${lang}: the first step says what to do`,
+          );
+        } finally {
+          await p.unmount();
+        }
+      }
+    });
+  });
+
+  // ======================================================================================== KAD2 (lane AD)
+
+  /** Keys her code reads by name that her dictionaries ALREADY lacked at her main b352405 (her listings and orders pages
+   *  drawn when AIAIC's trade is off): there each draws its own name. Lane AD changes no behaviour and names them for her
+   *  team; every other key read by name must be in all three languages. */
+  const ABSENT_AT_B352405 = new Set([
+    "failure.request_failed.title", // routes/listings.tsx, routes/orders.index.tsx
+    "order.list.subtitle", // routes/orders.index.tsx
+    "order.empty.title", // routes/orders.index.tsx
+    "order.empty.body", // routes/orders.index.tsx
+  ]);
+
+  /** STRINGS IN HER CODE SHAPED LIKE A KEY THAT ARE NOT KEYS (lane AD's fix round, 23 Nov 2026: AD-05), each named with
+   *  what it is. Every other key-shaped string in src/ (outside the two dictionary files) is a key her code reads,
+   *  whatever carries it to t(): a ternary, a variable, an array of lines, a map. A prefix is held to its family. */
+  const NOT_KEYS: Record<string, string> = {
+    "aiaic.farm": "the browser storage's name for her saved farm (lib/farm-storage.ts)",
+    "aiaic.feedback": "the browser storage's name for her feedback (lib/farm-storage.ts)",
+    "aiaic.plant": "the browser storage's name for her plant checks (lib/farm-storage.ts)",
+    "aiaic.register.draft":
+      "the tab storage's name for the registration's boxes (routes/register.tsx)",
+    "aiaic.today.sell_started":
+      "the browser storage's name for a sale she started (lib/aiaic-today.ts)",
+    "farmer.money.direct.said_got":
+      "AIAIC's own code for its sentence (lib/aiaic-today.ts TOLD_SAYS)",
+    "farmer.money.direct.said_got_any": "AIAIC's own code for its sentence",
+    "farmer.money.direct.said_not_yet": "AIAIC's own code for its sentence",
+    "farmer.money.direct.buyer_says": "AIAIC's own code for its sentence",
+    "farmer.money.direct.buyer_says_any": "AIAIC's own code for its sentence",
+    "farmer.money.direct.ask": "AIAIC's own code for its sentence",
+    "host.docker.internal": "a host name (lib/aiaic-base.server.ts)",
+    "plant.jpg": "a file name (lib/plant.functions.ts)",
+    "transactions.json": "a file name (lib/transactions.server.ts)",
+  };
+  /** Key families: a prefix her code builds keys from (`${family}.${code}`, `${key}.title`); each must lead to keys. */
+  const FAMILIES: Record<string, string[]> = {
+    "aiaic.account.code": [], // lib/aiaic-account.ts accountWords: `${family}.${code}`
+    "aiaic.help.code": [], // routes/help.*: accountWords(t, code, "aiaic.help.code")
+    "state.offline": ["title", "body"], // components/farm/StateBlock.tsx: `${entry.key}.title`, `.body`
+    "state.notfound": ["title", "body"],
+    "state.bad": ["title", "body"],
+    "state.failed": ["title", "body"],
+  };
+
+  test("KAD2 every word her code reads by name is in her dictionaries in English, Marathi and Hindi (lane AD, push 2b, 23 Nov 2026: filter.all, read by two routes, was taken out as unread by a scan that misread mixed quotes; read here by her own TypeScript parser; its fix round's AD-05: also a key carried by a ternary, a ?? or ||, a variable, an array or a map): every key-shaped string in src/ outside the dictionaries is a key of en, mr and hi, apart from the four already absent at b352405 and the strings named as no key (each with what it is), a key family leads to keys in all three, and each t of a built key builds at least one key", async () => {
+    const ts = (await import("typescript")).default;
+    const src = path.join(here, "..", "src");
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (/\.(ts|tsx)$/.test(e.name)) files.push(p);
+      }
+    };
+    walk(src);
+    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const missing: string[] = [];
+    const unbuilt: string[] = [];
+    let named = 0;
+    // every string shaped like a key, wherever it is (a ternary, a variable, an array, a map), outside the dictionaries
+    const SHAPE = /^[a-z][a-zA-Z0-9_]*(\.[a-zA-Z0-9_]+)+$/;
+    const DICT_FILES = new Set(["lib/i18n.tsx", "lib/i18n-aiaic.ts"]);
+    const notKeysSeen = new Set<string>();
+    let shaped = 0;
+    for (const [family, tails] of Object.entries(FAMILIES))
+      for (const lang of ["en", "mr", "hi"] as const) {
+        const keys = Object.keys(DICTS[lang]);
+        if (tails.length)
+          for (const tail of tails)
+            if (DICTS[lang][`${family}.${tail}`] === undefined)
+              missing.push(`${family}.${tail} [${lang}] (a key family's member)`);
+        if (!keys.some((k) => k.startsWith(`${family}.`)))
+          missing.push(`${family}.… [${lang}] (a key family with no key)`);
+      }
+    for (const f of files) {
+      const rel = path.relative(src, f).replace(/\\/g, "/");
+      const sf = ts.createSourceFile(
+        f,
+        fs.readFileSync(f, "utf8"),
+        ts.ScriptTarget.Latest,
+        true,
+        f.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
+      );
+      const at = (n: import("typescript").Node) =>
+        `${path.relative(src, f).replace(/\\/g, "/")}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
+      const visit = (n: import("typescript").Node): void => {
+        const a =
+          ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === "t"
+            ? n.arguments[0]
+            : undefined;
+        if (a && (ts.isStringLiteral(a) || ts.isNoSubstitutionTemplateLiteral(a))) {
+          named++;
+          if (!ABSENT_AT_B352405.has(a.text))
+            for (const lang of ["en", "mr", "hi"] as const)
+              if (DICTS[lang][a.text] === undefined) missing.push(`${a.text} [${lang}] ${at(a)}`);
+        } else if (a && ts.isTemplateExpression(a)) {
+          const parts = [a.head.text, ...a.templateSpans.map((s) => s.literal.text)];
+          const re = new RegExp(`^${parts.map(esc).join(".+")}$`);
+          if (!Object.keys(DICTS.en).some((k) => re.test(k)))
+            unbuilt.push(`${parts.join("{…}")} ${at(a)}`);
+        }
+        if (
+          !DICT_FILES.has(rel) &&
+          (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) &&
+          SHAPE.test(n.text) &&
+          !(n.parent && (ts.isImportDeclaration(n.parent) || ts.isExportDeclaration(n.parent)))
+        ) {
+          shaped++;
+          if (n.text in NOT_KEYS || n.text in FAMILIES) notKeysSeen.add(n.text);
+          else if (!ABSENT_AT_B352405.has(n.text))
+            for (const lang of ["en", "mr", "hi"] as const)
+              if (DICTS[lang][n.text] === undefined) missing.push(`${n.text} [${lang}] ${at(n)}`);
+        }
+        ts.forEachChild(n, visit);
+      };
+      visit(sf);
+    }
+    ok(
+      files.length > 100 && named > 500 && shaped > named,
+      `the files read: ${files.length}; the keys read by name: ${named}; key-shaped strings: ${shaped}`,
+    );
+    assert.deepEqual(
+      [...Object.keys(NOT_KEYS), ...Object.keys(FAMILIES)].filter((k) => !notKeysSeen.has(k)),
+      [],
+      "a string named as no key that her code no longer holds (take it out of the list)",
+    );
+    assert.deepEqual(missing, [], "a key her code reads by name, absent from a dictionary");
+    assert.deepEqual(unbuilt, [], "a built key that matches no key");
+  });
+
   // ======================================================================================== KA8
   test("KA8 K8: a money button AIAIC holds shut is aria-disabled, reachable by Tab, its reason read with it; a press says why again and sends nothing", async () => {
     await inStart(async () => {

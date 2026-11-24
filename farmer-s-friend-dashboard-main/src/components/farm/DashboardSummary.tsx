@@ -3,14 +3,9 @@ import { ClipboardList, LayoutDashboard, Phone } from "lucide-react";
 
 import { AdviceActions } from "@/components/farm/AdviceActions";
 import { ConfidenceMeter } from "@/components/farm/ConfidenceMeter";
-import { adviceText } from "@/lib/advice-text";
+import { adviceText, bandOf } from "@/lib/advice-text";
 import type { FarmerAdviceCard } from "@/lib/farmer-advice.functions";
-import {
-  confidenceLevel,
-  type ServiceResult,
-  type IntelligenceItem,
-  type Service,
-} from "@/lib/aiaic-types";
+import { type ServiceResult, type IntelligenceItem, type Service } from "@/lib/aiaic-types";
 import { useI18n } from "@/lib/i18n";
 import { SERVICE_ICON } from "@/lib/service-icons";
 
@@ -54,11 +49,17 @@ export function DashboardSummary({
     abstained: 0,
   };
 
-  for (const { item } of items) {
+  // each answer counted by its one band: AIAIC's card's, after its caps (lane AD's fix round), as its card says it
+  for (const { item, service } of items) {
     if (item.abstained || item.recommendation === "ABSTAIN") {
       counts.abstained += 1;
     } else {
-      counts[confidenceLevel(item)] += 1;
+      counts[
+        bandOf(
+          cards?.find((c) => c.service === service),
+          item,
+        ).level
+      ] += 1;
     }
   }
 

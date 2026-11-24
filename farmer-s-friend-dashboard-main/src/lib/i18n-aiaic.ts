@@ -19,6 +19,10 @@
 type Dict = Record<string, string>;
 
 export const AIAIC_EN: Dict = {
+  "aiaic.kit.why": "Why?",
+  "aiaic.face.sure": "How sure: {band}",
+  "aiaic.face.other_warnings": "Read {n} warnings of the other answers before you act",
+  "aiaic.face.other_warnings.one": "Read {n} warning of the other answers before you act",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "Your taluka (for distance)",
   "aiaic.taluka.whole_district": "Whole district",
@@ -316,11 +320,9 @@ export const AIAIC_EN: Dict = {
   "aiaic.account.signed_out_note":
     "You were signed out on this phone. Sign in again to use your account.",
   "aiaic.account.title_signin": "Sign in",
-  "aiaic.account.intro_signin":
-    "Sign in with the username and password you registered. You can also go on as a guest: the advice is the same.",
+  "aiaic.account.intro_signin": "You can also go on as a guest: the advice is the same.",
   "aiaic.account.title_register": "Register",
-  "aiaic.account.intro_register":
-    "Make your own account: your questions and sales are kept with your account, not this phone. AIAIC's team approves each registration.",
+  "aiaic.account.intro_register": "AIAIC's team approves each registration.",
   "aiaic.account.username": "Username",
   "aiaic.account.username_hint": "3 to 64 letters or numbers, no spaces (. _ - allowed)",
   "aiaic.account.password": "Password",
@@ -384,8 +386,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.account.code.other": "That did not work. Please try again.",
   "nav.help.title": "Help",
   "aiaic.help.title": "Help",
-  "aiaic.help.intro":
-    "Ask AIAIC's team about prices, storage, transport, selling or the app. The team answers here.",
+  "aiaic.help.intro": "Ask AIAIC's team. The team answers here.",
   "aiaic.help.ask": "Ask a question",
   "aiaic.help.topic": "What is it about?",
   "aiaic.help.topic.price": "Price",
@@ -555,8 +556,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.sell.submit": "List it for sale",
   "aiaic.sell.saving": "Listing…",
   "aiaic.sell.done": "Listed. Buyers' offers will show under Orders.",
-  "aiaic.sell.kept":
-    "Your answers from before were kept on this phone. Check each one: Change opens it again.",
+  "aiaic.sell.kept": "Your answers from before were kept on this phone. Check each one.",
   "aiaic.sell.far.ask":
     "{price} a quintal is far from what mandis reported on {day}: {low} to {high}. Is your price right?",
   "aiaic.sell.far.yes": "Yes, list it at {price}",
@@ -596,7 +596,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.problem.listing_not_found": "This listing is not among yours.",
 
   "aiaic.offers.title": "Offers for you",
-  "aiaic.offers.empty": "No offer yet. Offers will show here.",
+  "aiaic.offers.empty": "No offer yet.",
   "aiaic.offer.from": "A {kind} from {district}",
   "aiaic.demand.title": "Buyers looking for produce",
   "aiaic.demand.intro":
@@ -754,20 +754,17 @@ export const AIAIC_EN: Dict = {
   "aiaic.refused.crop_required": "Choose the crop first.",
   "aiaic.refused.quantity_out_of_range": "Give a number above 0, up to 100,000 quintals.",
   "aiaic.store.title": "Store or sell now",
-  "aiaic.store.intro": "Four short steps: where, which crop, how much, then the answer.",
   "aiaic.store.home": "Store or sell now?",
   "aiaic.store.home_tip": "Prices by month, warehouses near you, wastage and cold stores",
 
   // HER GUIDED HOME, `/today` (Crowe EOD, 16 Nov 2026, work package 1): the lane and waiting words mirror AIAIC's website
   // (`trade.lane.*`), "you" for the farmer
   "aiaic.today.title": "What would you like to do today?",
-  "aiaic.today.lead": "Choose one. Each choice opens the step you need, one at a time.",
-  "aiaic.today.entry_tip": "Sell, your sales, your money and help, one step at a time",
+  "aiaic.today.entry_tip": "Sell, your sales, your money and help",
   "aiaic.today.guest":
     "Sign in to see your own sales here. As a guest, selling in this app is practice only.",
   "aiaic.today.mine.title": "Your sales and lots now",
-  "aiaic.today.mine.empty":
-    "Nothing is waiting for you now. You can sell a crop, or check today's price.",
+  "aiaic.today.mine.empty": "Nothing is waiting for you now.",
   "aiaic.today.mine.more": "See everything in Orders & Offers",
   "aiaic.today.problem.kept": "The choices below still open, and a person can help.",
   "aiaic.today.problem.person": "Ask a person",
@@ -843,7 +840,7 @@ export const AIAIC_EN: Dict = {
   "aiaic.today.money.to_her_confirmed": "Reached your bank: {amount}",
   "aiaic.today.money.more": "Money details",
   "aiaic.today.choose.title": "Choose what to do",
-  "aiaic.today.card.sell_tip": "List your crop for buyers, one step at a time",
+  "aiaic.today.card.sell_tip": "List your crop for buyers",
   "aiaic.today.card.sell_crop_tip": "Start with {crop}: you can change it",
   "aiaic.today.card.orders": "Offers and my sales",
   "aiaic.today.card.orders_tip": "Answer a buyer, and see each sale's steps",
@@ -900,7 +897,6 @@ export const AIAIC_EN: Dict = {
   "aiaic.store.qty.example_plain": "An example quantity",
   // THE STEP KIT'S OWN WORDS (R2-3 lane A, 12 Nov 2026; DESIGN_UPDATE C.11): `kit/StepFlow.tsx`. The hidden ones
   // too (Error:, done, now, not yet). Marathi and Hindi: drafts for a native reader, as the website's kit words are.
-  "aiaic.kit.g13": "Each choice opens the next step. You can change any answer.",
   "aiaic.kit.restarted":
     "The earlier answers were not kept here, so this starts at the first step that needs one.",
   "aiaic.kit.step_of": "Step {n} of {total}:",
@@ -1226,6 +1222,10 @@ export const AIAIC_EN: Dict = {
 };
 
 export const AIAIC_MR: Dict = {
+  "aiaic.kit.why": "का?",
+  "aiaic.face.sure": "किती खात्री: {band}",
+  "aiaic.face.other_warnings": "कृती करण्यापूर्वी इतर उत्तरांचे {n} इशारे वाचा",
+  "aiaic.face.other_warnings.one": "कृती करण्यापूर्वी इतर उत्तरांचा {n} इशारा वाचा",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "तुमचा तालुका (अंतरासाठी)",
   "aiaic.taluka.whole_district": "संपूर्ण जिल्हा",
@@ -1529,11 +1529,9 @@ export const AIAIC_MR: Dict = {
   "aiaic.account.signed_out_note":
     "या फोनवर तुम्ही साइन आउट झालात. तुमचे खाते वापरण्यासाठी पुन्हा साइन इन करा.",
   "aiaic.account.title_signin": "साइन इन",
-  "aiaic.account.intro_signin":
-    "नोंदणी करताना दिलेल्या वापरकर्ता नावाने आणि पासवर्डने साइन इन करा. तुम्ही पाहुणे म्हणूनही पुढे जाऊ शकता: सल्ला तोच मिळतो.",
+  "aiaic.account.intro_signin": "तुम्ही पाहुणे म्हणूनही पुढे जाऊ शकता: सल्ला तोच मिळतो.",
   "aiaic.account.title_register": "नोंदणी",
-  "aiaic.account.intro_register":
-    "तुमचे स्वतःचे खाते तयार करा: तुमचे प्रश्न आणि विक्री या फोनऐवजी तुमच्या खात्यासोबत ठेवले जातात. प्रत्येक नोंदणीला AIAIC ची टीम मंजुरी देते.",
+  "aiaic.account.intro_register": "प्रत्येक नोंदणीला AIAIC ची टीम मंजुरी देते.",
   "aiaic.account.username": "वापरकर्ता नाव",
   "aiaic.account.username_hint": "3 ते 64 अक्षरे किंवा अंक, जागा नको (. _ - चालेल)",
   "aiaic.account.password": "पासवर्ड",
@@ -1596,8 +1594,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.account.code.other": "हे झाले नाही. कृपया पुन्हा प्रयत्न करा.",
   "nav.help.title": "मदत",
   "aiaic.help.title": "मदत",
-  "aiaic.help.intro":
-    "भाव, साठवण, वाहतूक, विक्री किंवा ॲपबद्दल AIAIC च्या टीमला विचारा. टीम इथे उत्तर देते.",
+  "aiaic.help.intro": "AIAIC च्या टीमला विचारा. टीम इथे उत्तर देते.",
   "aiaic.help.ask": "प्रश्न विचारा",
   "aiaic.help.topic": "कशाबद्दल आहे?",
   "aiaic.help.topic.price": "भाव",
@@ -1764,8 +1761,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.sell.submit": "विक्रीसाठी नोंद करा",
   "aiaic.sell.saving": "नोंद करत आहे…",
   "aiaic.sell.done": "नोंद झाली. खरेदीदारांच्या ऑफर ऑर्डरमध्ये दिसतील.",
-  "aiaic.sell.kept":
-    "तुमची आधीची उत्तरे या फोनवर ठेवली आहेत. प्रत्येक उत्तर तपासा: बदला दाबले की ते पुन्हा उघडते.",
+  "aiaic.sell.kept": "तुमची आधीची उत्तरे या फोनवर ठेवली आहेत. प्रत्येक उत्तर तपासा.",
   "aiaic.sell.far.ask":
     "क्विंटलला {price} ही किंमत {day} रोजी मंडींनी दिलेल्या भावांपासून खूप दूर आहे: {low} ते {high}. तुमची किंमत बरोबर आहे का?",
   "aiaic.sell.far.yes": "हो, {price} ने नोंद करा",
@@ -1806,7 +1802,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.problem.listing_not_found": "ही नोंद तुमच्या नोंदींमध्ये नाही.",
 
   "aiaic.offers.title": "तुमच्यासाठी ऑफर",
-  "aiaic.offers.empty": "अजून ऑफर नाही. ऑफर इथे दिसतील.",
+  "aiaic.offers.empty": "अजून ऑफर नाही.",
   "aiaic.offer.from": "{district} मधील {kind}",
   "aiaic.demand.title": "माल शोधणारे खरेदीदार",
   "aiaic.demand.intro":
@@ -1963,20 +1959,17 @@ export const AIAIC_MR: Dict = {
   "aiaic.refused.crop_required": "आधी पीक निवडा.",
   "aiaic.refused.quantity_out_of_range": "0 पेक्षा जास्त आणि 100,000 क्विंटलपर्यंतची संख्या द्या.",
   "aiaic.store.title": "साठवावे की आता विकावे",
-  "aiaic.store.intro": "चार छोट्या पायऱ्या: कुठे, कोणते पीक, किती, आणि मग उत्तर.",
   "aiaic.store.home": "साठवावे की आता विकावे?",
   "aiaic.store.home_tip": "महिन्यानुसार भाव, जवळची गोदामे, नासाडी आणि शीतगृहे",
 
   // HER GUIDED HOME, `/today` (Crowe EOD, 16 Nov 2026): DRAFTS for a native reader; the lane and waiting words are AIAIC's
   // website's own Marathi (`trade.lane.*`)
   "aiaic.today.title": "आज तुम्हाला काय करायचे आहे?",
-  "aiaic.today.lead": "एक निवडा. प्रत्येक निवड तुम्हाला हवी ती पायरी उघडते, एका वेळी एक.",
-  "aiaic.today.entry_tip": "विक्री, तुमचे सौदे, तुमचे पैसे आणि मदत, एका वेळी एक पायरी",
+  "aiaic.today.entry_tip": "विक्री, तुमचे सौदे, तुमचे पैसे आणि मदत",
   "aiaic.today.guest":
     "तुमचे स्वतःचे सौदे इथे पाहण्यासाठी साइन इन करा. पाहुणे म्हणून या ॲपमधील विक्री फक्त सरावासाठी आहे.",
   "aiaic.today.mine.title": "तुमचे सौदे आणि माल, आत्ताची स्थिती",
-  "aiaic.today.mine.empty":
-    "आत्ता तुमच्यासाठी काहीही थांबलेले नाही. तुम्ही पीक विकू शकता, किंवा आजचा भाव पाहू शकता.",
+  "aiaic.today.mine.empty": "आत्ता तुमच्यासाठी काहीही थांबलेले नाही.",
   "aiaic.today.mine.more": "सर्व काही ऑर्डर्स आणि ऑफर्समध्ये पाहा",
   "aiaic.today.problem.kept": "खालील निवडी उघडतात, आणि एखादी व्यक्ती मदत करू शकते.",
   "aiaic.today.problem.person": "एखाद्या व्यक्तीला विचारा",
@@ -2053,7 +2046,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.today.money.to_her_confirmed": "तुमच्या बँकेत पोहोचले: {amount}",
   "aiaic.today.money.more": "पैशांचा तपशील",
   "aiaic.today.choose.title": "काय करायचे ते निवडा",
-  "aiaic.today.card.sell_tip": "खरेदीदारांसाठी तुमचे पीक नोंदवा, एका वेळी एक पायरी",
+  "aiaic.today.card.sell_tip": "खरेदीदारांसाठी तुमचे पीक नोंदवा",
   "aiaic.today.card.sell_crop_tip": "{crop} पासून सुरुवात: तुम्ही ते बदलू शकता",
   "aiaic.today.card.orders": "ऑफर्स आणि माझ्या विक्री",
   "aiaic.today.card.orders_tip": "खरेदीदाराला उत्तर द्या, आणि प्रत्येक विक्रीच्या पायऱ्या पाहा",
@@ -2110,7 +2103,6 @@ export const AIAIC_MR: Dict = {
   "aiaic.store.qty.example_plain": "उदाहरणाचे प्रमाण",
   // THE STEP KIT'S OWN WORDS (R2-3 lane A): DRAFTS for a native reader, the hidden ones (Error:, done, now, not yet)
   // included; the same words as the website's kit (aiaic-frontend/src/i18n/kit.js), with the storage page's colon.
-  "aiaic.kit.g13": "प्रत्येक निवड पुढची पायरी उघडते. तुम्ही कोणतेही उत्तर बदलू शकता.",
   "aiaic.kit.restarted":
     "आधीची उत्तरे येथे ठेवलेली नव्हती, म्हणून उत्तर हवे असलेल्या पहिल्या पायरीपासून सुरुवात होते.",
   "aiaic.kit.step_of": "{total} पैकी पायरी {n}:",
@@ -2440,6 +2432,10 @@ export const AIAIC_MR: Dict = {
 };
 
 export const AIAIC_HI: Dict = {
+  "aiaic.kit.why": "क्यों?",
+  "aiaic.face.sure": "कितना भरोसा: {band}",
+  "aiaic.face.other_warnings": "कदम उठाने से पहले दूसरे उत्तरों की {n} चेतावनियाँ पढ़ें",
+  "aiaic.face.other_warnings.one": "कदम उठाने से पहले दूसरे उत्तरों की {n} चेतावनी पढ़ें",
   // 28 Oct 2026: talukas, ways, the offer weighed, her money from AIAIC, her own sign-in to sell
   "aiaic.taluka.label": "आपका तालुका (दूरी के लिए)",
   "aiaic.taluka.whole_district": "पूरा ज़िला",
@@ -2735,11 +2731,9 @@ export const AIAIC_HI: Dict = {
   "aiaic.account.signed_out_note":
     "इस फ़ोन पर आप साइन आउट हो गए। अपना खाता इस्तेमाल करने के लिए फिर से साइन इन करें।",
   "aiaic.account.title_signin": "साइन इन",
-  "aiaic.account.intro_signin":
-    "पंजीकरण के समय दिए उपयोगकर्ता नाम और पासवर्ड से साइन इन करें। आप अतिथि के रूप में भी आगे बढ़ सकते हैं: सलाह वही मिलती है।",
+  "aiaic.account.intro_signin": "आप अतिथि के रूप में भी आगे बढ़ सकते हैं: सलाह वही मिलती है।",
   "aiaic.account.title_register": "पंजीकरण",
-  "aiaic.account.intro_register":
-    "अपना खाता बनाएँ: आपके प्रश्न और बिक्री इस फ़ोन के बजाय आपके खाते के साथ रखे जाते हैं। हर पंजीकरण को AIAIC की टीम मंज़ूरी देती है।",
+  "aiaic.account.intro_register": "हर पंजीकरण को AIAIC की टीम मंज़ूरी देती है।",
   "aiaic.account.username": "उपयोगकर्ता नाम",
   "aiaic.account.username_hint": "3 से 64 अक्षर या अंक, बिना जगह के (. _ - चलेगा)",
   "aiaic.account.password": "पासवर्ड",
@@ -2802,8 +2796,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.account.code.other": "यह नहीं हो पाया। कृपया फिर से कोशिश करें।",
   "nav.help.title": "मदद",
   "aiaic.help.title": "मदद",
-  "aiaic.help.intro":
-    "भाव, भंडारण, परिवहन, बिक्री या ऐप के बारे में AIAIC की टीम से पूछें। टीम यहीं उत्तर देती है।",
+  "aiaic.help.intro": "AIAIC की टीम से पूछें। टीम यहीं उत्तर देती है।",
   "aiaic.help.ask": "प्रश्न पूछें",
   "aiaic.help.topic": "किस बारे में है?",
   "aiaic.help.topic.price": "भाव",
@@ -2968,8 +2961,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.sell.submit": "बिक्री के लिए दर्ज करें",
   "aiaic.sell.saving": "दर्ज कर रहे हैं…",
   "aiaic.sell.done": "दर्ज हो गया। खरीदारों के ऑफ़र ऑर्डर में दिखेंगे।",
-  "aiaic.sell.kept":
-    "आपके पहले के उत्तर इस फ़ोन पर रखे गए हैं। हर उत्तर जाँचें: बदलें दबाने पर वह फिर से खुलता है।",
+  "aiaic.sell.kept": "आपके पहले के उत्तर इस फ़ोन पर रखे गए हैं। हर उत्तर जाँचें।",
   "aiaic.sell.far.ask":
     "{price} प्रति क्विंटल की कीमत {day} को मंडियों के बताए भावों से बहुत दूर है: {low} से {high}। क्या आपकी कीमत सही है?",
   "aiaic.sell.far.yes": "हाँ, {price} पर दर्ज करें",
@@ -3009,7 +3001,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.problem.listing_not_found": "यह लिस्टिंग आपकी लिस्टिंग में नहीं है।",
 
   "aiaic.offers.title": "आपके लिए ऑफ़र",
-  "aiaic.offers.empty": "अभी कोई ऑफ़र नहीं। ऑफ़र यहाँ दिखेंगे।",
+  "aiaic.offers.empty": "अभी कोई ऑफ़र नहीं।",
   "aiaic.offer.from": "{district} का {kind}",
   "aiaic.demand.title": "माल खोज रहे खरीदार",
   "aiaic.demand.intro":
@@ -3165,20 +3157,17 @@ export const AIAIC_HI: Dict = {
   "aiaic.refused.crop_required": "पहले फ़सल चुनें।",
   "aiaic.refused.quantity_out_of_range": "0 से ज़्यादा और 100,000 क्विंटल तक की संख्या दें।",
   "aiaic.store.title": "रखें या अभी बेचें",
-  "aiaic.store.intro": "चार छोटे चरण: कहाँ, कौन-सी फ़सल, कितनी, फिर उत्तर।",
   "aiaic.store.home": "रखें या अभी बेचें?",
   "aiaic.store.home_tip": "महीने के अनुसार भाव, पास के गोदाम, बर्बादी और शीतगृह",
 
   // HER GUIDED HOME, `/today` (Crowe EOD, 16 Nov 2026): DRAFTS for a native reader; the lane and waiting words are AIAIC's
   // website's own Hindi (`trade.lane.*`)
   "aiaic.today.title": "आज आप क्या करना चाहेंगे?",
-  "aiaic.today.lead": "एक चुनें। हर चुनाव आपको ज़रूरी कदम खोलता है, एक बार में एक।",
-  "aiaic.today.entry_tip": "बेचना, आपके सौदे, आपका पैसा और मदद, एक बार में एक कदम",
+  "aiaic.today.entry_tip": "बेचना, आपके सौदे, आपका पैसा और मदद",
   "aiaic.today.guest":
     "अपने सौदे यहाँ देखने के लिए साइन इन करें। मेहमान के रूप में इस ऐप में बिक्री सिर्फ़ अभ्यास है।",
   "aiaic.today.mine.title": "आपके सौदे और माल, अभी की स्थिति",
-  "aiaic.today.mine.empty":
-    "अभी आपके लिए कुछ भी रुका नहीं है। आप फ़सल बेच सकते हैं, या आज का भाव देख सकते हैं।",
+  "aiaic.today.mine.empty": "अभी आपके लिए कुछ भी रुका नहीं है।",
   "aiaic.today.mine.more": "सब कुछ ऑर्डर और ऑफ़र में देखें",
   "aiaic.today.problem.kept": "नीचे के विकल्प खुलते हैं, और कोई व्यक्ति मदद कर सकता है।",
   "aiaic.today.problem.person": "किसी व्यक्ति से पूछें",
@@ -3254,7 +3243,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.today.money.to_her_confirmed": "आपके बैंक में पहुँचा: {amount}",
   "aiaic.today.money.more": "पैसे का ब्योरा",
   "aiaic.today.choose.title": "क्या करना है, चुनें",
-  "aiaic.today.card.sell_tip": "खरीदारों के लिए अपनी फ़सल दर्ज करें, एक बार में एक कदम",
+  "aiaic.today.card.sell_tip": "खरीदारों के लिए अपनी फ़सल दर्ज करें",
   "aiaic.today.card.sell_crop_tip": "{crop} से शुरुआत: आप इसे बदल सकते हैं",
   "aiaic.today.card.orders": "ऑफ़र और मेरी बिक्री",
   "aiaic.today.card.orders_tip": "खरीदार को जवाब दें, और हर बिक्री के कदम देखें",
@@ -3311,7 +3300,6 @@ export const AIAIC_HI: Dict = {
   "aiaic.store.qty.example_plain": "उदाहरण की मात्रा",
   // THE STEP KIT'S OWN WORDS (R2-3 lane A): DRAFTS for a native reader, the hidden ones (Error:, done, now, not yet)
   // included; the same words as the website's kit (aiaic-frontend/src/i18n/kit.js), with the storage page's colon.
-  "aiaic.kit.g13": "हर चुनाव अगला चरण खोलता है। आप कोई भी उत्तर बदल सकते हैं।",
   "aiaic.kit.restarted":
     "पहले के उत्तर यहाँ नहीं रखे गए थे, इसलिए यह उस पहले चरण से शुरू होता है जिसे उत्तर चाहिए।",
   "aiaic.kit.step_of": "{total} में से चरण {n}:",
