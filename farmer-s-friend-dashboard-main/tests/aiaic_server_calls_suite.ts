@@ -7,6 +7,10 @@
  *   connected to AIAIC's sale service, in the page's language. "Development" is read from Vite's compile-time constants.
  * - AN5-AN6 (item 2): a write the demo store's file does not take is thrown, memory keeps nothing of it, and her two
  *   demo-store pages say it in her words (the development server only, where the store still is).
+ * - AN7-AN11 (item 3): after a deploy, a call to a server function the new build does not have is answered apart by
+ *   the server, read apart by TanStack's own browser fetcher, said on the page ("The app was updated."), and the page
+ *   opens the new version by itself once per build per tab, never in a loop; typed text or a storage that cannot be
+ *   used gives her a button instead.
  *
  * Every server here is a stand-in on 127.0.0.1 started by this suite: no request leaves this machine, and no account,
  * token or password is a real one.
@@ -27,10 +31,31 @@ import {
   createRootRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { runWithStartContext } from "@tanstack/start-storage-context";
 import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 
 import { TradeSwitch } from "../src/components/farm/aiaic/AiaicBits";
+import { AppUpdatedLine } from "../src/components/farm/AppUpdatedNotice";
+import {
+  APP_UPDATED_HEADER,
+  APP_UPDATED_MARKER,
+  RELOAD_MARK,
+  RESOLVER_UNKNOWN,
+  appUpdated,
+  appUpdatedAnswer,
+  appUpdatedLogLine,
+  appUpdatedMiddleware,
+  appUpdatedState,
+  isAppUpdatedError,
+  isUnknownServerFn,
+  onAppUpdated,
+  reloadOnce,
+  resetAppUpdatedForTests,
+  type AppUpdatedEnv,
+} from "../src/lib/app-updated";
+import { renderErrorPage } from "../src/lib/error-page";
+import { withNoStoreForServerFns } from "../src/lib/server-fn-cache";
 import { problem, type TradeMode } from "../src/lib/aiaic-trade";
 import * as client from "../src/lib/aiaic-trade.server";
 import * as identity from "../src/lib/aiaic-identity.server";
@@ -415,6 +440,296 @@ test("AN6 her two demo-store pages say a failed write in her words, one line in 
     assert.ok(body.includes('setActionError(t("demo.not_saved"))'), `said: ${body}`);
     assert.ok(!body.includes("message"), `never the error's own words: ${body}`);
   }
+});
+
+// ======================================================================= item 3: an old server function after a deploy
+
+const nodeModule = (...parts: string[]) =>
+  fs.readFileSync(path.join(APP, "node_modules", ...parts), "utf8");
+
+test("AN7 the evidence, pinned: TanStack Start names a server function by its file and its export only (the same in every build until one is renamed, moved or removed), and its resolver's own words are what her server reads", () => {
+  const compiler = nodeModule(
+    "@tanstack",
+    "start-plugin-core",
+    "dist",
+    "esm",
+    "start-compiler",
+    "compiler.js",
+  );
+  assert.ok(
+    compiler.includes("const entryId = `${opts.filename}--${opts.functionName}`;"),
+    "a built id is made from the file and the function's name",
+  );
+  assert.ok(
+    compiler.includes('functionId = crypto.createHash("sha256").update(entryId).digest("hex")'),
+    "and from nothing else: their sha256",
+  );
+  const resolver = nodeModule(
+    "@tanstack",
+    "start-plugin-core",
+    "dist",
+    "esm",
+    "start-compiler",
+    "server-fn-resolver-module.js",
+  );
+  assert.ok(
+    resolver.includes(`throw new Error('${RESOLVER_UNKNOWN}' + id)`),
+    "the resolver's words, as her server reads them",
+  );
+  // and the resolver throws before the handler's own try, so only her error middleware can answer it
+  const handler = nodeModule(
+    "@tanstack",
+    "start-server-core",
+    "dist",
+    "esm",
+    "server-functions-handler.js",
+  );
+  const lookup = handler.indexOf("await getServerFnById(serverFnId");
+  const firstTry = handler.indexOf("try {");
+  assert.ok(lookup > 0 && firstTry > lookup, "the lookup comes before the handler's own try");
+});
+
+test("AN8 her server answers a call to a server function this build does not have apart from every other failure, and TanStack's own browser fetcher throws that word as it is; the log names a build's id and echoes nothing else", async () => {
+  const id = "f".repeat(64);
+  assert.equal(isUnknownServerFn(new Error(`${RESOLVER_UNKNOWN}${id}`)), true);
+  assert.equal(isUnknownServerFn(new Error("Server function module not resolved for x")), false);
+  assert.equal(isUnknownServerFn(`${RESOLVER_UNKNOWN}${id}`), false, "only a thrown Error");
+  const answer = appUpdatedAnswer();
+  assert.equal(answer.status, 410);
+  assert.equal(answer.headers.get(APP_UPDATED_HEADER), "1");
+  assert.equal(answer.headers.get("cache-control"), "no-store");
+  assert.equal(await answer.clone().text(), APP_UPDATED_MARKER);
+  assert.ok(appUpdatedLogLine(new Error(`${RESOLVER_UNKNOWN}${id}`)).includes(id), "a build's id");
+  const junk = appUpdatedLogLine(new Error(`${RESOLVER_UNKNOWN}../../etc/passwd?token=abc`));
+  assert.ok(!/passwd|token|abc/.test(junk), `nothing else it was sent is echoed: ${junk}`);
+  // through TanStack's own browser fetcher (createClientRpc, as her pages call), the answer as her server.ts sends it
+  const { createClientRpc } = await import("@tanstack/start-client-core/client-rpc");
+  const call = createClientRpc(id) as unknown as (
+    opts: Record<string, unknown>,
+  ) => Promise<unknown>;
+  const thrownBy = async (res: Response) => {
+    try {
+      await runWithStartContext({ startOptions: {} } as never, () =>
+        call({ method: "POST", fetch: async () => res }),
+      );
+    } catch (e) {
+      return e;
+    }
+    return null;
+  };
+  const updated = await thrownBy(withNoStoreForServerFns(`/_serverFn/${id}`, appUpdatedAnswer()));
+  assert.ok(isAppUpdatedError(updated), `the page reads it apart: ${String(updated)}`);
+  const other = await thrownBy(
+    new Response(renderErrorPage(), {
+      status: 500,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    }),
+  );
+  assert.ok(other instanceof Error, "any other failure still fails");
+  assert.equal(isAppUpdatedError(other), false, "and is never read as an update");
+});
+
+/** The tab's storage, as a browser keeps it. */
+const tabStorage = () => {
+  const kept = new Map<string, string>();
+  return {
+    getItem: (k: string) => kept.get(k) ?? null,
+    setItem: (k: string, v: string) => {
+      kept.set(k, v);
+    },
+  };
+};
+
+test("AN9 the page opens the new version by itself once per build per tab and never loops: the same build again, typed text, or a storage that cannot be read or does not keep the mark each give her button instead; calls failing together decide once", () => {
+  const A = "/assets/index-A1b2.js";
+  const B = "/assets/index-C3d4.js";
+  const tab = tabStorage();
+  assert.equal(reloadOnce({ storage: tab, build: A, typed: false }), "reload", "once");
+  assert.equal(tab.getItem(RELOAD_MARK), A, "the tab remembers the build it reloaded from");
+  assert.equal(reloadOnce({ storage: tab, build: A, typed: false }), "press", "never twice");
+  assert.equal(
+    reloadOnce({ storage: tab, build: B, typed: false }),
+    "reload",
+    "a newer build: once",
+  );
+  assert.equal(reloadOnce({ storage: tab, build: B, typed: false }), "press");
+  assert.equal(reloadOnce({ storage: null, build: A, typed: false }), "press", "no storage");
+  const refusing = {
+    getItem: (): string | null => {
+      throw new Error("SecurityError");
+    },
+    setItem: () => {
+      throw new Error("SecurityError");
+    },
+  };
+  assert.equal(reloadOnce({ storage: refusing, build: A, typed: false }), "press", "unreadable");
+  const forgetful = { getItem: () => null, setItem: () => {} };
+  assert.equal(
+    reloadOnce({ storage: forgetful, build: A, typed: false }),
+    "press",
+    "a storage that keeps nothing: a button, so it cannot loop",
+  );
+  assert.equal(reloadOnce({ storage: tabStorage(), build: A, typed: true }), "press", "typed");
+
+  // the page reloads and the same build meets the old function again, five times, in one tab: one reload
+  const one = tabStorage();
+  let reloads = 0;
+  const env = (over: Partial<AppUpdatedEnv> = {}): AppUpdatedEnv => ({
+    storage: () => one,
+    build: A,
+    typed: () => false,
+    reload: () => {
+      reloads += 1;
+    },
+    later: (run) => run(),
+    ...over,
+  });
+  for (let load = 0; load < 5; load++) {
+    resetAppUpdatedForTests();
+    appUpdated(env());
+  }
+  assert.equal(reloads, 1, "five loads of the same build: one reload");
+  assert.deepEqual(appUpdatedState(), { how: "press", typed: false }, "then her button");
+
+  // three calls of one page failing together decide once
+  resetAppUpdatedForTests();
+  reloads = 0;
+  const heard: unknown[] = [];
+  const stop = onAppUpdated((s) => heard.push(s));
+  const fresh = tabStorage();
+  appUpdated(env({ storage: () => fresh }));
+  appUpdated(env({ storage: () => fresh }));
+  appUpdated(env({ storage: () => fresh }));
+  stop();
+  assert.equal(reloads, 1, "one reload");
+  assert.equal(heard.length, 1, "said once");
+  assert.deepEqual(appUpdatedState(), { how: "opening", typed: false });
+
+  // she typed: no reload; her button, and the line that a reload clears what she typed
+  resetAppUpdatedForTests();
+  reloads = 0;
+  appUpdated(env({ storage: () => tabStorage(), typed: () => true }));
+  assert.equal(reloads, 0, "nothing she typed is cleared without her press");
+  assert.deepEqual(appUpdatedState(), { how: "press", typed: true });
+  resetAppUpdatedForTests();
+});
+
+test("AN10 every server function call from the browser goes through the middleware: a call that met the app-updated answer says so once and opens the new version once; the call still fails as it did; any other failure is passed on untouched", async () => {
+  type Run = (o: { next: () => Promise<unknown> }) => Promise<unknown>;
+  const run = (appUpdatedMiddleware as unknown as { options: { client: Run } }).options.client;
+  const g = globalThis as unknown as Record<string, unknown>;
+  const had = { window: g["window"], document: g["document"] };
+  let reloads = 0;
+  const later: (() => void)[] = [];
+  g["window"] = {
+    sessionStorage: tabStorage(),
+    location: {
+      reload: () => {
+        reloads += 1;
+      },
+    },
+    setTimeout: (fn: () => void) => later.push(fn),
+  };
+  g["document"] = { querySelectorAll: () => [], addEventListener: () => {} };
+  resetAppUpdatedForTests();
+  try {
+    const updated = new Error(APP_UPDATED_MARKER);
+    await assert.rejects(
+      () => run({ next: () => Promise.reject(updated) }),
+      (e) => e === updated,
+    );
+    await assert.rejects(
+      () => run({ next: () => Promise.reject(updated) }),
+      (e) => e === updated,
+    );
+    assert.deepEqual(appUpdatedState(), { how: "opening", typed: false }, "said, once");
+    assert.equal(later.length, 1, "one opening of the new version, after the line is shown");
+    later.forEach((fn) => fn());
+    assert.equal(reloads, 1);
+    resetAppUpdatedForTests();
+    const other = new Error("AIAIC is not answering");
+    await assert.rejects(
+      () => run({ next: () => Promise.reject(other) }),
+      (e) => e === other,
+    );
+    assert.equal(appUpdatedState(), null, "any other failure says nothing of an update");
+    const fine = { result: "her answer" };
+    assert.equal(
+      await run({ next: () => Promise.resolve(fine) }),
+      fine,
+      "an answer passes as it is",
+    );
+  } finally {
+    resetAppUpdatedForTests();
+    g["window"] = had.window;
+    g["document"] = had.document;
+  }
+});
+
+test("AN11 the page says it in her words, in English, Marathi and Hindi: one line, her button only where it does not open by itself, the typed line only when she typed; her server and every page are wired to it", () => {
+  const cases: NonNullable<ReturnType<typeof appUpdatedState>>[] = [
+    { how: "opening", typed: false },
+    { how: "press", typed: false },
+    { how: "press", typed: true },
+  ];
+  for (const lang of LANGS) {
+    for (const k of [
+      "app.updated.line",
+      "app.updated.opening",
+      "app.updated.open",
+      "app.updated.typed",
+    ]) {
+      const w = words(lang, k);
+      assert.ok(w.length < 60, `${k} [${lang}]: one short line`);
+      if (lang !== "en") noEnglish(lang, w, k);
+    }
+    for (const state of cases) {
+      const html = renderToString(
+        createElement(I18nProvider, {
+          initialLang: lang,
+          children: createElement(AppUpdatedLine, { state, onOpen: () => {} }),
+        }),
+      ).replaceAll("<!-- -->", "");
+      const tag = `${lang} ${state.how}${state.typed ? " typed" : ""}`;
+      assert.ok(html.includes('role="alert"'), `${tag}: said aloud`);
+      assert.ok(html.includes(escHtml(words(lang, "app.updated.line"))), `${tag}: the line`);
+      assert.equal(
+        html.includes(escHtml(words(lang, "app.updated.opening"))),
+        state.how === "opening",
+        `${tag}: "opening" only when it opens by itself`,
+      );
+      assert.equal(html.includes("<button"), state.how === "press", `${tag}: her button`);
+      assert.equal(
+        html.includes(escHtml(words(lang, "app.updated.typed"))),
+        state.typed,
+        `${tag}: the typed line only when she typed`,
+      );
+    }
+  }
+  // the wiring: start.ts answers it apart and puts the middleware on every call; the root page draws the notice
+  const start = fs.readFileSync(path.join(APP, "src", "start.ts"), "utf8");
+  const sf = ts.createSourceFile("start.ts", start, ts.ScriptTarget.Latest, true);
+  let branch = "";
+  let functionMiddleware = "";
+  const visit = (n: import("typescript").Node) => {
+    if (ts.isIfStatement(n) && n.expression.getText(sf).includes("isUnknownServerFn(error)"))
+      branch = n.getText(sf);
+    if (ts.isPropertyAssignment(n) && n.name.getText(sf) === "functionMiddleware")
+      functionMiddleware = n.initializer.getText(sf);
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  assert.ok(
+    branch.includes('handlerType === "serverFn"') && branch.includes("return appUpdatedAnswer()"),
+    `the error middleware answers it apart: ${branch}`,
+  );
+  assert.ok(
+    start.indexOf("isUnknownServerFn(error)") < start.indexOf("console.error(error)"),
+    "before the error page",
+  );
+  assert.ok(functionMiddleware.includes("appUpdatedMiddleware"), "on every call from the browser");
+  const root = fs.readFileSync(path.join(APP, "src", "routes", "__root.tsx"), "utf8");
+  assert.ok(root.includes("<AppUpdatedNotice />"), "every page draws the notice");
 });
 
 // ------------------------------------------------------------------------------------------- run

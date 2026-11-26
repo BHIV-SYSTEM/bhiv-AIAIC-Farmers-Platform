@@ -15,6 +15,7 @@ import { I18nProvider, useI18n } from "../lib/i18n";
 import { reportError } from "../lib/error-reporting";
 import { TopNav } from "../components/farm/TopNav";
 import { AccountNotices } from "../components/farm/AccountChip";
+import { AppUpdatedNotice } from "../components/farm/AppUpdatedNotice";
 import { BottomNav } from "../components/farm/BottomNav";
 
 function NotFoundComponent() {
@@ -165,6 +166,8 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <div className="flex min-h-screen flex-col bg-background text-foreground">
+          {/* after a deploy, an old server function: "The app was updated." (lane AN, item 3) */}
+          <AppUpdatedNotice />
           <TopNav />
           <AccountNotices />
           <main className="flex-1 pb-20 sm:pb-24">

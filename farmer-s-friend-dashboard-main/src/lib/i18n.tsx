@@ -283,6 +283,11 @@ const en: Dict = {
     "Listings and orders are persisted in the backend server file store (data/transactions.json). State is preserved across page refreshes and server reboots.",
   // lane AN, item 2 (push 2b-2): a demo store write its file did not take (the development server only)
   "demo.not_saved": "This was not saved. Try again.",
+  // lane AN, item 3 (push 2b-2): after a deploy, a page that called an old server function
+  "app.updated.line": "The app was updated.",
+  "app.updated.opening": "Opening the new version…",
+  "app.updated.open": "Open the new version",
+  "app.updated.typed": "What you typed on this page will be cleared.",
   "listing.section.produce": "1. Produce Specification",
   "listing.section.pricing": "2. Asking Price & Gross Lot Value",
   "listing.section.location": "3. Pickup Location & Logistics Window",
@@ -693,6 +698,10 @@ const hi: Dict = {
   "persistence.notice.body":
     "फ़सलें और ऑर्डर सर्वर फ़ाइल स्टोर (data/transactions.json) में सहेजे जाते हैं। पेज रीफ़्रेश और सर्वर रीस्टार्ट के बाद भी स्थिति सुरक्षित रहती है।",
   "demo.not_saved": "यह सहेजा नहीं गया। फिर से कोशिश करें।",
+  "app.updated.line": "ऐप का नया संस्करण आया है।",
+  "app.updated.opening": "नया संस्करण खुल रहा है…",
+  "app.updated.open": "नया संस्करण खोलें",
+  "app.updated.typed": "इस पेज पर आपने जो लिखा है, वह मिट जाएगा।",
   "listing.section.produce": "1. फ़सल विवरण",
   "listing.section.pricing": "2. अपेक्षित भाव और कुल मूल्य",
   "listing.section.location": "3. पिकअप स्थान और समय",
@@ -1100,6 +1109,10 @@ const mr: Dict = {
   "persistence.notice.body":
     "नोंदणी आणि ऑर्डर्स सर्व्हर फाइल स्टोअरमध्ये (data/transactions.json) कायमस्वरूपी जतन केले जातात. पेज रीफ्रेश किंवा सर्व्हर रीस्टार्ट झाल्यावरही माहिती टिकून राहते.",
   "demo.not_saved": "हे जतन झाले नाही. पुन्हा प्रयत्न करा.",
+  "app.updated.line": "ॲपची नवी आवृत्ती आली आहे.",
+  "app.updated.opening": "नवी आवृत्ती उघडत आहे…",
+  "app.updated.open": "नवी आवृत्ती उघडा",
+  "app.updated.typed": "या पानावर तुम्ही लिहिलेले पुसले जाईल.",
   "listing.section.produce": "१. पीक तपशील",
   "listing.section.pricing": "२. अपेक्षित भाव आणि एकूण मूल्य",
   "listing.section.location": "३. पिकअप ठिकाण आणि वेळ",

@@ -1,14 +1,27 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
+import {
+  appUpdatedAnswer,
+  appUpdatedLogLine,
+  appUpdatedMiddleware,
+  isUnknownServerFn,
+} from "./lib/app-updated";
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, handlerType }) => {
   try {
     return await next();
   } catch (error) {
     if (error != null && typeof error === "object" && "statusCode" in error) {
       throw error;
+    }
+    // AFTER A DEPLOY (lane AN, item 3): a page from an earlier build asked for a server function this build does not
+    // have. The answer says so (`app-updated.ts`), so the page can say the app was updated, where any other failure
+    // gets the error page
+    if (handlerType === "serverFn" && isUnknownServerFn(error)) {
+      console.warn(appUpdatedLogLine(error));
+      return appUpdatedAnswer();
     }
     console.error(error);
     return new Response(renderErrorPage(), {
@@ -34,6 +47,7 @@ const deviceIdMiddleware = createMiddleware().server(async ({ next }) => {
 });
 
 export const startInstance = createStart(() => ({
-  functionMiddleware: [attachSupabaseAuth],
+  // appUpdatedMiddleware (lane AN, item 3): a call that met an old server function says the app was updated
+  functionMiddleware: [attachSupabaseAuth, appUpdatedMiddleware],
   requestMiddleware: [errorMiddleware, csrfMiddleware, deviceIdMiddleware],
 }));
