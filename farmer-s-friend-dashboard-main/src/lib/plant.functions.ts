@@ -108,14 +108,16 @@ export const analyzePlantPhoto = createServerFn({ method: "POST" })
 
     let response: Response;
     try {
-      response = await fetch(`${baseUrl}/analyze`, {
+      // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+      const { outsideFetch } = await import("./outside-call.server");
+      response = await outsideFetch("plant", `${baseUrl}/analyze`, {
         method: "POST",
         headers: {
           accept: "application/json",
           "ngrok-skip-browser-warning": "true",
         },
         body,
-        signal: AbortSignal.timeout(45_000),
+        limitMs: 45_000,
       });
     } catch (error) {
       console.error("[plant] request failed", error);

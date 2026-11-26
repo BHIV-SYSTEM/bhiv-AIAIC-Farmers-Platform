@@ -28,6 +28,7 @@ import {
 } from "@tanstack/react-start/server";
 
 import { farmerAppKey, resolveBaseUrl, signInAllowed } from "./aiaic-base.server";
+import { outsideFetch } from "./outside-call.server";
 
 export const GUEST_COOKIE = "aiaic_guest";
 export const SESSION_COOKIE = "aiaic_session";
@@ -292,11 +293,12 @@ export async function fetchForHer(
   headers: Record<string, string>,
   timeoutMs: number,
 ): Promise<Response> {
+  // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
   const once = (who: Asker) =>
-    fetch(url, {
+    outsideFetch("aiaic", url, {
       method: "GET",
       headers: { ...headers, ...askerHeaders(who) },
-      signal: AbortSignal.timeout(timeoutMs),
+      limitMs: timeoutMs,
     });
   const who = asker();
   const first = await once(who);

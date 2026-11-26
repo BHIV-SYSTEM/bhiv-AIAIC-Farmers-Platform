@@ -46,8 +46,18 @@ const deviceIdMiddleware = createMiddleware().server(async ({ next }) => {
   return next();
 });
 
+// A slow page's line names the server function the request ran, by its name in her code (lane AN, item 4:
+// `slow-page.server.ts`)
+const nameServerFnMiddleware = createMiddleware({ type: "function" }).server(
+  async ({ next, serverFnMeta }) => {
+    const { nameServerFn } = await import("./lib/slow-page.server");
+    nameServerFn(serverFnMeta?.name);
+    return next();
+  },
+);
+
 export const startInstance = createStart(() => ({
   // appUpdatedMiddleware (lane AN, item 3): a call that met an old server function says the app was updated
-  functionMiddleware: [attachSupabaseAuth, appUpdatedMiddleware],
+  functionMiddleware: [attachSupabaseAuth, appUpdatedMiddleware, nameServerFnMiddleware],
   requestMiddleware: [errorMiddleware, csrfMiddleware, deviceIdMiddleware],
 }));

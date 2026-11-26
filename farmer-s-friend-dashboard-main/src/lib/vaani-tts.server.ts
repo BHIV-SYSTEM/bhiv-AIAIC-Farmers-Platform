@@ -18,6 +18,8 @@
 
 import { z } from "zod";
 
+import { outsideFetch } from "./outside-call.server";
+
 export const ttsRequestSchema = z.object({
   text: z
     .string()
@@ -129,11 +131,12 @@ export async function synthesizeAdviceSpeech(input: TTSRequestInput): Promise<TT
   }
 
   try {
-    const response = await fetch(synthesizeUrl, {
+    // one time limit over the whole call, its audio included (lane AN, item 4: `outside-call.server.ts`)
+    const response = await outsideFetch("vaani", synthesizeUrl, {
       method: "POST",
       headers,
       body: requestBody,
-      signal: AbortSignal.timeout(15_000), // 15-second upstream timeout
+      limitMs: 15_000, // 15-second upstream timeout
     });
 
     if (!response.ok) {

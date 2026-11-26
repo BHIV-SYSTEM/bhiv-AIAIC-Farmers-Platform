@@ -11,6 +11,9 @@
  *   the server, read apart by TanStack's own browser fetcher, said on the page ("The app was updated."), and the page
  *   opens the new version by itself once per build per tab, never in a loop; typed text or a storage that cannot be
  *   used gives her a button instead.
+ * - AN12-AN15 (item 4): every call her server makes to another server goes through one door with its own time limit
+ *   over the whole call (the answer's body included); a call past it is said as a failure in her words; a request
+ *   slower than the threshold logs one line, its route and its slowest call, path only.
  *
  * Every server here is a stand-in on 127.0.0.1 started by this suite: no request leaves this machine, and no account,
  * token or password is a real one.
@@ -18,6 +21,8 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
+import http from "node:http";
+import type { AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,7 +40,9 @@ import { runWithStartContext } from "@tanstack/start-storage-context";
 import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 
-import { TradeSwitch } from "../src/components/farm/aiaic/AiaicBits";
+import { ProblemCard, TradeSwitch } from "../src/components/farm/aiaic/AiaicBits";
+import { OutsideCallTimeout, isTimeout, outsideFetch } from "../src/lib/outside-call.server";
+import { SLOW_PAGE_MS, nameServerFn, pathForLog, timedRequest } from "../src/lib/slow-page.server";
 import { AppUpdatedLine } from "../src/components/farm/AppUpdatedNotice";
 import {
   APP_UPDATED_HEADER,
@@ -730,6 +737,347 @@ test("AN11 the page says it in her words, in English, Marathi and Hindi: one lin
   assert.ok(functionMiddleware.includes("appUpdatedMiddleware"), "on every call from the browser");
   const root = fs.readFileSync(path.join(APP, "src", "routes", "__root.tsx"), "utf8");
   assert.ok(root.includes("<AppUpdatedNotice />"), "every page draws the notice");
+});
+
+// ======================================================================= item 4: time limits, and the slow-page line
+
+type StandIn = {
+  url: string;
+  hits: { path: string; method: string; auth: string | null; guest: string | null }[];
+  close: () => Promise<void>;
+};
+
+/** A stand-in for AIAIC (and the other servers) on 127.0.0.1: `/slow-head/*` and `/storage/plan` answer after 2 s,
+ *  `/slow-body/*` and `/farmer/trade/price` send their headers and half a body at once and the rest after 2 s; every
+ *  other path answers its own path after `?wait=` ms. Nothing leaves this machine. */
+async function standIn(): Promise<StandIn> {
+  const s: StandIn = { url: "", hits: [], close: async () => {} };
+  const server = http.createServer((req, res) => {
+    const u = new URL(req.url ?? "/", "http://127.0.0.1");
+    const header = (k: string) => {
+      const v = req.headers[k];
+      return typeof v === "string" ? v : null;
+    };
+    s.hits.push({
+      path: u.pathname,
+      method: req.method ?? "GET",
+      auth: header("authorization"),
+      guest: header("x-aiaic-guest"),
+    });
+    const json = (status: number, body: unknown) => {
+      if (res.destroyed) return;
+      res.writeHead(status, { "content-type": "application/json" });
+      res.end(JSON.stringify(body));
+    };
+    if (u.pathname.startsWith("/slow-head") || u.pathname === "/storage/plan") {
+      setTimeout(() => json(200, { late: true }), 2000);
+      return;
+    }
+    if (u.pathname.startsWith("/slow-body") || u.pathname === "/farmer/trade/price") {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.write('{"part":');
+      setTimeout(() => {
+        if (!res.destroyed) res.end('"late"}');
+      }, 2000);
+      return;
+    }
+    const wait = Number(u.searchParams.get("wait") ?? "0");
+    const status = Number(u.searchParams.get("status") ?? "200");
+    setTimeout(() => json(status, { path: u.pathname, n: s.hits.length }), wait);
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", () => resolve()));
+  s.url = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  s.close = () =>
+    new Promise<void>((resolve) => {
+      server.closeAllConnections();
+      server.close(() => resolve());
+    });
+  return s;
+}
+
+/** Her problem card as the page draws it. */
+function problemCard(p: ReturnType<typeof problem>, lang: (typeof LANGS)[number]): string {
+  return renderToString(
+    createElement(RouterContextProvider, {
+      router: appRouter as never,
+      children: createElement(QueryClientProvider, {
+        client: new QueryClient(),
+        children: createElement(I18nProvider, {
+          initialLang: lang,
+          children: createElement(ProblemCard, { problem: p }),
+        }),
+      }),
+    }),
+  ).replaceAll("<!-- -->", "");
+}
+
+const asHer = () =>
+  identity.sessionForTests({
+    token: "standin-token-an-0000000001",
+    username: "standin_farmer",
+    displayName: null,
+    expiresAt: Date.now() + 60 * 60_000,
+  });
+
+test("AN12 every call her server makes to another server goes through one door, each with its own time limit: no bare fetch in her server's code, every call listed (a new one is added here with its limit), and the generated Supabase server clients are imported by nothing", () => {
+  const src = path.join(APP, "src");
+  const lib = path.join(src, "lib");
+  const files = [
+    ...fs
+      .readdirSync(lib)
+      .filter((f) => /\.(server|functions)\.tsx?$/.test(f))
+      .map((f) => path.join(lib, f)),
+    path.join(src, "server.ts"),
+    path.join(src, "start.ts"),
+  ];
+  const sites: Record<string, number> = {};
+  const bare: string[] = [];
+  const noLimit: string[] = [];
+  for (const file of files) {
+    const rel = path.relative(src, file).replaceAll("\\", "/");
+    const sf = ts.createSourceFile(
+      file,
+      fs.readFileSync(file, "utf8"),
+      ts.ScriptTarget.Latest,
+      true,
+    );
+    const at = (n: import("typescript").Node) =>
+      `${rel}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
+    const visit = (n: import("typescript").Node): void => {
+      if (ts.isCallExpression(n) && ts.isIdentifier(n.expression)) {
+        if (n.expression.text === "fetch" && rel !== "lib/outside-call.server.ts") bare.push(at(n));
+        if (n.expression.text === "outsideFetch") {
+          sites[rel] = (sites[rel] ?? 0) + 1;
+          const init = n.arguments[2];
+          const limited =
+            init !== undefined &&
+            ts.isObjectLiteralExpression(init) &&
+            init.properties.some(
+              (p) => ts.isPropertyAssignment(p) && p.name.getText(sf) === "limitMs",
+            );
+          if (!limited) noLimit.push(at(n));
+        }
+      }
+      ts.forEachChild(n, visit);
+    };
+    visit(sf);
+  }
+  assert.deepEqual(bare, [], "no call goes around the door");
+  assert.deepEqual(noLimit, [], "each call names its time limit");
+  assert.deepEqual(
+    sites,
+    {
+      "lib/aiaic-account.server.ts": 1, // her sign-in, registration, Help, notices: 15 s
+      "lib/aiaic-identity.server.ts": 1, // advice, intelligence, crop signals (fetchForHer): 15-20 s
+      "lib/aiaic-trade.server.ts": 1, // sale, payment, transport, storage, places names: 20 s
+      "lib/catalog.functions.ts": 1, // the catalogue: 15 s
+      "lib/places.functions.ts": 5, // districts, crops, place, price series, brief: 10-15 s
+      "lib/plant.functions.ts": 1, // the plant check: 45 s
+      "lib/vaani-tts.server.ts": 1, // Vaani's speech: 15 s
+    },
+    "every outside call of her server, listed",
+  );
+  // the generated Supabase clients: the browser's only; nothing imports the server ones
+  const walk = (dir: string): string[] =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+      const p = path.join(dir, e.name);
+      return e.isDirectory() ? walk(p) : /\.tsx?$/.test(e.name) ? [p] : [];
+    });
+  const importers = walk(src)
+    .filter((f) => !f.includes(path.join("integrations", "supabase")))
+    .filter((f) => /supabase\/(client\.server|auth-middleware)/.test(fs.readFileSync(f, "utf8")));
+  assert.deepEqual(importers, [], "no server code calls Supabase");
+});
+
+test("AN13 a call past its limit fails within it, a body still coming included, and is said as a failure in her words: the sale path's own line (never 'nothing was changed'), in English, Marathi and Hindi; the other paths fail in time into their 'not answering'", async () => {
+  const s = await standIn();
+  const savedBase = process.env["AIAIC_BASE_URL"];
+  try {
+    for (const p of ["/slow-head/x", "/slow-body/x"]) {
+      const t0 = Date.now();
+      await assert.rejects(
+        () => outsideFetch("aiaic", `${s.url}${p}`, { limitMs: 300 }),
+        (e: unknown) => e instanceof OutsideCallTimeout && isTimeout(e),
+        `${p}: past its limit`,
+      );
+      const ms = Date.now() - t0;
+      assert.ok(ms < 1500, `${p}: failed within its limit (${ms} ms), not after the 2 s answer`);
+    }
+    const ok = await outsideFetch("aiaic", `${s.url}/ok/1`, { limitMs: 2000 });
+    assert.equal(ok.status, 200);
+    assert.equal(ok.headers.get("content-type"), "application/json");
+    assert.deepEqual(JSON.parse(await ok.text()), { path: "/ok/1", n: 3 }, "an answer, whole");
+    await assert.rejects(
+      () => outsideFetch("aiaic", "http://127.0.0.1:9/x", { limitMs: 3000 }),
+      (e: unknown) => e instanceof Error && !isTimeout(e),
+      "a server not reached is thrown as it was, never as a timeout",
+    );
+    // the sale path: her price (a body still coming) and a guest's storage plan (an answer not begun)
+    process.env["AIAIC_BASE_URL"] = s.url;
+    client.resetForTests();
+    client.callLimitForTests(300);
+    asHer();
+    const price = await client.getPrice({ crop: "onion", state: "mh", district: "nashik" });
+    assert.equal(!price.ok ? price.problem.code : "", "aiaic_timed_out", "her price");
+    identity.sessionForTests(null);
+    const plan = await client.storagePlan({
+      crop: "onion",
+      district: "nashik",
+      state: "mh",
+      lang: "en",
+    });
+    assert.equal(!plan.ok ? plan.problem.code : "", "aiaic_timed_out", "a guest's storage plan");
+    for (const lang of LANGS) {
+      const line = words(lang, "aiaic.problem.aiaic_timed_out");
+      assert.ok(problemCard(problem("aiaic_timed_out"), lang).includes(escHtml(line)), lang);
+      assert.ok(!line.includes(words(lang, "aiaic.problem.aiaic_unavailable")), `${lang}: its own`);
+      if (lang !== "en") noEnglish(lang, line, "aiaic.problem.aiaic_timed_out");
+    }
+    assert.ok(
+      !/changed/i.test(words("en", "aiaic.problem.aiaic_timed_out")),
+      "no claim it changed nothing",
+    );
+    // advice, intelligence and crop signals go through fetchForHer: past its limit, in time
+    const t0 = Date.now();
+    await assert.rejects(
+      () => identity.fetchForHer(`${s.url}/slow-body/advice`, {}, 300),
+      (e: unknown) => isTimeout(e),
+    );
+    assert.ok(Date.now() - t0 < 1500, "fetchForHer fails within its limit");
+  } finally {
+    client.callLimitForTests(null);
+    client.resetForTests();
+    identity.sessionForTests(null);
+    if (savedBase === undefined) delete process.env["AIAIC_BASE_URL"];
+    else process.env["AIAIC_BASE_URL"] = savedBase;
+    await s.close();
+  }
+});
+
+test("AN14 a request slower than the threshold logs one line once its body ended: its route and its slowest outside call, path only (no query string, no token, no id, no person's detail); a fast one logs nothing; a stream stays a stream", async () => {
+  const s = await standIn();
+  try {
+    assert.equal(SLOW_PAGE_MS, 8_000, "the threshold (UNCALIBRATED)");
+    assert.equal(
+      pathForLog("/farmer/trade/offers/ofr_0123456789abcdef0123/compare"),
+      "/farmer/trade/offers/:id/compare",
+    );
+    assert.equal(pathForLog("/orders/ORD-20261019-8421"), "/orders/:id");
+    assert.equal(pathForLog("/help/3fa85f64-5717-4562-b3fc-2c963f66afa6"), "/help/:id");
+    assert.equal(pathForLog("/farmer/queries/deadbeefcafe"), "/farmer/queries/:id", "hex letters");
+    assert.equal(pathForLog("/transport/nearby-mandis"), "/transport/nearby-mandis");
+    assert.equal(pathForLog("/v1/tts/synthesize"), "/v1/tts/synthesize");
+    const lines: string[] = [];
+    const slow = await timedRequest(
+      new Request("http://localhost/orders/ord_00112233445566778899?phone=9876543210&t=secret"),
+      async () => {
+        nameServerFn("getMyTrade");
+        const r = await outsideFetch(
+          "aiaic",
+          `${s.url}/farmer/trade/offers/ofr_0123456789abcdef0123/compare?wait=120&token=SECRET&phone=9876543210`,
+          { headers: { authorization: "Bearer standin-token-secret-xyz" }, limitMs: 2000 },
+        );
+        await r.text();
+        await outsideFetch("aiaic", `${s.url}/slow-head/late`, { limitMs: 60 }).catch(() => null);
+        return new Response("her answer", { status: 200 });
+      },
+      { slowMs: 50, log: (l) => lines.push(l) },
+    );
+    assert.deepEqual(lines, [], "nothing until the body has ended");
+    assert.equal(await slow.text(), "her answer", "the answer as it was");
+    assert.equal(lines.length, 1, "then one line");
+    const line = lines[0] ?? "";
+    assert.ok(line.startsWith("[slow-page] GET serverFn getMyTrade "), line);
+    assert.ok(line.includes("outside calls 2 (1 timed out)"), line);
+    assert.ok(line.includes("slowest: aiaic /farmer/trade/offers/:id/compare"), line);
+    for (const never of [
+      "?",
+      "phone",
+      "9876543210",
+      "SECRET",
+      "secret",
+      "standin-token",
+      "ofr_",
+      "ord_",
+    ])
+      assert.ok(!line.includes(never), `the line holds no "${never}": ${line}`);
+    // a page (not a server function) is named by its path, ids written :id
+    const page: string[] = [];
+    await (
+      await timedRequest(
+        new Request("http://localhost/listing/LST-20261019-01?x=1"),
+        async () => {
+          await new Promise((r) => setTimeout(r, 70));
+          return new Response(null, { status: 204 });
+        },
+        { slowMs: 50, log: (l) => page.push(l) },
+      )
+    ).text();
+    assert.equal(page.length, 1);
+    assert.ok((page[0] ?? "").startsWith("[slow-page] GET /listing/:id "), page[0]);
+    assert.ok((page[0] ?? "").includes("outside calls 0"), page[0]);
+    // a fast request logs nothing
+    const fast: string[] = [];
+    await (
+      await timedRequest(new Request("http://localhost/"), async () => new Response("ok"), {
+        log: (l) => fast.push(l),
+      })
+    ).text();
+    assert.deepEqual(fast, [], "a fast page logs nothing");
+    // a stream stays a stream: its first part is handed on before its second is written
+    const source: { push: ReadableStreamDefaultController<Uint8Array> | null } = { push: null };
+    const streamed = await timedRequest(
+      new Request("http://localhost/today"),
+      async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            start: (c) => {
+              source.push = c;
+            },
+          }),
+          { status: 200, headers: { "content-type": "text/html" } },
+        ),
+      { slowMs: 0, log: () => {} },
+    );
+    const reader = streamed.body?.getReader();
+    const push = source.push;
+    if (!reader || !push) throw new Error("the answer holds no stream");
+    push.enqueue(new TextEncoder().encode("part 1"));
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const first = await Promise.race([
+      reader.read(),
+      new Promise<"held">((done) => {
+        timer = setTimeout(() => done("held"), 2000);
+      }),
+    ]);
+    clearTimeout(timer);
+    assert.notEqual(first, "held", "the first part was held back: the answer is no stream");
+    push.close();
+    assert.equal((await reader.read()).done, true, "then the end");
+  } finally {
+    await s.close();
+  }
+});
+
+test("AN15 her server times every answer (the speech route too) and still hands each through the no-store rule unread; a slow line names the server function a request ran", () => {
+  const server = fs.readFileSync(path.join(APP, "src", "server.ts"), "utf8");
+  assert.ok(
+    /async fetch\(request: Request, env: unknown, ctx: unknown\) \{\s*return timedRequest\(request, \(\) => answer\(request, env, ctx\)\);\s*\}/.test(
+      server,
+    ),
+    "the server's one door times every answer",
+  );
+  const body = server.slice(server.indexOf("async function answer("));
+  assert.ok(
+    body.indexOf("handleTtsApiRoute(request)") > 0,
+    "the speech route is answered inside it",
+  );
+  const start = fs.readFileSync(path.join(APP, "src", "start.ts"), "utf8");
+  assert.ok(
+    /nameServerFn\(serverFnMeta\?\.name\)/.test(start) &&
+      /functionMiddleware: \[[^\]]*nameServerFnMiddleware[^\]]*\]/.test(start),
+    "every server function names itself for the line",
+  );
 });
 
 // ------------------------------------------------------------------------------------------- run

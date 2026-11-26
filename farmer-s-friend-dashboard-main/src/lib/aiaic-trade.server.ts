@@ -57,7 +57,8 @@ import {
   type MySharing,
   type ShareAnswer,
 } from "./aiaic-trade";
-import { demoStoreAllowed } from "./demo-store.server";
+import { buildKind, demoStoreAllowed } from "./demo-store.server";
+import { isTimeout, outsideFetch } from "./outside-call.server";
 
 export const USERNAME_ENV = "AIAIC_FARMER_USERNAME";
 export const PASSWORD_ENV = "AIAIC_FARMER_PASSWORD";
@@ -103,6 +104,16 @@ export function tradeModeNow(): TradeMode {
 }
 
 // ------------------------------------------------------------------------------------------------ what is kept
+
+/** Each call's time limit: `CALL_TIMEOUT_MS`, unless a suite run from source shortened it (`callLimitForTests`). */
+let callLimitMs = CALL_TIMEOUT_MS;
+
+/** FOR HER SUITES ONLY, run from source: a shorter time limit for each call (null: `CALL_TIMEOUT_MS` again). */
+export function callLimitForTests(ms: number | null): void {
+  if (buildKind() !== "source")
+    throw new Error("callLimitForTests is for the suites run from source only");
+  callLimitMs = ms ?? CALL_TIMEOUT_MS;
+}
 
 /** For the tests only: forget what was kept. */
 export function resetForTests(): void {
@@ -198,14 +209,20 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
     if (opts.key) headers["idempotency-key"] = opts.key;
     let res: Response;
     try {
-      res = await fetch(url, {
+      // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+      res = await outsideFetch("aiaic", url, {
         method: opts.method ?? "GET",
         headers,
         ...(opts.body === undefined ? {} : { body: JSON.stringify(opts.body) }),
-        signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
+        limitMs: callLimitMs,
       });
-    } catch {
-      return { ok: false, problem: problem("aiaic_unavailable") };
+    } catch (error) {
+      // a call past its limit is said as such: AIAIC may have taken a write it did not answer, so never "nothing was
+      // changed"; the same press goes again with its same key (`answerLanded`)
+      return {
+        ok: false,
+        problem: problem(isTimeout(error) ? "aiaic_timed_out" : "aiaic_unavailable"),
+      };
     }
     const text = await res.text();
     if (isTunnelErrorBody(text))

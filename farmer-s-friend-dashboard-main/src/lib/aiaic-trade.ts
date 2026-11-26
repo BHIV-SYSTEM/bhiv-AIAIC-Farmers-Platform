@@ -311,6 +311,7 @@ export const APP_PROBLEMS = [
   "aiaic_account_not_a_farmer",
   "aiaic_account_not_practice",
   "aiaic_unavailable",
+  "aiaic_timed_out",
   "aiaic_answer_unreadable",
   "aiaic_busy",
   "aiaic_server_busy",

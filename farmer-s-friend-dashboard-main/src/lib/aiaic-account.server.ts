@@ -49,6 +49,7 @@ import {
   tokenExpiry,
 } from "./aiaic-identity.server";
 import { everyCropName } from "./aiaic-trade.server";
+import { outsideFetch } from "./outside-call.server";
 
 const TIMEOUT_MS = 15_000;
 
@@ -65,7 +66,9 @@ async function ask(
   const { baseUrl } = resolveBaseUrl();
   let res: Response;
   try {
-    res = await fetch(`${baseUrl}${path}`, {
+    // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`); past it, the
+    // call is said as AIAIC not answering, which claims nothing about what AIAIC kept
+    res = await outsideFetch("aiaic", `${baseUrl}${path}`, {
       method: init.method ?? "GET",
       headers: {
         ...aiaicHeaders(),
@@ -73,7 +76,7 @@ async function ask(
         ...(init.headers ?? {}),
       },
       ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      limitMs: TIMEOUT_MS,
     });
   } catch {
     return { status: 0, body: null, unreachable: true };

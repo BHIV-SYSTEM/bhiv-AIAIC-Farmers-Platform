@@ -308,6 +308,8 @@ export const AIAIC_EN: Dict = {
   "aiaic.problem.aiaic_account_not_practice":
     "The AIAIC account set on this server is a real farmer's. A guest's selling screens use only AIAIC's practice account.",
   "aiaic.problem.aiaic_unavailable": "AIAIC is not answering right now. Nothing was changed.",
+  // lane AN, item 4 (push 2b-2): a call past its time limit (AIAIC may have taken a write it did not answer)
+  "aiaic.problem.aiaic_timed_out": "AIAIC took too long to answer. Try again in a moment.",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC's answer could not be read. Try again.",
   "aiaic.problem.aiaic_busy": "Too many requests from here just now. Wait a minute and try again.",
   "aiaic.problem.aiaic_server_busy":
@@ -1516,6 +1518,8 @@ export const AIAIC_MR: Dict = {
   "aiaic.problem.aiaic_account_not_practice":
     "या सर्व्हरवर दिलेले AIAIC खाते खऱ्या शेतकऱ्याचे आहे. पाहुण्यासाठी विक्रीच्या स्क्रीन फक्त AIAIC चे सरावाचे खाते वापरतात.",
   "aiaic.problem.aiaic_unavailable": "AIAIC आत्ता उत्तर देत नाही. काहीही बदलले नाही.",
+  "aiaic.problem.aiaic_timed_out":
+    "AIAIC ला उत्तर द्यायला खूप वेळ लागला. थोड्या वेळाने पुन्हा प्रयत्न करा.",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC चे उत्तर वाचता आले नाही. पुन्हा प्रयत्न करा.",
   "aiaic.problem.aiaic_busy":
     "इथून सध्या खूप विनंत्या आल्या आहेत. एक मिनिट थांबून पुन्हा प्रयत्न करा.",
@@ -2720,6 +2724,8 @@ export const AIAIC_HI: Dict = {
   "aiaic.problem.aiaic_account_not_practice":
     "इस सर्वर पर दिया गया AIAIC खाता असली किसान का है। अतिथि के लिए बिक्री की स्क्रीन सिर्फ़ AIAIC का अभ्यास खाता इस्तेमाल करती हैं।",
   "aiaic.problem.aiaic_unavailable": "AIAIC अभी जवाब नहीं दे रहा। कुछ भी नहीं बदला।",
+  "aiaic.problem.aiaic_timed_out":
+    "AIAIC को जवाब देने में बहुत देर लगी। थोड़ी देर बाद फिर से कोशिश करें।",
   "aiaic.problem.aiaic_answer_unreadable": "AIAIC का जवाब पढ़ा नहीं जा सका। फिर से कोशिश करें।",
   "aiaic.problem.aiaic_busy": "यहाँ से अभी बहुत अनुरोध आए हैं। एक मिनट रुककर फिर से कोशिश करें।",
   "aiaic.problem.aiaic_server_busy":

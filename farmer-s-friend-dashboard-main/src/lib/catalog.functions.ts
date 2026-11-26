@@ -25,10 +25,12 @@ export const getCatalog = createServerFn({ method: "GET" }).handler(
 
     let response: Response;
     try {
-      response = await fetch(`${baseUrl}/catalog`, {
+      // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+      const { outsideFetch } = await import("./outside-call.server");
+      response = await outsideFetch("aiaic", `${baseUrl}/catalog`, {
         method: "GET",
         headers: aiaicHeaders(),
-        signal: AbortSignal.timeout(15_000),
+        limitMs: 15_000,
       });
     } catch (error) {
       console.error("[aiaic] catalog request failed", error);

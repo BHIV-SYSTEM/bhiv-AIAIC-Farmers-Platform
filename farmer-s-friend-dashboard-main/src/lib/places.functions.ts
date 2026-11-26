@@ -106,6 +106,8 @@ export const getPlacesDistricts = createServerFn({ method: "GET" })
   .handler(
     async ({ data }): Promise<{ ok: boolean; districts: DistrictItem[]; error?: string }> => {
       const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
+      // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+      const { outsideFetch } = await import("./outside-call.server");
       const { baseUrl } = resolveBaseUrl();
 
       const url = new URL(`${baseUrl}/places/districts`);
@@ -113,9 +115,9 @@ export const getPlacesDistricts = createServerFn({ method: "GET" })
       url.searchParams.set("lang", data.lang);
 
       try {
-        const res = await fetch(url.toString(), {
+        const res = await outsideFetch("aiaic", url, {
           headers: aiaicHeaders(),
-          signal: AbortSignal.timeout(15_000),
+          limitMs: 15_000,
         });
         if (!res.ok) return { ok: false, districts: [], error: `HTTP ${res.status}` };
         const json = await res.json();
@@ -137,6 +139,8 @@ export const getPlacesCrops = createServerFn({ method: "GET" })
       data,
     }): Promise<{ ok: boolean; crops: CropItem[]; firstPage: string[]; error?: string }> => {
       const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
+      // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+      const { outsideFetch } = await import("./outside-call.server");
       const { baseUrl } = resolveBaseUrl();
 
       const url = new URL(`${baseUrl}/places/crops`);
@@ -145,9 +149,9 @@ export const getPlacesCrops = createServerFn({ method: "GET" })
       url.searchParams.set("lang", data.lang);
 
       try {
-        const res = await fetch(url.toString(), {
+        const res = await outsideFetch("aiaic", url, {
           headers: aiaicHeaders(),
-          signal: AbortSignal.timeout(15_000),
+          limitMs: 15_000,
         });
         if (!res.ok) return { ok: false, crops: [], firstPage: [], error: `HTTP ${res.status}` };
         const json = await res.json();
@@ -171,6 +175,8 @@ export const resolvePlace = createServerFn({ method: "GET" })
   .handler(
     async ({ data }): Promise<{ ok: boolean; status?: string; place?: any; error?: string }> => {
       const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
+      // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+      const { outsideFetch } = await import("./outside-call.server");
       const { baseUrl } = resolveBaseUrl();
 
       const url = new URL(`${baseUrl}/places/resolve`);
@@ -179,9 +185,9 @@ export const resolvePlace = createServerFn({ method: "GET" })
       url.searchParams.set("lang", data.lang);
 
       try {
-        const res = await fetch(url.toString(), {
+        const res = await outsideFetch("aiaic", url, {
           headers: aiaicHeaders(),
-          signal: AbortSignal.timeout(10_000),
+          limitMs: 10_000,
         });
         if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
         const json = await res.json();
@@ -200,6 +206,8 @@ export const getPriceSeries = createServerFn({ method: "GET" })
   .validator((params: unknown) => priceSeriesQuerySchema.parse(params))
   .handler(async ({ data }): Promise<PriceSeriesResponse> => {
     const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
+    // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+    const { outsideFetch } = await import("./outside-call.server");
     const { baseUrl } = resolveBaseUrl();
 
     const url = new URL(`${baseUrl}/places/price-series`);
@@ -210,9 +218,9 @@ export const getPriceSeries = createServerFn({ method: "GET" })
     url.searchParams.set("lang", data.lang);
 
     try {
-      const res = await fetch(url.toString(), {
+      const res = await outsideFetch("aiaic", url, {
         headers: aiaicHeaders(),
-        signal: AbortSignal.timeout(15_000),
+        limitMs: 15_000,
       });
       if (!res.ok) {
         return {
@@ -276,6 +284,8 @@ export const getViewBrief = createServerFn({ method: "GET" })
   .validator((params: unknown) => viewBriefQuerySchema.parse(params))
   .handler(async ({ data }): Promise<{ ok: boolean; brief?: any; error?: string }> => {
     const { resolveBaseUrl, aiaicHeaders } = await import("./aiaic-base.server");
+    // one time limit over the whole call, its answer included (lane AN, item 4: `outside-call.server.ts`)
+    const { outsideFetch } = await import("./outside-call.server");
     const { baseUrl } = resolveBaseUrl();
 
     const url = new URL(`${baseUrl}/view/brief`);
@@ -285,9 +295,9 @@ export const getViewBrief = createServerFn({ method: "GET" })
     url.searchParams.set("lang", data.lang);
 
     try {
-      const res = await fetch(url.toString(), {
+      const res = await outsideFetch("aiaic", url, {
         headers: aiaicHeaders(),
-        signal: AbortSignal.timeout(15_000),
+        limitMs: 15_000,
       });
       if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
       const json = await res.json();
