@@ -294,6 +294,8 @@ export const AIAIC_EN: Dict = {
   "aiaic.compare.source_text": "Source: {text}",
   "aiaic.src.agmarknet_daily_prices": "Agmarknet mandi prices",
 
+  // lane AN, item 1 (push 2b-2): a built server without AIAIC's farmer settings, where the demo store was
+  "aiaic.problem.aiaic_not_connected": "This app is not connected to AIAIC's sale service.",
   "aiaic.problem.aiaic_setting_missing":
     "AIAIC is not fully set up on this server: {setting} is missing.",
   "aiaic.problem.aiaic_sign_in_needs_https":
@@ -1501,6 +1503,7 @@ export const AIAIC_MR: Dict = {
   "aiaic.compare.source_text": "स्रोत: {text}",
   "aiaic.src.agmarknet_daily_prices": "ॲगमार्कनेट बाजारभाव",
 
+  "aiaic.problem.aiaic_not_connected": "हे ॲप AIAIC च्या विक्री सेवेशी जोडलेले नाही.",
   "aiaic.problem.aiaic_setting_missing":
     "या सर्व्हरवर AIAIC पूर्ण जोडलेले नाही: {setting} दिलेले नाही.",
   "aiaic.problem.aiaic_sign_in_needs_https":
@@ -2704,6 +2707,7 @@ export const AIAIC_HI: Dict = {
   "aiaic.compare.source_text": "स्रोत: {text}",
   "aiaic.src.agmarknet_daily_prices": "एगमार्कनेट मंडी भाव",
 
+  "aiaic.problem.aiaic_not_connected": "यह ऐप AIAIC की बिक्री सेवा से जुड़ा नहीं है।",
   "aiaic.problem.aiaic_setting_missing":
     "इस सर्वर पर AIAIC पूरा जुड़ा नहीं है: {setting} नहीं दिया गया।",
   "aiaic.problem.aiaic_sign_in_needs_https":

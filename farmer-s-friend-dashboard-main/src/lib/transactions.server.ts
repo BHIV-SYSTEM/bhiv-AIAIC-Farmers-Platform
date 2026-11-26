@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { refuseUnlessDemoStoreAllowed } from "./demo-store.server";
 import type {
   CreateListingInput,
   ListingStatus,
@@ -19,6 +20,9 @@ const DB_FILE = path.resolve(DB_DIR, "transactions.json");
 let memoryCache: DatabaseStore | null = null;
 
 async function ensureDb(): Promise<DatabaseStore> {
+  // THE DEMO STORE IS FOR DEVELOPMENT ONLY (lane AN, item 1): every read and write starts here, so outside development
+  // nothing is read, kept or written, whoever calls (`demo-store.server.ts`)
+  refuseUnlessDemoStoreAllowed();
   if (memoryCache) return memoryCache;
 
   try {
@@ -99,6 +103,7 @@ async function ensureDb(): Promise<DatabaseStore> {
 }
 
 async function saveDb(store: DatabaseStore): Promise<void> {
+  refuseUnlessDemoStoreAllowed();
   store.lastUpdated = new Date().toISOString();
   memoryCache = store;
   try {

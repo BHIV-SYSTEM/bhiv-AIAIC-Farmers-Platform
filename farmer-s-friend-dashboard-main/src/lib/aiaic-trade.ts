@@ -294,15 +294,16 @@ export type AiaicCrisis = {
 export type AiaicResult<T> = { ok: true; data: T } | { ok: false; problem: AiaicProblem };
 
 /**
- * Where this app's sales live. `local`: neither AIAIC farmer setting is set, so the app's own demo store
- * (data/transactions.json) is used, as before. `aiaic`: the settings are set, so every sale, offer, order,
- * payment and transport screen reads AIAIC; a problem (a setting missing, a sign-in refused) is SAID, and the
- * local store is never used in its place.
+ * Where this app's sales live. `local`: neither AIAIC farmer setting is set AND this is the development server
+ * (`demo-store.server.ts`), so the app's own demo store (data/transactions.json) is used. `aiaic`: every sale, offer,
+ * order, payment and transport screen reads AIAIC; a problem (a setting missing, a sign-in refused, or a built server
+ * without the settings: `aiaic_not_connected`, lane AN item 1) is SAID, and the local store is never used in its place.
  */
 export type TradeMode = { mode: "local" } | { mode: "aiaic"; problem: AiaicProblem | null };
 
 /** This app's own problem codes (AIAIC's are its contract's). */
 export const APP_PROBLEMS = [
+  "aiaic_not_connected",
   "aiaic_setting_missing",
   "aiaic_sign_in_needs_https",
   "aiaic_sign_in_refused",

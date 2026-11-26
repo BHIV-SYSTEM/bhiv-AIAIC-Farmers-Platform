@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { demoStoreForTests } from "../src/lib/demo-store.server";
 import { createListingInputSchema } from "../src/lib/transaction-types";
 import {
   createProduceListing,
@@ -210,6 +211,9 @@ async function readBytes(file: string): Promise<Buffer | null> {
 }
 
 async function main() {
+  // the demo store is for development only (lane AN, push 2b-2, item 1): this suite runs it as the development server
+  // has it; a built server never opens it (tests/aiaic_server_calls_suite.ts AN1-AN2)
+  demoStoreForTests(true);
   const before = await readBytes(STORE_FILE);
   let failure: unknown = null;
   try {

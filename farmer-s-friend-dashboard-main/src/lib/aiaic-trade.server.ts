@@ -57,6 +57,7 @@ import {
   type MySharing,
   type ShareAnswer,
 } from "./aiaic-trade";
+import { demoStoreAllowed } from "./demo-store.server";
 
 export const USERNAME_ENV = "AIAIC_FARMER_USERNAME";
 export const PASSWORD_ENV = "AIAIC_FARMER_PASSWORD";
@@ -78,7 +79,12 @@ export { signInAllowed };
 export function tradeMode(): TradeMode {
   const hasUser = settingSet(USERNAME_ENV);
   const hasPassword = settingSet(PASSWORD_ENV);
-  if (!hasUser && !hasPassword) return { mode: "local" };
+  // THE DEMO STORE IS FOR DEVELOPMENT ONLY (lane AN, item 1): without the settings, a built server says it is not
+  // connected to AIAIC's sale service; only the development server keeps the demo store (`demo-store.server.ts`)
+  if (!hasUser && !hasPassword)
+    return demoStoreAllowed()
+      ? { mode: "local" }
+      : { mode: "aiaic", problem: problem("aiaic_not_connected") };
   if (!hasUser)
     return { mode: "aiaic", problem: problem("aiaic_setting_missing", { setting: USERNAME_ENV }) };
   if (!hasPassword)

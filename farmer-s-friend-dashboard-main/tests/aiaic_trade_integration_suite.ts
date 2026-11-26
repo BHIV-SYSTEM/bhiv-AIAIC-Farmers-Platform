@@ -164,6 +164,7 @@ import {
   giveMyDestination,
 } from "../src/lib/aiaic-trade.functions";
 import * as client from "../src/lib/aiaic-trade.server";
+import * as demoStore from "../src/lib/demo-store.server";
 import * as identity from "../src/lib/aiaic-identity.server";
 import { useMandiTrip } from "../src/lib/aiaic-trip";
 import { DICTS, I18nProvider } from "../src/lib/i18n";
@@ -2272,9 +2273,18 @@ function settings(base: string | null, user: string | null, password: string | n
   asGuest();
 }
 
-test("B1 no farmer setting: the app's own store; one setting: said by name; a public http address: refused", () => {
+test("B1 no farmer setting: not connected outside development, the app's own demo store only on the development server (lane AN, push 2b-2, item 1); one setting: said by name; a public http address: refused", () => {
   settings(null, null, null);
-  assert.deepEqual(client.tradeMode(), { mode: "local" });
+  assert.deepEqual(client.tradeMode(), {
+    mode: "aiaic",
+    problem: problem("aiaic_not_connected"),
+  });
+  demoStore.demoStoreForTests(true);
+  try {
+    assert.deepEqual(client.tradeMode(), { mode: "local" });
+  } finally {
+    demoStore.demoStoreForTests(false);
+  }
   settings("https://aiaic.example.org/api", USER, null);
   const one = client.tradeMode();
   assert.equal(one.mode, "aiaic");

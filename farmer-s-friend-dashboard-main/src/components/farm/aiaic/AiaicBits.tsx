@@ -179,8 +179,10 @@ export function WithMine({
 
 /**
  * A trade page's switch: AIAIC's screens when this server is set up for AIAIC (inside the page's crisis gate,
- * `CrisisFirst`), else the app's own demo-store page with one line that says so. While the server is asked, a loader
- * (never the demo store, which would then vanish).
+ * `CrisisFirst`); on a built server without AIAIC's farmer settings, the one line that says it is not connected to
+ * AIAIC's sale service (lane AN, item 1: never the demo store); on the development server without them, the app's own
+ * demo-store page with one line that says so. While the server is asked, a loader (never the demo store, which would
+ * then vanish).
  */
 export function TradeSwitch({
   aiaic,
@@ -215,7 +217,15 @@ export function TradeSwitch({
       </div>
     );
   }
-  if (mode.data.mode === "aiaic") return <CrisisFirst>{aiaic()}</CrisisFirst>;
+  if (mode.data.mode === "aiaic") {
+    if (mode.data.problem?.code === "aiaic_not_connected")
+      return (
+        <div className={cn("mx-auto w-full px-4 pt-6", width)} data-testid="aiaic-not-connected">
+          <ProblemCard problem={mode.data.problem} />
+        </div>
+      );
+    return <CrisisFirst>{aiaic()}</CrisisFirst>;
+  }
   return (
     <>
       <div className={cn("mx-auto w-full px-3.5 pt-5 sm:px-4", width)}>
