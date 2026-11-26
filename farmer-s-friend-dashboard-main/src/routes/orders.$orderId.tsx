@@ -92,8 +92,9 @@ function LocalOrderDetailPage() {
       queryClient.setQueryData(["produce-order", orderId], updatedOrder);
       queryClient.invalidateQueries({ queryKey: ["produce-orders"] });
     },
-    onError: (err: any) => {
-      setActionError(err?.message || "Failed to accept order");
+    // A FAILED WRITE IS SAID IN HER WORDS (lane AN, item 2): the demo store throws when its file did not take it
+    onError: () => {
+      setActionError(t("demo.not_saved"));
     },
   });
 
@@ -113,8 +114,8 @@ function LocalOrderDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["produce-orders"] });
       setShowDeclineModal(false);
     },
-    onError: (err: any) => {
-      setActionError(err?.message || "Failed to decline order");
+    onError: () => {
+      setActionError(t("demo.not_saved"));
     },
   });
 

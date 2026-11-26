@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { refuseUnlessDemoStoreAllowed } from "./demo-store.server";
+import { buildKind, refuseUnlessDemoStoreAllowed } from "./demo-store.server";
 import type {
   CreateListingInput,
   ListingStatus,
@@ -17,7 +17,28 @@ type DatabaseStore = {
 const DB_DIR = path.resolve(process.cwd(), "data");
 const DB_FILE = path.resolve(DB_DIR, "transactions.json");
 
+/** Where the store is kept: its file, unless a suite run from source moved it (`storeFileForTests`). */
+let dbDir = DB_DIR;
+let dbFile = DB_FILE;
+
 let memoryCache: DatabaseStore | null = null;
+
+/** What a write the store's file did not take throws (lane AN, item 2): the page then says it was not saved. */
+export const DEMO_STORE_WRITE_FAILED =
+  "demo_store_write_failed: the demo store's file did not take the change; nothing was changed";
+
+/**
+ * FOR HER SUITES ONLY, run from source with the store opened (`demoStoreForTests`): keep the store in this file instead
+ * (null: its own file again), and forget what memory held.
+ */
+export function storeFileForTests(file: string | null): void {
+  if (buildKind() !== "source")
+    throw new Error("storeFileForTests is for the suites run from source only");
+  refuseUnlessDemoStoreAllowed();
+  dbFile = file ?? DB_FILE;
+  dbDir = file ? path.dirname(file) : DB_DIR;
+  memoryCache = null;
+}
 
 async function ensureDb(): Promise<DatabaseStore> {
   // THE DEMO STORE IS FOR DEVELOPMENT ONLY (lane AN, item 1): every read and write starts here, so outside development
@@ -26,8 +47,8 @@ async function ensureDb(): Promise<DatabaseStore> {
   if (memoryCache) return memoryCache;
 
   try {
-    await fs.mkdir(DB_DIR, { recursive: true });
-    const content = await fs.readFile(DB_FILE, "utf-8");
+    await fs.mkdir(dbDir, { recursive: true });
+    const content = await fs.readFile(dbFile, "utf-8");
     memoryCache = JSON.parse(content) as DatabaseStore;
     return memoryCache;
   } catch {
@@ -93,7 +114,7 @@ async function ensureDb(): Promise<DatabaseStore> {
     };
 
     try {
-      await fs.writeFile(DB_FILE, JSON.stringify(initial, null, 2), "utf-8");
+      await fs.writeFile(dbFile, JSON.stringify(initial, null, 2), "utf-8");
     } catch (e) {
       console.warn("[transactions.server] Could not write initial DB file:", e);
     }
@@ -102,16 +123,33 @@ async function ensureDb(): Promise<DatabaseStore> {
   }
 }
 
+/**
+ * A FAILED WRITE IS SAID, NEVER A QUIET SUCCESS (lane AN, item 2; the VM report's first finding): the store in memory
+ * becomes `store` only once its file took it. A write that fails throws `DEMO_STORE_WRITE_FAILED`, and memory keeps what
+ * the file holds.
+ */
 async function saveDb(store: DatabaseStore): Promise<void> {
   refuseUnlessDemoStoreAllowed();
   store.lastUpdated = new Date().toISOString();
-  memoryCache = store;
   try {
-    await fs.mkdir(DB_DIR, { recursive: true });
-    await fs.writeFile(DB_FILE, JSON.stringify(store, null, 2), "utf-8");
+    await fs.mkdir(dbDir, { recursive: true });
+    await fs.writeFile(dbFile, JSON.stringify(store, null, 2), "utf-8");
   } catch (err) {
-    console.error("[transactions.server] Failed to save DB to file:", err);
+    const code = err && typeof err === "object" && "code" in err ? String(err.code) : "unknown";
+    console.error(
+      `[transactions.server] the demo store's file did not take a change (${code}): not kept`,
+    );
+    throw new Error(DEMO_STORE_WRITE_FAILED, { cause: err });
   }
+  memoryCache = store;
+}
+
+/** One change to the store, made on a copy: memory keeps it only once the file took it (`saveDb`). */
+async function change<T>(edit: (draft: DatabaseStore) => T): Promise<T> {
+  const draft = structuredClone(await ensureDb());
+  const result = edit(draft);
+  await saveDb(draft);
+  return result;
 }
 
 export async function getAllListings(): Promise<ProduceListing[]> {
@@ -127,7 +165,10 @@ export async function getListingById(id: string): Promise<ProduceListing | null>
 }
 
 export async function createProduceListing(input: CreateListingInput): Promise<ProduceListing> {
-  const db = await ensureDb();
+  return change((db) => listOne(db, input));
+}
+
+function listOne(db: DatabaseStore, input: CreateListingInput): ProduceListing {
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
   const randomSuffix = Math.floor(1000 + Math.random() * 9000);
@@ -201,7 +242,6 @@ export async function createProduceListing(input: CreateListingInput): Promise<P
   };
 
   db.orders.unshift(matchedOrder);
-  await saveDb(db);
 
   return newListing;
 }
@@ -210,13 +250,13 @@ export async function updateListingStatus(
   id: string,
   status: ListingStatus,
 ): Promise<ProduceListing | null> {
-  const db = await ensureDb();
-  const listing = db.listings.find((l) => l.id === id);
-  if (!listing) return null;
-  listing.status = status;
-  listing.updatedAt = new Date().toISOString();
-  await saveDb(db);
-  return listing;
+  if (!(await ensureDb()).listings.some((l) => l.id === id)) return null;
+  return change((db) => {
+    const listing = db.listings.find((l) => l.id === id) as ProduceListing;
+    listing.status = status;
+    listing.updatedAt = new Date().toISOString();
+    return listing;
+  });
 }
 
 export async function getAllOrders(): Promise<ProduceOrder[]> {
@@ -232,50 +272,49 @@ export async function getOrderById(id: string): Promise<ProduceOrder | null> {
 }
 
 export async function acceptProduceOrder(orderId: string): Promise<ProduceOrder> {
-  const db = await ensureDb();
-  const order = db.orders.find((o) => o.id === orderId);
-  if (!order) {
+  const found = (await ensureDb()).orders.find((o) => o.id === orderId);
+  if (!found) {
     throw new Error(`Order ${orderId} not found`);
   }
 
-  if (order.status === "ACCEPTED") {
-    return order; // Idempotent
+  if (found.status === "ACCEPTED") {
+    return found; // Idempotent
   }
 
-  const now = new Date().toISOString();
-  order.status = "ACCEPTED";
-  order.acceptedAt = now;
+  return change((db) => {
+    const order = db.orders.find((o) => o.id === orderId) as ProduceOrder;
+    const now = new Date().toISOString();
+    order.status = "ACCEPTED";
+    order.acceptedAt = now;
 
-  // Update corresponding listing to ORDERED
-  const listing = db.listings.find((l) => l.id === order.listingId);
-  if (listing) {
-    listing.status = "ORDERED";
-    listing.updatedAt = now;
-  }
-
-  await saveDb(db);
-  return order;
+    // Update corresponding listing to ORDERED
+    const listing = db.listings.find((l) => l.id === order.listingId);
+    if (listing) {
+      listing.status = "ORDERED";
+      listing.updatedAt = now;
+    }
+    return order;
+  });
 }
 
 export async function declineProduceOrder(orderId: string, reason?: string): Promise<ProduceOrder> {
-  const db = await ensureDb();
-  const order = db.orders.find((o) => o.id === orderId);
-  if (!order) {
+  if (!(await ensureDb()).orders.some((o) => o.id === orderId)) {
     throw new Error(`Order ${orderId} not found`);
   }
 
-  const now = new Date().toISOString();
-  order.status = "DECLINED";
-  order.declinedAt = now;
-  order.declineReason = reason ?? "Farmer declined offer terms";
+  return change((db) => {
+    const order = db.orders.find((o) => o.id === orderId) as ProduceOrder;
+    const now = new Date().toISOString();
+    order.status = "DECLINED";
+    order.declinedAt = now;
+    order.declineReason = reason ?? "Farmer declined offer terms";
 
-  // Revert listing to ACTIVE
-  const listing = db.listings.find((l) => l.id === order.listingId);
-  if (listing && listing.status === "MATCHED") {
-    listing.status = "ACTIVE";
-    listing.updatedAt = now;
-  }
-
-  await saveDb(db);
-  return order;
+    // Revert listing to ACTIVE
+    const listing = db.listings.find((l) => l.id === order.listingId);
+    if (listing && listing.status === "MATCHED") {
+      listing.status = "ACTIVE";
+      listing.updatedAt = now;
+    }
+    return order;
+  });
 }

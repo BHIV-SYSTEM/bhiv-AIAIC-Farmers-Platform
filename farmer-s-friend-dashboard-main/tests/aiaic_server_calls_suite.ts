@@ -5,6 +5,8 @@
  *
  * - AN1-AN4 (item 1): a built server never uses the app's demo store; without AIAIC's farmer settings it says it is not
  *   connected to AIAIC's sale service, in the page's language. "Development" is read from Vite's compile-time constants.
+ * - AN5-AN6 (item 2): a write the demo store's file does not take is thrown, memory keeps nothing of it, and her two
+ *   demo-store pages say it in her words (the development server only, where the store still is).
  *
  * Every server here is a stand-in on 127.0.0.1 started by this suite: no request leaves this machine, and no account,
  * token or password is a real one.
@@ -12,8 +14,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import ts from "typescript";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -278,6 +283,138 @@ test("AN4 the not-connected line is one line in her words in all three languages
     "the guide says a built server uses no demo store",
   );
   assert.ok(/Only the development server \(`vite dev`\)/.test(doc), "and where it stays");
+});
+
+// ======================================================================= item 2: a failed write is said
+
+/** A lot for the demo store (made-up, as the store's own records are). */
+const LOT = {
+  crop: "Onion (test lot)",
+  quantityQuintals: 12,
+  askingPricePerQuintal: 2100,
+  district: "Nashik",
+  pickupLocation: "Farm gate",
+} as Parameters<typeof store.createProduceListing>[0];
+
+test("AN5 on the development server a write the demo store's file does not take is thrown, never a quiet success: memory keeps nothing of it, the server's log says it, and once the file takes writes again a write is kept", async () => {
+  demoStoreForTests(true);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aiaic-an5-"));
+  const file = path.join(dir, "transactions.json");
+  const said: string[] = [];
+  const keep = { error: console.error, warn: console.warn };
+  const grab = (...a: unknown[]) => said.push(a.map((x) => String(x)).join(" "));
+  console.error = grab;
+  console.warn = grab;
+  try {
+    store.storeFileForTests(file);
+    await store.getAllListings(); // the first read writes the store's first records
+    assert.ok(fs.existsSync(file), "the store's file was made");
+    const first = await store.createProduceListing(LOT);
+    const onDisk = () =>
+      JSON.parse(fs.readFileSync(file, "utf8")) as {
+        listings: { id: string; status: string }[];
+        orders: { id: string; status: string }[];
+      };
+    assert.ok(
+      onDisk().listings.some((l) => l.id === first.id),
+      "a write the file took is kept",
+    );
+    const listingsBefore = JSON.stringify(await store.getAllListings());
+    const ordersBefore = JSON.stringify(await store.getAllOrders());
+    const pending = (await store.getAllOrders()).find((o) => o.status === "PENDING_ACCEPTANCE");
+    assert.ok(pending, "an offer waits for her answer");
+
+    // the file can no longer take a write: a folder stands where it was
+    fs.rmSync(file);
+    fs.mkdirSync(file);
+    const failed = { message: store.DEMO_STORE_WRITE_FAILED };
+    await assert.rejects(() => store.createProduceListing(LOT), failed, "a new lot");
+    await assert.rejects(() => store.acceptProduceOrder(pending.id), failed, "her yes");
+    await assert.rejects(() => store.declineProduceOrder(pending.id, "no"), failed, "her no");
+    await assert.rejects(
+      () => store.updateListingStatus(first.id, "DELISTED"),
+      failed,
+      "a lot taken off",
+    );
+    assert.equal(
+      JSON.stringify(await store.getAllListings()),
+      listingsBefore,
+      "memory keeps no lot the file did not take, and no status it did not take",
+    );
+    assert.equal(
+      JSON.stringify(await store.getAllOrders()),
+      ordersBefore,
+      "memory keeps no order or answer the file did not take",
+    );
+    const lines = said.filter((s) => s.includes("did not take a change"));
+    assert.equal(lines.length, 4, `the server's log says each of the four: ${said.join(" | ")}`);
+    assert.ok(!lines.some((s) => s.includes(dir)), "the log line names no path");
+
+    // the file takes writes again (the folder gone): the next write makes it from what memory holds, which is all the
+    // file had taken, and her yes is kept in memory and on disk
+    fs.rmdirSync(file);
+    const yes = await store.acceptProduceOrder(pending.id);
+    assert.equal(yes.status, "ACCEPTED", "her yes is kept");
+    assert.equal(
+      onDisk().orders.find((o) => o.id === pending.id)?.status,
+      "ACCEPTED",
+      "and the file holds it",
+    );
+    assert.equal(
+      onDisk().listings.length,
+      (JSON.parse(listingsBefore) as unknown[]).length,
+      "with every lot the file had taken, and no other",
+    );
+  } finally {
+    console.error = keep.error;
+    console.warn = keep.warn;
+    store.storeFileForTests(null);
+    demoStoreForTests(false);
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("AN6 her two demo-store pages say a failed write in her words, one line in English, Marathi and Hindi: never the error's own English, never a quiet success", () => {
+  for (const lang of LANGS) {
+    const line = words(lang, "demo.not_saved");
+    assert.ok(line.length < 60, `${lang}: one short line`);
+    if (lang !== "en") noEnglish(lang, line, "demo.not_saved");
+  }
+  const read = (rel: string) => {
+    const file = path.join(APP, "src", "routes", rel);
+    return ts.createSourceFile(file, fs.readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+  };
+  // the new lot (routes/listing.new.tsx): every way her press can fail sets the one line
+  const lot = read("listing.new.tsx");
+  const tries: import("typescript").TryStatement[] = [];
+  const findTries = (n: import("typescript").Node) => {
+    if (ts.isTryStatement(n) && n.tryBlock.getText(lot).includes("createListingFn(")) tries.push(n);
+    ts.forEachChild(n, findTries);
+  };
+  findTries(lot);
+  assert.equal(tries.length, 1, "the new lot's press is one try");
+  const press = tries[0] as import("typescript").TryStatement;
+  const caught = press.catchClause?.block.getText(lot) ?? "";
+  assert.ok(caught.includes('setErrorMsg(t("demo.not_saved"))'), `a throw is said: ${caught}`);
+  assert.ok(!/setErrorMsg\([^)]*message/.test(caught), "never the error's own words");
+  assert.ok(
+    press.tryBlock.getText(lot).includes('setErrorMsg(t("demo.not_saved"))'),
+    "an answer without a lot is said too",
+  );
+  // her answer to an offer (routes/orders.$orderId.tsx): each press's failure sets the one line
+  const order = read("orders.$orderId.tsx");
+  const onErrors: string[] = [];
+  const findOnError = (n: import("typescript").Node) => {
+    if (ts.isPropertyAssignment(n) && n.name.getText(order) === "onError")
+      onErrors.push(n.initializer.getText(order));
+    ts.forEachChild(n, findOnError);
+  };
+  findOnError(order);
+  assert.equal(onErrors.length, 2, "her yes and her no");
+  for (const body of onErrors) {
+    assert.ok(body.includes('setActionError(t("demo.not_saved"))'), `said: ${body}`);
+    assert.ok(!body.includes("message"), `never the error's own words: ${body}`);
+  }
 });
 
 // ------------------------------------------------------------------------------------------- run

@@ -140,13 +140,14 @@ function LocalNewListingPage() {
       });
 
       if (!created || !created.id) {
-        setErrorMsg("Failed to create produce listing on server");
+        setErrorMsg(t("demo.not_saved"));
       } else {
         setCreatedListingId(created.id);
       }
     } catch (err: any) {
-      console.error("[createListing] error:", err);
-      setErrorMsg(err?.message || "Communication failure with backend server");
+      // A FAILED WRITE IS SAID IN HER WORDS (lane AN, item 2): the demo store throws when its file did not take it
+      console.error("[createListing] not saved:", err?.message);
+      setErrorMsg(t("demo.not_saved"));
     } finally {
       setSubmitting(false);
     }
