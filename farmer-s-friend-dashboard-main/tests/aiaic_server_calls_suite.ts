@@ -17,6 +17,11 @@
  * - AN16-AN17 (item 5): identical AIAIC reads running at the same moment share one call (the same address and every
  *   header, so two farmers or two devices never share); a write never shares; a failure reaches every caller sharing
  *   it; nothing is kept once the call has ended; each caller keeps its own time limit.
+ * - The fix round of the lane's one check (27 Nov 2026): AN1 also sets a run-time NODE_ENV, DEV and MODE (AN-02); AN3
+ *   also draws a failed first read (AN-02) and the not-connected line with her Sign in where she can sign in (AN-05);
+ *   AN4 also reads her handover and both matrices (AN-07); AN14 also logs numbers as `:id` (AN-04); AN18 runs the
+ *   typing watch in jsdom, started by the notice itself (AN-01); AN19 keeps two changes of the demo store made at the
+ *   same moment (AN-03).
  *
  * Every server here is a stand-in on 127.0.0.1 started by this suite: no request leaves this machine, and no account,
  * token or password is a real one.
@@ -51,10 +56,11 @@ import {
   readsRunningForTests,
 } from "../src/lib/outside-call.server";
 import { SLOW_PAGE_MS, nameServerFn, pathForLog, timedRequest } from "../src/lib/slow-page.server";
-import { AppUpdatedLine } from "../src/components/farm/AppUpdatedNotice";
+import { AppUpdatedLine, AppUpdatedNotice } from "../src/components/farm/AppUpdatedNotice";
 import {
   APP_UPDATED_HEADER,
   APP_UPDATED_MARKER,
+  OPENING_SHOWN_MS,
   RELOAD_MARK,
   RESOLVER_UNKNOWN,
   appUpdated,
@@ -67,6 +73,7 @@ import {
   onAppUpdated,
   reloadOnce,
   resetAppUpdatedForTests,
+  typedText,
   type AppUpdatedEnv,
 } from "../src/lib/app-updated";
 import { renderErrorPage } from "../src/lib/error-page";
@@ -139,19 +146,53 @@ function withSettings<T>(user: string | null, password: string | null, run: () =
   }
 }
 
+/** AIAIC's address as her server reads it (`AIAIC_BASE_URL`; null: unset, her built-in default). */
+function withBase<T>(base: string | null, run: () => T): T {
+  const saved = process.env["AIAIC_BASE_URL"];
+  if (base === null) delete process.env["AIAIC_BASE_URL"];
+  else process.env["AIAIC_BASE_URL"] = base;
+  try {
+    return run();
+  } finally {
+    if (saved === undefined) delete process.env["AIAIC_BASE_URL"];
+    else process.env["AIAIC_BASE_URL"] = saved;
+  }
+}
+
 const appRouter = createRouter({
   routeTree: createRootRoute(),
   history: createMemoryHistory({ initialEntries: ["/listings"] }),
 });
 
+type Drawn = { html: string; aiaic: number; local: number };
+
 /** A trade page's switch rendered on the server as her app holds it, with the server's answer of where sales live
  *  already in the page's cache (as `getTradeMode` answers). */
-function tradePage(
-  answer: TradeMode,
-  lang: (typeof LANGS)[number],
-): { html: string; aiaic: number; local: number } {
+function tradePage(answer: TradeMode, lang: (typeof LANGS)[number]): Drawn {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   qc.setQueryData(["aiaic-trade-mode"], answer);
+  return drawSwitch(qc, lang);
+}
+
+/**
+ * A trade page's switch whose FIRST read of where sales live failed (her server or AIAIC not answering), as the page
+ * shows it once that read has failed: React Query reads a failed query again when a page mounts on it (its
+ * `retryOnMount`, with the loader meanwhile), so the page here is drawn as it stands after that read failed too.
+ */
+async function tradePageFailed(lang: (typeof LANGS)[number]): Promise<Drawn> {
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: false, retryOnMount: false } },
+  });
+  await qc.prefetchQuery({
+    queryKey: ["aiaic-trade-mode"],
+    queryFn: () => Promise.reject(new Error("her server did not answer")),
+  });
+  assert.equal(qc.getQueryState(["aiaic-trade-mode"])?.status, "error", "the first read failed");
+  return drawSwitch(qc, lang);
+}
+
+/** The switch drawn from what the page's cache holds, counting which page it chose. */
+function drawSwitch(qc: QueryClient, lang: (typeof LANGS)[number]): Drawn {
   const drawn = { aiaic: 0, local: 0 };
   const el: ReactElement = createElement(TradeSwitch, {
     aiaic: () => {
@@ -194,6 +235,33 @@ test("AN1 the demo store opens only on the development server: read from Vite's 
   assert.equal(buildKind({ DEV: "true", MODE: "development" }), "built", "only the boolean true");
   assert.equal(buildKind(undefined), "source", "run from source without Vite");
   assert.equal(buildKind(), "source", "this suite runs from source");
+  // NOTHING SET WHEN THE SERVER RUNS opens it (lane AN's fix round, AN-02): the dev compose file runs the built image
+  // with NODE_ENV=development, and a caller may set DEV or MODE too; the built constants stay what the build wrote
+  const runtime = ["NODE_ENV", "DEV", "MODE", "VITE_DEV", "VITE_MODE"] as const;
+  const savedRuntime = runtime.map((k) => [k, process.env[k]] as const);
+  Object.assign(process.env, {
+    NODE_ENV: "development",
+    DEV: "true",
+    MODE: "development",
+    VITE_DEV: "true",
+    VITE_MODE: "development",
+  });
+  try {
+    const built = { DEV: false, MODE: "production" };
+    assert.equal(
+      buildKind(built),
+      "built",
+      "a run-time NODE_ENV, DEV or MODE changes no built constant",
+    );
+    assert.equal(demoStoreAllowed(buildKind(built)), false, "so a built server stays closed");
+    assert.equal(buildKind(), "source", "from source: still source");
+    assert.equal(demoStoreAllowed(), false, "and still closed until a suite opens it");
+  } finally {
+    for (const [k, v] of savedRuntime) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
   // a built server never; the development server always; from source only once a suite opens it
   assert.equal(demoStoreAllowed("vite_dev"), true);
   assert.equal(demoStoreAllowed("built"), false);
@@ -208,14 +276,30 @@ test("AN1 the demo store opens only on the development server: read from Vite's 
   // a guest, no farmer setting: not connected outside development; the demo store only on the development server
   withSettings(null, null, () => {
     identity.sessionForTests(null);
-    assert.deepEqual(client.tradeMode(), {
-      mode: "aiaic",
-      problem: problem("aiaic_not_connected"),
+    withBase(null, () => {
+      // her built-in AIAIC address is plain http to a public address: nobody can sign in there, so no Sign in
+      assert.deepEqual(client.tradeMode(), {
+        mode: "aiaic",
+        problem: problem("aiaic_not_connected"),
+      });
+      assert.deepEqual(client.tradeModeNow(), {
+        mode: "aiaic",
+        problem: problem("aiaic_not_connected"),
+      });
     });
-    assert.deepEqual(client.tradeModeNow(), {
-      mode: "aiaic",
-      problem: problem("aiaic_not_connected"),
-    });
+    // where a farmer can sign in here (https, or this machine's private network), the line carries her Sign in
+    // (lane AN's fix round, AN-05): signed in, her sales are her own in AIAIC whatever these settings say
+    for (const base of ["https://aiaic.example.org/api", "http://192.168.1.20:8017"])
+      withBase(base, () => {
+        assert.deepEqual(
+          client.tradeMode(),
+          {
+            mode: "aiaic",
+            problem: problem("aiaic_not_connected", { facts: { sign_in: true } }),
+          },
+          `${base}: not connected, and she can sign in`,
+        );
+      });
     demoStoreForTests(true);
     try {
       assert.deepEqual(client.tradeMode(), { mode: "local" }, "the development server, as before");
@@ -286,7 +370,7 @@ test("AN2 outside development every read and write of the demo store refuses bef
   );
 });
 
-test("AN3 a selling page on a built server without the settings says 'not connected' where the demo store was, in English, Marathi and Hindi: never the demo store's page or its line; on the development server the demo store as before; with the settings, AIAIC's screens", () => {
+test("AN3 a selling page on a built server without the settings says 'not connected' where the demo store was, in English, Marathi and Hindi: never the demo store's page or its line, with her Sign in only where she can sign in; a first read that failed says AIAIC is not answering, never the demo store; on the development server the demo store as before; with the settings, AIAIC's screens", async () => {
   for (const lang of LANGS) {
     const off = tradePage({ mode: "aiaic", problem: problem("aiaic_not_connected") }, lang);
     const line = words(lang, "aiaic.problem.aiaic_not_connected");
@@ -300,6 +384,36 @@ test("AN3 a selling page on a built server without the settings says 'not connec
       `${lang}: no demo store line`,
     );
     if (lang !== "en") noEnglish(lang, line, "the not-connected line");
+    assert.ok(!off.html.includes('href="/signin"'), `${lang}: no Sign in where nobody can sign in`);
+
+    // where a farmer can sign in here, the same line carries her Sign in (lane AN's fix round, AN-05)
+    const canSignIn = tradePage(
+      { mode: "aiaic", problem: problem("aiaic_not_connected", { facts: { sign_in: true } }) },
+      lang,
+    );
+    assert.ok(canSignIn.html.includes(escHtml(line)), `${lang}: the same line`);
+    assert.ok(canSignIn.html.includes('href="/signin"'), `${lang}: her Sign in under it`);
+    assert.ok(
+      canSignIn.html.includes(`>${escHtml(words(lang, "aiaic.sign_in_to_sell.go"))}</a>`),
+      `${lang}: in her words`,
+    );
+    assert.equal(canSignIn.local, 0, `${lang}: never the demo store`);
+    assert.equal(canSignIn.aiaic, 0, `${lang}: nor AIAIC's screens before she signs in`);
+
+    // the first read of where sales live failed: AIAIC is not answering, with "try again"; never the demo store's
+    // page, which a built server would refuse (lane AN's fix round, AN-02)
+    const failed = await tradePageFailed(lang);
+    assert.equal(failed.local, 0, `${lang}: a failed first read never draws the demo store`);
+    assert.equal(failed.aiaic, 0, `${lang}: nor AIAIC's screens`);
+    assert.ok(
+      failed.html.includes(escHtml(words(lang, "aiaic.problem.aiaic_unavailable"))),
+      `${lang}: it says AIAIC is not answering`,
+    );
+    assert.ok(failed.html.includes(escHtml(words(lang, "aiaic.retry"))), `${lang}: try again`);
+    assert.ok(
+      !failed.html.includes(escHtml(words(lang, "aiaic.local.line"))),
+      `${lang}: no demo store line`,
+    );
 
     const dev = tradePage({ mode: "local" }, lang);
     assert.equal(dev.local, 1, `${lang}: the development server keeps its demo store page`);
@@ -323,6 +437,27 @@ test("AN4 the not-connected line is one line in her words in all three languages
     "the guide says a built server uses no demo store",
   );
   assert.ok(/Only the development server \(`vite dev`\)/.test(doc), "and where it stays");
+  // her handover and both matrices say it too, dated (lane AN's fix round, AN-07): no matrix row names the demo
+  // store's file without saying it is the development server's; dated reports keep their words with their date
+  for (const rel of [
+    "HANDOVER.md",
+    "docs/CAPABILITY_TRUTH_MATRIX.md",
+    "docs/INTEGRATION_MATRIX.md",
+  ]) {
+    const text = fs.readFileSync(path.join(APP, "..", rel), "utf8");
+    assert.ok(
+      /27 Nov 2026:\*\*[^\n]*a built server \(the Docker image\) uses no demo store/.test(text),
+      `${rel} says a built server uses no demo store`,
+    );
+    if (rel.startsWith("docs/"))
+      for (const row of text.split("\n").filter((l) => l.startsWith("|"))) {
+        if (row.includes("data/transactions.json"))
+          assert.ok(
+            row.includes("(27 Nov 2026: the development server only.)"),
+            `${rel}: a row names the file without saying it is the development server's: ${row}`,
+          );
+      }
+  }
 });
 
 // ======================================================================= item 2: a failed write is said
@@ -454,6 +589,81 @@ test("AN6 her two demo-store pages say a failed write in her words, one line in 
   for (const body of onErrors) {
     assert.ok(body.includes('setActionError(t("demo.not_saved"))'), `said: ${body}`);
     assert.ok(!body.includes("message"), `never the error's own words: ${body}`);
+  }
+});
+
+test("AN19 on the development server changes of the demo store made at the same moment are each kept, in memory and in its file (each one is answered as saved, so none may be dropped); a change that fails ends its turn and the next one still runs", async () => {
+  demoStoreForTests(true);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "aiaic-an19-"));
+  const file = path.join(dir, "transactions.json");
+  type OnDisk = {
+    listings: { id: string; crop: string }[];
+    orders: { id: string; status: string }[];
+  };
+  const onDisk = (): OnDisk => {
+    const text = fs.readFileSync(file, "utf8");
+    try {
+      return JSON.parse(text) as OnDisk;
+    } catch {
+      return assert.fail("the store's file holds one whole store (writes made at once mixed it)");
+    }
+  };
+  try {
+    store.storeFileForTests(file);
+    const before = (await store.getAllListings()).length; // the first read writes the store's first records
+    const offer = (await store.getAllOrders()).find((o) => o.status === "PENDING_ACCEPTANCE");
+    assert.ok(offer, "an offer waits for her answer");
+    // two new lots and her yes to the waiting offer, pressed at the same moment
+    const [a, b, yes] = await Promise.all([
+      store.createProduceListing({ ...LOT, crop: "Onion (lot A)" }),
+      store.createProduceListing({ ...LOT, crop: "Onion (lot B)" }),
+      store.acceptProduceOrder(offer.id),
+    ]);
+    assert.equal(yes.status, "ACCEPTED", "her yes is answered as saved");
+    const lots = [
+      ["lot A", a],
+      ["lot B", b],
+    ] as const;
+    // memory first (what her pages read), then the file
+    const memory = await store.getAllListings();
+    for (const [what, lot] of lots)
+      assert.ok(
+        memory.some((l) => l.id === lot.id && l.crop === lot.crop),
+        `memory keeps ${what}`,
+      );
+    assert.equal(memory.length, before + 2, "memory: both new lots, and no other");
+    assert.equal((await store.getOrderById(offer.id))?.status, "ACCEPTED", "memory keeps her yes");
+    const disk = onDisk();
+    for (const [what, lot] of lots)
+      assert.ok(
+        disk.listings.some((l) => l.id === lot.id && l.crop === lot.crop),
+        `the file keeps ${what}`,
+      );
+    assert.equal(disk.listings.length, before + 2, "the file: both new lots, and no other");
+    assert.equal(
+      disk.orders.find((o) => o.id === offer.id)?.status,
+      "ACCEPTED",
+      "the file keeps her yes",
+    );
+    // a change that fails (an offer the store does not hold) ends its turn: the change pressed with it still runs
+    const [missing, c] = await Promise.allSettled([
+      store.acceptProduceOrder("ORD-00000000-0000"),
+      store.createProduceListing({ ...LOT, crop: "Onion (lot C)" }),
+    ]);
+    assert.equal(missing.status, "rejected", "an offer it does not hold is said");
+    assert.ok(c.status === "fulfilled", "the next change still runs");
+    assert.ok(
+      (await store.getAllListings()).some((l) => l.id === c.value.id),
+      "and memory keeps it",
+    );
+    assert.ok(
+      onDisk().listings.some((l) => l.id === c.value.id),
+      "and so does the file",
+    );
+  } finally {
+    store.storeFileForTests(null);
+    demoStoreForTests(false);
+    fs.rmSync(dir, { recursive: true, force: true });
   }
 });
 
@@ -747,6 +957,161 @@ test("AN11 the page says it in her words, in English, Marathi and Hindi: one lin
   assert.ok(root.includes("<AppUpdatedNotice />"), "every page draws the notice");
 });
 
+test("AN18 in a browser's document (jsdom), the notice as every page draws it watches her typing: text she typed in a box (an input event) makes the page wait for her press, with the line that a reload clears it; nothing typed, a tick box, a choice, text the page set itself, or boxes she emptied again let the new version open by itself, once", async () => {
+  // jsdom, as her DOM suites load it: a suite that cannot load it fails, and says why; it never skips
+  const { JSDOM } = (await import("jsdom")) as {
+    JSDOM: new (
+      html: string,
+      options: Record<string, unknown>,
+    ) => { window: Window & typeof globalThis };
+  };
+  const dom = new JSDOM(
+    '<!doctype html><html><body><div id="notice"></div><form>' +
+      '<input id="name" type="text"><input id="qty" type="number"><textarea id="notes"></textarea>' +
+      '<input id="agree" type="checkbox"><select id="crop"><option value="onion">onion</option>' +
+      '<option value="tur">tur</option></select></form></body></html>',
+    { url: "http://localhost/listing/new" },
+  );
+  const win = dom.window;
+  const doc = win.document;
+  // the window's names as this test's globals (as her DOM suites set them), each put back after
+  const g = globalThis as unknown as Record<string, unknown>;
+  const added: string[] = [];
+  for (const k of Object.getOwnPropertyNames(win)) {
+    if (k in g) continue;
+    try {
+      Object.defineProperty(g, k, {
+        value: (win as unknown as Record<string, unknown>)[k],
+        configurable: true,
+        writable: true,
+      });
+      added.push(k);
+    } catch {
+      /* a name the global keeps */
+    }
+  }
+  const replaced = ["window", "document", "navigator", "IS_REACT_ACT_ENVIRONMENT"].map(
+    (k) => [k, Object.getOwnPropertyDescriptor(g, k)] as const,
+  );
+  for (const [k, v] of [
+    ["window", win],
+    ["document", doc],
+    ["navigator", win.navigator],
+    ["IS_REACT_ACT_ENVIRONMENT", true],
+  ] as const)
+    Object.defineProperty(g, k, { value: v, configurable: true, writable: true });
+  // the page opening the new version by itself is noted, never done
+  const opened: number[] = [];
+  Object.defineProperty(win, "setTimeout", {
+    value: (_run: () => void, ms?: number) => {
+      opened.push(ms ?? 0);
+      return 0;
+    },
+    configurable: true,
+    writable: true,
+  });
+  type Run = (o: { next: () => Promise<unknown> }) => Promise<unknown>;
+  const run = (appUpdatedMiddleware as unknown as { options: { client: Run } }).options.client;
+  const updated = new Error(APP_UPDATED_MARKER);
+  let unmount: (() => Promise<void>) | null = null;
+  resetAppUpdatedForTests();
+  try {
+    const React = await import("react");
+    const { createRoot } = await import("react-dom/client");
+    const reactRoot = createRoot(doc.getElementById("notice") as HTMLElement);
+    // the notice as her root page draws it: its first paint starts the typing watch
+    await React.act(async () => {
+      reactRoot.render(
+        createElement(I18nProvider, {
+          initialLang: "en",
+          children: createElement(AppUpdatedNotice),
+        }),
+      );
+    });
+    unmount = () => React.act(async () => reactRoot.unmount());
+    const meetsTheUpdate = () =>
+      React.act(async () => {
+        await run({ next: () => Promise.reject(updated) }).catch((e: unknown) => {
+          assert.equal(e, updated, "the call still fails as it did");
+        });
+      });
+    const box = <T>(id: string) => doc.getElementById(id) as T;
+    const name = box<HTMLInputElement>("name");
+    const qty = box<HTMLInputElement>("qty");
+    const notes = box<HTMLTextAreaElement>("notes");
+    const agree = box<HTMLInputElement>("agree");
+    const crop = box<HTMLSelectElement>("crop");
+    /** Her keys in a box: the text goes in, and the browser fires an input event for it. */
+    const typeInto = (el: HTMLInputElement | HTMLTextAreaElement, text: string) => {
+      el.value = text;
+      el.dispatchEvent(
+        new win.InputEvent("input", { bubbles: true, data: text, inputType: "insertText" }),
+      );
+    };
+
+    assert.equal(typedText(doc), false, "nothing typed yet");
+    // the page sets text itself (her saved farm filled in), she ticks a box and makes a choice: none is typed text
+    name.value = "Sunita";
+    agree.checked = true;
+    agree.dispatchEvent(new win.Event("input", { bubbles: true }));
+    agree.dispatchEvent(new win.Event("change", { bubbles: true }));
+    crop.value = "tur";
+    crop.dispatchEvent(new win.Event("input", { bubbles: true }));
+    crop.dispatchEvent(new win.Event("change", { bubbles: true }));
+    assert.equal(
+      typedText(doc),
+      false,
+      "text the page set, a tick box and a choice are not typed text",
+    );
+
+    // she types in a box: the page waits for her press and says a reload clears what she typed
+    typeInto(qty, "12");
+    assert.equal(typedText(doc), true, "she typed in a box that still holds it");
+    await meetsTheUpdate();
+    assert.deepEqual(appUpdatedState(), { how: "press", typed: true }, "her button");
+    assert.deepEqual(opened, [], "nothing opens by itself");
+    const notice = () => doc.querySelector('[data-testid="app-updated"]');
+    assert.ok(notice(), "the page says it");
+    assert.ok(
+      notice()?.textContent?.includes(words("en", "app.updated.typed")),
+      "with the line that a reload clears what she typed",
+    );
+    assert.ok(notice()?.querySelector("button"), "and her button");
+
+    // she empties the boxes again (the page's own text too): nothing a reload would clear, so it opens by itself, once
+    name.value = "";
+    qty.value = "";
+    assert.equal(typedText(doc), false, "no box holds text");
+    resetAppUpdatedForTests();
+    await meetsTheUpdate();
+    assert.deepEqual(appUpdatedState(), { how: "opening", typed: false });
+    assert.deepEqual(
+      opened,
+      [OPENING_SHOWN_MS],
+      "the new version opens once, after the line is shown",
+    );
+    assert.ok(win.sessionStorage.getItem(RELOAD_MARK), "the tab keeps the build it opened it from");
+    assert.ok(
+      notice()?.textContent?.includes(words("en", "app.updated.opening")),
+      "the page says it is opening the new version",
+    );
+    assert.equal(notice()?.querySelector("button") ?? null, null, "no button while it opens");
+
+    // a text area she types in counts as well
+    typeInto(notes, "pickup after 4 pm");
+    assert.equal(typedText(doc), true, "she typed in a text area");
+  } finally {
+    if (unmount) await unmount();
+    resetAppUpdatedForTests();
+    for (const [k, d] of replaced) {
+      if (d) Object.defineProperty(g, k, d);
+      else delete g[k];
+    }
+    for (const k of added) delete g[k];
+    win.close();
+  }
+});
+
 // ======================================================================= item 4: time limits, and the slow-page line
 
 type StandIn = {
@@ -973,6 +1338,10 @@ test("AN14 a request slower than the threshold logs one line once its body ended
     assert.equal(pathForLog("/orders/ORD-20261019-8421"), "/orders/:id");
     assert.equal(pathForLog("/help/3fa85f64-5717-4562-b3fc-2c963f66afa6"), "/help/:id");
     assert.equal(pathForLog("/farmer/queries/deadbeefcafe"), "/farmer/queries/:id", "hex letters");
+    // numbers are never kept: an id of digits, a phone number, a word with digits (lane AN's fix round, AN-04)
+    assert.equal(pathForLog("/notifications/12345/read"), "/notifications/:id/read", "a number");
+    assert.equal(pathForLog("/x/9876543210"), "/x/:id", "a phone number");
+    assert.equal(pathForLog("/farmer/a1b2"), "/farmer/:id", "a word with digits");
     assert.equal(pathForLog("/transport/nearby-mandis"), "/transport/nearby-mandis");
     assert.equal(pathForLog("/v1/tts/synthesize"), "/v1/tts/synthesize");
     const lines: string[] = [];

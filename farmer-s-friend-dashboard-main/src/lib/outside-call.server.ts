@@ -16,7 +16,12 @@
  *   farmer app's key and the visitor's address among them), so two farmers or two devices never share an answer. Its
  *   failure reaches every caller sharing it; a write (anything but a GET, or a call with a body) never shares; nothing
  *   is kept once the call has ended (the next identical read calls again). Each caller keeps its own time limit.
- *   This lowers the calls her server holds running at AIAIC, beside the number AIAIC itself allows her server.
+ *   What it saves depends on the farmer app's key (lane AN's fix round, AN-06). Without the key, the public reads
+ *   (catalogue, places, pricing) carry no visitor's detail, so identical ones from different visitors share. With the
+ *   key and an AIAIC address it may travel to (https, or this machine's private network: `signInAllowed`), every call
+ *   carries the visitor's address (`aiaicHeaders`), so identical reads share only within one visitor's address:
+ *   AIAIC's limit for one address must never reach another visitor. Then the relief comes mainly from the number AIAIC
+ *   itself allows her server (AIAIC's `AIAIC_INFLIGHT_SERVERS`).
  */
 import { createHash } from "node:crypto";
 

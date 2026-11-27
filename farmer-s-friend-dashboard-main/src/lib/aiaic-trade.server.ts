@@ -81,11 +81,18 @@ export function tradeMode(): TradeMode {
   const hasUser = settingSet(USERNAME_ENV);
   const hasPassword = settingSet(PASSWORD_ENV);
   // THE DEMO STORE IS FOR DEVELOPMENT ONLY (lane AN, item 1): without the settings, a built server says it is not
-  // connected to AIAIC's sale service; only the development server keeps the demo store (`demo-store.server.ts`)
+  // connected to AIAIC's sale service; only the development server keeps the demo store (`demo-store.server.ts`).
+  // Where a farmer can sign in here (`signInAllowed`), the line carries her Sign in button (`sign_in`; lane AN's fix
+  // round, AN-05): a signed-in farmer's sales are her own in AIAIC whatever these settings say (`tradeModeNow`)
   if (!hasUser && !hasPassword)
     return demoStoreAllowed()
       ? { mode: "local" }
-      : { mode: "aiaic", problem: problem("aiaic_not_connected") };
+      : {
+          mode: "aiaic",
+          problem: problem("aiaic_not_connected", {
+            facts: signInAllowed(resolveBaseUrl().baseUrl) ? { sign_in: true } : null,
+          }),
+        };
   if (!hasUser)
     return { mode: "aiaic", problem: problem("aiaic_setting_missing", { setting: USERNAME_ENV }) };
   if (!hasPassword)

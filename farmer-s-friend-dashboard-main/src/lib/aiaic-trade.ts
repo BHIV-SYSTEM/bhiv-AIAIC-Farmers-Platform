@@ -279,7 +279,8 @@ export type AiaicProblem = {
   status: number | null;
   /** The setting a problem of this app's names (a setting's NAME, never its value). */
   setting: string | null;
-  /** AIAIC's facts beside a refusal (e.g. the price range of `price_far_from_market`). */
+  /** AIAIC's facts beside a refusal (e.g. the price range of `price_far_from_market`), or this app's own: `sign_in`
+   *  beside `aiaic_not_connected` when a farmer can sign in here (lane AN's fix round, AN-05). */
   facts: Record<string, Json> | null;
   /** AIAIC answered with its crisis card instead: the helplines lead, nothing else is shown. */
   crisis: AiaicCrisis | null;

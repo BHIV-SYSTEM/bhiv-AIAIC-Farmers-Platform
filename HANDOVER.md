@@ -2,6 +2,8 @@
 
 Farmer-facing UI for the AIAIC decision engine and the **BHIV Farm-to-Retail Mission**. Mobile-first, three languages (English, Hindi, Marathi), built so a 50+ non-technical farmer can read one screen and know what to do — and know how sure the system is.
 
+> **27 Nov 2026:** `data/transactions.json` is the app's demo store, for the development server (`vite dev`) only: a built server (the Docker image) uses no demo store. Without AIAIC's farmer settings its selling pages say the app is not connected to AIAIC's sale service; a signed-in farmer's sales are her own in AIAIC. The rows below that name the file describe the development server.
+
 ## Screens & Routes
 
 | Route | Purpose | Backend Integration / Status |

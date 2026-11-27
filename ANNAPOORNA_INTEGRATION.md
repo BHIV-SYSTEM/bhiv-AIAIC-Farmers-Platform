@@ -7,7 +7,8 @@ state → what reached the farmer → pickup and delivery. The order and offer p
 
 Without the settings, a built server (the Docker image) uses no demo store: each of those pages says, in the page's
 language, that this app is not connected to AIAIC's sale service, and a signed-in farmer's sales are still her own in
-AIAIC. Only the development server (`vite dev`) keeps the app's own demo store (`data/transactions.json`), and each of
+AIAIC. Where a farmer can sign in here (AIAIC at an https address, or on this machine's private network), that line
+carries her Sign in button. Only the development server (`vite dev`) keeps the app's own demo store (`data/transactions.json`), and each of
 those pages says so in one line there. The rule is read from how the server was built, never from a setting
 (`src/lib/demo-store.server.ts`). One exception: the demo store's order page also shows AIAIC's transport cost card, which reads
 AIAIC's public routes (`GET /places/districts`, `GET /transport/nearby-mandis`, `GET /transport/estimate`; no sign-in;

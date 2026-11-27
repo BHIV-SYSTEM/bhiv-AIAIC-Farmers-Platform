@@ -47,6 +47,13 @@ export function LocalStoreLine({ className = "" }: { className?: string }) {
   );
 }
 
+/** A problem whose next step is to sign in: a guest asked to sign in to sell, or a server not connected to AIAIC's sale
+ * service where a farmer can still sign in (her own sales are AIAIC's: lane AN's fix round, AN-05). */
+function signInIsNext(problem: AiaicProblem): boolean {
+  if (problem.code === "sign_in_to_sell") return true;
+  return problem.code === "aiaic_not_connected" && problem.facts?.["sign_in"] === true;
+}
+
 /** A problem, said in one line, with "try again" when trying again can help. AIAIC's crisis card is raised to the page
  * instead (`CrisisFirst`): the page then shows it alone. */
 export function ProblemCard({
@@ -72,7 +79,7 @@ export function ProblemCard({
         <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden />
         <p className="min-w-0 break-words text-sm font-bold text-foreground">{say(problem)}</p>
       </div>
-      {problem.code === "sign_in_to_sell" ? (
+      {signInIsNext(problem) ? (
         <Link
           to="/signin"
           className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground"
