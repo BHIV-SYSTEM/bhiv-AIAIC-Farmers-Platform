@@ -118,6 +118,7 @@ export const getPlacesDistricts = createServerFn({ method: "GET" })
         const res = await outsideFetch("aiaic", url, {
           headers: aiaicHeaders(),
           limitMs: 15_000,
+          share: true, // the same read, running now, is shared (item 5)
         });
         if (!res.ok) return { ok: false, districts: [], error: `HTTP ${res.status}` };
         const json = await res.json();
@@ -152,6 +153,7 @@ export const getPlacesCrops = createServerFn({ method: "GET" })
         const res = await outsideFetch("aiaic", url, {
           headers: aiaicHeaders(),
           limitMs: 15_000,
+          share: true, // the same read, running now, is shared (item 5)
         });
         if (!res.ok) return { ok: false, crops: [], firstPage: [], error: `HTTP ${res.status}` };
         const json = await res.json();
@@ -188,6 +190,7 @@ export const resolvePlace = createServerFn({ method: "GET" })
         const res = await outsideFetch("aiaic", url, {
           headers: aiaicHeaders(),
           limitMs: 10_000,
+          share: true, // the same read, running now, is shared (item 5)
         });
         if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
         const json = await res.json();
@@ -221,6 +224,7 @@ export const getPriceSeries = createServerFn({ method: "GET" })
       const res = await outsideFetch("aiaic", url, {
         headers: aiaicHeaders(),
         limitMs: 15_000,
+        share: true, // the same read, running now, is shared (item 5)
       });
       if (!res.ok) {
         return {
@@ -298,6 +302,7 @@ export const getViewBrief = createServerFn({ method: "GET" })
       const res = await outsideFetch("aiaic", url, {
         headers: aiaicHeaders(),
         limitMs: 15_000,
+        share: true, // the same read, running now, is shared (item 5)
       });
       if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
       const json = await res.json();

@@ -299,6 +299,8 @@ export async function fetchForHer(
       method: "GET",
       headers: { ...headers, ...askerHeaders(who) },
       limitMs: timeoutMs,
+      // the same read, running now as the same asker, is shared (item 5)
+      share: true,
     });
   const who = asker();
   const first = await once(who);

@@ -14,6 +14,9 @@
  * - AN12-AN15 (item 4): every call her server makes to another server goes through one door with its own time limit
  *   over the whole call (the answer's body included); a call past it is said as a failure in her words; a request
  *   slower than the threshold logs one line, its route and its slowest call, path only.
+ * - AN16-AN17 (item 5): identical AIAIC reads running at the same moment share one call (the same address and every
+ *   header, so two farmers or two devices never share); a write never shares; a failure reaches every caller sharing
+ *   it; nothing is kept once the call has ended; each caller keeps its own time limit.
  *
  * Every server here is a stand-in on 127.0.0.1 started by this suite: no request leaves this machine, and no account,
  * token or password is a real one.
@@ -41,7 +44,12 @@ import { createElement, type ReactElement } from "react";
 import { renderToString } from "react-dom/server";
 
 import { ProblemCard, TradeSwitch } from "../src/components/farm/aiaic/AiaicBits";
-import { OutsideCallTimeout, isTimeout, outsideFetch } from "../src/lib/outside-call.server";
+import {
+  OutsideCallTimeout,
+  isTimeout,
+  outsideFetch,
+  readsRunningForTests,
+} from "../src/lib/outside-call.server";
 import { SLOW_PAGE_MS, nameServerFn, pathForLog, timedRequest } from "../src/lib/slow-page.server";
 import { AppUpdatedLine } from "../src/components/farm/AppUpdatedNotice";
 import {
@@ -1078,6 +1086,176 @@ test("AN15 her server times every answer (the speech route too) and still hands 
       /functionMiddleware: \[[^\]]*nameServerFnMiddleware[^\]]*\]/.test(start),
     "every server function names itself for the line",
   );
+});
+
+// ======================================================================= item 5: identical reads share one call
+
+test("AN16 two identical reads at once make one call and each gets the answer; two identities (two farmers, two devices) or two addresses make two; a write never shares; a failure reaches every caller sharing it; each caller keeps its own limit; nothing is kept once the call has ended", async () => {
+  const s = await standIn();
+  try {
+    const at = (p: string) => s.hits.filter((h) => h.path === p).length;
+    const read = (p: string, headers: Record<string, string> = {}, limitMs = 3000) =>
+      outsideFetch("aiaic", `${s.url}${p}?wait=150`, { headers, limitMs, share: true });
+    const g1 = { "x-aiaic-guest": "1".repeat(32) };
+    const [a, b] = await Promise.all([
+      read("/places/districts", g1),
+      read("/places/districts", g1),
+    ]);
+    assert.equal(at("/places/districts"), 1, "two identical reads at once: one call");
+    assert.equal(await a.text(), await b.text(), "the same answer to both, each its own");
+    // two farmers, two devices: two calls each
+    await Promise.all([
+      read("/farmer/trade", { authorization: "Bearer standin-token-farmer-a" }),
+      read("/farmer/trade", { authorization: "Bearer standin-token-farmer-b" }),
+    ]);
+    assert.equal(at("/farmer/trade"), 2, "two farmers never share");
+    await Promise.all([
+      read("/storage/verdict", { "x-aiaic-guest": "a".repeat(32) }),
+      read("/storage/verdict", { "x-aiaic-guest": "b".repeat(32) }),
+    ]);
+    assert.equal(at("/storage/verdict"), 2, "two devices never share");
+    // the whole address: another query is another read
+    await Promise.all([
+      outsideFetch("aiaic", `${s.url}/places/crops?wait=150&district=nashik`, {
+        limitMs: 3000,
+        share: true,
+      }),
+      outsideFetch("aiaic", `${s.url}/places/crops?wait=150&district=pune`, {
+        limitMs: 3000,
+        share: true,
+      }),
+    ]);
+    assert.equal(at("/places/crops"), 2, "two addresses: two calls");
+    // a write never shares, even asked to
+    const write = () =>
+      outsideFetch("aiaic", `${s.url}/farmer/trade/listings?wait=150`, {
+        method: "POST",
+        headers: { authorization: "Bearer standin-token-farmer-a" },
+        body: '{"crop":"onion"}',
+        limitMs: 3000,
+        share: true,
+      });
+    await Promise.all([write(), write()]);
+    assert.equal(at("/farmer/trade/listings"), 2, "a write never shares");
+    // a failure reaches every caller sharing it: AIAIC's 500 to both, and a call past its limit to both
+    const failing = () =>
+      outsideFetch("aiaic", `${s.url}/places/fail?wait=150&status=500`, {
+        limitMs: 3000,
+        share: true,
+      });
+    const [f1, f2] = await Promise.all([failing(), failing()]);
+    assert.deepEqual([f1.status, f2.status, at("/places/fail")], [500, 500, 1], "AIAIC's 500");
+    const late = () =>
+      outsideFetch("aiaic", `${s.url}/slow-head/shared`, { limitMs: 200, share: true });
+    const settled = await Promise.allSettled([late(), late()]);
+    assert.ok(
+      settled.every((r) => r.status === "rejected" && isTimeout(r.reason)),
+      "a call past its limit fails for both",
+    );
+    assert.equal(at("/slow-head/shared"), 1, "one call");
+    // each caller keeps its own limit: one joining with a shorter limit gives up at its own
+    const t0 = Date.now();
+    const first = outsideFetch("aiaic", `${s.url}/slow-head/limits`, {
+      limitMs: 2800,
+      share: true,
+    });
+    await assert.rejects(
+      () => outsideFetch("aiaic", `${s.url}/slow-head/limits`, { limitMs: 200, share: true }),
+      (e: unknown) => isTimeout(e),
+    );
+    assert.ok(Date.now() - t0 < 1500, "the joiner gave up at its own limit, not the first one's");
+    assert.equal((await first).status, 200, "the first one still gets its answer");
+    assert.equal(at("/slow-head/limits"), 1);
+    // nothing is kept once the call has ended
+    await read("/places/districts", g1);
+    assert.equal(at("/places/districts"), 2, "the same read after the call ended calls again");
+    assert.equal(readsRunningForTests(), 0, "no read is left running");
+  } finally {
+    await s.close();
+  }
+});
+
+test("AN17 her own calls share as the rule says: her sale record read twice at once is one call to AIAIC, two devices' advice reads are two, two sales are two; every AIAIC read door asks to share and the plant check and the speech never do", async () => {
+  const s = await standIn();
+  const savedBase = process.env["AIAIC_BASE_URL"];
+  try {
+    process.env["AIAIC_BASE_URL"] = s.url;
+    client.resetForTests();
+    asHer();
+    const at = (p: string) => s.hits.filter((h) => h.path === p).length;
+    const [m1, m2] = await Promise.all([client.getMine("en"), client.getMine("en")]);
+    assert.ok(m1.ok && m2.ok, "both pages get her record");
+    assert.equal(at("/farmer/trade"), 1, "her record read twice at once: one call");
+    const w = (key: string) =>
+      client.sell(key, { state: "mh", district: "nashik", crop: "onion", quantity_q: 10 });
+    await Promise.all([w("ann-press-key-000000000001"), w("ann-press-key-000000000002")]);
+    assert.equal(at("/farmer/trade/listings"), 2, "two sales: two calls");
+    identity.sessionForTests(null);
+    await Promise.all([
+      identity.fetchForHer(
+        `${s.url}/farmer/advice?wait=150`,
+        { "x-aiaic-guest": "c".repeat(32) },
+        3000,
+      ),
+      identity.fetchForHer(
+        `${s.url}/farmer/advice?wait=150`,
+        { "x-aiaic-guest": "d".repeat(32) },
+        3000,
+      ),
+      identity.fetchForHer(
+        `${s.url}/farmer/advice?wait=150`,
+        { "x-aiaic-guest": "d".repeat(32) },
+        3000,
+      ),
+    ]);
+    assert.equal(at("/farmer/advice"), 2, "two devices: two calls; the same device twice: one");
+  } finally {
+    client.resetForTests();
+    identity.sessionForTests(null);
+    if (savedBase === undefined) delete process.env["AIAIC_BASE_URL"];
+    else process.env["AIAIC_BASE_URL"] = savedBase;
+    await s.close();
+  }
+  // the doors: every AIAIC read asks to share; the plant check and the speech (both writes) never do
+  const asks: Record<string, string[]> = {};
+  const lib = path.join(APP, "src", "lib");
+  for (const f of fs.readdirSync(lib).filter((x) => /\.(server|functions)\.ts$/.test(x))) {
+    const sf = ts.createSourceFile(
+      f,
+      fs.readFileSync(path.join(lib, f), "utf8"),
+      ts.ScriptTarget.Latest,
+      true,
+    );
+    const visit = (n: import("typescript").Node): void => {
+      if (
+        ts.isCallExpression(n) &&
+        ts.isIdentifier(n.expression) &&
+        n.expression.text === "outsideFetch"
+      ) {
+        const init = n.arguments[2];
+        const share =
+          init && ts.isObjectLiteralExpression(init)
+            ? init.properties.find(
+                (p) => ts.isPropertyAssignment(p) && p.name.getText(sf) === "share",
+              )
+            : undefined;
+        (asks[f] ??= []).push(
+          share && ts.isPropertyAssignment(share) ? share.initializer.getText(sf) : "none",
+        );
+      }
+      ts.forEachChild(n, visit);
+    };
+    visit(sf);
+  }
+  assert.deepEqual(asks, {
+    "aiaic-account.server.ts": ['(init.method ?? "GET") === "GET"'],
+    "aiaic-identity.server.ts": ["true"],
+    "aiaic-trade.server.ts": ['(opts.method ?? "GET") === "GET"'],
+    "catalog.functions.ts": ["true"],
+    "places.functions.ts": ["true", "true", "true", "true", "true"],
+    "plant.functions.ts": ["none"],
+    "vaani-tts.server.ts": ["none"],
+  });
 });
 
 // ------------------------------------------------------------------------------------------- run

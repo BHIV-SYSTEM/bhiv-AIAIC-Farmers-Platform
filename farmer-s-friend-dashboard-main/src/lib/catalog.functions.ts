@@ -31,6 +31,7 @@ export const getCatalog = createServerFn({ method: "GET" }).handler(
         method: "GET",
         headers: aiaicHeaders(),
         limitMs: 15_000,
+        share: true, // the same read, running now, is shared (item 5)
       });
     } catch (error) {
       console.error("[aiaic] catalog request failed", error);

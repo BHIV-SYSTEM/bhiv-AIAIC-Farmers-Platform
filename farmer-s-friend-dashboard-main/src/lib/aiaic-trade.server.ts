@@ -215,6 +215,8 @@ async function call<T>(opts: CallOpts): Promise<AiaicResult<T>> {
         headers,
         ...(opts.body === undefined ? {} : { body: JSON.stringify(opts.body) }),
         limitMs: callLimitMs,
+        // the same read, running now as the same asker, is shared (item 5); a write never is
+        share: (opts.method ?? "GET") === "GET",
       });
     } catch (error) {
       // a call past its limit is said as such: AIAIC may have taken a write it did not answer, so never "nothing was

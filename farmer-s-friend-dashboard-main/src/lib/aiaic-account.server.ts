@@ -77,6 +77,8 @@ async function ask(
       },
       ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
       limitMs: TIMEOUT_MS,
+      // the same read, running now as the same asker, is shared (item 5); a write never is
+      share: (init.method ?? "GET") === "GET",
     });
   } catch {
     return { status: 0, body: null, unreachable: true };
